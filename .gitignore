@@ -3,3 +3,5 @@
 .env
 /storage/*
 /tests/*
+*img/*
+*images/*

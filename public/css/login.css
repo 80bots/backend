@@ -1,0 +1,125 @@
+body {
+  background: #fff;
+  overflow: visible; }
+
+.sa-content {
+  padding: 0; }
+
+.sa-page-body {
+  background: none; }
+
+.main {
+  padding-top: 20px; }
+
+.hero {
+  background-image: url(../img/gradient/login.png);
+  background-repeat: no-repeat;
+  background-position: 0 137px;
+  height: 360px;
+  width: 100%;
+  float: left; }
+
+h4.paragraph-header {
+  color: #565656;
+  font-size: 1.15385rem;
+  font-weight: 400;
+  line-height: 22px;
+  margin-top: 15px;
+  width: 270px; }
+
+h5.about-heading {
+  color: #565656;
+  font-size: 1.15385rem;
+  font-weight: 700;
+  line-height: 24px;
+  margin: 0 0 5px; }
+
+.login-header-big {
+  font-weight: 400; }
+
+.login-desc-box-l {
+  min-height: 350px;
+  width: 50%; }
+
+.login-app-icons {
+  vertical-align: top;
+  margin-top: 90px;
+  width: 300px; }
+
+.display-image {
+  margin-top: -60px;
+  margin-right: 20px; }
+
+.clearfix:after {
+  clear: both;
+  content: ' ';
+  display: block;
+  font-size: 0;
+  line-height: 0;
+  visibility: hidden;
+  width: 0;
+  height: 0; }
+
+.timeline-seperator {
+  display: block;
+  text-align: center;
+  color: #999;
+  margin: 20px 0 0; }
+  .timeline-seperator > :first-child {
+    padding: 4px 5px;
+    border: 1px dashed rgba(0, 0, 0, 0.1);
+    background: #fff;
+    font-size: 0.84615rem;
+    border-radius: 4px; }
+  .timeline-seperator .btn,
+  .timeline-seperator .btn + .dropdown-menu {
+    margin-right: 15px; }
+  .timeline-seperator:after {
+    display: block;
+    content: " ";
+    margin: 0 20px;
+    border-bottom: 1px dashed rgba(0, 0, 0, 0.1);
+    margin-top: -8px; }
+
+.text-align-center, .text-center {
+  text-align: center !important; }
+
+.list-inline {
+  padding-left: 0;
+  list-style: none;
+  margin-left: -5px; }
+  .list-inline > li {
+    display: inline-block;
+    padding-left: 5px;
+    padding-right: 5px; }
+
+.btn-circle {
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  padding: 6px 0;
+  font-size: 0.92308rem;
+  line-height: 18px;
+  border-radius: 50%; }
+
+.btn-circle.btn-lg {
+  width: 50px;
+  height: 50px;
+  padding: 10px 15px;
+  font-size: 1.38462rem;
+  line-height: 30px;
+  border-radius: 50%; }
+
+.btn-circle.btn-xl {
+  width: 70px;
+  height: 70px;
+  padding: 10px 15px;
+  font-size: 1.84615rem;
+  line-height: 50px;
+  border-radius: 50%; }
+
+@media (max-width: 992px) {
+  .hidden-sm {
+    display: none !important; } }
+
+/*# sourceMappingURL=login.css.map */

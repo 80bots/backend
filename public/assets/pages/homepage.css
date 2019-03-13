@@ -1,0 +1,187 @@
+.show-stats .progress {
+  margin-top: 0.23077rem;
+  margin-bottom: 1.15385rem; }
+
+.show-stat-buttons .col-12:first-child {
+  padding-right: 0.38462rem; }
+
+.show-stat-buttons .col-12:last-child {
+  padding-left: 0.38462rem; }
+
+.show-stat-microcharts > div {
+  padding: 0.53846rem 0.69231rem;
+  border-right: 0.07692rem solid #dadada;
+  border-top: 0.07692rem solid #dadada; }
+  .show-stat-microcharts > div:last-child {
+    border-right-width: 0; }
+
+.show-stat-microcharts .label {
+  opacity: .5;
+  min-width: 3.23077rem; }
+  .show-stat-microcharts .label:hover {
+    opacity: 1; }
+
+.show-stat-microcharts li {
+  margin-top: 3px; }
+
+.show-stat-microcharts .sparkline {
+  margin-top: 0.76923rem;
+  margin-right: 0.61538rem;
+  opacity: .7; }
+
+.show-stat-microcharts .easy-pie-chart {
+  margin-bottom: -4px; }
+
+.home-first-tab {
+  padding-left: 0.76923rem;
+  padding-right: 0.76923rem;
+  padding-top: 1.15385rem; }
+
+.smaller-stat {
+  margin: 0;
+  padding: 0;
+  text-align: right;
+  list-style: none; }
+
+.easy-pie-title .icon-color-bad, .easy-pie-title .icon-color-good {
+  font-size: 1.38462rem; }
+
+.sa-status .who {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+  padding: 20px;
+  font-weight: normal;
+  font-size: inherit; }
+  .sa-status .who img {
+    float: left;
+    height: 40px;
+    margin-right: 10px;
+    width: 40px; }
+  .sa-status .who .name {
+    display: block;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: normal; }
+  .sa-status .who .name b {
+    color: #57889c; }
+  .sa-status .who .from {
+    font-size: 12px;
+    opacity: .7; }
+
+.sa-status .text {
+  font-size: 13px;
+  line-height: 1.82em;
+  padding: 20px; }
+
+.sa-status .image {
+  padding: 20px; }
+  .sa-status .image img {
+    width: 100%; }
+
+.sa-status .links {
+  border-top: 1px solid rgba(0, 0, 0, 0.07);
+  margin: 0;
+  padding: 15px 20px;
+  background: #fafafa; }
+  .sa-status .links .fa {
+    color: inherit;
+    font-size: 14px;
+    margin-right: 2px; }
+  .sa-status .links li {
+    display: inline;
+    padding-right: 20px; }
+
+.sa-status .comments {
+  border-top: 1px solid rgba(0, 0, 0, 0.07);
+  font-size: 13px;
+  padding: 0 20px; }
+  .sa-status .comments li {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+    display: block;
+    padding: 15px 0 15px 40px;
+    position: relative; }
+    .sa-status .comments li:last-child {
+      border-bottom: none;
+      padding-bottom: 5px; }
+  .sa-status .comments img {
+    height: 30px;
+    left: 0;
+    position: absolute;
+    width: 30px; }
+  .sa-status .comments .name {
+    display: block;
+    font-weight: 600;
+    opacity: .8; }
+
+.sa-status.card-body {
+  padding: 0; }
+
+.sa-status .vote .comments {
+  padding: 0 !important; }
+  .sa-status .vote .comments li {
+    padding: 10px 0 10px 20px !important; }
+    .sa-status .vote .comments li:last-child {
+      padding-right: 20px !important; }
+
+.card {
+  margin-bottom: 1.38462rem;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05); }
+
+.card-header {
+  border-color: #ddd;
+  background: none; }
+
+.card-body {
+  border-left: 1px solid #ddd;
+  border-right: 1px solid #ddd; }
+
+.card:last-child .card-body,
+.card .card-body {
+  border-bottom: 1px solid #ddd; }
+
+.well.connect {
+  padding: 1.07692rem; }
+  .well.connect img {
+    border-radius: 50% 50% 0; }
+
+blockquote.twitter-tweet {
+  border-color: #eee #ddd #bbb;
+  border-radius: 5px;
+  border-style: solid;
+  border-width: 1px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  display: inline-block;
+  font-size: 0.92308rem;
+  font-family: "Helvetica Neue",Roboto,"Segoe UI",Calibri,sans-serif;
+  font-weight: 700;
+  line-height: 16px;
+  margin: 10px 5px;
+  width: calc(100% - 10px);
+  padding: 0 16px 16px; }
+  blockquote.twitter-tweet p {
+    font-size: 1.23077rem;
+    font-weight: 400;
+    line-height: 20px; }
+  blockquote.twitter-tweet a {
+    color: inherit;
+    font-weight: 400;
+    outline: 0 none;
+    text-decoration: none; }
+  blockquote.twitter-tweet a:focus, blockquote.twitter-tweet blockquote.twitter-tweet a:hover {
+    text-decoration: underline; }
+
+@media (min-width: 1200px) {
+  .show-stat-microcharts > div {
+    height: 68px;
+    overflow: hidden; } }
+
+@media (max-width: 979px) {
+  header .nav-tabs .d-none.d-md-inline-block {
+    display: none !important; }
+  .show-stat-microcharts > div {
+    margin-top: 10px; } }
+
+@media (max-width: 767px) {
+  .show-stat-microcharts > div {
+    border-right: 0; } }
+
+/*# sourceMappingURL=homepage.css.map */

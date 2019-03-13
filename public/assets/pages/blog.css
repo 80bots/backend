@@ -1,0 +1,23 @@
+.list-inline > li {
+  display: inline-block;
+  padding-left: 5px;
+  padding-right: 5px; }
+
+.well-blog h3, .well-blog .h3 {
+  font-size: 1.45rem;
+  margin-bottom: 20px; }
+
+.well-blog .font-xs {
+  font-size: 85%; }
+
+.well-blog .btn-warning {
+  color: #fff; }
+
+.well-blog .list-inline {
+  margin-left: -0.38462rem; }
+
+.list-group .badge {
+  background: #999;
+  border-radius: 10px; }
+
+/*# sourceMappingURL=blog.css.map */

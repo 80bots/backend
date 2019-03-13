@@ -1,0 +1,1 @@
+{"version":3,"names":[],"mappings":"","sources":["invoice.css"],"sourcesContent":[".text-align-right {\n  text-align: right; }\n\n.invoice-footer {\n  border-top: 1px dotted #aaa; }\n\n.invoice-sum-total {\n  margin-top: 2.30769rem; }\n"],"file":"invoice.css"}

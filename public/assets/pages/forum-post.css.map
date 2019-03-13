@@ -1,0 +1,1 @@
+{"version":3,"names":[],"mappings":"","sources":["forum-post.css"],"sourcesContent":["table {\n  font-size: inherit; }\n\n.list-inline > li {\n  display: inline-block;\n  padding-left: 5px;\n  padding-right: 5px; }\n"],"file":"forum-post.css"}

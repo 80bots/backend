@@ -1,0 +1,24 @@
+.demo-icon-font {
+  font-size: 1.07692rem;
+  margin-bottom: 7px;
+  padding-top: 4px;
+  padding-bottom: 4px; }
+
+.demo-icon-font:hover {
+  background-color: rgba(86, 61, 124, 0.1);
+  text-decoration: none; }
+
+.show-grid {
+  margin-bottom: 1rem; }
+  .show-grid [class*="col"] {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    background-color: rgba(61, 106, 124, 0.15);
+    border: 1px solid rgba(61, 106, 124, 0.2); }
+
+.knobs-demo > div {
+  display: inline-block; }
+  .knobs-demo > div + div {
+    margin-left: 30px; }
+
+/*# sourceMappingURL=demo.css.map */
