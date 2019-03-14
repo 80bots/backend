@@ -5,3 +5,4 @@
 /tests/*
 *img/
 *images/
+composer.lock

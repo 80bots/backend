@@ -20,10 +20,11 @@ Auth::routes();
 //Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/user-activation/{id}', 'AppController@UserActivation')->name('user-activation');
 
-Route::group(['prefix' => 'admin',  'middleware' => ['auth','admin'], 'namespace' => 'admin'], function(){
+Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','admin'], 'namespace' => 'admin'], function(){
     Route::get('dashboard', 'UserController@index')->name('dashboard');
+    Route::get('instance', 'UserInstancesController@index')->name('instance');
 });
 
-Route::group(['prefix' => 'user',  'middleware' => ['auth', 'user']], function(){
+Route::group(['prefix' => 'user', 'as' => 'user.', 'middleware' => ['auth', 'user']], function(){
     Route::get('dashboard', 'UserController@index')->name('dashboard');
 });

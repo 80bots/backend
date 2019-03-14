@@ -40,11 +40,11 @@
         <!-- END .sa-page-breadcrumb -->
 
             <div class="sa-content">
-                <div class="d-flex w-100 home-header">
+                {{--<div class="d-flex w-100 home-header">
                     <div>
                         <h1 class="page-header"><i class="fa-fw fa fa-puzzle-piece"></i> App Views <span>> Profile</span></h1>
                     </div>
-                    {{--<div class="ml-auto">
+                    --}}{{--<div class="ml-auto">
                         <ul class="sa-sparks">
                             <li class="sparks-info">
                                 <h5> <small>My Income</small> <span class="text-blue">$47,171</span></h5>
@@ -65,11 +65,11 @@
                                 </div>
                             </li>
                         </ul>
-                    </div>--}}
-                </div>
-                <div class="d-flex w-100">
+                    </div>--}}{{--
+                </div>--}}
+                {{--<div class="d-flex w-100">--}}
                     @yield('content')
-                </div>
+                {{--</div>--}}
             </div>
             @include('layouts.imports.footer')
         </div>
