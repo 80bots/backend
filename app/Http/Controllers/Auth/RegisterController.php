@@ -2,9 +2,14 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Mail\register;
 use App\User;
 use App\Http\Controllers\Controller;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
 
@@ -28,7 +33,10 @@ class RegisterController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/user/dashboard';
+//    protected $redirectTo = '/user/dashboard';
+    protected function redirectTo(){
+        return '/login';
+    }
 
     /**
      * Create a new controller instance.
@@ -69,8 +77,16 @@ class RegisterController extends Controller
         $user->password = bcrypt($data['password']);
         $user->verification_token = str_random();
         $user->role_id = 1;
-        $user->save();
-
+        if($user->save()){
+           $sendMail = $user->sendMail($user);
+        }
         return $user;
+    }
+
+    public function register(Request $request)
+    {
+        $this->validator($request->all())->validate();
+        event(new Registered($user = $this->create($request->all())));
+        return redirect($this->redirectPath())->with('success', 'Please check your Mail for activate your account');
     }
 }

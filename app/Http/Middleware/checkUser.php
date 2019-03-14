@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Illuminate\Support\Facades\Auth;
 
 class checkUser
 {
@@ -15,6 +16,11 @@ class checkUser
      */
     public function handle($request, Closure $next)
     {
-        return $next($request);
+        if (Auth::check() && Auth::user()->role->name == 'User' && Auth::user()->status == 'active') {
+            return $next($request);
+        }
+        else {
+            return redirect('/login');
+        }
     }
 }

@@ -1,7 +1,10 @@
 @php
+    use Illuminate\Support\Facades\Auth;
+
     $requestUrl = explode('/', ltrim($_SERVER['REQUEST_URI'],'/'));
+    $role = isset(Auth::user()->role->name) ? Auth::user()->role->name : '';
 @endphp
-@if ($requestUrl[0] == 'user')
+@if (!empty($role) && $role == 'User' || $role == 'Admin')
     <header class="sa-page-header">
         <div class="sa-header-container h-100">
             <div class="d-table d-table-fixed h-100 w-100">
@@ -99,12 +102,20 @@
                                         <button type="submit" class="sa-form-btn"><span class="fa fa-search"></span>
                                         </button>
                                     </form>
-                                    <button class="btn btn-default sa-logout-header-toggle sa-btn-icon" type="button">
-                                        <span class="fa fa-sign-out"></span></button>
+
+                                    <a class="btn btn-default sa-logout-header-toggle sa-btn-icon" href="{{ route('logout') }}"
+                                       onclick="event.preventDefault();
+                                                     document.getElementById('logout-form').submit();">
+                                        <span class="fa fa-sign-out"></span>
+                                    </a>
+
+                                    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                                        @csrf
+                                    </form>
                                     <span class="dropdown sa-user-dropdown">
                           <a href="javascript:void(0);" data-toggle="dropdown" aria-haspopup="true"
                              aria-expanded="false" class="sa-user-dropdown-toggle">
-                            <img src="assets/img/avatars/sunny.png" alt="John Doe">
+                            <img src="{{asset('assets/img/avatars/sunny.png')}}" alt="John Doe">
                           </a>
                           <span class="dropdown-menu dropdown-menu-right ml-auto" aria-labelledby="dropdownMenuButton">
                             <a class="dropdown-item" href="javascript:void(0);"><i class="fa fa-cog"></i> Setting</a>
@@ -137,14 +148,26 @@
         </div>
     </header>
 @else
-    <header id="header" class="publicheader">
-        <div class="logo-group">
-            <span class="sa-logo"> <img src="{{ asset('assets/img/common/logo.png') }}"
-                                        alt="{{config('app.name')}}"> </span>
-        </div>
-        <span class="extr-page-header-space">
-    <span class="hidden-mobile hiddex-xs">Already registered?</span>
-    <a href="{{route('login')}}" class="btn sa-btn-danger">Sign In</a>
-    </span>
-    </header>
+    @if($requestUrl[0] == 'login')
+        <header id="header" class="publicheader">
+            <div class="logo-group">
+                <span class="sa-logo"> <img src="{{ asset('assets/img/common/logo.png') }}" alt="{{config('app.name')}}"></span>
+            </div>
+
+            <span class="extr-page-header-space">
+        			<span class="hidden-mobile hiddex-xs">Need an account?</span>
+        			<a href="{{route('register')}}" class="btn sa-btn-danger">Create account</a>
+        		</span>
+        </header>
+    @else
+        <header id="header" class="publicheader">
+            <div class="logo-group">
+                <span class="sa-logo"> <img src="{{ asset('assets/img/common/logo.png') }}" alt="{{config('app.name')}}"></span>
+            </div>
+            <span class="extr-page-header-space">
+                <span class="hidden-mobile hiddex-xs">Already registered?</span>
+                <a href="{{route('login')}}" class="btn sa-btn-danger">Sign In</a>
+            </span>
+        </header>
+    @endif
 @endif

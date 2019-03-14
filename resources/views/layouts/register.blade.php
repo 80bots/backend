@@ -1,3 +1,6 @@
+<?php
+use Illuminate\Contracts\Session\Session;
+?>
 <!DOCTYPE html>
 
 <html lang="en" class="smart-style-0">
@@ -29,6 +32,33 @@
         <div class="sa-content-wrapper">
             <div class="sa-content">
                 <div class="main" role="main">
+                    @if ($message = session('success'))
+                        <div class="alert alert-success alert-block">
+                            <button type="button" class="close" data-dismiss="alert">×</button>
+                            <strong>{{ $message }}</strong>
+                        </div>
+                    @endif
+
+                    @if ($message = session('error'))
+                        <div class="alert alert-danger alert-block">
+                            <button type="button" class="close" data-dismiss="alert">×</button>
+                            <strong>{{ $message }}</strong>
+                        </div>
+                    @endif
+
+                    @if ($message = session('warning'))
+                        <div class="alert alert-warning alert-block">
+                            <button type="button" class="close" data-dismiss="alert">×</button>
+                            <strong>{{ $message }}</strong>
+                        </div>
+                    @endif
+
+                    @if ($message = session('info'))
+                        <div class="alert alert-info alert-block">
+                            <button type="button" class="close" data-dismiss="alert">×</button>
+                            <strong>{{ $message }}</strong>
+                        </div>
+                    @endif
                     @yield('content')
                 </div>
             </div>

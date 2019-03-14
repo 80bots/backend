@@ -17,7 +17,8 @@ Route::get('/', function () {
 
 Auth::routes();
 
-Route::get('/home', 'HomeController@index')->name('home');
+//Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/user-activation/{id}', 'AppController@UserActivation')->name('user-activation');
 
 Route::group(['prefix' => 'admin',  'middleware' => ['auth','admin'], 'namespace' => 'admin'], function(){
     Route::get('dashboard', 'UserController@index')->name('dashboard');

@@ -2,9 +2,12 @@
 
 namespace App;
 
+use App\Mail\register;
+use Exception;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Facades\Mail;
 
 class User extends Authenticatable
 {
@@ -36,6 +39,20 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function sendMail($user){
+        try {
+            Mail::send('mail.register', ['user' => $user], function($mail) use ($user) {
+                $mail->to($user->email, $user->name);
+                $mail->subject('Test Register mail');
+                $mail->from(env('MAIL_FROM_ADDRESS', 'test@technostacks.com'), env('MAIL_FROM_NAME', 'technostacks'));
+            });
+            return "Success";
+        } catch (Exception $ex) {
+//            dd($ex->getMessage());
+            return "We've got errors!";
+        }
+    }
 
     public function role()
     {
