@@ -20,7 +20,8 @@ class checkAdmin
             return $next($request);
         }
         else {
-            return redirect('/login');
+            Auth::logout();
+            return redirect('/login')->with('error','Unauthorized');
         }
     }
 }

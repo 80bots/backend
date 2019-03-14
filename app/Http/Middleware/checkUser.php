@@ -16,11 +16,16 @@ class checkUser
      */
     public function handle($request, Closure $next)
     {
-        if (Auth::check() && Auth::user()->role->name == 'User' && Auth::user()->status == 'active') {
-            return $next($request);
-        }
-        else {
-            return redirect('/login');
+        if (Auth::check() && Auth::user()->role->name == 'User') {
+            if(Auth::user()->status == 'active'){
+                return $next($request);
+            } else {
+                Auth::logout();
+                return redirect('/login')->with('error','Please Active Your Account First!!');
+            }
+        } else {
+            Auth::logout();
+            return redirect('/login')->with('error','Unauthorized');
         }
     }
 }
