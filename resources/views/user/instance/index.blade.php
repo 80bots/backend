@@ -54,7 +54,7 @@
                                             <td>{{!empty($instance->aws_public_dns) ? $instance->aws_public_dns : ''}}</td>
                                             <td>{{!empty($instance->status) ? $instance->status : ''}}</td>
                                             <td>{{!empty($instance->created_at) ? $instance->created_at : ''}}</td>
-                                            <td><a href="{{!empty($instance->aws_pem_file_path) ? route('download-pem',['path' => $instance->aws_pem_file_path]) : 'javascript:void(0)'}}" title="Download pem file">
+                                            <td><a href="{{!empty($instance->aws_pem_file_path) ? $instance->aws_pem_file_path : 'javascript:void(0)'}}" title="Download pem file">
                                                     <i class="fa fa-download"></i>
                                                 </a></td>
                                         </tr>
