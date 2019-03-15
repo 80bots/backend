@@ -10,10 +10,9 @@
             <div class="d-table d-table-fixed h-100 w-100">
                 <div class="sa-logo-space d-table-cell h-100">
                     <div class="flex-row d-flex align-items-center h-100">
-                        <a class="sa-logo-link" href="" title="Smart Admin 2.0"><img alt="Smart Admin 2.0"
-                                                                                     src="assets/img/common/sa-logo.png"
-                                                                                     class="sa-logo"></a>
-                        <div class="dropdown ml-auto">
+                        <a class="sa-logo-link" href="" title="{{config('app.name')}}">
+                            <img alt="{{config('app.name')}}" src="{{asset('assets/img/common/sa-logo.png')}}" class="sa-logo"></a>
+                        {{--<div class="dropdown ml-auto">
                             <button class="btn btn-default sa-btn-icon sa-activity-dropdown-toggle" type="button"
                                     data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span
                                     class="fa fa-user"></span><span class="badge bg-red">21</span></button>
@@ -47,13 +46,13 @@
                                 </form>
 
                             </div>
-                        </div>
+                        </div>--}}
                     </div>
                 </div>
                 <div class="d-table-cell h-100 w-100 align-middle">
                     <div class="sa-header-menu">
                         <div class="d-flex align-items-center w-100">
-                            <div class="sa-header-left-area">
+                            {{--<div class="sa-header-left-area">
                                 <span class="sa-project-label">Projects:</span>
                                 <div class="dropdown sa-project-dropdown">
                                     <a href=":;" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Recent
@@ -68,10 +67,10 @@
                                             Clear</a>
                                     </div>
                                 </div>
-                            </div>
+                            </div>--}}
                             <div class="ml-auto sa-header-right-area">
                                 <div class="form-inline">
-                        <span class="dropdown sa-country-dropdown">
+                        {{--<span class="dropdown sa-country-dropdown">
                           <a href="javascript:void(0);" data-toggle="dropdown" aria-haspopup="true"
                              aria-expanded="false"><em class="flag flag-us"></em> <span>English (US) <span
                                       class="fa fa-angle-down"></span></span></a>
@@ -91,9 +90,9 @@
                             <a class="dropdown-item" href="javascript:void(0);"><span
                                     class="flag flag-kr"></span> 한국어</a>
                           </span>
-                        </span>
-                                    <button class="btn btn-light sa-btn-icon sa-btn-micro d-none d-lg-block"
-                                            type="button"><span class="fa fa-microphone"></span></button>
+                        </span>--}}
+                                    {{--<button class="btn btn-light sa-btn-icon sa-btn-micro d-none d-lg-block"
+                                            type="button"><span class="fa fa-microphone"></span></button>--}}
                                     <button class="btn btn-light sa-btn-icon sa-toggle-full-screen d-none d-lg-block"
                                             type="button" onclick="toggleFullScreen()"><span
                                             class="fa fa-arrows-alt"></span></button>

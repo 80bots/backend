@@ -16,7 +16,7 @@ class CreateUserInstancesTable extends Migration
     {
         Schema::create('user_instances', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('name');
+            $table->string('name')->nullable();
             $table->unsignedBigInteger('user_id');
             $table->double('used_credit')->default(0);
             $table->double('up_time')->default(0);
@@ -28,7 +28,7 @@ class CreateUserInstancesTable extends Migration
             $table->string('aws_public_ip')->nullable();
             $table->string('aws_public_dns')->nullable();
             $table->string('aws_pem_file_path')->nullable();
-            $table->enum('status', ['new', 'running', 'stop', 'terminated'])->default('new');
+            $table->enum('status', ['start', 'running', 'stop', 'terminated'])->default('start');
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'));
             $table->softDeletes();

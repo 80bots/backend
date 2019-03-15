@@ -1,3 +1,7 @@
+@php
+use Illuminate\Support\Facades\Auth;
+$user = Auth::user();
+@endphp
 <!DOCTYPE html>
 <html lang="en" class="smart-style-0">
 <head>
@@ -19,7 +23,7 @@
 <!-- BEGIN .sa-wrapper -->
 <div class="sa-wrapper">
     <!-- BEGIN .sa-shortcuts -->
-@include('layouts.imports.shortcuts')
+{{--@include('layouts.imports.shortcuts')--}}
 <!-- END .sa-shortcuts -->
 
     <!-- BEGIN .header -->
@@ -29,7 +33,11 @@
     <div class="sa-page-body">
 
         <!-- BEGIN .sa-aside-left -->
-    @include('layouts.imports.side-left')
+        @if($user->role->name == 'User')
+            @include('layouts.imports.side-left')
+        @else
+            @include('layouts.imports.admin-side-left')
+        @endif
     <!-- END .sa-aside-left -->
 
         <!-- BEGIN .sa-content-wrapper -->

@@ -22,9 +22,13 @@ Route::get('/user-activation/{id}', 'AppController@UserActivation')->name('user-
 
 Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','admin'], 'namespace' => 'admin'], function(){
     Route::get('dashboard', 'UserController@index')->name('dashboard');
-    Route::get('instance', 'UserInstancesController@index')->name('instance');
 });
 
 Route::group(['prefix' => 'user', 'as' => 'user.', 'middleware' => ['auth', 'user']], function(){
     Route::get('dashboard', 'UserController@index')->name('dashboard');
+
+    Route::group(['prefix' => 'instance', 'as' => 'instance.'], function() {
+        Route::get('/', 'UserInstancesController@index')->name('index');
+        Route::get('create', 'UserInstancesController@create')->name('create');
+    });
 });

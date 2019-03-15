@@ -1,8 +1,6 @@
 <ol class="align-items-center sa-page-ribbon breadcrumb" aria-label="breadcrumb" role="navigation">
     <li><span id="refresh" class="btn sa-ribbon-btn sa-theme-btn" data-action="resetWidgets"><i class="fa fa-refresh"></i></span></li>
-    <li class="breadcrumb-item"><a href="javascript:void(0)">App Views</a></li>
-    <li class="breadcrumb-item"><a href="profile.html">Profile</a></li>
-
+    {{--<li class="breadcrumb-item"><a href="{{route('user.instance.index')}}">List</a></li>--}}
 </ol>
 <div class="sa-theme-settings">
     <a href="javascript:void(0)" class="sa-theme-settings-toggle" onclick="SAtoggleClass(this, '.sa-theme-settings', 'active')"><span class="fa fa-cogs fa-spin"></span></a>

@@ -16,25 +16,6 @@ class UserInstancesController extends AwsConnectionController
      */
     public function index()
     {
-        $keyPair = $this->CreateKeyPair();
-        $SecurityGroup = $this->CreateSecurityGroupId();
-
-        $keyPairName = $keyPair['keyName'];
-        $keyPairPath = $keyPair['path'];
-
-        $groupId = $SecurityGroup['securityGroupId'];
-        $groupName = $SecurityGroup['securityGroupName'];
-
-        // Instance Create
-        $newInstanceResponce = $this->LaunchInstance($keyPairName, $groupName);
-        $instanceId = $newInstanceResponce->getPath('Instances')[0]['InstanceId'];
-
-        $instanceIds = [];
-        array_push($instanceIds, $instanceId);
-
-        // Instance Describe for Public Dns Name
-        $describeInstancesResponse = $this->DescribeInstances($instanceIds);
-        $publicDnsName = $describeInstancesResponse->getPath('Reservations')[0]['Instances'][0]['PublicDnsName'];
 
     }
 
@@ -45,7 +26,7 @@ class UserInstancesController extends AwsConnectionController
      */
     public function create()
     {
-        //
+
     }
 
     /**
@@ -56,7 +37,7 @@ class UserInstancesController extends AwsConnectionController
      */
     public function store(Request $request)
     {
-        //
+        dd($request);
     }
 
     /**

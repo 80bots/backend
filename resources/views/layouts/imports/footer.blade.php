@@ -2,9 +2,9 @@
 <footer class="sa-page-footer">
     <div class="d-flex align-items-center w-100 h-100">
         <div class="footer-left">
-            SmartAdmin 1.9.X - <span class="footer-txt">Web Application Framework</span> &copy; 2017-2019
+            {{config('app.name')}} - <span class="footer-txt">Web Application Framework</span> &copy; 2017-2019
         </div>
-        <div class="ml-auto footer-right">
+        {{--<div class="ml-auto footer-right">
             <i class="hidden-xs text-blue-light">Last account activity <i class="fa fa-clock-o"></i> <strong>52 mins ago &nbsp;</strong> </i>
             <div class="btn-group dropup">
                 <button class="btn btn-xs dropdown-toggle sa-btn-blue" data-toggle="dropdown">
@@ -45,7 +45,7 @@
                     </li>
                 </ul>
             </div>
-        </div>
+        </div>--}}
     </div>
 
 </footer>

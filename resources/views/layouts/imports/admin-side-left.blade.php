@@ -8,7 +8,7 @@
     <div class="sa-left-menu-outer">
         <ul class="metismenu sa-left-menu" id="menu1">
             <li class=" "><!-- first-level -->
-                <a class="has-arrow" href="{{route('user.dashboard')}}" title="Dashboard"><span class="fa fa-lg fa-fw fa-home"></span>
+                <a class="has-arrow" href="{{route('admin.dashboard')}}" title="Dashboard"><span class="fa fa-lg fa-fw fa-home"></span>
                     <span class="menu-item-parent">Dashboard</span>
                     <b class="collapse-sign">
                         <em class="fa fa-plus-square-o"></em>
@@ -29,7 +29,7 @@
                     </li>
                 </ul>--}}
             </li>
-            <li class=" ">
+            {{--<li class=" ">
                 <a class="has-arrow" href="{{route('user.instance.index')}}" title="Instance"><span class="fa fa-lg fa-fw fa-home"></span>
                     <span class="menu-item-parent">Instance</span>
                     <b class="collapse-sign">
@@ -39,13 +39,10 @@
                 </a>
                 <ul aria-expanded="true" class="sa-sub-nav collapse">
                     <li class="">
-                        <a href="{{route('user.instance.index')}}" title="List"><span class="fa fa-lg fa-fw fa-gear"></span> List</a>
-                    </li>
-                    <li class="">
                         <a href="{{route('user.instance.create')}}" title="Create"><span class="fa fa-lg fa-fw fa-gear"></span> Create</a>
                     </li>
                 </ul>
-            </li>
+            </li>--}}
             {{--<li class="top-menu-invisible "><!-- first-level -->
                 <a class="has-arrow" href="layouts.html" title="SmartAdmin Intel"><span
                         class="fa fa-lg fa-fw fa-cube text-blue"></span> <span
