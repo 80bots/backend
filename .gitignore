@@ -6,3 +6,4 @@
 *img/
 *images/
 composer.lock
+*ssh_keys/

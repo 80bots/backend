@@ -1,0 +1,119 @@
+<?php
+
+namespace App;
+
+use Aws\Ec2\Ec2Client;
+use Illuminate\Database\Eloquent\Model;
+
+class AwsConnection extends Model
+{
+    public static function AwsConnection(){
+        $ec2Client = new Ec2Client([
+            'region' => 'us-east-2',
+            'version' => 'latest',
+            'credentials' => [
+                'key'    => 'AKIAIO7MFUMEZ33ZDXKA',
+                'secret' => '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',
+            ],
+        ]);
+        return $ec2Client;
+    }
+
+    public static function AwsCreateKeyPair(){
+        $ec2Client = self::AwsConnection();
+
+        // Create Aws Pair Key
+        $keyPairName = time().'_darshan';
+        $result = $ec2Client->createKeyPair(array(
+            'KeyName' => $keyPairName
+        ));
+        $uploadDirPath = "/uploads/ssh_keys/".time()."_{$keyPairName}.pem";
+        // Save the private key
+        $saveKeyLocation = public_path(). $uploadDirPath;
+        file_put_contents($saveKeyLocation, $result['keyMaterial']);
+        // Update the key's permissions so it can be used with SSH
+        chmod($saveKeyLocation, 0600);
+        $filePath = config('app.url').$uploadDirPath;
+
+        $return['path'] = $filePath;
+        $return['keyName'] = $keyPairName;
+        return $return;
+    }
+
+    public static function AwsSetSecretGroupIngress($securityGroupName){
+        $ec2Client = self::AwsConnection();
+        // Set ingress rules for the security group
+        $securityGroupIngress =
+            $ec2Client->authorizeSecurityGroupIngress(array(
+            'GroupName'     => $securityGroupName,
+            'IpPermissions' => array(
+                array(
+                    'IpProtocol' => 'tcp',
+                    'FromPort'   => 80,
+                    'ToPort'     => 80,
+                    'IpRanges'   => array(
+                        array('CidrIp' => '0.0.0.0/0')
+                    ),
+                ),
+                array(
+                    'IpProtocol' => 'tcp',
+                    'FromPort'   => 22,
+                    'ToPort'     => 22,
+                    'IpRanges'   => array(
+                        array('CidrIp' => '0.0.0.0/0')
+                    ),
+                )
+            )
+        ));
+        return $securityGroupIngress;
+    }
+
+    public static function AwsCreateSecretGroup(){
+        $ec2Client = self::AwsConnection();
+
+        $securityGroupName = time().'_darshan';
+        // Create the security group
+        $result = $ec2Client->createSecurityGroup(array(
+            'GroupName'   => $securityGroupName,
+            'Description' => 'Basic web server security'
+        ));
+
+        self::AwsSetSecretGroupIngress($securityGroupName);
+
+        // Get the security group ID (optional)
+        $securityGroupId = $result->get('GroupId');
+        $return['securityGroupId'] = $securityGroupId;
+        $return['securityGroupName'] = $securityGroupName;
+        return $return;
+    }
+
+    public static function AwsLaunchInstance($keyPairName, $securityGroupName){
+        $imageId = env('AWS_IMAGEID','ami-0cd3dfa4e37921605');
+        $instanceType = env('AWS_INSTANCE_TYPE', 't2.micro');
+        $ec2Client = self::AwsConnection();
+
+        $result = $ec2Client->runInstances(array(
+            'ImageId'        => $imageId,
+            'MinCount'       => 1,
+            'MaxCount'       => 1,
+            'InstanceType'   => $instanceType,
+            'KeyName'        => $keyPairName,
+            'SecurityGroups' => array($securityGroupName),
+        ));
+        return $result;
+    }
+
+    public static function DescribeInstances($instanceIds){
+        $ec2Client = self::AwsConnection();
+
+        // Describe the now-running instance to get the public URL
+        $resultDescribe = $ec2Client->describeInstances(
+            array(
+                'InstanceIds' => $instanceIds,
+            ));
+        return $resultDescribe;
+    }
+
+}
+//"PublicDnsName" => "ec2-18-222-190-135.us-east-2.compute.amazonaws.com"
+//            "PublicIpAddress" => "18.222.190.135"

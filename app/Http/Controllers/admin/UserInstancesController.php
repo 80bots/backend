@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\admin;
 
-use App\Http\Controllers\AppController;
+use App\AwsConnection;
 use App\UserInstances;
 use Aws\Ec2\Ec2Client;
 use Illuminate\Http\Request;
 
-class UserInstancesController extends AppController
+class UserInstancesController extends AwsConnectionController
 {
     /**
      * Display a listing of the resource.
@@ -16,48 +16,26 @@ class UserInstancesController extends AppController
      */
     public function index()
     {
+        $keyPair = $this->CreateKeyPair();
+        $SecurityGroup = $this->CreateSecurityGroupId();
 
-        $ec2Client = new Ec2Client([
-            'region' => 'us-east-2',
-            'version' => 'latest',
-            'credentials' => [
-                'key'    => 'AKIAIO7MFUMEZ33ZDXKA',
-                'secret' => '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',
-            ],
-        ]);
+        $keyPairName = $keyPair['keyName'];
+        $keyPairPath = $keyPair['path'];
 
-        $keyPairName = time().'_darshan';
-        $result = $ec2Client->createKeyPair(array(
-            'KeyName' => $keyPairName
-        ));
-        // Save the private key
-//        $saveKeyLocation = getenv('HOME') . "/.ssh/{$keyPairName}.pem";
-        $saveKeyLocation = public_path(). "/uploads/ssh_keys/".time()."_{$keyPairName}.pem";
-//        file_put_contents($saveKeyLocation, $result['keyMaterial']);
-            // Update the key's permissions so it can be used with SSH
-        chmod($saveKeyLocation, 0600);
+        $groupId = $SecurityGroup['securityGroupId'];
+        $groupName = $SecurityGroup['securityGroupName'];
 
-        /*$result = $ec2Client->runInstances(array(
-            'DryRun' => false,
-            'ImageId' => 'ami-0cd3dfa4e37921605',
-            'MinCount' => 1,
-            'MaxCount' => 1,
-        ));*/
+        // Instance Create
+        $newInstanceResponce = $this->LaunchInstance($keyPairName, $groupName);
+        $instanceId = $newInstanceResponce->getPath('Instances')[0]['InstanceId'];
 
+        $instanceIds = [];
+        array_push($instanceIds, $instanceId);
 
-//        $result = $ec2Client->describeInstances();
-        /*$instanceIds = array('InstanceID1', 'InstanceID2');
-        $monitorInstance = 'ON';
-        if ($monitorInstance == 'ON') {
-            $result = $ec2Client->monitorInstances(array(
-                'InstanceIds' => $instanceIds
-            ));
-        } else {
-            $result = $ec2Client->unmonitorInstances(array(
-                'InstanceIds' => $instanceIds
-            ));
-        }*/
-        dd($result);
+        // Instance Describe for Public Dns Name
+        $describeInstancesResponse = $this->DescribeInstances($instanceIds);
+        $publicDnsName = $describeInstancesResponse->getPath('Reservations')[0]['Instances'][0]['PublicDnsName'];
+
     }
 
     /**
