@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\AwsConnection;
 use App\UserInstances;
 use App\UserInstancesDetails;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Session;
 
 class UserInstancesController extends AwsConnectionController
 {
@@ -81,12 +83,56 @@ class UserInstancesController extends AwsConnectionController
                 $userInstanceDetail->user_instance_id = $userInstance->id;
                 $userInstanceDetail->start_time = $created_at;
                 $userInstanceDetail->save();
+                Session::flash('error', 'Instance Create successfully');
                 return redirect(route('user.instance.index'));
             }
+            Session::flash('error', 'Please Try again later');
             return redirect(route('user.instance.index'));
         }
         catch (\Exception $e) {
+            Session::flash('error', $e->getMessage());
             return redirect(route('user.instance.index'));
+        }
+    }
+
+
+    public function changeStatus(Request $request){
+        try{
+            $instanceObj = UserInstances::find($request->id);
+            $instanceDetail = UserInstancesDetails::where(['user_instance_id' => $request->id])->latest()->first();
+            $instanceIds = [];
+            array_push($instanceIds, $instanceObj->aws_instance_id);
+            $currentDate = date('Y-m-d H:i:s');
+
+            if($request->status == 'start'){
+                $instanceObj->status = 'running';
+               $startObj = $this->StartInstance($instanceIds);
+               $instanceDetail = new UserInstancesDetails();
+               $instanceDetail->user_instance_id = $request->id;
+               $instanceDetail->start_time = $currentDate;
+               $instanceDetail->save();
+
+            } elseif($request->status == 'stop') {
+                $instanceObj->status = 'stop';
+                $stopObj = $this->StopInstance($instanceIds);
+                $instanceDetail->end_time = $currentDate;
+                $deffTime = UserInstances::deffTime($instanceDetail->start_time, $instanceDetail->end_date);
+                $instanceDetail->total_time = $deffTime;
+                $instanceDetail->save();
+            } else {
+                $instanceObj->status = 'terminated';
+                $terminateInstance = $this->TerminateInstance($instanceIds);
+            }
+
+            if($instanceObj->save()){
+                Session::flash('success', 'Instance '.$request->status.' successfully!');
+                return 'true';
+            }
+            Session::flash('error', 'Instance '.$request->status.' Not successfully!');
+            return 'false';
+        } catch (\Exception $e){
+            Session::flash('error', $e->getMessage());
+            return 'false';
         }
     }
 

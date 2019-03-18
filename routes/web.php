@@ -30,5 +30,6 @@ Route::group(['prefix' => 'user', 'as' => 'user.', 'middleware' => ['auth', 'use
     Route::group(['prefix' => 'instance', 'as' => 'instance.'], function() {
         Route::get('/', 'UserInstancesController@index')->name('index');
         Route::get('create', 'UserInstancesController@create')->name('create');
+        Route::post('change-status', 'UserInstancesController@changeStatus')->name('change-status');
     });
 });

@@ -30,7 +30,8 @@ class AwsConnection extends Model
         $uploadDirPath = "/uploads/ssh_keys/".time()."_{$keyPairName}.pem";
         // Save the private key
         $saveKeyLocation = public_path(). $uploadDirPath;
-        file_put_contents($saveKeyLocation, $result['keyMaterial']);
+        $pemKey = $result->getPath('KeyMaterial');
+        file_put_contents($saveKeyLocation, $pemKey);
         // Update the key's permissions so it can be used with SSH
         chmod($saveKeyLocation, 0600);
         $filePath = config('app.url').$uploadDirPath;
@@ -112,6 +113,39 @@ class AwsConnection extends Model
                 'InstanceIds' => $instanceIds,
             ));
         return $resultDescribe;
+    }
+
+    public static function StartInstance($instanceIds){
+        $ec2Client = self::AwsConnection();
+
+        $result = $ec2Client->startInstances(array(
+            'InstanceIds' => $instanceIds,
+        ));
+
+        return $result;
+    }
+
+    public static function StopInstance($instanceIds){
+        $ec2Client = self::AwsConnection();
+
+        $result = $ec2Client->stopInstances(array(
+            'InstanceIds' => $instanceIds,
+        ));
+
+        return $result;
+    }
+
+    public static function TerminateInstance($instanceIds)
+    {
+        $ec2Client = self::AwsConnection();
+
+        $result = $ec2Client->terminateInstances(array(
+            'DryRun' => false,
+            // InstanceIds is required
+            'InstanceIds' => $instanceIds,
+        ));
+
+        return $result;
     }
 
 }

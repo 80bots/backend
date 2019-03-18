@@ -35,8 +35,9 @@
                                    width="100%">
                                 <thead>
                                 <tr>
-                                    <th data-hide="phone">Name</th>
+                                    <th data-hide="phone,tablet">Name</th>
                                     <th data-class="expand">Instance Id</th>
+                                    <th data-class="expand">Up-Time</th>
                                     <th data-hide="phone">AWS Public Ip</th>
                                     <th data-hide="phone,tablet">AWS Public DNS</th>
                                     <th data-hide="phone,tablet">Status</th>
@@ -50,11 +51,26 @@
                                         <tr>
                                             <td>{{!empty($instance->name) ? $instance->name : ''}}</td>
                                             <td>{{!empty($instance->aws_instance_id) ? $instance->aws_instance_id : ''}}</td>
+                                            <td>{{!empty($instance->up_time) ? $instance->up_time : 0}}</td>
                                             <td>{{!empty($instance->aws_public_ip) ? $instance->aws_public_ip : ''}}</td>
                                             <td>{{!empty($instance->aws_public_dns) ? $instance->aws_public_dns : ''}}</td>
-                                            <td>{{!empty($instance->status) ? $instance->status : ''}}</td>
+                                            <td>
+                                                <select name="instStatus" class="btn btn-default instStatus" data-id="{{$instance->id}}">
+                                                @if(!empty($instance->status) && $instance->status == 'running')
+                                                    <option value="running">Running</option>
+                                                    <option value="stop">Stop</option>
+                                                    <option value="terminated">Terminate</option>
+                                                @elseif(!empty($instance->status) && $instance->status == 'stop')
+                                                    <option value="stop">Stop</option>
+                                                    <option value="start">Start</option>
+                                                    <option value="terminated">Terminate</option>
+                                                @else
+                                                    <option value="terminated">Terminate</option>
+                                                @endif
+                                                </select>
+                                            </td>
                                             <td>{{!empty($instance->created_at) ? $instance->created_at : ''}}</td>
-                                            <td><a href="{{!empty($instance->aws_pem_file_path) ? $instance->aws_pem_file_path : 'javascript:void(0)'}}" title="Download pem file">
+                                            <td><a href="{{!empty($instance->aws_pem_file_path) ? $instance->aws_pem_file_path : 'javascript:void(0)'}}" title="Download pem file" download>
                                                     <i class="fa fa-download"></i>
                                                 </a></td>
                                         </tr>
@@ -208,5 +224,27 @@
         /* END TABLETOOLS */
 
 
+    </script>
+    <script>
+        $(document).on('change', '.instStatus', function () {
+            var status = $(this).val();
+            var instanceId = $(this).data('id');
+            var URL = '{{route('user.instance.change-status')}}';
+            $.ajax({
+                type: 'post',
+                url: URL,
+                cache: false,
+                data: {
+                    _token : function () {
+                        return '{{csrf_token()}}';
+                    },
+                    id : instanceId,
+                    status: status
+                },
+                success: function (data) {
+                    location.reload();
+                }
+            });
+        })
     </script>
 @endsection

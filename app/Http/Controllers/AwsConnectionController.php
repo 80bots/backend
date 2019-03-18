@@ -27,4 +27,20 @@ class AwsConnectionController extends AppController
         $describeInstances = AwsConnection::DescribeInstances($instanceIds);
         return $describeInstances;
     }
+
+    public function StartInstance($instanceIds){
+        $startResponse = AwsConnection::StartInstance($instanceIds);
+        return $startResponse;
+    }
+
+    public function StopInstance($instanceIds){
+        $startResponse = AwsConnection::StopInstance($instanceIds);
+        return $startResponse;
+    }
+
+    public function TerminateInstance($instanceIds){
+        $startResponse = AwsConnection::TerminateInstance($instanceIds);
+        return $startResponse;
+    }
+
 }
