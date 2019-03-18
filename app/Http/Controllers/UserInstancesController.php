@@ -83,7 +83,7 @@ class UserInstancesController extends AwsConnectionController
                 $userInstanceDetail->user_instance_id = $userInstance->id;
                 $userInstanceDetail->start_time = $created_at;
                 $userInstanceDetail->save();
-                Session::flash('error', 'Instance Create successfully');
+                Session::flash('success', 'Instance Create successfully');
                 return redirect(route('user.instance.index'));
             }
             Session::flash('error', 'Please Try again later');
