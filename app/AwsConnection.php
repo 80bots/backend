@@ -23,7 +23,7 @@ class AwsConnection extends Model
         $ec2Client = self::AwsConnection();
 
         // Create Aws Pair Key
-        $keyPairName = time().'_darshan';
+        $keyPairName = time().'_psbt';
         $result = $ec2Client->createKeyPair(array(
             'KeyName' => $keyPairName
         ));
@@ -72,7 +72,7 @@ class AwsConnection extends Model
     public static function AwsCreateSecretGroup(){
         $ec2Client = self::AwsConnection();
 
-        $securityGroupName = time().'_darshan';
+        $securityGroupName = time().'_80bots';
         // Create the security group
         $result = $ec2Client->createSecurityGroup(array(
             'GroupName'   => $securityGroupName,
