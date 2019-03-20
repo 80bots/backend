@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>User List | AWS SAAS</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/datatables.min.css">
+    <link rel="stylesheet" href="vendors/font-awesome/css/all.min.css">
+    <link rel="stylesheet" href="vendors/select2/css/select2.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:400,500,600" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/theme.css">
+</head>
+<body>
+<div class="main-wrapper d-flex align-items-stretch">
+    <div class="sidebar">
+        <div class="">
+            <a href="#." class="sidebar-brand text-decoration-none">AWS SAAS</a>
+        </div>
+        <div class="sidebar-nav">
+            <ul class="list-unstyled mb-0">
+                <li class="sidebar-header">Navigation</li>
+                <li class="sidebar-item ">
+                    <span data-toggle="collapse" data-target="#user" class="sidebar-link"
+                          aria-expanded="false">
+                        <span class="align-middle"><i class="fas fa-user mr-2"></i> Users</span>
+                    </span>
+                    <div id="user" class="collapse in show">
+                        <ul class="sidebar-dropdown list-unstyled">
+                            <li class="sidebar-item "><a href="user-list.html" class="sidebar-link">User List</a></li>
+                            <li class="sidebar-item "><a href="add-user.html" class="sidebar-link active">Add User</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="body-content flex-grow-1">
+        <nav class="bg-white navbar navbar-expand d-flex justify-content-between align-items-center border-bottom">
+                <span class="sidebar-toggle d-flex mr-2">
+                    <span class="hamburger align-self-center"></span>
+                </span>
+            <div class="nav-right">
+                <div class="dropdown">
+                    <span class="align-items-center d-flex dropdown-toggle" id="dropdownMenuButton"
+                          data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fa fa-user-circle mr-2"></i> John Doe</span>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <a class="dropdown-item d-flex align-items-center justify-content-between" href="sign-in.html">
+                            <span>Logout</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                 aria-hidden="true">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                <polyline points="16 17 21 12 16 7"></polyline>
+                                <line x1="21" y1="12" x2="9" y2="12"></line>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        <div class="wrapper">
+            <form class="card">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0">Add User</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 col-sm-12">
+                            <div class="form-group">
+                                <label for="">First Name</label>
+                                <input type="text" class="form-control"/>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-sm-12">
+                            <div class="form-group">
+                                <label for="">Last Name</label>
+                                <input type="text" class="form-control"/>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-sm-12">
+                            <div class="form-group">
+                                <label for="">Email address</label>
+                                <input type="text" class="form-control"/>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-sm-12">
+                            <div class="row align-items-end">
+                                <div class="col-md-6 col-sm-12 mb-3">
+                                    <div class="">
+                                        <label for="">Gender</label>
+                                        <div>
+                                            <div class="form-check form-check-inline">
+                                                <label class="control control--radio mr-2">Male
+                                                    <input type="radio" checked="checked" name="gender">
+                                                    <div class="control__indicator"></div>
+                                                </label>
+                                                <label class="control control--radio mr-2">Female
+                                                    <input type="radio" name="gender">
+                                                    <div class="control__indicator"></div>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-sm-12 mb-3">
+                                    <div class="">
+                                        <label class="control control--checkbox">Make Admin
+                                            <input type="checkbox" name="gender">
+                                            <div class="control__indicator"></div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-sm-12">
+                            <div class="form-group">
+                                <label>Sample Dropdown</label>
+                                <select class="form-control">
+                                    <option value="opt1">Option 1</option>
+                                    <option value="opt2">Option 2</option>
+                                    <option value="opt3">Option 3</option>
+                                    <option value="opt4">Option 4</option>
+                                    <option value="opt5">Option 5</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-sm-12">
+                            <div class="form-group">
+                                <label>Dropdown with Search</label>
+                                <select class="form-control select2">
+                                    <option value="opt1">Option 1</option>
+                                    <option value="opt2">Option 2</option>
+                                    <option value="opt3">Option 3</option>
+                                    <option value="opt4">Option 4</option>
+                                    <option value="opt5">Option 5</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer text-right">
+                    <button type="submit" class="btn btn-primary btn-round">Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
+<script type="text/javascript" src="js/bootstrap.min.js"></script>
+<script type="text/javascript" src="js/datatables.min.js"></script>
+<script type="text/javascript" src="vendors/select2/js/select2.full.min.js"></script>
+<script type="text/javascript" src="js/script.js"></script>
+</body>
+</html>

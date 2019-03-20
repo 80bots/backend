@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>User List | AWS SAAS</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/datatables.min.css">
+    <link rel="stylesheet" href="vendors/font-awesome/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:400,500,600" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/theme.css">
+</head>
+<body>
+<div class="main-wrapper d-flex align-items-stretch">
+    <div class="sidebar">
+        <div class="">
+            <a href="#." class="sidebar-brand text-decoration-none">AWS SAAS</a>
+        </div>
+        <div class="sidebar-nav">
+            <ul class="list-unstyled mb-0">
+                <li class="sidebar-header">Navigation</li>
+                <li class="sidebar-item ">
+                    <span data-toggle="collapse" data-target="#user" class="sidebar-link"
+                          aria-expanded="false">
+                        <span class="align-middle"><i class="fas fa-user mr-2"></i> Users</span>
+                    </span>
+                    <div id="user" class="collapse in show">
+                        <ul class="sidebar-dropdown list-unstyled">
+                            <li class="sidebar-item "><a href="user-list.html" class="sidebar-link active">User List</a>
+                            </li>
+                            <li class="sidebar-item "><a href="add-user.html" class="sidebar-link">Add User</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="body-content flex-grow-1">
+        <nav class="bg-white navbar navbar-expand d-flex justify-content-between align-items-center border-bottom">
+                <span class="sidebar-toggle d-flex mr-2">
+                    <span class="hamburger align-self-center"></span>
+                </span>
+            <div class="nav-right">
+                <div class="dropdown">
+                    <span class="align-items-center d-flex dropdown-toggle" id="dropdownMenuButton"
+                          data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fa fa-user-circle mr-2"></i> John Doe</span>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <a class="dropdown-item d-flex align-items-center justify-content-between" href="sign-in.html">
+                            <span>Logout</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                 aria-hidden="true">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                <polyline points="16 17 21 12 16 7"></polyline>
+                                <line x1="21" y1="12" x2="9" y2="12"></line>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        <div class="wrapper">
+            <div class="card">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0">User List</h5>
+                    <a href="add-user.html" class="btn btn-round btn-primary"><i class="fas fa-plus"></i> Add user</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table thead-default vertical-middle mb-0">
+                            <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">First Name</th>
+                                <th scope="col">Last Name</th>
+                                <th scope="col">Email</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <!--<td><img src="images/001.jpg" class="img-fluid rounded-circle" width="50" alt=""></td>-->
+                                <td>1</td>
+                                <td>Jess</td>
+                                <td>Otto</td>
+                                <td>jess@otto.co</td>
+                            </tr>
+                            <tr>
+                                <!--<td><img src="images/002.jpg" class="img-fluid rounded-circle" width="50" alt=""></td>-->
+                                <td>2</td>
+                                <td>Natasha</td>
+                                <td>Thornton</td>
+                                <td>natasha@thornton.co</td>
+                            </tr>
+                            <tr>
+                                <!--<td><img src="images/003.jpg" class="img-fluid rounded-circle" width="50" alt=""></td>-->
+                                <td>3</td>
+                                <td>Larry</td>
+                                <td>Bird</td>
+                                <td>larry@bird.co</td>
+                            </tr>
+                            <tr>
+                                <!--<td><img src="images/004.jpg" class="img-fluid rounded-circle" width="50" alt=""></td>-->
+                                <td>4</td>
+                                <td>Fred</td>
+                                <td>Jackson</td>
+                                <td>fred@jackson.co</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
+<script type="text/javascript" src="js/bootstrap.min.js"></script>
+<script type="text/javascript" src="js/datatables.min.js"></script>
+<script type="text/javascript" src="js/script.js"></script>
+</body>
+</html>
