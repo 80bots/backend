@@ -15,6 +15,11 @@ class UserInstances extends Model
         return self::where('user_id' , $user_id);
     }
 
+    public static function findByInstanceId($instanceId)
+    {
+        return self::where('aws_instance_id', $instanceId);
+    }
+
     public function userInstanceDetails()
     {
         return $this->hasMany('App\UserInstancesDetails');

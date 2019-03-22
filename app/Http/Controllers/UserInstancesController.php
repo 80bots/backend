@@ -33,6 +33,24 @@ class UserInstancesController extends AwsConnectionController
         }
     }
 
+    /*public function describe($instanceIds){
+
+        $describeInstancesResponse = $this->DescribeInstances($instanceIds);
+        $instanceArray = $describeInstancesResponse->getPath('Reservations')[0]['Instances'][0];
+
+        $LaunchTime = isset($instanceArray['LaunchTime']) ? $instanceArray['LaunchTime'] : '';
+        $publicIp = isset($instanceArray['PublicIpAddress']) ? $instanceArray['PublicIpAddress'] : '';
+        $publicDnsName = isset($instanceArray['PublicDnsName']) ? $instanceArray['PublicDnsName'] : '';
+
+        foreach ($instanceIds as $instanceId){
+            $updateInstances = UserInstances::findByInstanceId($instanceId);
+            $updateInstances->aws_public_ip = $publicIp;
+            $updateInstances->aws_public_dns = $publicDnsName;
+            $updateInstances->save();
+        }
+
+    }*/
+
     /**
      * Show the form for creating a new resource.
      *
@@ -58,13 +76,15 @@ class UserInstancesController extends AwsConnectionController
             $instanceIds = [];
             array_push($instanceIds, $instanceId);
 
+            $waitUntilResponse = $this->waitUntil($instanceIds);
+
             // Instance Describe for Public Dns Name
             $describeInstancesResponse = $this->DescribeInstances($instanceIds);
             $instanceArray = $describeInstancesResponse->getPath('Reservations')[0]['Instances'][0];
 
-            $LaunchTime = $instanceArray['LaunchTime'];
-            $publicIp = $instanceArray['PublicIpAddress'];
-            $publicDnsName = $instanceArray['PublicDnsName'];
+            $LaunchTime = isset($instanceArray['LaunchTime']) ? $instanceArray['LaunchTime'] : '';
+            $publicIp = isset($instanceArray['PublicIpAddress']) ? $instanceArray['PublicIpAddress'] : '';
+            $publicDnsName = isset($instanceArray['PublicDnsName']) ? $instanceArray['PublicDnsName'] : '';
 
             $awsAmiId = env('AWS_IMAGEID','ami-0cd3dfa4e37921605');
 
