@@ -2,7 +2,7 @@
     use Illuminate\Support\Facades\Auth;
 
     $requestUrl = explode('/', ltrim($_SERVER['REQUEST_URI'],'/'));
-    $role = isset(Auth::user()->role->name) ? Auth::user()->role->name : '';
+    $role = $user->role->name;
 @endphp
 @if (!empty($role) && $role == 'User' || $role == 'Admin')
     <nav class="bg-white navbar navbar-expand d-flex justify-content-between align-items-center border-bottom">
@@ -13,9 +13,11 @@
             <div class="dropdown">
                     <span class="align-items-center d-flex dropdown-toggle" id="dropdownMenuButton"
                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <i class="fa fa-user-circle mr-2"></i> John Doe</span>
+                        <i class="fa fa-user-circle mr-2"></i> {{!empty($user->name) ? $user->name : ''}}</span>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <a class="dropdown-item d-flex align-items-center justify-content-between" href="{{route('login')}}">
+                    <a class="dropdown-item d-flex align-items-center justify-content-between" href="{{ route('logout') }}"
+                       onclick="event.preventDefault();
+                                                     document.getElementById('logout-form').submit();">
                         <span>Logout</span>
                         <svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 0 24 24" fill="none"
                              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -25,6 +27,10 @@
                             <line x1="21" y1="12" x2="9" y2="12"></line>
                         </svg>
                     </a>
+
+                    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                        @csrf
+                    </form>
                 </div>
             </div>
         </div>

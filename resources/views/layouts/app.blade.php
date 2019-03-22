@@ -15,7 +15,7 @@ $user = Auth::user();
     <link rel="stylesheet" href="{{asset('css/bootstrap.min.css')}}">
     <link rel="stylesheet" href="{{asset('css/datatables.min.css')}}">
     <link rel="stylesheet" href="{{asset('vendors/font-awesome/css/all.min.css')}}">
-    {{--<link rel="stylesheet" href="{{asset('vendors/select2/css/select2.min.css')}}">--}}
+    <link rel="stylesheet" href="{{asset('vendors/select2/css/select2.min.css')}}">
     <link href="https://fonts.googleapis.com/css?family=Nunito:400,500,600" rel="stylesheet">
     <link rel="stylesheet" href="{{asset('css/style.css')}}">
     <link rel="stylesheet" href="{{asset('css/theme.css')}}">
@@ -67,7 +67,7 @@ $user = Auth::user();
 <script type="text/javascript" src="{{asset('js/jquery-3.3.1.min.js')}}"></script>
 <script type="text/javascript" src="{{asset('js/bootstrap.min.js')}}"></script>
 <script type="text/javascript" src="{{asset('js/datatables.min.js')}}"></script>
-{{--<script type="text/javascript" src="vendors/select2/js/select2.full.min.js"></script>--}}
+<script type="text/javascript" src="{{asset('vendors/select2/js/select2.full.min.js')}}"></script>
 <script type="text/javascript" src="{{asset('js/script.js')}}"></script>
 
 

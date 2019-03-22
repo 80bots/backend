@@ -43,4 +43,14 @@ class AwsConnectionController extends AppController
         return $startResponse;
     }
 
+    public function AllocateAddresses($instanceIds){
+        $addressResponse = AwsConnection::AllocateAddresses($instanceIds);
+        return $addressResponse;
+    }
+
+    public function InstanceMonitoring($instanceIds){
+        $monitoringRespinse = AwsConnection::InstanceMonitoring($instanceIds);
+        return $monitoringRespinse;
+    }
+
 }

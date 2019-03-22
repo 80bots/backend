@@ -148,6 +148,35 @@ class AwsConnection extends Model
         return $result;
     }
 
+    public static function AllocateAddresses($instanceId){
+
+        $ec2Client = self::AwsConnection();
+        $allocation = $ec2Client->allocateAddress(array(
+            'DryRun' => false,
+            'Domain' => 'vpc',
+        ));
+        $result = $ec2Client->associateAddress(array(
+            'DryRun' => false,
+            'InstanceId' => $instanceId,
+            'AllocationId' => $allocation->get('AllocationId')
+        ));
+        return $result;
+    }
+
+    public static function InstanceMonitoring($instanceIds){
+        $ec2Client = self::AwsConnection();
+        $monitorInstance = 'ON';
+        if ($monitorInstance == 'ON') {
+            $result = $ec2Client->monitorInstances(array(
+                'InstanceIds' => $instanceIds
+            ));
+        } else {
+            $result = $ec2Client->unmonitorInstances(array(
+                'InstanceIds' => $instanceIds
+            ));
+        }
+        return $result;
+    }
 }
 //"PublicDnsName" => "ec2-18-222-190-135.us-east-2.compute.amazonaws.com"
 //            "PublicIpAddress" => "18.222.190.135"

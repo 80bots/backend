@@ -22,6 +22,9 @@ class UserInstancesController extends AwsConnectionController
         try{
             $UserInstance = UserInstances::findByUserId($user_id)->get();
             if($UserInstance){
+                $instancesId = [];
+                array_push($instancesId,$UserInstance[0]->aws_instance_id);
+                $this->InstanceMonitoring($instancesId);
                 return view('user.instance.index',compact('UserInstance'));
             }
             return view('user.instance.index')->with('error', 'Instance Are not Found');
@@ -75,6 +78,7 @@ class UserInstancesController extends AwsConnectionController
             $userInstance->aws_security_group_id = $groupId;
             $userInstance->aws_security_group_name = $groupName;
             $userInstance->aws_public_ip = $publicIp;
+            $userInstance->status = 'running';
             $userInstance->aws_public_dns = $publicDnsName;
             $userInstance->aws_pem_file_path = $keyPairPath;
             $userInstance->created_at = $created_at;
