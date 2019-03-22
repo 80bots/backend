@@ -7,3 +7,4 @@
 *images/
 composer.lock
 *ssh_keys/
+public/html
