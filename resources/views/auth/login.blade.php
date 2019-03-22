@@ -11,6 +11,7 @@
 @section('content')
 
     <div class="login-box-wrapper d-flex align-items-center justify-content-center flex-column">
+        @include('layouts.imports.messages')
         <div class="p-4 login-box mb-3 d-flex align-items-center">
             <form method="POST" action="{{ route('login') }}" id="frmSignin" class="flex-grow-1">
                 @csrf

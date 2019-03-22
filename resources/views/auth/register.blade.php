@@ -9,8 +9,9 @@
 @endsection
 
 @section('content')
-    <div class="login-box-wrapper d-flex align-items-center justify-content-center flex-column">
-        <div class="p-4 login-box mb-3 d-flex align-items-center">
+    <div class="login-box-wrapper d-flex align-items-center justify-content-center flex-column container">
+        @include('layouts.imports.messages')
+        <div class="p-4 login-box mb-3">
             <form method="POST" action="{{ route('register') }}" id="frmSignup" class="smart-form client-form">
                 @csrf
                 <h2 class="text-primary text-center">AWS SAAS</h2>
