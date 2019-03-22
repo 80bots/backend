@@ -1,0 +1,70 @@
+.text-primary {
+    /*color: #D13A28 !important;*/
+    color: hsl(200, 100%, 40%) !important
+}
+
+.border-primary {
+    /*border-color: #D13A28 !important;*/
+    border-color: #0088cc !important;
+}
+
+/* Button style */
+
+.btn {
+    padding: .375rem 1rem;
+}
+
+.btn, .btn:active {
+    -webkit-box-shadow: 0 4px 6px rgba(50, 50, 93, .11), 0 1px 3px rgba(0, 0, 0, .08) !important;
+    -moz-box-shadow: 0 4px 6px rgba(50, 50, 93, .11), 0 1px 3px rgba(0, 0, 0, .08) !important;
+    box-shadow: 0 4px 6px rgba(50, 50, 93, .11), 0 1px 3px rgba(0, 0, 0, .08) !important;
+    -webkit-transition: all .20s ease;
+    -moz-transition: all .20s ease;
+    transition: all .20s ease;
+}
+
+.btn:hover {
+    -webkit-box-shadow: 0 13px 27px -5px rgba(50, 50, 93, .25), 0 8px 16px -8px rgba(0, 0, 0, .3), 0 -6px 16px -6px rgba(0, 0, 0, .025) !important;
+    -moz-box-shadow: 0 13px 27px -5px rgba(50, 50, 93, .25), 0 8px 16px -8px rgba(0, 0, 0, .3), 0 -6px 16px -6px rgba(0, 0, 0, .025) !important;
+    box-shadow: 0 13px 27px -5px rgba(50, 50, 93, .25), 0 8px 16px -8px rgba(0, 0, 0, .3), 0 -6px 16px -6px rgba(0, 0, 0, .025) !important;
+}
+
+.btn:focus, .btn:focus:active {
+    -webkit-box-shadow: 0 0 0 1.5px hsla(0, 0%, 100%, .75), inset 0 0 0 1.25px rgba(0, 0, 0, .2), 0 13px 27px -5px rgba(50, 50, 93, .25), 0 8px 16px -8px rgba(0, 0, 0, .3), 0 -6px 16px -6px rgba(0, 0, 0, .025) !important;
+    -moz-box-shadow: 0 0 0 1.5px hsla(0, 0%, 100%, .75), inset 0 0 0 1.25px rgba(0, 0, 0, .2), 0 13px 27px -5px rgba(50, 50, 93, .25), 0 8px 16px -8px rgba(0, 0, 0, .3), 0 -6px 16px -6px rgba(0, 0, 0, .025) !important;
+    box-shadow: 0 0 0 1.5px hsla(0, 0%, 100%, .75), inset 0 0 0 1.25px rgba(0, 0, 0, .2), 0 13px 27px -5px rgba(50, 50, 93, .25), 0 8px 16px -8px rgba(0, 0, 0, .3), 0 -6px 16px -6px rgba(0, 0, 0, .025) !important;
+    /*-webkit-box-shadow: 0 4px 6px rgba(50, 50, 93, .11), 0 1px 3px rgba(0, 0, 0, .08) !important;
+    -moz-box-shadow: 0 4px 6px rgba(50, 50, 93, .11), 0 1px 3px rgba(0, 0, 0, .08) !important;
+    box-shadow: 0 4px 6px rgba(50, 50, 93, .11), 0 1px 3px rgba(0, 0, 0, .08) !important;*/
+}
+
+.btn-primary {
+    /*background-color: #D13A28 !important;
+    border-color: #D13A28 !important;*/
+    background-color: hsl(200, 100%, 40%) !important;
+    border-color: hsl(200, 100%, 40%) !important;
+}
+
+.btn-primary:hover {
+    /*background-color: #da4e3e !important;
+    border-color: #da4e3e !important;*/
+    background-color: hsl(200, 100%, 35%) !important;
+    border-color: hsl(200, 100%, 35%) !important;
+}
+
+.btn-primary:focus, .btn-primary:active, .btn-primary:active:focus {
+    /*background-color: #c13425 !important;
+    border-color: #c13425 !important;*/
+    background-color: hsl(200, 100%, 45%) !important;
+    border-color: hsl(200, 100%, 45%) !important;
+}
+
+/* Button style END */
+
+/* Select2 style */
+
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background-color: #08c;
+}
+
+/* Select2 style END */

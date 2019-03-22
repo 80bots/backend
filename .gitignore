@@ -5,5 +5,6 @@
 /tests/*
 *img/
 *images/
-composer.lock
+/composer.lock
 *ssh_keys/
+public/html

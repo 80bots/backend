@@ -4,121 +4,87 @@
 
 @endsection
 
+@section('title')
+    <title>Login | AWS SAAS</title>
+@endsection
+
 @section('content')
-<!-- MAIN CONTENT -->
-<div id="content" class="container padding-top-10">
-    <div class="row">
-        <div class="col-sm-12 col-md-7 col-lg-8 hidden-xs hidden-sm">
-            <h1 class="text-red login-header-big">{{config('app.name')}}</h1>
-            <div class="clearfix">
-                <div class="hero">
-                    <div class="pull-left login-desc-box-l">
-                        <h4 class="paragraph-header">It's Okay to be Smart. Experience the simplicity of SmartAdmin, everywhere you go!</h4>
-                        <div class="login-app-icons">
-                            <a href="javascript:void(0);" class="btn sa-btn-danger btn-sm">Frontend Template</a>
-                            <a href="javascript:void(0);" class="btn sa-btn-danger btn-sm">Find out more</a>
-                        </div>
-                    </div>
 
-                    <img src="{{asset('assets/img/demo/iphoneview.png')}}" class="pull-right display-image" alt="" style="width:210px">
-
+    <div class="login-box-wrapper d-flex align-items-center justify-content-center flex-column">
+        @include('layouts.imports.messages')
+        <div class="p-4 login-box mb-3 d-flex align-items-center">
+            <form method="POST" action="{{ route('login') }}" id="frmSignin" class="flex-grow-1">
+                @csrf
+                <h2 class="text-primary text-center">AWS SAAS</h2>
+                <h4 class="text-center">Sign In</h4>
+                <div class="form-group">
+                    <label for="email">Username / E-mail</label>
+                    <input id="email" type="email" class="form-control{{ $errors->has('email') ? ' is-invalid' : '' }}"
+                           name="email" value="{{ old('email') }}" required autofocus>
+                    @if ($errors->has('email'))
+                        <span class="invalid-feedback" role="alert">
+                            <strong>{{ $errors->first('email') }}</strong>
+                        </span>
+                    @endif
                 </div>
-            </div>
 
-
-            <div class="row">
-                <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
-                    <h5 class="about-heading">About SmartAdmin - Are you up to date?</h5>
-                    <p>
-                        Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa.
-                    </p>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input id="password" type="password"
+                           class="form-control{{ $errors->has('password') ? ' is-invalid' : '' }}" name="password"
+                           value="{{ old('password') }}" required autofocus>
+                    @if ($errors->has('password'))
+                        <span class="invalid-feedback" role="alert">
+                            <strong>{{ $errors->first('password') }}</strong>
+                        </span>
+                    @endif
                 </div>
-                <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
-                    <h5 class="about-heading">Not just your average template!</h5>
-                    <p>
-                        Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi voluptatem accusantium!
-                    </p>
-                </div>
-            </div>
 
+                <button type="submit" class="btn btn-primary btn-block text-uppercase mb-3">Sign in</button>
+                <div class="text-right">
+                    <a href="#frmForgotPwd" data-toggle="form" data-slide="left" class="text-dark text-decoration-none">Forgot
+                        Password?</a>
+                </div>
+            </form>
+            <form id="frmForgotPwd" class="flex-grow-1" action="javascript:void(0)" style="display: none;">
+                <h4 class="text-primary text-center">Forgot password?</h4>
+                <p class="text-center">Reset password link will be sent on email id</p>
+                <div class="form-group">
+                    <label for="">Email</label>
+                    <input type="email" class="form-control"/>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block text-uppercase mb-3">Send reset link</button>
+                <div>
+                    <a href="#frmSignin" data-toggle="form" data-slide="right" class="text-dark text-decoration-none">Back
+                        to Sign In</a>
+                </div>
+            </form>
         </div>
-        <div class="col-sm-12 col-lg-4">
-            <div class="well no-padding">
-                <form method="POST" action="{{ route('login') }}" id="login-form" class="smart-form client-form">
-                    @csrf
-                    <header>
-                        Sign In
-                    </header>
-
-                    <fieldset>
-                        <section>
-                            <label class="label">E-mail</label>
-                            <label class="input mb-3"> <i class="icon-append fa fa-user"></i>
-                                <input id="email" type="email" class="form-control{{ $errors->has('email') ? ' is-invalid' : '' }}" name="email" value="{{ old('email') }}" required autofocus>
-                                @if ($errors->has('email'))
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $errors->first('email') }}</strong>
-                                    </span>
-                                @endif
-                                <b class="tooltip tooltip-top-right"><i class="fa fa-user txt-color-teal"></i> Please enter email address/username</b></label>
-                        </section>
-
-                        <section>
-                            <label class="label">Password</label>
-                            <label class="input mb-1"> <i class="icon-append fa fa-lock"></i>
-                                <input id="password" type="password" class="form-control{{ $errors->has('password') ? ' is-invalid' : '' }}" name="password" required>
-
-                                @if ($errors->has('password'))
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $errors->first('password') }}</strong>
-                                    </span>
-                                @endif
-                                <b class="tooltip tooltip-top-right"><i class="fa fa-lock txt-color-teal"></i> Enter your password</b> </label>
-                            <div class="note mb-3">
-                                @if (Route::has('password.request'))
-                                    <a class="btn btn-link" href="{{ route('password.request') }}">
-                                        {{ __('Forgot Your Password?') }}
-                                    </a>
-                                @endif
-                            </div>
-                        </section>
-
-                        <section>
-                            <label for="gra-0" class="vcheck mb-3">
-                                <input type="checkbox" name="remember"  id="gra-0" {{ old('remember') ? 'checked' : '' }}>
-                                <span></span> {{ __('Remember Me') }}
-                            </label>
-
-                        </section>
-                    </fieldset>
-                    <footer>
-                        <button type="submit" class="btn btn-primary">
-                            {{ __('Login') }}
-                        </button>
-                    </footer>
-                </form>
-
-            </div>
-
-            <h5 class="text-center"> - Or sign in using -</h5>
-
-            <ul class="list-inline text-center">
-                <li>
-                    <a href="javascript:void(0);" class="btn sa-btn-primary btn-circle"><i class="fa fa-facebook"></i></a>
-                </li>
-                <li>
-                    <a href="javascript:void(0);" class="btn sa-btn-info btn-circle"><i class="fa fa-twitter"></i></a>
-                </li>
-                <li>
-                    <a href="javascript:void(0);" class="btn sa-btn-warning btn-circle"><i class="fa fa-linkedin"></i></a>
-                </li>
-            </ul>
-
-        </div>
+        <h5 class="text-white mb-0">Not registered? <a href="{{route('register')}}" class="text-white font-weight-bold">Sign up</a>
+        </h5>
     </div>
-</div>
+
 @endsection
 
 @section('scripts')
-
+    <script type="text/javascript">
+        $(document).on('click', '[data-toggle="form"]', function () {
+            let $targetEle = $(this.getAttribute('href'));
+            let $parentForm = $(this).parents('form');
+            let slideTo = this.dataset.slide;
+            let slideTargetTo = $targetEle.find('[data-toggle="form"]').data('slide');
+            if ($parentForm.parents('.login-box').attr('style') === undefined) {
+                $parentForm.parents('.login-box').css('height', ($parentForm.outerHeight() + 48) + 'px');
+            }
+            $parentForm.hide('slide', {direction: slideTo}, function () {
+                $targetEle.show('slide', {direction: slideTargetTo}, function () {
+                    if ($parentForm.parents('.login-box').attr('style') === undefined) {
+                        $parentForm.parents('.login-box').animate({
+                            height: ($targetEle.outerHeight() + 48) + 'px'
+                        }, 250);
+                    }
+                });
+            });
+        })
+    </script>
 @endsection
