@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title')
-User Listing
+    User Listing
 @endsection
 
 @section('css')
@@ -11,12 +11,12 @@ User Listing
 @section('content')
     <div class="wrapper">
         <div class="card">
-            @include('layouts.imports.messages')
             <div class="card-header d-flex align-items-center justify-content-between">
                 <h5 class="mb-0">User List</h5>
                 {{--<a href="{{route('user.instance.create')}}" class="btn btn-round btn-primary"><i class="fas fa-plus"></i> Add Instance</a>--}}
             </div>
-            <div class="card-body p-0">
+            <div class="card-body">
+                @include('layouts.imports.messages')
                 <div class="table-responsive">
                     <table id="user-list" class="table thead-default vertical-middle mb-0">
                         <thead>
@@ -36,17 +36,29 @@ User Listing
                                     <td>{{!empty($user->name) ? $user->name : ''}}</td>
                                     <td>{{!empty($user->email) ? $user->email : ''}}</td>
                                     <td>{{!empty($user->credit_score) ? $user->credit_score : 0.0}}</td>
-                                    <td>{{!empty($user->created_at) ? $user->created_at : ''}}</td>
+                                    <td>{{!empty($user->created_at) ? date('Y-m-d', strtotime($user->created_at)) : ''}}</td>
                                     <td>
                                         @if(!empty($user->status) && $user->status == 'active')
-                                            <button type="button" class="form-group btn btn-danger" onclick="ChangeStatus('{{$user->id}}','inactive')" title="make it inactive" >Inactive</button>
+                                            <button type="button" class="form-group btn btn-danger mb-0"
+                                                    onclick="ChangeStatus('{{$user->id}}','inactive')"
+                                                    title="make it inactive">Inactive
+                                            </button>
                                         @else
-                                            <button type="button" class="form-group btn btn-success" onclick="ChangeStatus('{{$user->id}}','active')" title="make it active" >Active</button>
+                                            <button type="button" class="form-group btn btn-success mb-0"
+                                                    onclick="ChangeStatus('{{$user->id}}','active')"
+                                                    title="make it active">Active
+                                            </button>
                                         @endif
                                     </td>
                                     <td>
-                                        <button class="form-group btn btn-primary change-credit-model" value="{{$user->id}}"  title="update credit score"><i class="fa fa-edit"></i></button>
-                                        <a href="{{route('admin.user.instance.list',['id' => $user->id])}}" class="form-group btn btn-primary" title="List Of All Instances"><i class="fa fa-eye"></i></a>
+                                        <div class="d-flex align-items-center">
+                                            <button class="form-group btn btn-icon btn-primary change-credit-model mb-0 mr-1"
+                                                    value="{{$user->id}}" title="update credit score"><i
+                                                    class="fa fa-edit"></i></button>
+                                            <a href="{{route('admin.user.instance.list',['id' => $user->id])}}"
+                                               class="form-group btn btn-icon btn-secondary mb-0"
+                                               title="List Of All Instances"><i class="fa fa-eye"></i></a>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach
@@ -88,21 +100,21 @@ User Listing
 @section('script')
     <script>
 
-        $(document).ready(function() {
+        $(document).ready(function () {
             $('#user-list').DataTable();
         });
 
-        function ChangeStatus(userId, status){
+        function ChangeStatus(userId, status) {
             var URL = '{{route('admin.user.change-status')}}';
             $.ajax({
                 type: 'post',
                 url: URL,
                 cache: false,
                 data: {
-                    _token : function () {
+                    _token: function () {
                         return '{{csrf_token()}}';
                     },
-                    id : userId,
+                    id: userId,
                     status: status
                 },
                 success: function (data) {

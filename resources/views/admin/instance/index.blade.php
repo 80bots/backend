@@ -11,11 +11,11 @@ Instance Listing
 @section('content')
     <div class="wrapper">
         <div class="card">
-            @include('layouts.imports.messages')
             <div class="card-header d-flex align-items-center justify-content-between">
                 <h5 class="mb-0">Instance List</h5>
             </div>
-            <div class="card-body p-0">
+            <div class="card-body">
+                @include('layouts.imports.messages')
                 <div class="table-responsive">
                     <table id="instance-list" class="table thead-default vertical-middle mb-0">
                         <thead>
@@ -54,7 +54,7 @@ Instance Listing
                                             @endif
                                         </select>
                                     </td>
-                                    <td>{{!empty($instance->created_at) ? $instance->created_at : ''}}</td>
+                                    <td>{{!empty($instance->created_at) ? date('Y-m-d', strtotime($instance->created_at)) : ''}}</td>
                                     <td><a href="{{!empty($instance->aws_pem_file_path) ? $instance->aws_pem_file_path : 'javascript:void(0)'}}" title="Download pem file" download>
                                             <i class="fa fa-download"></i>
                                         </a></td>
