@@ -2,12 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\AwsConnection;
 use App\UserInstances;
 use App\UserInstancesDetails;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Session;
 
 class UserInstancesController extends AwsConnectionController
 {
@@ -21,15 +19,17 @@ class UserInstancesController extends AwsConnectionController
         $user_id = Auth::user()->id;
         try{
             $UserInstance = UserInstances::findByUserId($user_id)->get();
-            if($UserInstance){
+            if(!$UserInstance->isEmpty()){
                 $instancesId = [];
                 array_push($instancesId,$UserInstance[0]->aws_instance_id);
                 $this->InstanceMonitoring($instancesId);
                 return view('user.instance.index',compact('UserInstance'));
             }
-            return view('user.instance.index')->with('error', 'Instance Are not Found');
+            session()->flash('error', 'Instance Not Found');
+            return view('user.instance.index');
         } catch (\Exception $e){
-            return view('user.instance.index')->with('error', $e->getMessage());
+            session()->flash('error', $e->getMessage());
+            return view('user.instance.index');
         }
     }
 
@@ -107,14 +107,14 @@ class UserInstancesController extends AwsConnectionController
                 $userInstanceDetail->user_instance_id = $userInstance->id;
                 $userInstanceDetail->start_time = $created_at;
                 $userInstanceDetail->save();
-                Session::flash('success', 'Instance Create successfully');
+                session()->flash('success', 'Instance Create successfully');
                 return redirect(route('user.instance.index'));
             }
-            Session::flash('error', 'Please Try again later');
+            session()->flash('error', 'Please Try again later');
             return redirect(route('user.instance.index'));
         }
         catch (\Exception $e) {
-            Session::flash('error', $e->getMessage());
+            session()->flash('error', $e->getMessage());
             return redirect(route('user.instance.index'));
         }
     }
@@ -151,13 +151,13 @@ class UserInstancesController extends AwsConnectionController
             }
 
             if($instanceObj->save()){
-                Session::flash('success', 'Instance '.$request->status.' successfully!');
+                session()->flash('success', 'Instance '.$request->status.' successfully!');
                 return 'true';
             }
-            Session::flash('error', 'Instance '.$request->status.' Not successfully!');
+            session()->flash('error', 'Instance '.$request->status.' Not successfully!');
             return 'false';
         } catch (\Exception $e){
-            Session::flash('error', $e->getMessage());
+            session()->flash('error', $e->getMessage());
             return 'false';
         }
     }

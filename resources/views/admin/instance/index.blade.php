@@ -79,7 +79,7 @@ Instance Listing
         $(document).on('change', '.instStatus', function () {
             var status = $(this).val();
             var instanceId = $(this).data('id');
-            var URL = '{{route('user.instance.change-status')}}';
+            var URL = '{{route('admin.user.instance.change-status')}}';
             $.ajax({
                 type: 'post',
                 url: URL,

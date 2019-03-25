@@ -30,6 +30,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','ad
 
         Route::group(['prefix' => 'instance', 'as' => 'instance.'], function() {
             Route::get('list/{id}', 'UserInstancesController@index')->name('list');
+            Route::post('change-status', 'UserInstancesController@changeStatus')->name('change-status');
         });
     });
 });

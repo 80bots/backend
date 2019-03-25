@@ -5,7 +5,6 @@ namespace App\Http\Controllers\admin;
 use App\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Session;
 
 class UserController extends Controller
 {
@@ -19,7 +18,6 @@ class UserController extends Controller
         try{
             $userListObj = User::get();
             if(!$userListObj->isEmpty()){
-                session()->flash('success', 'User List Successfully!');
                 return view('admin.user.index',compact('userListObj'));
             } else {
                 session()->flash('error', 'User Not Found');
