@@ -14,7 +14,6 @@ Instance Listing
             @include('layouts.imports.messages')
             <div class="card-header d-flex align-items-center justify-content-between">
                 <h5 class="mb-0">Instance List</h5>
-                <a href="{{route('user.instance.create')}}" class="btn btn-round btn-primary"><i class="fas fa-plus"></i> Add Instance</a>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">

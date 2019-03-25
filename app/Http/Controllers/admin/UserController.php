@@ -18,12 +18,15 @@ class UserController extends Controller
     {
         try{
             $userListObj = User::get();
-            if($userListObj){
+            if(!$userListObj->isEmpty()){
+                session()->flash('success', 'User List Successfully!');
                 return view('admin.user.index',compact('userListObj'));
             } else {
+                session()->flash('error', 'User Not Found');
                 return view('admin.user.index');
             }
         } catch (\Exception $exception){
+            session()->flash('error', $exception->getMessage());
             return view('admin.user.index');
         }
     }
@@ -99,13 +102,13 @@ class UserController extends Controller
             $userObj = User::find($request->id);
             $userObj->status = $request->status;
             if($userObj->save()){
-                Session::flash('success', 'Status Successfully Change');
+                session()->flash('success', 'Status Successfully Change');
                 return 'true';
             }
-            Session::flash('error', 'Status Change Fail Please Try Again');
+            session()->flash('error', 'Status Change Fail Please Try Again');
             return 'false';
         } catch (\Exception $exception){
-            Session::flash('error', $exception->getMessage());
+            session()->flash('error', $exception->getMessage());
             return 'false';
         }
     }
@@ -115,13 +118,13 @@ class UserController extends Controller
             $userObj = User::find($request->id);
             $userObj->credit_score = $userObj->credit_score + $request->credit_score;
             if ($userObj->save()){
-                Session::flash('success', 'Credit Add Successfully');
+                session()->flash('success', 'Credit Add Successfully');
                 return redirect()->back();
             }
-            Session::flash('error', 'Credit Add Fail Please Try Again');
+            session()->flash('error', 'Credit Add Fail Please Try Again');
             return redirect()->back();
         } catch (\Exception $exception){
-            Session::flash('error', $exception->getMessage());
+            session()->flash('error', $exception->getMessage());
             return redirect()->back();
         }
     }

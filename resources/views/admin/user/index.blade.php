@@ -18,7 +18,7 @@ User Listing
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table thead-default vertical-middle mb-0">
+                    <table id="user-list" class="table thead-default vertical-middle mb-0">
                         <thead>
                         <tr>
                             <th>Name</th>
@@ -44,7 +44,10 @@ User Listing
                                             <button type="button" class="form-group btn btn-success" onclick="ChangeStatus('{{$user->id}}','active')" title="make it active" >Active</button>
                                         @endif
                                     </td>
-                                    <td><button class="form-group btn btn-primary change-credit-model" value="{{$user->id}}"  title="update credit score"><i class="fa fa-edit"></i></button></td>
+                                    <td>
+                                        <button class="form-group btn btn-primary change-credit-model" value="{{$user->id}}"  title="update credit score"><i class="fa fa-edit"></i></button>
+                                        <a href="{{route('admin.user.instance.list',['id' => $user->id])}}" class="form-group btn btn-primary" title="List Of All Instances"><i class="fa fa-eye"></i></a>
+                                    </td>
                                 </tr>
                             @endforeach
                         @endif
@@ -84,6 +87,11 @@ User Listing
 
 @section('script')
     <script>
+
+        $(document).ready(function() {
+            $('#user-list').DataTable();
+        });
+
         function ChangeStatus(userId, status){
             var URL = '{{route('admin.user.change-status')}}';
             $.ajax({

@@ -27,6 +27,10 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','ad
         Route::get('/', 'UserController@index')->name('index');
         Route::post('change-status', 'UserController@changeStatus')->name('change-status');
         Route::post('update-credit', 'UserController@updateCredit')->name('update-credit');
+
+        Route::group(['prefix' => 'instance', 'as' => 'instance.'], function() {
+            Route::get('list/{id}', 'UserInstancesController@index')->name('list');
+        });
     });
 });
 

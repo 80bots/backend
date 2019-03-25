@@ -6,6 +6,7 @@ use App\AwsConnection;
 use App\UserInstances;
 use Aws\Ec2\Ec2Client;
 use Illuminate\Http\Request;
+use Session;
 
 class UserInstancesController extends AwsConnectionController
 {
@@ -14,9 +15,21 @@ class UserInstancesController extends AwsConnectionController
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index($id)
     {
-
+        try
+        {
+            $UserInstance = UserInstances::findByUserId($id)->get();
+            if(!$UserInstance->isEmpty()){
+                session()->flash('success', 'Instance List Successfully!');
+                return view('admin.instance.index',compact('UserInstance'));
+            }
+            session()->flash('error', 'Instance Not Found');
+            return view('admin.instance.index');
+        } catch (\Exception $exception){
+            session()->flash('error', $exception->getMessage());
+            return view('admin.instance.index');
+        }
     }
 
     /**
