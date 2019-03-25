@@ -41,7 +41,7 @@
                                     <td>{{!empty($instance->aws_public_ip) ? $instance->aws_public_ip : ''}}</td>
                                     <td>{{!empty($instance->aws_public_dns) ? $instance->aws_public_dns : ''}}</td>
                                     <td>
-                                        <select name="instStatus" class="btn btn-default instStatus" data-id="{{$instance->id}}">
+                                        <select name="instStatus" class="form-control instStatus" data-id="{{$instance->id}}">
                                             @if(!empty($instance->status) && $instance->status == 'running')
                                                 <option value="running">Running</option>
                                                 <option value="stop">Stop</option>
