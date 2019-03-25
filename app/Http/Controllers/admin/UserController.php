@@ -16,7 +16,7 @@ class UserController extends Controller
     public function index()
     {
         try{
-            $userListObj = User::get();
+            $userListObj = User::where('role_id',2)->get();
             if(!$userListObj->isEmpty()){
                 return view('admin.user.index',compact('userListObj'));
             } else {

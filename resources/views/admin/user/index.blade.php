@@ -39,14 +39,14 @@
                                     <td>{{!empty($user->created_at) ? date('Y-m-d', strtotime($user->created_at)) : ''}}</td>
                                     <td>
                                         @if(!empty($user->status) && $user->status == 'active')
-                                            <button type="button" class="form-group btn btn-danger mb-0"
+                                            <button type="button" class="form-group btn btn-success mb-0"
                                                     onclick="ChangeStatus('{{$user->id}}','inactive')"
-                                                    title="make it inactive">Inactive
+                                                    title="make it inactive">Active
                                             </button>
                                         @else
-                                            <button type="button" class="form-group btn btn-success mb-0"
+                                            <button type="button" class="form-group btn btn-danger mb-0"
                                                     onclick="ChangeStatus('{{$user->id}}','active')"
-                                                    title="make it active">Active
+                                                    title="make it active">Inactive
                                             </button>
                                         @endif
                                     </td>
