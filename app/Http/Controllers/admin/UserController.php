@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\admin;
 
+use App\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -14,7 +15,18 @@ class UserController extends Controller
      */
     public function index()
     {
-        return view('admin.dashboard');
+        try{
+            $userListObj = User::get();
+            if(!$userListObj->isEmpty()){
+                return view('admin.user.index',compact('userListObj'));
+            } else {
+                session()->flash('error', 'User Not Found');
+                return view('admin.user.index');
+            }
+        } catch (\Exception $exception){
+            session()->flash('error', $exception->getMessage());
+            return view('admin.user.index');
+        }
     }
 
     /**
@@ -81,5 +93,37 @@ class UserController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function changeStatus(Request $request){
+        try{
+            $userObj = User::find($request->id);
+            $userObj->status = $request->status;
+            if($userObj->save()){
+                session()->flash('success', 'Status Successfully Change');
+                return 'true';
+            }
+            session()->flash('error', 'Status Change Fail Please Try Again');
+            return 'false';
+        } catch (\Exception $exception){
+            session()->flash('error', $exception->getMessage());
+            return 'false';
+        }
+    }
+
+    public function updateCredit(Request $request){
+        try{
+            $userObj = User::find($request->id);
+            $userObj->credit_score = $userObj->credit_score + $request->credit_score;
+            if ($userObj->save()){
+                session()->flash('success', 'Credit Add Successfully');
+                return redirect()->back();
+            }
+            session()->flash('error', 'Credit Add Fail Please Try Again');
+            return redirect()->back();
+        } catch (\Exception $exception){
+            session()->flash('error', $exception->getMessage());
+            return redirect()->back();
+        }
     }
 }

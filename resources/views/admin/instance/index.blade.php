@@ -13,7 +13,6 @@ Instance Listing
         <div class="card">
             <div class="card-header d-flex align-items-center justify-content-between">
                 <h5 class="mb-0">Instance List</h5>
-                <a href="{{route('user.instance.create')}}" class="btn btn-round btn-primary"><i class="fas fa-plus"></i> Add Instance</a>
             </div>
             <div class="card-body">
                 @include('layouts.imports.messages')
@@ -80,7 +79,7 @@ Instance Listing
         $(document).on('change', '.instStatus', function () {
             var status = $(this).val();
             var instanceId = $(this).data('id');
-            var URL = '{{route('user.instance.change-status')}}';
+            var URL = '{{route('admin.user.instance.change-status')}}';
             $.ajax({
                 type: 'post',
                 url: URL,

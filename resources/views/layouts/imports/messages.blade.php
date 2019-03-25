@@ -25,5 +25,5 @@
 <script type="text/javascript">
     setTimeout(()=>{
         $('.alert').fadeOut();
-    },7000)
+    },5000)
 </script>

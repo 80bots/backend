@@ -10,7 +10,7 @@ $user = Auth::user();
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
-    @yield('title')
+    <title>@yield('title') | AWS SaaS</title>
 
     <link rel="stylesheet" href="{{asset('css/bootstrap.min.css')}}">
     <link rel="stylesheet" href="{{asset('css/datatables.min.css')}}">
@@ -19,6 +19,7 @@ $user = Auth::user();
     <link href="https://fonts.googleapis.com/css?family=Nunito:400,500,600" rel="stylesheet">
     <link rel="stylesheet" href="{{asset('css/style.css')}}">
     <link rel="stylesheet" href="{{asset('css/theme.css')}}">
+    @yield('css')
 </head>
 <body>
 <div class="main-wrapper d-flex align-items-stretch">
@@ -41,6 +42,7 @@ $user = Auth::user();
 <script type="text/javascript" src="{{asset('js/datatables.min.js')}}"></script>
 <script type="text/javascript" src="{{asset('vendors/select2/js/select2.full.min.js')}}"></script>
 <script type="text/javascript" src="{{asset('js/script.js')}}"></script>
+@yield('script')
 
 
 </body>
