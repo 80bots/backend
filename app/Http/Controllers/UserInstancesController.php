@@ -68,12 +68,12 @@ class UserInstancesController extends AwsConnectionController
 
             $groupId = $SecurityGroup['securityGroupId'];
             $groupName = $SecurityGroup['securityGroupName'];
-
+            $instanceIds = [];
             // Instance Create
             $newInstanceResponse = $this->LaunchInstance($keyPairName, $groupName);
             $instanceId = $newInstanceResponse->getPath('Instances')[0]['InstanceId'];
 
-            $instanceIds = [];
+
             array_push($instanceIds, $instanceId);
 
             $waitUntilResponse = $this->waitUntil($instanceIds);
@@ -130,11 +130,11 @@ class UserInstancesController extends AwsConnectionController
 
             if($request->status == 'start'){
                 $instanceObj->status = 'running';
-               $startObj = $this->StartInstance($instanceIds);
-               $instanceDetail = new UserInstancesDetails();
-               $instanceDetail->user_instance_id = $request->id;
-               $instanceDetail->start_time = $currentDate;
-               $instanceDetail->save();
+                $startObj = $this->StartInstance($instanceIds);
+                $instanceDetail = new UserInstancesDetails();
+                $instanceDetail->user_instance_id = $request->id;
+                $instanceDetail->start_time = $currentDate;
+                $instanceDetail->save();
 
             } elseif($request->status == 'stop') {
                 $instanceObj->status = 'stop';
