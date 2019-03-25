@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title')
-
+Instance Listing
 @endsection
 
 @section('css')

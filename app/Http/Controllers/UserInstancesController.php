@@ -142,7 +142,9 @@ class UserInstancesController extends AwsConnectionController
                 $instanceDetail->end_time = $currentDate;
                 $deffTime = UserInstances::deffTime($instanceDetail->start_time, $instanceDetail->end_date);
                 $instanceDetail->total_time = $deffTime;
-                $instanceDetail->save();
+                if($instanceDetail->save()){
+                    $instanceObj->up_time = $instanceObj->up_time + $deffTime;
+                }
             } else {
                 $instanceObj->status = 'terminated';
                 $terminateInstance = $this->TerminateInstance($instanceIds);

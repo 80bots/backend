@@ -22,6 +22,12 @@ Route::get('/user-activation/{id}', 'AppController@UserActivation')->name('user-
 
 Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','admin'], 'namespace' => 'admin'], function(){
     Route::get('dashboard', 'UserController@index')->name('dashboard');
+
+    Route::group(['prefix' => 'user', 'as' => 'user.'], function() {
+        Route::get('/', 'UserController@index')->name('index');
+        Route::post('change-status', 'UserController@changeStatus')->name('change-status');
+        Route::post('update-credit', 'UserController@updateCredit')->name('update-credit');
+    });
 });
 
 Route::group(['prefix' => 'user', 'as' => 'user.', 'middleware' => ['auth', 'user']], function(){

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title')
-    <title>Dashboard | AWS SAAS</title>
+    Dashboard
 @endsection
 
 @section('content')

@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\admin;
 
+use App\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Session;
 
 class UserController extends Controller
 {
@@ -14,7 +16,16 @@ class UserController extends Controller
      */
     public function index()
     {
-        return view('admin.dashboard');
+        try{
+            $userListObj = User::get();
+            if($userListObj){
+                return view('admin.user.index',compact('userListObj'));
+            } else {
+                return view('admin.user.index');
+            }
+        } catch (\Exception $exception){
+            return view('admin.user.index');
+        }
     }
 
     /**
@@ -81,5 +92,37 @@ class UserController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function changeStatus(Request $request){
+        try{
+            $userObj = User::find($request->id);
+            $userObj->status = $request->status;
+            if($userObj->save()){
+                Session::flash('success', 'Status Successfully Change');
+                return 'true';
+            }
+            Session::flash('error', 'Status Change Fail Please Try Again');
+            return 'false';
+        } catch (\Exception $exception){
+            Session::flash('error', $exception->getMessage());
+            return 'false';
+        }
+    }
+
+    public function updateCredit(Request $request){
+        try{
+            $userObj = User::find($request->id);
+            $userObj->credit_score = $userObj->credit_score + $request->credit_score;
+            if ($userObj->save()){
+                Session::flash('success', 'Credit Add Successfully');
+                return redirect()->back();
+            }
+            Session::flash('error', 'Credit Add Fail Please Try Again');
+            return redirect()->back();
+        } catch (\Exception $exception){
+            Session::flash('error', $exception->getMessage());
+            return redirect()->back();
+        }
     }
 }
