@@ -107,7 +107,7 @@ class AwsConnection extends Model
     public static function waitUntil($instanceId){
         $ec2Client = self::AwsConnection();
 
-        $waitResponse = $ec2Client->waitUntil('InstanceRunning', ['InstanceIds' => array($instanceId)]);
+        $waitResponse = $ec2Client->waitUntil('InstanceRunning', ['InstanceIds' => $instanceId]);
         return $waitResponse;
     }
 
