@@ -129,13 +129,14 @@ class UserInstancesController extends AwsConnectionController
             $currentDate = date('Y-m-d H:i:s');
 
             $describeInstancesResponse = $this->DescribeInstances($instanceIds);
-            if(empty($describeInstancesResponse->getPath('Reservations'))){
+            $reservationObj = $describeInstancesResponse->getPath('Reservations');
+            if(empty($reservationObj)){
                 $instanceObj->status = 'terminated';
                 $instanceObj->save();
                 session()->flash('error', 'This instance is not exist');
                 return 'false';
             }
-            $InstStatus = $describeInstancesResponse->getPath('Instances')[0]['State']['Name'];
+            $InstStatus = $reservationObj[0]['Instances'][0]['State']['Name'];
             if($InstStatus == 'terminated'){
                 $instanceObj->status = 'terminated';
                 $instanceObj->save();
