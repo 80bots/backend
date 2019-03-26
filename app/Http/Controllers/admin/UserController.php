@@ -99,6 +99,7 @@ class UserController extends Controller
         try{
             $userObj = User::find($request->id);
             $userObj->status = $request->status;
+            $userObj->verification_token = '';
             if($userObj->save()){
                 session()->flash('success', 'Status Successfully Change');
                 return 'true';

@@ -16,7 +16,7 @@ return [
     |
     */
 
-    'driver' => 'sendmail',
+    'driver' => 'ses',
 
     /*
     |--------------------------------------------------------------------------
@@ -29,7 +29,7 @@ return [
     |
     */
 
-    'host' => 'smtp.gmail.com',
+    'host' => 'email-smtp.us-west-2.amazonaws.com',
 
     /*
     |--------------------------------------------------------------------------
@@ -42,7 +42,7 @@ return [
     |
     */
 
-    'port' => 25,
+    'port' => 587,
 
     /*
     |--------------------------------------------------------------------------
@@ -56,8 +56,8 @@ return [
     */
 
     'from' => [
-        'address' => 'developer.technostacks@gmail.com',
-        'name' => 'technostacks',
+        'address' => '80bots@inforca.com',
+        'name' => '80bots',
     ],
 
     /*
@@ -84,9 +84,8 @@ return [
     |
     */
 
-    'username' => 'developer.technostacks@gmail.com',
-
-    'password' => 'welcome!@#',
+    'username' => 'AKIAIQGIM5HSECC6T56A',
+    'password' => 'BBmpVDUt8NqvEuxaub8/0SE5xZ6A+SDP6otb0wKTqan+',
 
     /*
     |--------------------------------------------------------------------------
