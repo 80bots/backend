@@ -22,7 +22,7 @@ class UserInstancesController extends AwsConnectionController
             if(!$UserInstance->isEmpty()){
                 $instancesId = [];
                 array_push($instancesId,$UserInstance[0]->aws_instance_id);
-                $this->InstanceMonitoring($instancesId);
+//                $this->InstanceMonitoring($instancesId);
                 return view('user.instance.index',compact('UserInstance'));
             }
             session()->flash('error', 'Instance Not Found');
@@ -127,6 +127,21 @@ class UserInstancesController extends AwsConnectionController
             $instanceIds = [];
             array_push($instanceIds, $instanceObj->aws_instance_id);
             $currentDate = date('Y-m-d H:i:s');
+
+            $describeInstancesResponse = $this->DescribeInstances($instanceIds);
+            if(empty($describeInstancesResponse->getPath('Reservations'))){
+                $instanceObj->status = 'terminated';
+                $instanceObj->save();
+                session()->flash('error', 'This instance is not exist');
+                return 'false';
+            }
+            $InstStatus = $describeInstancesResponse->getPath('Instances')[0]['State']['Name'];
+            if($InstStatus == 'terminated'){
+                $instanceObj->status = 'terminated';
+                $instanceObj->save();
+                session()->flash('error', 'This instance is already terminated');
+                return 'false';
+            }
 
             if($request->status == 'start'){
                 $instanceObj->status = 'running';
