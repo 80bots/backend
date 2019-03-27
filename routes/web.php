@@ -33,6 +33,16 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','ad
             Route::post('change-status', 'UserInstancesController@changeStatus')->name('change-status');
         });
     });
+
+    Route::resource('bots','BotsController');
+    Route::group(['prefix' => 'bots', 'as' => 'bots.'], function() {
+        Route::post('change-status', 'BotsController@ChangeStatus')->name('change-status');
+        /*Route::get('/', 'BotsController@index')->name('index');
+        Route::get('create', 'BotsController@create')->name('create');
+        Route::post('store', 'BotsController@store')->name('store');
+        Route::get('{id}/edit', 'BotsController@edit')->name('edit');
+        Route::get('{id}/edit', 'BotsController@edit')->name('edit');*/
+    });
 });
 
 Route::group(['prefix' => 'user', 'as' => 'user.', 'middleware' => ['auth', 'user']], function(){
