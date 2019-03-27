@@ -88,15 +88,24 @@ class AwsConnection extends Model
         return $return;
     }
 
-    public static function AwsLaunchInstance($keyPairName, $securityGroupName){
-        $imageId = env('AWS_IMAGEID','ami-0cd3dfa4e37921605');
-        $instanceType = env('AWS_INSTANCE_TYPE', 't2.micro');
+    public static function AwsLaunchInstance($keyPairName, $securityGroupName, $bots){
+
+        if(!empty($bots)){
+            $imageId = isset($bots->aws_ami_image_id) ? $bots->aws_ami_image_id : env('AWS_IMAGEID','ami-0cd3dfa4e37921605');
+            $instanceType = isset($bots->aws_instance_type) ? $bots->aws_instance_type : env('AWS_INSTANCE_TYPE', 't2.micro');
+            $volumeSize = isset($bots->aws_storage_gb) ? $bots->aws_storage_gb : env('AWS_Volume_Size', '8');
+        } else {
+            $imageId = env('AWS_IMAGEID','ami-0cd3dfa4e37921605');
+            $instanceType = env('AWS_INSTANCE_TYPE', 't2.micro');
+            $volumeSize = env('AWS_Volume_Size', '8');
+        }
         $ec2Client = self::AwsConnection();
 
         $result = $ec2Client->runInstances(array(
             'ImageId'        => $imageId,
             'MinCount'       => 1,
             'MaxCount'       => 1,
+            'VolumeSize'     => $volumeSize ,
             'InstanceType'   => $instanceType,
             'KeyName'        => $keyPairName,
             'SecurityGroups' => array($securityGroupName),

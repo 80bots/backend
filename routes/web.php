@@ -48,9 +48,10 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','ad
 Route::group(['prefix' => 'user', 'as' => 'user.', 'middleware' => ['auth', 'user']], function(){
     Route::get('dashboard', 'UserController@index')->name('dashboard');
 
+    Route::resource('instance','UserInstancesController');
     Route::group(['prefix' => 'instance', 'as' => 'instance.'], function() {
-        Route::get('/', 'UserInstancesController@index')->name('index');
-        Route::get('create', 'UserInstancesController@create')->name('create');
+        /*Route::get('/', 'UserInstancesController@index')->name('index');
+        Route::get('create', 'UserInstancesController@create')->name('create');*/
         Route::post('change-status', 'UserInstancesController@changeStatus')->name('change-status');
     });
 });

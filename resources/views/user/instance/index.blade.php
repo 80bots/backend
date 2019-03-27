@@ -13,7 +13,7 @@ Instance Listing
         <div class="card">
             <div class="card-header d-flex align-items-center justify-content-between">
                 <h5 class="mb-0">Instance List</h5>
-                <a href="{{route('user.instance.create')}}" class="btn btn-round btn-primary"><i class="fas fa-plus"></i> Add Instance</a>
+                <button data-toggle="modal" data-target="#lunch-instance" class="btn btn-round btn-primary"><i class="fas fa-plus"></i> Add Instance</button>
             </div>
             <div class="card-body">
                 @include('layouts.imports.messages')
@@ -65,6 +65,36 @@ Instance Listing
                         </tbody>
                     </table>
                 </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="lunch-instance" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <form id="lunchInstance" action="{{route('user.instance.store')}}" method="post">
+                    @csrf
+                    <div class="modal-header">
+                        <h4 class="modal-title">Lunch Instance</h4>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Bots</label>
+                            <select class="form-control" name="bot_id">
+                                <option value="">Select Bot</option>
+                                @if(isset($botsArr) && !empty($botsArr))
+                                    @foreach($botsArr as $bots)
+                                        <option value="{{$bots->id}}">{{isset($bots->bot_name) ? $bots->bot_name : $bots->aws_ami_name}}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <input type="submit" class="btn btn-success" value="submit">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

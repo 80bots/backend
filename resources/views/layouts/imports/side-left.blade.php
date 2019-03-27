@@ -13,7 +13,6 @@
                 <div id="userInstance" class="collapse in show">
                     <ul class="sidebar-dropdown list-unstyled">
                         <li class="sidebar-item "><a href="{{route('user.instance.index')}}" class="sidebar-link {{ (request()->is('user/instance')) ? 'active' : '' }}">List</a></li>
-                        <li class="sidebar-item "><a href="{{route('user.instance.create')}}" class="sidebar-link {{ (request()->is('user/instance/create')) ? 'active' : '' }}">Create</a></li>
                     </ul>
                 </div>
             </li>
