@@ -77,6 +77,7 @@ class RegisterController extends Controller
         $user->password = bcrypt($data['password']);
         $user->verification_token = str_random();
         $user->role_id = 2;
+        $user->credit_score = 8;
         if($user->save()){
            $sendMail = $user->sendMail($user);
         }
