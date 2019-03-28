@@ -144,7 +144,7 @@ class UserInstancesController extends AwsConnectionController
 
             if(!empty($bots)){
                 $StartUpScriptString = $bots->aws_startup_script;
-                $StartUpScript = array_filter(explode(';',$StartUpScriptString));
+                $StartUpScript = explode(PHP_EOL, $StartUpScriptString);
                 $runScript = $this->RunStartUpScript($StartUpScript);
             }
 
