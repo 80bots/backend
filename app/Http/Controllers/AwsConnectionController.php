@@ -54,8 +54,13 @@ class AwsConnectionController extends AppController
     }
 
     public function InstanceMonitoring($instanceIds){
-        $monitoringRespinse = AwsConnection::InstanceMonitoring($instanceIds);
-        return $monitoringRespinse;
+        $monitoringResponse = AwsConnection::InstanceMonitoring($instanceIds);
+        return $monitoringResponse;
+    }
+
+    public function RunStartUpScript($StartUpScript){
+        $runStartUpScriptResponse = AwsConnection::RunStartUpScript($StartUpScript);
+        return $runStartUpScriptResponse;
     }
 
 }

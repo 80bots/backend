@@ -193,6 +193,23 @@ class AwsConnection extends Model
         }
         return $result;
     }
+
+    public static function RunStartUpScript($StartUpScript)
+    {
+        /*exec('aws configure');*/
+        exec('mkdir -p Shell');
+        chdir('Shell');
+        $returnArr['status'] = [];
+        foreach ($StartUpScript as $script){
+            exec($script, $output, $return);
+            if (!$return) {
+                array_push($returnArr['status'], 'Success');
+            } else {
+                array_push($returnArr['status'], 'Fail');
+            }
+        }
+        return $returnArr;
+    }
 }
 //"PublicDnsName" => "ec2-18-222-190-135.us-east-2.compute.amazonaws.com"
 //            "PublicIpAddress" => "18.222.190.135"

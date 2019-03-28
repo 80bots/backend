@@ -8,3 +8,4 @@
 /composer.lock
 *ssh_keys/
 public/html
+/public/Shell/

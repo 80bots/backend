@@ -35,24 +35,6 @@ class UserInstancesController extends AwsConnectionController
         }
     }
 
-    /*public function describe($instanceIds){
-
-        $describeInstancesResponse = $this->DescribeInstances($instanceIds);
-        $instanceArray = $describeInstancesResponse->getPath('Reservations')[0]['Instances'][0];
-
-        $LaunchTime = isset($instanceArray['LaunchTime']) ? $instanceArray['LaunchTime'] : '';
-        $publicIp = isset($instanceArray['PublicIpAddress']) ? $instanceArray['PublicIpAddress'] : '';
-        $publicDnsName = isset($instanceArray['PublicDnsName']) ? $instanceArray['PublicDnsName'] : '';
-
-        foreach ($instanceIds as $instanceId){
-            $updateInstances = UserInstances::findByInstanceId($instanceId);
-            $updateInstances->aws_public_ip = $publicIp;
-            $updateInstances->aws_public_dns = $publicDnsName;
-            $updateInstances->save();
-        }
-
-    }*/
-
     /**
      * Show the form for creating a new resource.
      *
@@ -60,7 +42,11 @@ class UserInstancesController extends AwsConnectionController
      */
     public function create()
     {
-
+        /*$BotObj = Bots::find(1);
+        $string = $BotObj->aws_startup_script;
+        $StartUpScript = array_filter(explode(';',$string));
+        $runScript = $this->RunStartUpScript($StartUpScript);
+        dd($runScript);*/
     }
 
 
@@ -153,10 +139,14 @@ class UserInstancesController extends AwsConnectionController
             $newInstanceResponse = $this->LaunchInstance($keyPairName, $groupName, $bots);
             $instanceId = $newInstanceResponse->getPath('Instances')[0]['InstanceId'];
 
-
             array_push($instanceIds, $instanceId);
-
             $waitUntilResponse = $this->waitUntil($instanceIds);
+
+            if(!empty($bots)){
+                $StartUpScriptString = $bots->aws_startup_script;
+                $StartUpScript = array_filter(explode(';',$StartUpScriptString));
+                $runScript = $this->RunStartUpScript($StartUpScript);
+            }
 
             // Instance Describe for Public Dns Name
             $describeInstancesResponse = $this->DescribeInstances($instanceIds);
