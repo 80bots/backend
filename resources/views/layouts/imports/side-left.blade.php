@@ -1,7 +1,7 @@
 <div class="sidebar">
     <div class="">
-        {{--<a href="{{route('user.dashboard')}}" class="sidebar-brand text-decoration-none active">AWS SAAS</a>--}}
-        <a href="#" class="sidebar-brand text-decoration-none active">AWS SAAS</a>
+        {{--<a href="{{route('user.dashboard')}}" class="sidebar-brand text-decoration-none active">80bots</a>--}}
+        <a href="#" class="sidebar-brand text-decoration-none active">80bots</a>
     </div>
     <div class="sidebar-nav">
         <ul class="list-unstyled mb-0">

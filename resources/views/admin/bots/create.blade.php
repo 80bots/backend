@@ -25,7 +25,7 @@
                 </div>
                 <div class="col-md-6 col-sm-12">
                     <div class="form-group">
-                        <label for="">AMI Image Id*</label>
+                        <label for="">AMI Image ID*</label>
                         <input type="text" name="aws_ami_image_id" class="form-control"/>
                     </div>
                 </div>
@@ -43,7 +43,7 @@
                 </div>
                 <div class="col-md-6 col-sm-12">
                     <div class="form-group">
-                        <label for="">StartUp Script*</label>
+                        <label for="">Start Up Script*</label>
                         <textarea name="aws_startup_script" class="form-control"></textarea>
                     </div>
                 </div>

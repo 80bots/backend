@@ -12,7 +12,7 @@ $user = Auth::user();
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@yield('title') | AWS SaaS</title>
+    <title>@yield('title') | 80bots</title>
 
     <link rel="stylesheet" href="{{asset('css/bootstrap.min.css')}}">
     <link rel="stylesheet" href="{{asset('css/datatables.min.css')}}">

@@ -5,7 +5,7 @@
 @endsection
 
 @section('title')
-    <title>Login | AWS SAAS</title>
+    <title>Login | 80bots</title>
 @endsection
 
 @section('content')
@@ -15,7 +15,7 @@
         <div class="p-4 login-box mb-3 d-flex align-items-center">
             <form method="POST" action="{{ route('login') }}" id="frmSignin" class="flex-grow-1">
                 @csrf
-                <h2 class="text-primary text-center">AWS SAAS</h2>
+                <h2 class="text-primary text-center">80bots</h2>
                 <h4 class="text-center">Sign In</h4>
                 <div class="form-group">
                     <label for="email">Username / E-mail</label>
