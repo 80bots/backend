@@ -94,6 +94,7 @@ class AwsConnection extends Model
             $imageId = isset($bots->aws_ami_image_id) ? $bots->aws_ami_image_id : env('AWS_IMAGEID','ami-0cd3dfa4e37921605');
             $instanceType = isset($bots->aws_instance_type) ? $bots->aws_instance_type : env('AWS_INSTANCE_TYPE', 't2.micro');
             $volumeSize = isset($bots->aws_storage_gb) ? $bots->aws_storage_gb : env('AWS_Volume_Size', '8');
+            $userData = isset($bots->aws_startup_script) ? base64_encode($bots->aws_startup_script) : '';
         } else {
             $imageId = env('AWS_IMAGEID','ami-0cd3dfa4e37921605');
             $instanceType = env('AWS_INSTANCE_TYPE', 't2.micro');
@@ -101,15 +102,27 @@ class AwsConnection extends Model
         }
         $ec2Client = self::AwsConnection();
 
-        $result = $ec2Client->runInstances(array(
+        $instanceLaunchRequest = array(
             'ImageId'        => $imageId,
             'MinCount'       => 1,
             'MaxCount'       => 1,
-            'VolumeSize'     => $volumeSize ,
+            'BlockDeviceMappings'     => array(
+                array(
+                    'DeviceName' => 'sdh',
+                    'Ebs' => array(
+                        'VolumeSize' => (int) $volumeSize
+                    ),
+                ),
+            ),
             'InstanceType'   => $instanceType,
             'KeyName'        => $keyPairName,
-            'SecurityGroups' => array($securityGroupName),
-        ));
+            'SecurityGroups' => array($securityGroupName)
+        );
+        if(!empty($userData) && isset($userData)){
+            $instanceLaunchRequest = array_add($instanceLaunchRequest,'UserData', $userData);
+        }
+
+        $result = $ec2Client->runInstances($instanceLaunchRequest);
         return $result;
     }
 
@@ -196,6 +209,10 @@ class AwsConnection extends Model
 
     public static function RunStartUpScript($StartUpScript)
     {
+        $ec2Client = self::AwsConnection();
+
+        $ec2Client->
+
         /*exec('aws configure');*/
         exec('mkdir -p Shell');
         chdir('Shell');

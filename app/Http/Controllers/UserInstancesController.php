@@ -142,11 +142,11 @@ class UserInstancesController extends AwsConnectionController
             array_push($instanceIds, $instanceId);
             $waitUntilResponse = $this->waitUntil($instanceIds);
 
-            if(!empty($bots)){
+            /*if(!empty($bots)){
                 $StartUpScriptString = $bots->aws_startup_script;
                 $StartUpScript = explode(PHP_EOL, $StartUpScriptString);
                 $runScript = $this->RunStartUpScript($StartUpScript);
-            }
+            }*/
 
             // Instance Describe for Public Dns Name
             $describeInstancesResponse = $this->DescribeInstances($instanceIds);
