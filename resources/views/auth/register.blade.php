@@ -16,7 +16,7 @@
                 @csrf
                 <h2 class="text-primary text-center">80bots</h2>
                 <h4 class="text-center">Sign Up</h4>
-                <div class="form-group">
+                {{--<div class="form-group">
                     <label for="name">Username</label>
                     <input id="name" type="text" class="form-control{{ $errors->has('name') ? ' is-invalid' : '' }}"
                            name="name" value="{{ old('name') }}" required autofocus>
@@ -25,7 +25,7 @@
                             <strong>{{ $errors->first('name') }}</strong>
                         </span>
                     @endif
-                </div>
+                </div>--}}
                 <div class="form-group">
                     <label for="">Email</label>
                     <input id="email" type="email" class="form-control{{ $errors->has('email') ? ' is-invalid' : '' }}"
