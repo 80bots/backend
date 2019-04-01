@@ -4,12 +4,14 @@ namespace App;
 
 use DateTime;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class UserInstances extends Model
 {
     protected $hidden = [
     ];
 
+    use SoftDeletes;
 
     public static function findByUserId($user_id) {
         return self::where('user_id' , $user_id);
