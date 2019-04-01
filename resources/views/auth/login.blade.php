@@ -46,12 +46,13 @@
                         Password?</a>
                 </div>
             </form>
-            <form id="frmForgotPwd" class="flex-grow-1" action="javascript:void(0)" style="display: none;">
+            <form id="frmForgotPwd" class="flex-grow-1" action="{{route('password.email')}}" method="post" style="display: none;">
+                @csrf
                 <h4 class="text-primary text-center">Forgot password?</h4>
                 <p class="text-center">Reset password link will be sent on email id</p>
                 <div class="form-group">
                     <label for="">Email</label>
-                    <input type="email" class="form-control"/>
+                    <input type="email" name="email" class="form-control"/>
                 </div>
                 <button type="submit" class="btn btn-primary btn-block text-uppercase mb-3">Send reset link</button>
                 <div>
