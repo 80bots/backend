@@ -40,6 +40,10 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    public function userInstances(){
+        return $this->hasMany('App\UserInstances');
+    }
+
     public function sendMail($user){
         try {
             Mail::send('mail.register', ['user' => $user], function($mail) use ($user) {

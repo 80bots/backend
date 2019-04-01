@@ -11,9 +11,10 @@
                 </span>
         <div class="nav-right">
             <div class="dropdown">
-                    <span class="align-items-center d-flex dropdown-toggle" id="dropdownMenuButton"
-                          data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <i class="fa fa-user-circle mr-2"></i> {{!empty($user->name) ? $user->name : ''}}</span>
+                <span class="align-items-center d-flex dropdown-toggle" id="dropdownMenuButton"
+                      data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fa fa-user-circle mr-2"></i> {{!empty($user->name) ? $user->name : ''}}
+                </span>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                     <a class="dropdown-item d-flex align-items-center justify-content-between" href="{{ route('logout') }}"
                        onclick="event.preventDefault();
@@ -31,6 +32,15 @@
                     <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                         @csrf
                     </form>
+                    @if($role == 'User')
+                        <a href="{{route('user.profile',['id' => $user->id])}}" class="dropdown-item d-flex align-items-center justify-content-between">
+                            Profile <i class="fa fa-user-circle mr-2"></i>
+                        </a>
+                    @endif
+
+                </div>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <h1>Hello</h1>
                 </div>
             </div>
         </div>

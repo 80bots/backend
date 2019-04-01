@@ -47,6 +47,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','ad
 
 Route::group(['prefix' => 'user', 'as' => 'user.', 'middleware' => ['auth', 'user']], function(){
     Route::get('dashboard', 'UserController@index')->name('dashboard');
+    Route::get('profile/{id}', 'UserController@show')->name('profile');
 
     Route::resource('instance','UserInstancesController');
     Route::group(['prefix' => 'instance', 'as' => 'instance.'], function() {

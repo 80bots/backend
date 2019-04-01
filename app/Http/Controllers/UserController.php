@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\User;
 use Illuminate\Http\Request;
 
 class UserController extends AppController
@@ -45,7 +46,10 @@ class UserController extends AppController
      */
     public function show($id)
     {
-        //
+        $user = User::find($id);
+        $used_credit = $user->userInstances->sum('used_credit');
+
+        return view('user.profile', compact('user', 'used_credit'));
     }
 
     /**
