@@ -37,7 +37,13 @@ class UserInstancesController extends AwsConnectionController
 
 
     public function BotList(){
-        return view('user.bots.index');
+        try{
+            $bots = Bots::get();
+            return view('user.bots.index',compact('bots'));
+        } catch (\Exception $exception){
+            session()->flash('error', $exception->getMessage());
+            return view('user.bots.index');
+        }
     }
 
     /**
