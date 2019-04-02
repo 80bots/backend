@@ -21,6 +21,19 @@
                 <div class="row">
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
+                            <label for="">Platform*</label>
+                            <select name="Platform" class="form-control">
+                                <option value="">Select Platform</option>
+                                @if(!$platforms->isEmpty())
+                                    @foreach($platforms as $platform)
+                                        <option value="{{$platform->id}}" @if($bots->platform_id == $platform->id) selected @endif>{{ !empty($platform->name) ? $platform->name : '' }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-sm-12">
+                        <div class="form-group">
                             <label for="">Bot Name*</label>
                             <input type="text" name="bot_name" value="{{isset($bots->bot_name) ? $bots->bot_name : ''}}" class="form-control"/>
                         </div>
@@ -45,14 +58,20 @@
                     </div>
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
+                            <label for="">Storage GB*</label>
+                            <input type="text" name="aws_storage_gb" value="{{isset($bots->aws_storage_gb) ? $bots->aws_storage_gb : ''}}" class="form-control"/>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-sm-12">
+                        <div class="form-group">
                             <label for="">StartUp Script*</label>
                             <textarea name="aws_startup_script" class="form-control">{{isset($bots->aws_startup_script)?$bots->aws_startup_script:''}}</textarea>
                         </div>
                     </div>
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label for="">Storage GB*</label>
-                            <input type="text" name="aws_storage_gb" value="{{isset($bots->aws_storage_gb) ? $bots->aws_storage_gb : ''}}" class="form-control"/>
+                            <label for="">Bot Description*</label>
+                            <textarea name="description" class="form-control">{{isset($bots->description)?$bots->description:''}}</textarea>
                         </div>
                     </div>
                 </div>

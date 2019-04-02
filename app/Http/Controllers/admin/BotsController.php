@@ -4,6 +4,7 @@ namespace App\Http\Controllers\admin;
 
 use App\Bots;
 use App\Http\Controllers\AppController;
+use App\Platforms;
 use Illuminate\Http\Request;
 
 class BotsController extends AppController
@@ -35,7 +36,13 @@ class BotsController extends AppController
      */
     public function create()
     {
-        return view('admin.bots.create');
+        try{
+            $platforms = Platforms::get();
+            return view('admin.bots.create',compact('platforms'));
+        } catch (\Exception $exception){
+            session()->flash('error', $exception->getMessage());
+            return view('admin.bots.create');
+        }
     }
 
     /**
@@ -48,7 +55,9 @@ class BotsController extends AppController
     {
         try{
             $botObj = new Bots();
+            $botObj->platform_id = isset($request->Platform) ? $request->Platform : '';
             $botObj->bot_name = isset($request->bot_name) ? $request->bot_name : '';
+            $botObj->description = isset($request->description) ? $request->description : '';
             $botObj->aws_ami_image_id = isset($request->aws_ami_image_id) ? $request->aws_ami_image_id : '';
             $botObj->aws_ami_name = isset($request->aws_ami_name) ? $request->aws_ami_name : '';
             $botObj->aws_instance_type = isset($request->aws_instance_type) ? $request->aws_instance_type : '';
@@ -96,8 +105,9 @@ class BotsController extends AppController
     {
         try{
             $bots = Bots::find($id);
+            $platforms = Platforms::get();
             if(isset($bots) && !empty($bots)){
-                return view('admin.bots.edit',compact('bots', 'id'));
+                return view('admin.bots.edit',compact('platforms','bots', 'id'));
             }
             session()->flash('error', 'Please Try Again');
             return redirect()->back();
@@ -118,7 +128,9 @@ class BotsController extends AppController
     {
         try{
             $botObj = Bots::find($id);
+            $botObj->platform_id = isset($request->Platform) ? $request->Platform : '';
             $botObj->bot_name = isset($request->bot_name) ? $request->bot_name : '';
+            $botObj->description = isset($request->description) ? $request->description : '';
             $botObj->aws_ami_image_id = isset($request->aws_ami_image_id) ? $request->aws_ami_image_id : '';
             $botObj->aws_ami_name = isset($request->aws_ami_name) ? $request->aws_ami_name : '';
             $botObj->aws_instance_type = isset($request->aws_instance_type) ? $request->aws_instance_type : '';

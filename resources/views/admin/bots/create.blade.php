@@ -15,8 +15,24 @@
         <div class="card-header d-flex align-items-center justify-content-between">
             <h5 class="mb-0">Add Bot</h5>
         </div>
+        @if(!$platforms->isEmpty())
+
+        @endif
         <div class="card-body">
             <div class="row">
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label for="">Platform*</label>
+                        <select name="Platform" class="form-control">
+                            <option value="">Select Platform</option>
+                            @if(!$platforms->isEmpty())
+                                @foreach($platforms as $platform)
+                                    <option value="{{$platform->id}}">{{ !empty($platform->name) ? $platform->name : '' }}</option>
+                                @endforeach
+                            @endif
+                        </select>
+                    </div>
+                </div>
                 <div class="col-md-6 col-sm-12">
                     <div class="form-group">
                         <label for="">Bot Name*</label>
@@ -43,14 +59,20 @@
                 </div>
                 <div class="col-md-6 col-sm-12">
                     <div class="form-group">
+                        <label for="">Storage GB*</label>
+                        <input type="text" name="aws_storage_gb" class="form-control"/>
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
                         <label for="">Start Up Script*</label>
                         <textarea name="aws_startup_script" class="form-control"></textarea>
                     </div>
                 </div>
                 <div class="col-md-6 col-sm-12">
                     <div class="form-group">
-                        <label for="">Storage GB*</label>
-                        <input type="text" name="aws_storage_gb" class="form-control"/>
+                        <label for="">Bot Description*</label>
+                        <textarea name="description" class="form-control"></textarea>
                     </div>
                 </div>
             </div>
@@ -67,6 +89,12 @@
     <script>
         $("#bot-create").validate({
             rules: {
+                platform: {
+                    required: true
+                },
+                description: {
+                    required: true
+                },
                 bot_name: {
                     required: true
                 },
