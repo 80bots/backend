@@ -8,6 +8,14 @@
     border-color: #0088cc !important;
 }
 
+.bg-primary {
+    background-color: hsl(200, 100%, 40%) !important;
+}
+
+.bg-purple {
+    background-color: #6f42c1;
+}
+
 /* Button style */
 
 .btn {

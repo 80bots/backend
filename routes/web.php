@@ -49,6 +49,7 @@ Route::group(['prefix' => 'user', 'as' => 'user.', 'middleware' => ['auth', 'use
     Route::get('dashboard', 'UserController@index')->name('dashboard');
     Route::get('profile/{id}', 'UserController@show')->name('profile');
     Route::get('cal-used-credit', 'AppController@CalUsedCredit')->name('cal-used-credit');
+    Route::get('bots-list', 'UserInstancesController@BotList')->name('bots.list');
 
     Route::resource('instance','UserInstancesController');
     Route::group(['prefix' => 'instance', 'as' => 'instance.'], function() {

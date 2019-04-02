@@ -35,6 +35,11 @@ class UserInstancesController extends AwsConnectionController
         }
     }
 
+
+    public function BotList(){
+        return view('user.bots.index');
+    }
+
     /**
      * Show the form for creating a new resource.
      *
