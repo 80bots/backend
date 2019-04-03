@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Bots;
+use App\Platforms;
 use App\UserInstances;
 use App\UserInstancesDetails;
+use function GuzzleHttp\Promise\all;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -38,8 +40,18 @@ class UserInstancesController extends AwsConnectionController
 
     public function BotList(){
         try{
-            $bots = Bots::get();
-            return view('user.bots.index',compact('bots'));
+            $platforms = Platforms::findWithBots()->get();
+            return view('user.bots.index',compact('platforms'));
+        } catch (\Exception $exception){
+            session()->flash('error', $exception->getMessage());
+            return view('user.bots.index');
+        }
+    }
+
+    public function BotAllList($id){
+        try{
+            $platform = Platforms::findBotsWithPlatformId($id)->first();
+            return view('user.bots.list',compact('platform'));
         } catch (\Exception $exception){
             session()->flash('error', $exception->getMessage());
             return view('user.bots.index');

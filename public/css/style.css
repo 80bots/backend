@@ -335,6 +335,14 @@ body {
 
 /* Body content style END */
 
+.font-size-16 {
+    font-size: 16px;
+}
+
+.font-size-18 {
+    font-size: 18px;
+}
+
 @media (max-width: 992px) {
     .body-content {
         overflow-x: hidden;
