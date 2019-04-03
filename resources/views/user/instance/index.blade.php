@@ -12,8 +12,8 @@ Instance Listing
     <div class="wrapper">
         <div class="card">
             <div class="card-header d-flex align-items-center justify-content-between">
-                <h5 class="mb-0">Instance List</h5>
-                <button data-toggle="modal" data-target="#lunch-instance" class="btn btn-round btn-primary"><i class="fas fa-plus"></i> Add Instance</button>
+                <h5 class="mb-0">Running Bots</h5>
+                <button data-toggle="modal" data-target="#lunch-instance" class="btn btn-round btn-primary"><i class="fas fa-plus"></i> Launch Bot</button>
             </div>
             <div class="card-body">
                 @include('layouts.imports.messages')
@@ -45,18 +45,18 @@ Instance Listing
                                             @if(!empty($instance->status) && $instance->status == 'running')
                                                 <option value="running">Running</option>
                                                 <option value="stop">Stop</option>
-                                                <option value="terminated">Terminate</option>
+                                                <option value="terminated">Terminated</option>
                                             @elseif(!empty($instance->status) && $instance->status == 'stop')
                                                 <option value="stop">Stop</option>
                                                 <option value="start">Start</option>
-                                                <option value="terminated">Terminate</option>
+                                                <option value="terminated">Terminated</option>
                                             @else
-                                                <option value="terminated">Terminate</option>
+                                                <option value="terminated">Terminated</option>
                                             @endif
                                         </select>
                                     </td>
                                     <td>{{!empty($instance->created_at) ? date('Y-m-d', strtotime($instance->created_at)) : ''}}</td>
-                                    <td><a href="{{!empty($instance->aws_pem_file_path) ? $instance->aws_pem_file_path : 'javascript:void(0)'}}" title="Download pem file" download>
+                                    <td><a href="{{!empty($instance->aws_pem_file_path) ? $instance->aws_pem_file_path : 'javascript:void(0)'}}" title="Download PEM file" download>
                                             <i class="fa fa-download"></i>
                                         </a></td>
                                 </tr>
@@ -74,7 +74,7 @@ Instance Listing
                 <form id="lunchInstance" action="{{route('user.instance.store')}}" method="post">
                     @csrf
                     <div class="modal-header">
-                        <h4 class="modal-title">Lunch Instance</h4>
+                        <h4 class="modal-title">Launch Bot</h4>
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                     </div>
                     <div class="modal-body">
