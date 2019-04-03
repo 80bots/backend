@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\admin;
 
 use App\Bots;
+use App\BotTags;
 use App\Http\Controllers\AppController;
 use App\Platforms;
+use App\Tags;
 use Illuminate\Http\Request;
 
 class BotsController extends AppController
@@ -53,6 +55,7 @@ class BotsController extends AppController
      */
     public function store(Request $request)
     {
+
         try{
             $botObj = new Bots();
             $botObj->platform_id = isset($request->Platform) ? $request->Platform : '';
@@ -64,6 +67,22 @@ class BotsController extends AppController
             $botObj->aws_startup_script = isset($request->aws_startup_script) ? $request->aws_startup_script : '';
             $botObj->aws_storage_gb = isset($request->aws_storage_gb) ? $request->aws_storage_gb : '';
             if($botObj->save()){
+                if(!empty($request->tags) && isset($request->tags)){
+                    $tagString = rtrim($request->tags,',');
+                    $tags = explode(',', $tagString);
+                    foreach ($tags as $tag){
+                        $tagObj = Tags::findByName($tag);
+                        if(!isset($tagObj) && empty($tagObj)){
+                            $tagObj = new Tags();
+                            $tagObj->name = $tag;
+                            $tagObj->save();
+                        }
+                        $botTagsObj = New BotTags();
+                        $botTagsObj->bots_id = $botObj->id;
+                        $botTagsObj->tags_id = $tagObj->id;
+                        $botTagsObj->save();
+                    }
+                }
                 return redirect(route('admin.bots.index'))->with('success', 'Bot Added Successfully');
             }
             session()->flash('error', 'Bot Can not Added Successfully');
@@ -105,9 +124,16 @@ class BotsController extends AppController
     {
         try{
             $bots = Bots::find($id);
+            $tagsArray = [];
+            if(isset($bots->botTags) && !empty($bots->botTags)){
+                foreach ($bots->botTags as $tag){
+                    array_push($tagsArray, $tag->tags->name);
+                }
+            }
+            $tags = implode(',',$tagsArray);
             $platforms = Platforms::get();
             if(isset($bots) && !empty($bots)){
-                return view('admin.bots.edit',compact('platforms','bots', 'id'));
+                return view('admin.bots.edit',compact('platforms','bots', 'id', 'tags'));
             }
             session()->flash('error', 'Please Try Again');
             return redirect()->back();
@@ -137,6 +163,23 @@ class BotsController extends AppController
             $botObj->aws_startup_script = isset($request->aws_startup_script) ? $request->aws_startup_script : '';
             $botObj->aws_storage_gb = isset($request->aws_storage_gb) ? $request->aws_storage_gb : '';
             if($botObj->save()){
+                if(!empty($request->tags) && isset($request->tags)){
+                    BotTags::deleteByBotId($id);
+                    $tagString = rtrim($request->tags,',');
+                    $tags = explode(',', $tagString);
+                    foreach ($tags as $tag){
+                        $tagObj = Tags::findByName($tag);
+                        if(!isset($tagObj) && empty($tagObj)){
+                            $tagObj = new Tags();
+                            $tagObj->name = $tag;
+                            $tagObj->save();
+                        }
+                        $botTagsObj = New BotTags();
+                        $botTagsObj->bots_id = $botObj->id;
+                        $botTagsObj->tags_id = $tagObj->id;
+                        $botTagsObj->save();
+                    }
+                }
                 return redirect(route('admin.bots.index'))->with('success', 'Bot Update Successfully');
             }
             session()->flash('error', 'Bot Can not Updated Successfully');

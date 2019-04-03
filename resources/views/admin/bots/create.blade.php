@@ -75,6 +75,12 @@
                         <textarea name="description" class="form-control"></textarea>
                     </div>
                 </div>
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label for="">Tags*</label>
+                        <textarea name="tags" class="form-control" placeholder="Comma(,) consider as new Tags"></textarea>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="card-footer text-right">

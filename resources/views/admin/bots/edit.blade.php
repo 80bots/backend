@@ -74,6 +74,12 @@
                             <textarea name="description" class="form-control">{{isset($bots->description)?$bots->description:''}}</textarea>
                         </div>
                     </div>
+                    <div class="col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label for="">Tags*</label>
+                            <textarea name="tags" class="form-control" placeholder="Comma(,) consider as new Tags">{{isset($tags)?$tags:''}}</textarea>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="card-footer text-right">
