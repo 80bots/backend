@@ -17,8 +17,8 @@ class CreateUserInstancesDetailsTable extends Migration
         Schema::create('user_instances_details', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('user_instance_id');
-            $table->time('start_time')->nullable();
-            $table->time('end_time')->nullable();
+            $table->timestamp('start_time')->nullable();
+            $table->timestamp('end_time')->nullable();
             $table->double('total_time')->default(0);
             $table->enum('status', ['active','inactive'])->default('active');
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));

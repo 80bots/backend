@@ -20,34 +20,49 @@ class AppController extends Controller
         $this->credit = Notifications::CalCredit();
     }
 
-    public function CalUsedCredit(){
+    public function CalUsedCredit()
+    {
+            $user = Auth::user();
+            $userInstances = $user->userInstances;
 
-        $user = Auth::user();
-        $userInstances = $user->userInstances;
-        $instancesIds = [];
-        foreach ($userInstances as $instance){
-            if($instance->status == 'running'){
-                array_push($instancesIds, $instance->aws_instance_id);
-            }
-        }
-        if(!empty($instancesIds)){
-            $describeInstance = AwsConnection::DescribeInstances($instancesIds);
-            $reservations = $describeInstance->getPath('Reservations');
-            foreach ($reservations as $reserved){
-                dd($reserved);
-                $instanceArray = $reserved['Instances'][0];
-                $inspectionId = $instanceArray['InstanceId'];
-                $status = $instanceArray['State']['Name'];
-                if($status == 'running'){
-                    $userInstance = UserInstances::findByInstanceId($inspectionId)->first();
-                    $currentDate = date('Y-m-d H:i:s');
-//                    $userInstance->up_time = $userInstance->up_time +
+            if(!empty($userInstances)){
+                foreach ($userInstances as $instance){
+                    if($instance->status == 'running'){
+                        $instancesIds = [];
+                        array_push($instancesIds, $instance->aws_instance_id);
+                        try{
+                            $describeInstance = AwsConnection::DescribeInstances($instancesIds);
+                            $reservationObj = $describeInstance->getPath('Reservations');
+                            if(empty($reservationObj)){
+                                $instance->status = 'terminated';
+                                $instance->save();
+                                Log::debug('instance id '.$instance->aws_instance_id. ' already terminated');
+                            }
+
+                        } catch (\Exception $exception){
+                            $instance->status = 'terminated';
+                            $instance->save();
+                            Log::debug('instance id '.$instance->aws_instance_id. ' terminated because not found');
+                        }
+                    }
                 }
+
+                $reservations = $describeInstance->getPath('Reservations');
+                foreach ($reservations as $reserved){
+                    dd($reserved);
+                    $instanceArray = $reserved['Instances'][0];
+                    $inspectionId = $instanceArray['InstanceId'];
+                    $status = $instanceArray['State']['Name'];
+                    if($status == 'running'){
+                        $userInstance = UserInstances::findByInstanceId($inspectionId)->first();
+                        $currentDate = date('Y-m-d H:i:s');
+        //                    $userInstance->up_time = $userInstance->up_time +
+                    }
+                }
+
             }
+            Log::debug('cal used credit scheduler');
 
-        }
-
-        Log::debug('cal used credit scheduler');
     }
 
     public function UserActivation($id){
