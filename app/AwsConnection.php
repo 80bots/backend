@@ -5,7 +5,7 @@ namespace App;
 use Aws\Ec2\Ec2Client;
 use Illuminate\Database\Eloquent\Model;
 
-class AwsConnection extends Model
+class AwsConnection extends BaseModel
 {
     public static function AwsConnection(){
         $ec2Client = new Ec2Client([

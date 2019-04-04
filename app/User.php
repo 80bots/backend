@@ -41,6 +41,11 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    public static function findUserInstances()
+    {
+        return self::with('userInstances')->whereHas('userInstances')->get();
+    }
+
     public function userInstances(){
         return $this->hasMany('App\UserInstances');
     }
