@@ -104,6 +104,22 @@ class UserInstancesController extends AwsConnectionController
             array_push($instanceIds, $instanceObj->aws_instance_id);
             $currentDate = date('Y-m-d H:i:s');
 
+            $describeInstancesResponse = $this->DescribeInstances($instanceIds);
+            $reservationObj = $describeInstancesResponse->getPath('Reservations');
+            if(empty($reservationObj)){
+                $instanceObj->status = 'terminated';
+                $instanceObj->save();
+                session()->flash('error', 'This instance is not exist');
+                return 'false';
+            }
+            $InstStatus = $reservationObj[0]['Instances'][0]['State']['Name'];
+            if($InstStatus == 'terminated'){
+                $instanceObj->status = 'terminated';
+                $instanceObj->save();
+                session()->flash('error', 'This instance is already terminated');
+                return 'false';
+            }
+
             if($request->status == 'start'){
                 $instanceObj->status = 'running';
                 $startObj = $this->StartInstance($instanceIds);
