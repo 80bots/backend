@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    'name' => env('APP_NAME', '80bots'),
 
     /*
     |--------------------------------------------------------------------------
@@ -123,6 +123,9 @@ return [
 
     'cipher' => 'AES-256-CBC',
 
+    'up_time' => env('UP_TIME_MINUTES', '60'),
+
+    'credit' => env('CRADIT_UP_TIME', '1'),
     /*
     |--------------------------------------------------------------------------
     | Autoloaded Service Providers

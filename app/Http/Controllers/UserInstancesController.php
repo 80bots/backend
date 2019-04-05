@@ -118,6 +118,7 @@ class UserInstancesController extends AwsConnectionController
                         $upTime = $diffTime + $tempUpTime;
                         $instanceObj->temp_up_time = $upTime;
                         $instanceObj->up_time = $upTime;
+                        $instanceObj->used_credit = $this->CalUsedCredit($upTime);
                     }
                 }
             } else {

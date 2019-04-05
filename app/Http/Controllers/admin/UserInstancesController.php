@@ -135,7 +135,14 @@ class UserInstancesController extends AwsConnectionController
                 $diffTime = $this->DiffTime($instanceDetail->start_time, $instanceDetail->end_date);
                 $instanceDetail->total_time = $diffTime;
                 if($instanceDetail->save()){
-                    $instanceObj->up_time = $instanceObj->up_time + $diffTime;
+                    if($diffTime > $instanceObj->cron_up_time){
+                        $instanceObj->cron_up_time = 0;
+                        $tempUpTime = !empty($instanceObj->temp_up_time) ? $instanceObj->temp_up_time: 0;
+                        $upTime = $diffTime + $tempUpTime;
+                        $instanceObj->temp_up_time = $upTime;
+                        $instanceObj->up_time = $upTime;
+                        $instanceObj->used_credit = $this->CalUsedCredit($upTime);
+                    }
                 }
             } else {
                 $instanceObj->status = 'terminated';
