@@ -91,7 +91,7 @@ class AppController extends Controller
                     array_push($usedCreditArray, $usedCredit);
                 }
                 $totalUsedCredit = array_sum($usedCreditArray);
-                if (empty($UserObj->temp_credit_score) && $UserObj->temp_credit_score == 0) {
+                if (empty($UserObj->temp_credit_score) || $UserObj->temp_credit_score == 0) {
                     $UserObj->temp_credit_score = $UserObj->credit_score;
                 }
                 $temp_credit = $UserObj->temp_credit_score;
