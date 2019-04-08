@@ -95,8 +95,14 @@ class AppController extends Controller
                     $UserObj->temp_credit_score = $UserObj->credit_score;
                 }
                 $temp_credit = $UserObj->temp_credit_score;
-                $UserObj->credit_score = (float)$temp_credit - (float)$totalUsedCredit;
+                $creditScore = (float)$temp_credit - (float)$totalUsedCredit;
+                $UserObj->credit_score = $creditScore;
                 $UserObj->save();
+                /*if($UserObj->save()){
+                    if($creditScore <= 1){
+                        $this->SendEmailNotification($UserObj);
+                    }
+                }*/
                 Log::info('credit Score of email: ' . $UserObj->email . ' is ' . $UserObj->credit_score);
             }
         }
@@ -119,4 +125,13 @@ class AppController extends Controller
             return redirect(route('login'))->with('error', 'Unauthorized');
         }
     }
+
+    /*public function SendEmailNotification($UserObj){
+        $UserInstances = UserInstances::findRunningInstanceByUserId($UserObj->id);
+        if (!empty($UserInstances)) {
+            foreach ($UserInstances as $instance) {
+
+            }
+        }
+    }*/
 }

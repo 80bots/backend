@@ -22,6 +22,11 @@ class UserInstances extends BaseModel
         return self::where('aws_instance_id', $instanceId);
     }
 
+    public static function findRunningInstanceByUserId($id)
+    {
+        return self::where('status', 'running')->where('user_id', $id)->get();
+    }
+
     public function userInstanceDetails()
     {
         return $this->hasMany('App\UserInstancesDetails');
