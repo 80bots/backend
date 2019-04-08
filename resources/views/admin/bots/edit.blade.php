@@ -22,14 +22,7 @@
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
                             <label for="">Platform*</label>
-                            <select name="Platform" class="form-control">
-                                <option value="">Select Platform</option>
-                                @if(!$platforms->isEmpty())
-                                    @foreach($platforms as $platform)
-                                        <option value="{{$platform->id}}" @if($bots->platform_id == $platform->id) selected @endif>{{ !empty($platform->name) ? $platform->name : '' }}</option>
-                                    @endforeach
-                                @endif
-                            </select>
+                            <input type="text" name="Platform" value="{{isset($bots->platform->name) ? $bots->platform->name : ''}}" class="form-control">
                         </div>
                     </div>
                     <div class="col-md-6 col-sm-12">

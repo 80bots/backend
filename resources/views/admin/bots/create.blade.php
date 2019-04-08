@@ -15,22 +15,12 @@
         <div class="card-header d-flex align-items-center justify-content-between">
             <h5 class="mb-0">Add Bot</h5>
         </div>
-        @if(!$platforms->isEmpty())
-
-        @endif
         <div class="card-body">
             <div class="row">
                 <div class="col-md-6 col-sm-12">
                     <div class="form-group">
                         <label for="">Platform*</label>
-                        <select name="Platform" class="form-control">
-                            <option value="">Select Platform</option>
-                            @if(!$platforms->isEmpty())
-                                @foreach($platforms as $platform)
-                                    <option value="{{$platform->id}}">{{ !empty($platform->name) ? $platform->name : '' }}</option>
-                                @endforeach
-                            @endif
-                        </select>
+                        <input type="text" name="Platform" class="form-control">
                     </div>
                 </div>
                 <div class="col-md-6 col-sm-12">

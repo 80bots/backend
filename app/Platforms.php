@@ -17,6 +17,11 @@ class Platforms extends Model
         return self::with(['bots'])->where('id', $id);
     }
 
+    public static function findByName(string $platform_name)
+    {
+        return self::where('name',$platform_name)->first();
+    }
+
     public function bots()
     {
         return $this->hasMany('App\Bots','platform_id');

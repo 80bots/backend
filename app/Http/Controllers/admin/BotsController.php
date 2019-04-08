@@ -58,7 +58,6 @@ class BotsController extends AppController
 
         try{
             $botObj = new Bots();
-            $botObj->platform_id = isset($request->Platform) ? $request->Platform : '';
             $botObj->bot_name = isset($request->bot_name) ? $request->bot_name : '';
             $botObj->description = isset($request->description) ? $request->description : '';
             $botObj->aws_ami_image_id = isset($request->aws_ami_image_id) ? $request->aws_ami_image_id : '';
@@ -66,6 +65,16 @@ class BotsController extends AppController
             $botObj->aws_instance_type = isset($request->aws_instance_type) ? $request->aws_instance_type : '';
             $botObj->aws_startup_script = isset($request->aws_startup_script) ? $request->aws_startup_script : '';
             $botObj->aws_storage_gb = isset($request->aws_storage_gb) ? $request->aws_storage_gb : '';
+
+            $platform_name = isset($request->Platform) ? $request->Platform : '';
+            $platformObj = Platforms::findByName($platform_name);
+            if(empty($platformObj)){
+                $platformObj = new Platforms();
+                $platformObj->name = $platform_name;
+                $platformObj->save();
+            }
+            $botObj->platform_id = $platformObj->id;
+
             if($botObj->save()){
                 if(!empty($request->tags) && isset($request->tags)){
                     $tagString = rtrim($request->tags,',');
@@ -154,7 +163,6 @@ class BotsController extends AppController
     {
         try{
             $botObj = Bots::find($id);
-            $botObj->platform_id = isset($request->Platform) ? $request->Platform : '';
             $botObj->bot_name = isset($request->bot_name) ? $request->bot_name : '';
             $botObj->description = isset($request->description) ? $request->description : '';
             $botObj->aws_ami_image_id = isset($request->aws_ami_image_id) ? $request->aws_ami_image_id : '';
@@ -162,6 +170,16 @@ class BotsController extends AppController
             $botObj->aws_instance_type = isset($request->aws_instance_type) ? $request->aws_instance_type : '';
             $botObj->aws_startup_script = isset($request->aws_startup_script) ? $request->aws_startup_script : '';
             $botObj->aws_storage_gb = isset($request->aws_storage_gb) ? $request->aws_storage_gb : '';
+
+            $platform_name = isset($request->Platform) ? $request->Platform : '';
+            $platformObj = Platforms::findByName($platform_name);
+            if(empty($platformObj)){
+                $platformObj = new Platforms();
+                $platformObj->name = $platform_name;
+                $platformObj->save();
+            }
+            $botObj->platform_id = $platformObj->id;
+
             if($botObj->save()){
                 if(!empty($request->tags) && isset($request->tags)){
                     BotTags::deleteByBotId($id);
