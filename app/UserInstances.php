@@ -27,6 +27,11 @@ class UserInstances extends BaseModel
         return self::where('status', 'running')->where('user_id', $id)->get();
     }
 
+    public static function findRunningInstance()
+    {
+        return self::where('status', 'running')->get();
+    }
+
     public function userInstanceDetails()
     {
         return $this->hasMany('App\UserInstancesDetails');
@@ -35,5 +40,10 @@ class UserInstances extends BaseModel
     public function userInstanceDetail()
     {
         return $this->hasOne('App\UserInstancesDetails');
+    }
+
+    public function bots()
+    {
+        return $this->belongsTo('App\Bots','bot_id');
     }
 }

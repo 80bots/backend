@@ -38,9 +38,13 @@
                                     {{$bot->description}}
                                 </div>
                                 <div class="col-md-3 col-sm-12">
-                                        <span class="badge badge-pill badge-info font-size-16 mr-1 mb-1">
-                                            Tags
-                                        </span>
+                                    @if(isset($bot->botTags) && !$bot->botTags->isEmpty())
+                                        @foreach($bot->botTags as $botTag)
+                                            <span class="badge badge-pill badge-info font-size-16 mr-1 mb-1">
+                                                {{$botTag->tags->name}}
+                                            </span>
+                                        @endforeach
+                                    @endif
                                 </div>
                                 <div class="col-md-2 col-sm-12 text-right">
                                     <a href="javascript:void(0)" data-toggle="modal" data-target="#lunch-instance"

@@ -57,7 +57,7 @@
                         @endforeach
                     @endif
                     <small class="d-block text-right mt-3">
-                        <a href="{{route('user.bots.all.list',['id' => $platform->id])}}">My Bots</a>
+                        <a href="{{route('user.bots.all.list',['id' => $platform->id])}}">All Bots</a>
                     </small>
                 </div>
             @endforeach

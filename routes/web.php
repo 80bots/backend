@@ -30,18 +30,18 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','ad
 
         Route::group(['prefix' => 'instance', 'as' => 'instance.'], function() {
             Route::get('list/{id}', 'UserInstancesController@index')->name('list');
+            Route::get('running', 'UserInstancesController@runningInstances')->name('running');
             Route::post('change-status', 'UserInstancesController@changeStatus')->name('change-status');
         });
+    });
+
+    Route::group(['prefix' => 'instance', 'as' => 'instance.'], function() {
+        Route::get('running', 'UserInstancesController@runningInstances')->name('running');
     });
 
     Route::resource('bots','BotsController');
     Route::group(['prefix' => 'bots', 'as' => 'bots.'], function() {
         Route::post('change-status', 'BotsController@ChangeStatus')->name('change-status');
-        /*Route::get('/', 'BotsController@index')->name('index');
-        Route::get('create', 'BotsController@create')->name('create');
-        Route::post('store', 'BotsController@store')->name('store');
-        Route::get('{id}/edit', 'BotsController@edit')->name('edit');
-        Route::get('{id}/edit', 'BotsController@edit')->name('edit');*/
     });
 });
 
@@ -55,8 +55,6 @@ Route::group(['prefix' => 'user', 'as' => 'user.', 'middleware' => ['auth', 'use
 
     Route::resource('instance','UserInstancesController');
     Route::group(['prefix' => 'instance', 'as' => 'instance.'], function() {
-        /*Route::get('/', 'UserInstancesController@index')->name('index');
-        Route::get('create', 'UserInstancesController@create')->name('create');*/
         Route::post('change-status', 'UserInstancesController@changeStatus')->name('change-status');
     });
 });

@@ -20,12 +20,8 @@
 
             <li class="sidebar-item">
                 <ul class="sidebar-dropdown list-unstyled">
-                    <li class="sidebar-item "><a href="{{route('user.instance.index')}}" class="sidebar-link {{ (request()->is('user/instance')) ? 'active' : '' }}">Instance Lists</a></li>
-                </ul>
-            </li>
-            <li class="sidebar-item">
-                <ul class="sidebar-dropdown list-unstyled">
-                    <li class="sidebar-item "><a href="{{route('user.bots.list')}}" class="sidebar-link {{ (request()->is('user/bots-list')) ? 'active' : '' }}">Bot Lists</a></li>
+                    <li class="sidebar-item "><a href="{{route('user.instance.index')}}" class="sidebar-link {{ (request()->is('user/instance')) ? 'active' : '' }}">My Bots</a></li>
+                    <li class="sidebar-item "><a href="{{route('user.bots.list')}}" class="sidebar-link {{ (request()->is('user/bots-list')) ? 'active' : '' }}">Bots List</a></li>
                 </ul>
             </li>
         </ul>

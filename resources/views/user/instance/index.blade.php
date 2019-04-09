@@ -10,93 +10,62 @@ Instance Listing
 
 @section('content')
     <div class="wrapper">
-        <div class="card">
-            <div class="card-header d-flex align-items-center justify-content-between">
-                <h5 class="mb-0">Running Bots</h5>
-                <button data-toggle="modal" data-target="#lunch-instance" class="btn btn-round btn-primary"><i class="fas fa-plus"></i> Launch Bot</button>
-            </div>
-            <div class="card-body">
-                @include('layouts.imports.messages')
-                <div class="table-responsive">
-                    <table id="instance-list" class="table thead-default vertical-middle mb-0">
-                        <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Instance Id</th>
-                            <th>Up-Time</th>
-                            <th>AWS Public Ip</th>
-                            <th>AWS Public DNS</th>
-                            <th>Status</th>
-                            <th>Launch Time</th>
-                            <th></th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        @if(isset($UserInstance) && !empty($UserInstance))
-                            @foreach($UserInstance as $instance)
-                                <tr>
-                                    <td>{{!empty($instance->name) ? $instance->name : ''}}</td>
-                                    <td>{{!empty($instance->aws_instance_id) ? $instance->aws_instance_id : ''}}</td>
-                                    <td>{{!empty($instance->up_time) ? $instance->up_time : 0}}</td>
-                                    <td>{{!empty($instance->aws_public_ip) ? $instance->aws_public_ip : ''}}</td>
-                                    <td>{{!empty($instance->aws_public_dns) ? $instance->aws_public_dns : ''}}</td>
-                                    <td>
-                                        <select name="instStatus" class="form-control instStatus" data-id="{{$instance->id}}">
-                                            @if(!empty($instance->status) && $instance->status == 'running')
-                                                <option value="running">Running</option>
-                                                <option value="stop">Stop</option>
-                                                <option value="terminated">Terminated</option>
-                                            @elseif(!empty($instance->status) && $instance->status == 'stop')
-                                                <option value="stop">Stop</option>
-                                                <option value="start">Start</option>
-                                                <option value="terminated">Terminated</option>
-                                            @else
-                                                <option value="terminated">Terminated</option>
-                                            @endif
-                                        </select>
-                                    </td>
-                                    <td>{{!empty($instance->created_at) ? date('Y-m-d', strtotime($instance->created_at)) : ''}}</td>
-                                    <td><a href="{{!empty($instance->aws_pem_file_path) ? $instance->aws_pem_file_path : 'javascript:void(0)'}}" title="Download PEM file" download>
-                                            <i class="fa fa-download"></i>
-                                        </a></td>
-                                </tr>
-                            @endforeach
-                        @endif
-                        </tbody>
-                    </table>
-                </div>
+        <div class="align-items-center bg-purple d-flex p-3 rounded shadow-sm text-white-50 mb-3">
+            <h4 class="border mb-0 mr-2 pb-2 pl-3 pr-3 pt-2 rounded text-white">8</h4>
+            <div class="lh-100">
+                <h6 class="mb-0 text-white lh-100">80bots</h6>
+                <small>Since 2019</small>
             </div>
         </div>
-    </div>
-    <div class="modal fade" id="lunch-instance" role="dialog">
-        <div class="modal-dialog modal-sm">
-            <div class="modal-content">
-                <form id="lunchInstance" action="{{route('user.instance.store')}}" method="post">
-                    @csrf
-                    <div class="modal-header">
-                        <h4 class="modal-title">Launch Bot</h4>
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <label>Bots</label>
-                            <select class="form-control" name="bot_id">
-                                <option value="">Select Bot</option>
-                                @if(isset($botsArr) && !empty($botsArr))
-                                    @foreach($botsArr as $bots)
-                                        <option value="{{$bots->id}}">{{isset($bots->bot_name) ? $bots->bot_name : $bots->aws_ami_name}}</option>
-                                    @endforeach
-                                @endif
-                            </select>
+        @include('layouts.imports.messages')
+        @if(!empty($UserInstance) && isset($UserInstance))
+            <div class="my-3 p-3 bg-white rounded shadow-sm">
+                <h6 class="border-bottom  pb-2 mb-0">Running Bots</h6>
+                    @foreach($UserInstance as $instance)
+                        <div class="media text-muted pt-3 d-flex align-items-start">
+                            <svg class="bd-placeholder-img mr-2 rounded flex-shrink-0" width="32" height="32"
+                                 xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"
+                                 focusable="false" role="img" aria-label="Placeholder: 32x32"><title>
+                                    Placeholder</title>
+                                <rect width="100%" height="100%" fill="#007bff"></rect>
+                                <text x="50%" y="50%" fill="#007bff" dy=".3em">32x32</text>
+                            </svg>
+                            <div class="row flex-grow-1 ml-0 mr-0 border-bottom pb-3">
+                                <div class="col-md-2 col-sm-2">
+                                    <strong class="d-block text-gray-dark">{{isset($instance->bots->bot_name)?$instance->bots->bot_name:''}}</strong>
+                                </div>
+                                <div class="col-md-2 col-sm-2">
+                                    {{!empty($instance->up_time) ? $instance->up_time : 0}}
+                                </div>
+                                <div class="col-md-2 col-sm-2">
+                                    {{!empty($instance->aws_public_ip) ? $instance->aws_public_ip : ''}}
+                                </div>
+                                <div class="col-md-2 col-sm-2">
+                                    <select name="instStatus" class="form-control instStatus" data-id="{{$instance->id}}">
+                                        @if(!empty($instance->status) && $instance->status == 'running')
+                                            <option value="running">Running</option>
+                                            <option value="stop">Stop</option>
+                                            <option value="terminated">Terminated</option>
+                                        @elseif(!empty($instance->status) && $instance->status == 'stop')
+                                            <option value="stop">Stop</option>
+                                            <option value="start">Start</option>
+                                            <option value="terminated">Terminated</option>
+                                        @else
+                                            <option value="terminated">Terminated</option>
+                                        @endif
+                                    </select>
+                                </div>
+                                <div class="col-md-2 col-sm-2">
+                                    {{!empty($instance->created_at) ? date('Y-m-d', strtotime($instance->created_at)) : ''}}
+                                </div>
+                                <div class="col-md-2 col-sm-2">
+                                    <a href="{{!empty($instance->aws_public_ip) ? 'http://'.$instance->aws_public_ip : ''}}" target="_blank"><i class="fa fa-eye"></i></a>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="modal-footer">
-                        <input type="submit" class="btn btn-success" value="submit">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    </div>
-                </form>
+                @endforeach
             </div>
-        </div>
+        @endif
     </div>
 @endsection
 

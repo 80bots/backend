@@ -22,11 +22,7 @@
             <li class="sidebar-item">
                 <ul class="sidebar-dropdown list-unstyled">
                     <li class="sidebar-item "><a href="{{route('admin.user.index')}}" class="sidebar-link {{ (request()->is('admin/user')) ? 'active' : '' }}">User Lists</a></li>
-                </ul>
-            </li>
-
-            <li class="sidebar-item">
-                <ul class="sidebar-dropdown list-unstyled">
+                    <li class="sidebar-item "><a href="{{route('admin.instance.running')}}" class="sidebar-link {{ (request()->is('admin/instance/running')) ? 'active' : '' }}">Running Bots</a></li>
                     <li class="sidebar-item "><a href="{{route('admin.bots.index')}}" class="sidebar-link {{ (request()->is('admin/bots')) ? 'active' : '' }}">Bot Lists</a></li>
                     <li class="sidebar-item "><a href="{{route('admin.bots.create')}}" class="sidebar-link {{ (request()->is('admin/bots/create')) ? 'active' : '' }}">Bot Create</a></li>
                 </ul>
