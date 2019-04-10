@@ -15,8 +15,8 @@ class CreateUserInstancesDetailsTable extends Migration
     public function up()
     {
         Schema::create('user_instances_details', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->unsignedBigInteger('user_instance_id');
+            $table->integerIncrements('id');
+            $table->unsignedInteger('user_instance_id');
             $table->timestamp('start_time')->nullable();
             $table->timestamp('end_time')->nullable();
             $table->double('total_time')->default(0);

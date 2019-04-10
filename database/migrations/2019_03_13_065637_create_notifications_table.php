@@ -15,10 +15,10 @@ class CreateNotificationsTable extends Migration
     public function up()
     {
         Schema::create('notifications', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->integerIncrements('id');
             $table->string('title');
-            $table->unsignedBigInteger('to_id');
-            $table->unsignedBigInteger('from_id');
+            $table->unsignedInteger('to_id');
+            $table->unsignedInteger('from_id');
             $table->string('message');
             $table->string('icon')->nullable();
             $table->text('payload');

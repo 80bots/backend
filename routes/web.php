@@ -53,6 +53,11 @@ Route::group(['prefix' => 'user', 'as' => 'user.', 'middleware' => ['auth', 'use
     Route::get('bots-list', 'UserInstancesController@BotList')->name('bots.list');
     Route::get('bots-all-list/{id}', 'UserInstancesController@BotAllList')->name('bots.all.list');
 
+    Route::resource('scheduling', 'SchedulingInstancesController');
+    Route::group(['prefix' => 'scheduling', 'as' => 'scheduling.'], function() {
+        //
+    });
+
     Route::resource('instance','UserInstancesController');
     Route::group(['prefix' => 'instance', 'as' => 'instance.'], function() {
         Route::post('change-status', 'UserInstancesController@changeStatus')->name('change-status');

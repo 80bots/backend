@@ -15,9 +15,9 @@ class CreateUserInstancesTable extends Migration
     public function up()
     {
         Schema::create('user_instances', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->integerIncrements('id');
             $table->string('name')->nullable();
-            $table->unsignedBigInteger('user_id');
+            $table->unsignedInteger('user_id');
             $table->double('used_credit')->default(0);
             $table->double('up_time')->default(0);
             $table->string('aws_instance_id')->nullable();
