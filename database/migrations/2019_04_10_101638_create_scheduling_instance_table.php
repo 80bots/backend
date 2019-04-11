@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
@@ -15,8 +16,8 @@ class CreateSchedulingInstanceTable extends Migration
     {
         Schema::create('scheduling_instances', function (Blueprint $table) {
             $table->integerIncrements('id');
-            $table->time('start_time');
-            $table->time('end_time');
+            $table->string('start_time')->nullable();
+            $table->string('end_time')->nullable();
             $table->string('current_time_zone');
             $table->enum('status', ['active', 'inactive']);
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
