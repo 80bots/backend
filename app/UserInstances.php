@@ -46,4 +46,9 @@ class UserInstances extends BaseModel
     {
         return $this->belongsTo('App\Bots','bot_id');
     }
+
+    // public function schedulingInstance()
+    // {
+    //     return $this->hasMany('App\SchedulingInstance','user_instances_id');
+    // }
 }

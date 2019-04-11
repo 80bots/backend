@@ -19,6 +19,7 @@ Scheduling instances
         </div>
         @include('layouts.imports.messages')
         @if(!empty($results) && isset($results))
+            
             <div class="table-responsive">
                 <table id="scheduling_instances" class="table thead-default vertical-middle mb-0">
                     <thead>
@@ -41,9 +42,13 @@ Scheduling instances
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <a href="{{route('user.scheduling.edit',$row->id)}}" class="form-group btn btn-icon btn-primary change-credit-model mb-0 mr-1"
-                                                   title="Edit Bot"><i class="fa fa-edit"></i></a>
-
-                                       
+                                        title="Edit Bot"><i class="fa fa-edit"></i></a>
+                                       <form action="{{ route('user.scheduling.destroy',$row->id) }}" method="POST">
+                                         @csrf
+                                            @method('DELETE')
+                                                <button type="submit" onclick="return confirm('Are you sure? you want to remove this record')" class="form-group btn btn-icon btn-danger change-credit-model mb-0"><i class="fa fa-trash"></i></button>
+                                            </div>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>

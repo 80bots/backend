@@ -9,6 +9,9 @@ Scheduling instances
 @endsection
 
 @section('content')
+
+<link rel="stylesheet" type="text/css" media="screen"
+     href="{{ asset('css/tempusdominus-bootstrap-4.min.css')}}">
  <div class="wrapper">
         <div class="align-items-center bg-purple d-flex p-3 rounded shadow-sm text-white-50 mb-3">
             <h4 class="border mb-0 mr-2 pb-2 pl-3 pr-3 pt-2 rounded text-white">8</h4>
@@ -19,7 +22,6 @@ Scheduling instances
         </div>
         @include('layouts.imports.messages')
 
-<div class="wrapper">
     <form class="card" id="scheduling_create" action="{{route('user.scheduling.store')}}" method="post">
         @csrf
         <div class="card-header d-flex align-items-center justify-content-between">
@@ -41,13 +43,25 @@ Scheduling instances
                 <div class="col-md-6 col-sm-12">
                     <div class="form-group">
                         <label for="">Start time*</label>
-                        <input type="text"  name="start_time" class="form-control"/>
+                          <div class="input-group date time-picker" id="startTimePicker" data-target-input="nearest">
+                                <input type="text" class="form-control datetimepicker-input" data-target="#startTimePicker" name="start_time" data-toggle="datetimepicker"/>
+                                <div class="input-group-append" data-target="#startTimePicker" data-toggle="datetimepicker">
+                                    <div class="input-group-text"><i class="fas fa-clock"></i></div>
+                                </div>
+                            </div>
+                        <!-- <input type="text"  name="start_time" class="form-control"/> -->
                     </div>
                 </div>
                 <div class="col-md-6 col-sm-12">
                     <div class="form-group">
                         <label for="">End time*</label>
-                        <input type="text" name="end_time" class="form-control"/>
+                        <div class="input-group date time-picker" id="endTimePicker" data-target-input="nearest">
+                                <input type="text" class="form-control datetimepicker-input" data-target="#endTimePicker" data-toggle="datetimepicker" name="end_time"/>
+                                <div class="input-group-append" data-target="#endTimePicker" data-toggle="datetimepicker">
+                                    <div class="input-group-text"><i class="fas fa-clock"></i></div>
+                                </div>
+                            </div>
+                        <!-- <input type="text" name="end_time" class="form-control"/> -->
                     </div>
                 </div>
             </div>
@@ -56,12 +70,34 @@ Scheduling instances
             <button type="submit" class="btn btn-primary btn-round">Add</button>
         </div>
     </form>
-</div>
 @endsection
 
 @section('script')
+ <script type="text/javascript" src="{{ asset('js/moment.min.js')}}"></script>
+ <script type="text/javascript" src="{{ asset('js/tempusdominus-bootstrap-4.min.js')}}"></script>
     <script src="{{ asset('js/jquery.validate.min.js')  }}" type="text/javascript"></script>
-    <script>
+    <script type="text/javascript">
+        $(function() {  
+            $('#startTimePicker').datetimepicker({
+               format: 'HH:mm',
+               // startDate: moment().startOf('hour'),
+               // endDate:moment().endOf(String);
+            });
+            $('#endTimePicker').datetimepicker({
+               format: 'HH:mm',
+               // startDate: moment().startOf('hour'),
+               // endDate:moment().endOf(String);
+            });
+
+            $("#startTimePicker").on("change.datetimepicker", function (e) {
+                $('#endTimePicker').datetimepicker('minDate', e.date);
+            });
+            $("#endTimePicker").on("change.datetimepicker", function (e) {
+                $('#startTimePicker').datetimepicker('maxDate', e.date);
+            });
+
+        });
+
         $("#scheduling_create").validate({
             rules: {
                 user_instances_id: {

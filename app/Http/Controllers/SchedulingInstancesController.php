@@ -15,19 +15,40 @@
 
 	class SchedulingInstancesController extends Controller
 	{
+
+		public function __construct()
+	    {
+	        // echo 'dsfdsf';exit;
+	    }
+		
+		
+
 	    public function index()
 	    {
-	    	$user_id = Auth::user()->id;
-	    	$results = SchedulingInstance::findByUserId($user_id)->get();
-	    	return view('user.scheduling.index',compact('results'));
+		    try {	
+		    	$user_id = Auth::user()->id;
+		    	$results = SchedulingInstance::findByUserId($user_id)->get();
+		    	return view('user.scheduling.index',compact('results'));
+	    	}
+	        catch (\Exception $e) {
+	            session()->flash('error', $e->getMessage());
+	            return redirect(route('user.scheduling.index'));
+	        } 
 	    }
 
 		public function create()
 		{
-			$user_id = Auth::user()->id;
+			try {
+				$user_id = Auth::user()->id;
 
-			$instances = UserInstances::where(['status' => 'stop','user_id'=>$user_id])->get();
-			return view('user.scheduling.create',compact('instances'));
+				$instances = UserInstances::where(['status' => 'stop','user_id'=>$user_id])->get();
+				return view('user.scheduling.create',compact('instances'));
+			}
+	        catch (\Exception $e) {
+	            session()->flash('error', $e->getMessage());
+	            return redirect(route('user.scheduling.index'));
+	        } 	
+
 		}
 
 		/**
@@ -84,12 +105,17 @@
 		 */
 		public function edit($id)
 		{
-		    $user_id = Auth::user()->id;
-			$instances = UserInstances::where(['status' => 'stop','user_id'=>$user_id])->get();
+			try{
+			    $user_id = Auth::user()->id;
+				$instances = UserInstances::where(['status' => 'stop','user_id'=>$user_id])->get();
 
-			$scheduling = SchedulingInstance::find($id);
+				$scheduling = SchedulingInstance::find($id);
 
-			return view('user.scheduling.edit',compact('scheduling','instances' ,'id'));
+				return view('user.scheduling.edit',compact('scheduling','instances' ,'id'));
+			} catch (\Exception $exception){
+	            session()->flash('error', $exception->getMessage());
+	            return redirect()->back();
+	        }
 		}
 
 		/**
@@ -101,7 +127,26 @@
 		 */
 		public function update(Request $request, $id)
 		{
-		    dd($request);
+			try{
+			    $schedulingInstance = SchedulingInstance::find($id);
+			    $schedulingInstance->user_instances_id = $request->user_instances_id;
+			    $schedulingInstance->start_time = $request->start_time;
+				$schedulingInstance->end_time = $request->end_time;
+				$schedulingInstance->current_time_zone = '+5.30';
+				
+			    if($schedulingInstance->save()){
+
+			    	return redirect(route('user.scheduling.index'))->with('success', 'Scheduling Update Successfully');
+				}
+				else
+				{
+					session()->flash('error', 'Bot Can not Updated Successfully');
+            		return redirect()->back();
+				}
+			} catch (\Exception $exception){
+	            session()->flash('error', $exception->getMessage());
+	            return redirect()->back();
+	        }
 		}
 
 		/**
@@ -112,6 +157,16 @@
 		 */
 		public function destroy($id)
 		{
-		    //
+		   	try{
+	            $schedulingInstance = SchedulingInstance::find($id);
+		       	if($schedulingInstance->delete()){
+	                return redirect(route('user.scheduling.index'))->with('success', 'Scheduling Delete Successfully');
+            	}
+	            session()->flash('error', 'Scheduling Can not Deleted Successfully');
+	            return redirect()->back();
+        	} catch (\Exception $exception){
+	            session()->flash('error', $exception->getMessage());
+	            return redirect()->back();
+        	}
 		}
 	}

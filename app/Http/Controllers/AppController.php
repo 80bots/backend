@@ -7,6 +7,7 @@ use App\BaseModel;
 use App\Notifications;
 use App\User;
 use App\UserInstances;
+use App\SchedulingInstance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -134,4 +135,51 @@ class AppController extends Controller
             }
         }
     }*/
+    
+    public function startScheduling()
+    {
+        $startScheduling  = SchedulingInstance::findScheduling('start');
+        $instancesIds = [];
+        foreach ($startScheduling as $row) {
+           
+            if(isset($row->userInstances->aws_instance_id))
+            {
+                array_push($instancesIds, $row->userInstances->aws_instance_id);
+            }
+
+            // Start instance
+            $reservationObj = $result->getPath('StartingInstances');
+            
+            // update user Instances      
+            $userInstances = $row->userInstances;
+            $userInstances->status = 'running';
+            $savedata =  $userInstances->save();
+            
+        }
+      
+        $result = AwsConnection::StartInstance($instancesIds);   
+    }
+
+    public function stopScheduling()
+    {
+        $startScheduling  = SchedulingInstance::findScheduling('stop');
+        $instancesIds = [];
+        foreach ($startScheduling as $row) {
+           
+            if(isset($row->userInstances->aws_instance_id))
+            {
+                array_push($instancesIds, $row->userInstances->aws_instance_id);
+            }
+            
+            // End instance 
+            $reservationObj = $result->getPath('StartingInstances');
+            
+            // update user Instances      
+            $userInstances = $row->userInstances;
+            $userInstances->status = 'stop';
+            $savedata =  $userInstances->save();
+            
+        }
+        $result = AwsConnection::StopInstance($instancesIds);   
+    }
 }
