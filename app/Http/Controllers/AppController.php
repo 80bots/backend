@@ -138,48 +138,102 @@ class AppController extends Controller
     
     public function startScheduling()
     {
-        $startScheduling  = SchedulingInstance::findScheduling('start');
-        $instancesIds = [];
-        foreach ($startScheduling as $row) {
-           
-            if(isset($row->userInstances->aws_instance_id))
-            {
-                array_push($instancesIds, $row->userInstances->aws_instance_id);
-            }
+        Log::info('cron call start scheduling');
+        try {
+            $startScheduling  = SchedulingInstance::findScheduling('start');
+            $instancesIds = [];
 
-            // Start instance
-            $reservationObj = $result->getPath('StartingInstances');
-            
-            // update user Instances      
-            $userInstances = $row->userInstances;
-            $userInstances->status = 'running';
-            $savedata =  $userInstances->save();
-            
+            if(count($startScheduling) >0)
+            {
+                foreach ($startScheduling as $row) {
+                    Log::info('Get Scheduling  instance id'.$row->userInstances->aws_instance_id);
+                    if(isset($row->userInstances->aws_instance_id))
+                    {
+                        array_push($instancesIds, $row->userInstances->aws_instance_id);
+                    }
+                        
+                    // update user Instances  
+                    Log::info('Update status on user instance '.$row->userInstances->aws_instance_id);    
+                    $userInstances = $row->userInstances;
+                    $userInstances->status = 'running';
+                    $savedata =  $userInstances->save();
+                }
+
+                if(count($instancesIds) > 0){
+                     Log::info('start all instance call aws connection class');
+                    $result = AwsConnection::StartInstance($instancesIds);
+                    // End instance 
+                    $reservationObj = $result->getPath('StartingInstances');
+                    if($reservationObj[0]['CurrentState']['Name'] == 'running')
+                    {
+                        Log::info('All instance are started successfully');
+                    }
+                    else
+                    {
+                        Log::info('Instance are not started');
+                    }
+                }
+            }
+            else
+            {
+                //echo 'Record Not Found';
+                Log::info('Start scheduling record not found');
+            }
         }
-      
-        $result = AwsConnection::StartInstance($instancesIds);   
+        catch (\Exception $e) {
+
+            Log::info('Catch Error Message '. $e->getMessage());
+        }    
     }
 
     public function stopScheduling()
     {
-        $startScheduling  = SchedulingInstance::findScheduling('stop');
-        $instancesIds = [];
-        foreach ($startScheduling as $row) {
-           
-            if(isset($row->userInstances->aws_instance_id))
+        Log::info('cron call stop scheduling');
+        try {
+            $startScheduling  = SchedulingInstance::findScheduling('stop');
+
+            $instancesIds = [];
+            if(count($startScheduling) >0)
             {
-                array_push($instancesIds, $row->userInstances->aws_instance_id);
+                foreach ($startScheduling as $row) {
+                    Log::info('Get Scheduling  instance id'.$row->userInstances->aws_instance_id);
+                    if(isset($row->userInstances->aws_instance_id))
+                    {
+                        array_push($instancesIds, $row->userInstances->aws_instance_id);
+                    }
+                   
+                    Log::info('Update status on user instance '.$row->userInstances->aws_instance_id);
+                    //update user Instances      
+                    $userInstances = $row->userInstances;
+                    $userInstances->status = 'stop';
+                    $savedata =  $userInstances->save();
+                }
+
+                if(count($instancesIds) > 0){
+                    Log::info('Stop all instance call aws connection class');
+                    $result = AwsConnection::StopInstance($instancesIds);
+                    
+                    // End instance 
+                    $reservationObj = $result->getPath('StoppingInstances');
+                    if($reservationObj[0]['CurrentState']['Name'] == 'stopped')
+                    {
+                        Log::info('All instance are stop successfully');
+                    }
+                    else
+                    {
+                        Log::info('All instance  are not stoped');
+                    }
+                }
             }
-            
-            // End instance 
-            $reservationObj = $result->getPath('StartingInstances');
-            
-            // update user Instances      
-            $userInstances = $row->userInstances;
-            $userInstances->status = 'stop';
-            $savedata =  $userInstances->save();
-            
+            else
+            {
+                // echo 'Record Not Found';
+                Log::info('Stop scheduling record not found');
+            }
         }
-        $result = AwsConnection::StopInstance($instancesIds);   
+        catch (\Exception $e) {
+
+            Log::info('Catch Error Message '. $e->getMessage());
+        }    
     }
 }

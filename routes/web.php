@@ -50,13 +50,20 @@ Route::group(['prefix' => 'user', 'as' => 'user.', 'middleware' => ['auth', 'use
     Route::get('profile/{id}', 'UserController@show')->name('profile');
     Route::get('cal-used-credit', 'AppController@CalUsedCredit')->name('cal-used-credit');
     Route::get('cal-up-time', 'AppController@CalInstancesUpTime')->name('cal-up-time');
+
+    Route::get('cron-start-scheduling','AppController@startScheduling')->name('cron-start-scheduling');
+    Route::get('cron-stop-scheduling','AppController@stopScheduling')->name('cron-stop-scheduling');
+
     Route::get('cron-scheduling','AppController@Scheduling')->name('cron-scheduling');
+
+
     Route::get('bots-list', 'UserInstancesController@BotList')->name('bots.list');
     Route::get('bots-all-list/{id}', 'UserInstancesController@BotAllList')->name('bots.all.list');
 
     Route::resource('scheduling', 'SchedulingInstancesController');
+
     Route::group(['prefix' => 'scheduling', 'as' => 'scheduling.'], function() {
-        //
+        Route::post('change-status', 'SchedulingInstancesController@changeStatus')->name('change-status');
     });
 
     Route::resource('instance','UserInstancesController');

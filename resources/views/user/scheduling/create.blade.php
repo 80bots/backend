@@ -44,7 +44,7 @@ Scheduling instances
                     <div class="form-group">
                         <label for="">Start time*</label>
                           <div class="input-group date time-picker" id="startTimePicker" data-target-input="nearest">
-                                <input type="text" class="form-control datetimepicker-input" data-target="#startTimePicker" name="start_time" data-toggle="datetimepicker"/>
+                                <input type="text" class="form-control datetimepicker-input" id="start_time" data-target="#startTimePicker" name="start_time" data-toggle="datetimepicker"/>
                                 <div class="input-group-append" data-target="#startTimePicker" data-toggle="datetimepicker">
                                     <div class="input-group-text"><i class="fas fa-clock"></i></div>
                                 </div>
@@ -56,7 +56,7 @@ Scheduling instances
                     <div class="form-group">
                         <label for="">End time*</label>
                         <div class="input-group date time-picker" id="endTimePicker" data-target-input="nearest">
-                                <input type="text" class="form-control datetimepicker-input" data-target="#endTimePicker" data-toggle="datetimepicker" name="end_time"/>
+                                <input id="end_time" type="text" class="form-control datetimepicker-input" data-target="#endTimePicker" data-toggle="datetimepicker" name="end_time"/>
                                 <div class="input-group-append" data-target="#endTimePicker" data-toggle="datetimepicker">
                                     <div class="input-group-text"><i class="fas fa-clock"></i></div>
                                 </div>
@@ -64,12 +64,16 @@ Scheduling instances
                         <!-- <input type="text" name="end_time" class="form-control"/> -->
                     </div>
                 </div>
+                <input type="hidden" name="utc_start_time" id="utc_start_time" value="">
+                <input type="hidden" id="utc_end_time" name="utc_end_time" value="">
+                <input type="hidden" id="current_time_zone" name="current_time_zone" value="">
             </div>
         </div>
         <div class="card-footer text-right">
             <button type="submit" class="btn btn-primary btn-round">Add</button>
         </div>
     </form>
+
 @endsection
 
 @section('script')
@@ -77,7 +81,17 @@ Scheduling instances
  <script type="text/javascript" src="{{ asset('js/tempusdominus-bootstrap-4.min.js')}}"></script>
     <script src="{{ asset('js/jquery.validate.min.js')  }}" type="text/javascript"></script>
     <script type="text/javascript">
-        $(function() {  
+       
+        function get_local_to_utc_time(time)
+        {
+            var gmtDateTime = moment.utc(time, "HH:mm").add(1, 'hours');
+            return gmtDateTime.local().format('HH:mm');
+        }
+        var current_time_zone =  moment().format('Z');
+        $('#current_time_zone').val(current_time_zone);
+        
+        $(function() { 
+
             $('#startTimePicker').datetimepicker({
                format: 'HH:mm',
                // startDate: moment().startOf('hour'),
@@ -96,6 +110,17 @@ Scheduling instances
                 $('#startTimePicker').datetimepicker('maxDate', e.date);
             });
 
+            $('#start_time').on('blur',function(){
+                var start_time = $('#start_time').val();
+                start_utc_time = get_local_to_utc_time(start_time);
+
+                $('#utc_start_time').val(start_utc_time);
+            });
+            $('#end_time').on('blur',function(){
+                var end_time = $('#end_time').val();
+                end_utc_time = get_local_to_utc_time(end_time);
+                $('#utc_end_time').val(end_utc_time);
+            })
         });
 
         $("#scheduling_create").validate({

@@ -20,7 +20,7 @@ Scheduling instances edit
         </div>
         <div class="card-body">
             <div class="row">
-                <div class="col-md-12 col-sm-12">
+                <div class="col-md-6 col-sm-12">
                     <div class="form-group">
                         <label for="">Select Instance*</label>
                         <select name="user_instances_id" id="user_instances_id" class="form-control">
@@ -33,9 +33,19 @@ Scheduling instances edit
                 </div>
                 <div class="col-md-6 col-sm-12">
                     <div class="form-group">
+                        <label for="">Status*</label>
+                        <select name="status" id="status" class="form-control">
+                            <option value="">Select Status </option>
+                            <option {{ $scheduling->status == 'active' ? 'selected="selected"' : '' }} value="active">Active</option>
+                            <option {{ $scheduling->status == 'inactive' ? 'selected="selected"' : '' }}  value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
                         <label for="">Start time*</label>
                           <div class="input-group date time-picker" id="startTimePicker" data-target-input="nearest">
-                                <input type="text" class="form-control datetimepicker-input" data-target="#startTimePicker" value="{{isset($scheduling->start_time) ? $scheduling->start_time : ''}}" name="start_time" data-toggle="datetimepicker"/>
+                                <input id="start_time" type="text" class="form-control datetimepicker-input" data-target="#startTimePicker" value="{{isset($scheduling->start_time) ? $scheduling->start_time : ''}}" name="start_time" data-toggle="datetimepicker"/>
                                 <div class="input-group-append" data-target="#startTimePicker" data-toggle="datetimepicker">
                                     <div class="input-group-text"><i class="fas fa-clock"></i></div>
                                 </div>
@@ -47,7 +57,7 @@ Scheduling instances edit
                     <div class="form-group">
                         <label for="">End time*</label>
                         <div class="input-group date time-picker" id="endTimePicker" data-target-input="nearest">
-                                <input type="text" class="form-control datetimepicker-input" value="{{isset($scheduling->end_time) ? $scheduling->end_time : ''}}" data-target="#endTimePicker" data-toggle="datetimepicker" name="end_time"/>
+                                <input id="end_time" type="text" class="form-control datetimepicker-input" value="{{isset($scheduling->end_time) ? $scheduling->end_time : ''}}" data-target="#endTimePicker" data-toggle="datetimepicker" name="end_time"/>
                                 <div class="input-group-append" data-target="#endTimePicker" data-toggle="datetimepicker">
                                     <div class="input-group-text"><i class="fas fa-clock"></i></div>
                                 </div>
@@ -67,6 +77,10 @@ Scheduling instances edit
                         <input type="text" value="{{isset($scheduling->end_time) ? $scheduling->end_time : ''}}"  name="end_time" class="form-control"/>
                     </div>
                 </div> -->
+
+                <input type="hidden" name="utc_start_time"  value="{{isset($scheduling->utc_start_time) ? $scheduling->utc_start_time : ''}}" id="utc_start_time" >
+                <input type="hidden" id="utc_end_time" value="{{isset($scheduling->utc_end_time) ? $scheduling->utc_end_time : ''}}"  name="utc_end_time">
+                <input type="hidden" id="current_time_zone" name="current_time_zone" value="{{isset($scheduling->current_time_zone) ? $scheduling->current_time_zone : ''}}">
             </div>
         </div>
         <div class="card-footer text-right">
@@ -81,6 +95,15 @@ Scheduling instances edit
     <script type="text/javascript" src="{{ asset('js/tempusdominus-bootstrap-4.min.js')}}"></script>
     <script src="{{ asset('js/jquery.validate.min.js')  }}" type="text/javascript"></script>
     <script>
+        function get_local_to_utc_time(time)
+        {
+            var gmtDateTime = moment.utc(time, "HH:mm").add(1, 'hours');
+            return gmtDateTime.local().format('HH:mm');
+        }
+        var current_time_zone =  moment().format('Z');
+        $('#current_time_zone').val(current_time_zone);
+
+
         $(function() {  
             $('#startTimePicker').datetimepicker({
                format: 'HH:mm',
@@ -99,6 +122,19 @@ Scheduling instances edit
             $("#endTimePicker").on("change.datetimepicker", function (e) {
                 $('#startTimePicker').datetimepicker('maxDate', e.date);
             });
+
+
+            $('#start_time').on('blur',function(){
+                var start_time = $('#start_time').val();
+                start_utc_time = get_local_to_utc_time(start_time);
+
+                $('#utc_start_time').val(start_utc_time);
+            });
+            $('#end_time').on('blur',function(){
+                var end_time = $('#end_time').val();
+                end_utc_time = get_local_to_utc_time(end_time);
+                $('#utc_end_time').val(end_utc_time);
+            })
 
         });
         $("#scheduling_update").validate({

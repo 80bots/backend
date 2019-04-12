@@ -38,7 +38,17 @@ Scheduling instances
                                 <td> {{!empty($row->user_instances_id) ? $row->user_instances_id : ''}}</td>
                                 <td> {{!empty($row->start_time) ? $row->start_time : ''}}</td>
                                 <td> {{!empty($row->end_time) ? $row->end_time : ''}}</td>
-                                <td> {{!empty($row->status) ? $row->status : ''}}</td>
+                                <td> 
+                                <select name="status" class="form-control schedulingStatus" data-id="{{$row->id}}">
+                                        @if(!empty($row->status) && $row->status == 'active')
+                                            <option selected="selected"   value="active">Active</option>
+                                            <option value="inactive">Inactive</option>
+                                        @else
+                                            <option selected="selected"  value="inactive">Inactive</option>
+                                            <option  value="active">Active</option>
+                                        @endif
+                                    </select>
+                                </td>
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <a href="{{route('user.scheduling.edit',$row->id)}}" class="form-group btn btn-icon btn-primary change-credit-model mb-0 mr-1"
@@ -59,4 +69,30 @@ Scheduling instances
             </div>
         @endif
     </div>
+@endsection
+
+@section('script')
+    <script>
+       
+        $(document).on('change', '.schedulingStatus', function () {
+            var status = $(this).val();
+            var schedulingId = $(this).data('id');
+            var URL = '{{route('user.scheduling.change-status')}}';
+            $.ajax({
+                type: 'post',
+                url: URL,
+                cache: false,
+                data: {
+                    _token : function () {
+                        return '{{csrf_token()}}';
+                    },
+                    id : schedulingId,
+                    status: status
+                },
+                success: function (data) {
+                   // location.reload();
+                }
+            });
+        })
+    </script>
 @endsection

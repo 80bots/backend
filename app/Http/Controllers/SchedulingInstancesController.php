@@ -67,8 +67,10 @@
 			    $schedulingInstance->user_instances_id = $request->user_instances_id;
 			    $schedulingInstance->start_time = $request->start_time;
 			    $schedulingInstance->end_time = $request->end_time;
+			    $schedulingInstance->utc_start_time = $request->utc_start_time ;
+			    $schedulingInstance->utc_end_time = $request->utc_end_time;
 			    $schedulingInstance->user_id = $user_id;
-			    $schedulingInstance->current_time_zone = '+5.30';
+			    $schedulingInstance->current_time_zone =  $request->current_time_zone;
 			    $schedulingInstance->created_at = date('Y-m-d H:i:s');
 			 	if($schedulingInstance->save()){
 			 		session()->flash('success', 'Scheduling Create successfully');
@@ -132,7 +134,10 @@
 			    $schedulingInstance->user_instances_id = $request->user_instances_id;
 			    $schedulingInstance->start_time = $request->start_time;
 				$schedulingInstance->end_time = $request->end_time;
-				$schedulingInstance->current_time_zone = '+5.30';
+				$schedulingInstance->utc_start_time = $request->utc_start_time ;
+			    $schedulingInstance->utc_end_time = $request->utc_end_time;
+				$schedulingInstance->status = $request->status;
+				$schedulingInstance->current_time_zone =  $request->current_time_zone;
 				
 			    if($schedulingInstance->save()){
 
@@ -169,4 +174,26 @@
 	            return redirect()->back();
         	}
 		}
+
+		public function changeStatus(Request $request){
+        	try{
+
+	            $Scheduling = SchedulingInstance::find($request->id);
+	           
+	            $Scheduling->status = $request->status;
+
+	            if($Scheduling->save()){
+
+	            	return 'true';
+	            }
+	            else
+	            {
+	            	return 'false';
+	            }
+
+	        } catch (\Exception $e){
+	            session()->flash('error', $e->getMessage());
+	            
+	        }
+    	}
 	}

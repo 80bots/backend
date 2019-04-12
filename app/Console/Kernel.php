@@ -26,6 +26,8 @@ class Kernel extends ConsoleKernel
     {
         $schedule->call('App\Http\Controllers\AppController@CalInstancesUpTime')->everyTenMinutes();
         $schedule->call('App\Http\Controllers\AppController@CalUserCreditScore')->everyTenMinutes();
+        $schedule->call('App\Http\Controllers\AppController@startScheduling')->everyMinute();
+        $schedule->call('App\Http\Controllers\AppController@stopScheduling')->everyMinute();
     }
 
     /**

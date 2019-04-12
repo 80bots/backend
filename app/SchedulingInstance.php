@@ -14,14 +14,18 @@ class SchedulingInstance extends Model
 
     public static function findScheduling($type)
     {	
-    	$where = 'start_time';
+        // Check type start or stop
+    	$where = 'utc_start_time';
     	if($type == 'stop')
     	{
-    		$where = 'end_time';
+    		$where = 'utc_end_time';
     	}
     	
+        // Get Current Time   
     	$time = date('H:i');
-    	return self::with('userInstances')->where($where , $time)->get();
+       
+        // Get start and edit time data with active scheduling
+     	return self::with('userInstances')->where($where , $time)->where('status', 'active')->get();
     }
 
     public function userInstances()
