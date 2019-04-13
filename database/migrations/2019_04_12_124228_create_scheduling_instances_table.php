@@ -26,6 +26,8 @@ class CreateSchedulingInstancesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('scheduling_instances');
+        Schema::table('scheduling_instances', function (Blueprint $table){
+            $table->dropColumn(['utc_start_time','utc_end_time']);
+        });
     }
 }
