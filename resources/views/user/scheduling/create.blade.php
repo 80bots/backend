@@ -25,11 +25,11 @@ Scheduling instances
     <form class="card" id="scheduling_create" action="{{route('user.scheduling.store')}}" method="post">
         @csrf
         <div class="card-header d-flex align-items-center justify-content-between">
-            <h5 class="mb-0">Add Bot</h5>
+            <h5 class="mb-0">Add Scheduling</h5>
         </div>
         <div class="card-body">
             <div class="row">
-                <div class="col-md-12 col-sm-12">
+                <div class="col-md-6 col-sm-12">
                     <div class="form-group">
                         <label for="">Select Instance*</label>
                         <select name="user_instances_id" id="user_instances_id" class="form-control">
@@ -37,6 +37,16 @@ Scheduling instances
                             @foreach($instances as $row)
                             <option value="{{$row->id}}"> {{$row->aws_instance_id}}</option>
                             @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label for="">Status*</label>
+                        <select name="status" id="status" class="form-control">
+                            <option value="">Select Status </option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
                         </select>
                     </div>
                 </div>
@@ -58,7 +68,7 @@ Scheduling instances
                         <div class="input-group date time-picker" id="endTimePicker" data-target-input="nearest">
                                 <input id="end_time" type="text" class="form-control datetimepicker-input" data-target="#endTimePicker" data-toggle="datetimepicker" name="end_time"/>
                                 <div class="input-group-append" data-target="#endTimePicker" data-toggle="datetimepicker">
-                                    <div class="input-group-text"><i class="fas fa-clock"></i></div>
+                                <div class="input-group-text"><i class="fas fa-clock"></i></div>
                                 </div>
                             </div>
                         <!-- <input type="text" name="end_time" class="form-control"/> -->
@@ -84,8 +94,9 @@ Scheduling instances
        
         function get_local_to_utc_time(time)
         {
-            var gmtDateTime = moment.utc(time, "HH:mm").add(1, 'hours');
-            return gmtDateTime.local().format('HH:mm');
+            var current_d = moment().format('YYYY-MM-DD')+' '+time;
+            var localDate = new Date(current_d);
+            return moment.utc( localDate ).format('HH:mm');
         }
         var current_time_zone =  moment().format('Z');
         $('#current_time_zone').val(current_time_zone);
@@ -105,6 +116,13 @@ Scheduling instances
 
             $("#startTimePicker").on("change.datetimepicker", function (e) {
                 $('#endTimePicker').datetimepicker('minDate', e.date);
+
+                var end_time = $('#end_time').val();
+                if(end_time)
+                { 
+                    end_utc_time = get_local_to_utc_time(end_time);
+                    $('#utc_end_time').val(end_utc_time);  
+                }    
             });
             $("#endTimePicker").on("change.datetimepicker", function (e) {
                 $('#startTimePicker').datetimepicker('maxDate', e.date);
@@ -113,8 +131,8 @@ Scheduling instances
             $('#start_time').on('blur',function(){
                 var start_time = $('#start_time').val();
                 start_utc_time = get_local_to_utc_time(start_time);
-
                 $('#utc_start_time').val(start_utc_time);
+
             });
             $('#end_time').on('blur',function(){
                 var end_time = $('#end_time').val();

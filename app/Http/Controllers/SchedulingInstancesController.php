@@ -28,6 +28,8 @@
 		    try {	
 		    	$user_id = Auth::user()->id;
 		    	$results = SchedulingInstance::findByUserId($user_id)->get();
+
+		    	// dd($results);
 		    	return view('user.scheduling.index',compact('results'));
 	    	}
 	        catch (\Exception $e) {
@@ -70,8 +72,12 @@
 			    $schedulingInstance->utc_start_time = $request->utc_start_time ;
 			    $schedulingInstance->utc_end_time = $request->utc_end_time;
 			    $schedulingInstance->user_id = $user_id;
+			    $schedulingInstance->status = $request->status;
 			    $schedulingInstance->current_time_zone =  $request->current_time_zone;
 			    $schedulingInstance->created_at = date('Y-m-d H:i:s');
+
+			    // dd($schedulingInstance);
+			    
 			 	if($schedulingInstance->save()){
 			 		session()->flash('success', 'Scheduling Create successfully');
 			 		return redirect(route('user.scheduling.index'));
@@ -111,7 +117,7 @@
 			    $user_id = Auth::user()->id;
 				$instances = UserInstances::where(['status' => 'stop','user_id'=>$user_id])->get();
 
-				$scheduling = SchedulingInstance::find($id);
+				$scheduling = SchedulingInstance::with('userInstances')->find($id);
 
 				return view('user.scheduling.edit',compact('scheduling','instances' ,'id'));
 			} catch (\Exception $exception){

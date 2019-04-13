@@ -9,7 +9,7 @@ class SchedulingInstance extends Model
     // protected $tabel = 'scheduling_instances';
 
    	public static function findByUserId($user_id) {
-        return self::where('user_id' , $user_id);
+        return self::with('userInstances')->where('user_id' , $user_id);
     }
 
     public static function findScheduling($type)

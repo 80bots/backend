@@ -16,19 +16,22 @@ Scheduling instances edit
         @method('PATCH')
             @csrf
         <div class="card-header d-flex align-items-center justify-content-between">
-            <h5 class="mb-0">Add Bot</h5>
+            <h5 class="mb-0">Add Scheduling</h5>
         </div>
         <div class="card-body">
             <div class="row">
                 <div class="col-md-6 col-sm-12">
                     <div class="form-group">
                         <label for="">Select Instance*</label>
-                        <select name="user_instances_id" id="user_instances_id" class="form-control">
+                        <p> {{isset($scheduling->userInstances['aws_instance_id']) ? $scheduling->userInstances['aws_instance_id'] : ''}}</p>
+
+                        <input type="hidden" name="user_instances_id" value="{{ $scheduling->user_instances_id }}">
+                        <!-- <select name="user_instances_id" id="user_instances_id" class="form-control">
                             <option value="">Select Instance </option>
                             @foreach($instances as $row)
                             <option value="{{$row->id}}" {{ $scheduling->user_instances_id == $row->id ? 'selected="selected"' : '' }} > {{$row->aws_instance_id}}</option>
                             @endforeach
-                        </select>
+                        </select> -->
                     </div>
                 </div>
                 <div class="col-md-6 col-sm-12">
@@ -65,18 +68,6 @@ Scheduling instances edit
                         <!-- <input type="text" name="end_time" class="form-control"/> -->
                     </div>
                 </div>
-                <!-- <div class="col-md-6 col-sm-12">
-                    <div class="form-group">
-                        <label for="">Start time*</label>
-                        <input type="text" value="{{isset($scheduling->start_time) ? $scheduling->start_time : ''}}" name="start_time" class="form-control"/>
-                    </div>
-                </div>
-                <div class="col-md-6 col-sm-12">
-                    <div class="form-group">
-                        <label for="">End time*</label>
-                        <input type="text" value="{{isset($scheduling->end_time) ? $scheduling->end_time : ''}}"  name="end_time" class="form-control"/>
-                    </div>
-                </div> -->
 
                 <input type="hidden" name="utc_start_time"  value="{{isset($scheduling->utc_start_time) ? $scheduling->utc_start_time : ''}}" id="utc_start_time" >
                 <input type="hidden" id="utc_end_time" value="{{isset($scheduling->utc_end_time) ? $scheduling->utc_end_time : ''}}"  name="utc_end_time">
@@ -97,12 +88,12 @@ Scheduling instances edit
     <script>
         function get_local_to_utc_time(time)
         {
-            var gmtDateTime = moment.utc(time, "HH:mm").add(1, 'hours');
-            return gmtDateTime.local().format('HH:mm');
+            var current_d = moment().format('YYYY-MM-DD')+' '+time;
+            var localDate = new Date(current_d);
+            return moment.utc( localDate ).format('HH:mm');
         }
         var current_time_zone =  moment().format('Z');
         $('#current_time_zone').val(current_time_zone);
-
 
         $(function() {  
             $('#startTimePicker').datetimepicker({
@@ -118,6 +109,12 @@ Scheduling instances edit
 
             $("#startTimePicker").on("change.datetimepicker", function (e) {
                 $('#endTimePicker').datetimepicker('minDate', e.date);
+                var end_time = $('#end_time').val();
+                if(end_time)
+                { 
+                    end_utc_time = get_local_to_utc_time(end_time);
+                    $('#utc_end_time').val(end_utc_time);  
+                }
             });
             $("#endTimePicker").on("change.datetimepicker", function (e) {
                 $('#startTimePicker').datetimepicker('maxDate', e.date);

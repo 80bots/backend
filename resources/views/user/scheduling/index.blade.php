@@ -35,7 +35,7 @@ Scheduling instances
                     @if(isset($results) && !empty($results))
                         @foreach($results as $row)
                             <tr>
-                                <td> {{!empty($row->user_instances_id) ? $row->user_instances_id : ''}}</td>
+                                <td> {{!empty($row->userInstances['aws_instance_id']) ? $row->userInstances['aws_instance_id'] : ''}}</td>
                                 <td> {{!empty($row->start_time) ? $row->start_time : ''}}</td>
                                 <td> {{!empty($row->end_time) ? $row->end_time : ''}}</td>
                                 <td> 
