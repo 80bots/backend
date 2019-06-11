@@ -1,8 +1,8 @@
-Features Are completed
+*Completed Features*
 
 Template integration
 Register with authentication via email
-login role base (admin/ user)
+Login role base (admin / user)
 
 User Module
 - Can login
