@@ -1,4 +1,4 @@
-*Completed Features*
+**Completed Features**
 
 Template integration
 Register with authentication via email
