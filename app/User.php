@@ -55,11 +55,10 @@ class User extends Authenticatable
             Mail::send('mail.register', ['user' => $user], function($mail) use ($user) {
                 $mail->to($user->email, $user->name);
                 $mail->subject('Test Register mail');
-                $mail->from(env('MAIL_FROM_ADDRESS', 'test@technostacks.com'), env('MAIL_FROM_NAME', 'technostacks'));
+                $mail->from(env('MAIL_FROM_ADDRESS', '80bots@inforca.com'), env('MAIL_FROM_NAME', '80bots'));
             });
             return "Success";
         } catch (Exception $ex) {
-//            dd($ex->getMessage());
             return "We've got errors!";
         }
     }
