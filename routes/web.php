@@ -64,6 +64,7 @@ Route::group(['prefix' => 'user', 'as' => 'user.', 'middleware' => ['auth', 'use
     Route::resource('scheduling', 'SchedulingInstancesController');
 
     Route::group(['prefix' => 'scheduling', 'as' => 'scheduling.'], function() {
+        Route::get('check-scheduled/{id}', 'SchedulingInstancesController@CheckScheduled')->name('check-scheduled');
         Route::post('change-status', 'SchedulingInstancesController@changeStatus')->name('change-status');
     });
 

@@ -2,7 +2,8 @@
 
 	namespace App\Http\Controllers;
 
-	use Illuminate\Http\Request;
+	use App\SchedulingInstancesDetails;
+    use Illuminate\Http\Request;
 	use App\AwsConnection;
 	use App\BaseModel;
 	use App\Notifications;
@@ -11,9 +12,11 @@
 	use App\SchedulingInstance;
 
 	use Illuminate\Support\Facades\Auth;
-	use Illuminate\Support\Facades\Log;
+    use Illuminate\Support\Facades\DB;
+    use Illuminate\Support\Facades\Log;
+    use PhpParser\Node\Expr\New_;
 
-	class SchedulingInstancesController extends Controller
+    class SchedulingInstancesController extends Controller
 	{
 
 		public function __construct()
@@ -53,6 +56,19 @@
 
 		}
 
+		public function CheckScheduled($id){
+            try {
+                $user_id = Auth::user()->id;
+                $scheduleInstanceObj = SchedulingInstance::findByUserInstanceId($id, $user_id)->first()->toArray();
+                $return['status'] = 'true';
+                $return['data'] = $scheduleInstanceObj;
+                return json_encode($return);
+            } catch (\Exception $e) {
+                $return['status'] = 'false';
+                return $return;
+            }
+        }
+
 		/**
 		* Store a newly created resource in storage.
 		*
@@ -63,22 +79,51 @@
 		{
 			try {
 				$user_id = Auth::user()->id;
+				$userInstanceId = isset($request->instance_id) ? $request->instance_id : '';
+				$days = isset($request->day) ? $request->day : '';
+				$requestData = [];
+				foreach ($days as $key => $day){
+				    if(!empty($day)){
+                        $data = [];
+                        $data['day'] = $day;
+                        $startTime = isset($request->start_time) ? $request->start_time : '';
+                        $endTime = isset($request->end_time) ? $request->end_time : '';
+                        $startAside = isset($request->start_aside) ? $request->start_aside : '';
+                        $endAside = isset($request->end_aside) ? $request->end_aside : '';
+                        if(!empty($startTime) && !empty($startAside)){
+                            $data['schedule_type'] = 'start';
+                            if(!empty($startTime[$key]) && !empty($startAside[$key])){
+                                $data['selected_time'] = date('h:iA', strtotime($startTime[$key].$startAside[$key]));
+                            } else {
+                                $data['selected_time'] = '';
+                            }
+                            array_push($requestData, $data);
+                        }
+
+                        if(!empty($endTime) && !empty($endAside)){
+                            $data['schedule_type'] = 'stop';
+                            if(!empty($endTime[$key]) && !empty($endAside[$key])){
+                                $data['selected_time'] = date('h:iA', strtotime($endTime[$key].$endAside[$key]));
+                            } else {
+                                $data['selected_time'] = '';
+                            }
+                            array_push($requestData, $data);
+                        }
+                    }
+                }
 
 				$schedulingInstance = new SchedulingInstance();
-
-			    $schedulingInstance->user_instances_id = $request->user_instances_id;
-			    $schedulingInstance->start_time = $request->start_time;
-			    $schedulingInstance->end_time = $request->end_time;
-			    $schedulingInstance->utc_start_time = $request->utc_start_time ;
-			    $schedulingInstance->utc_end_time = $request->utc_end_time;
 			    $schedulingInstance->user_id = $user_id;
-			    $schedulingInstance->status = $request->status;
-			    $schedulingInstance->current_time_zone =  $request->current_time_zone;
-			    $schedulingInstance->created_at = date('Y-m-d H:i:s');
-
-			    // dd($schedulingInstance);
-			    
+			    $schedulingInstance->user_instances_id = $userInstanceId;
 			 	if($schedulingInstance->save()){
+			 	    foreach ($requestData as $scheduleDetail){
+			 	        $schedulingInstanceDetail = new SchedulingInstancesDetails();
+                        $schedulingInstanceDetail->scheduling_instances_id = $schedulingInstance->id;
+                        $schedulingInstanceDetail->schedule_type = $scheduleDetail['schedule_type'];
+                        $schedulingInstanceDetail->day = $scheduleDetail['day'];
+                        $schedulingInstanceDetail->selected_time = $scheduleDetail['selected_time'];
+			 	        $schedulingInstanceDetail->save();
+                    }
 			 		session()->flash('success', 'Scheduling Create successfully');
 			 		return redirect(route('user.scheduling.index'));
 			 	}

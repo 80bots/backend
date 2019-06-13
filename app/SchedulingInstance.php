@@ -12,6 +12,10 @@ class SchedulingInstance extends Model
         return self::with('userInstances')->where('user_id' , $user_id);
     }
 
+    public static function findByUserInstanceId($id, $user_id){
+   	    return self::where('user_instances_id', $id)->where('user_id', $user_id)->with('schedulingInstanceDetails');
+    }
+
     public static function findScheduling($type)
     {	
         // Check type start or stop
@@ -31,5 +35,9 @@ class SchedulingInstance extends Model
     public function userInstances()
     {
         return $this->belongsTo('App\UserInstances','user_instances_id');
+    }
+
+    public function schedulingInstanceDetails(){
+   	    return $this->hasMany('App\SchedulingInstancesDetails','scheduling_instances_id','id');
     }
 }
