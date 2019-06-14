@@ -113,8 +113,8 @@
                         if(!empty($startTime) && !empty($startAside)){
                             $data['schedule_type'] = 'start';
                             if(!empty($startTime[$key]) && !empty($startAside[$key])){
-                                $data['selected_time'] = date('h:i A', strtotime($startTime[$key].$startAside[$key]));
-//                                $data['selected_time'] = $this->convertTimeToUTCzone($startTime[$key].$startAside[$key], $userTimeZone);
+//                                $data['selected_time'] = date('h:i A', strtotime($startTime[$key].$startAside[$key]));
+                                $data['selected_time'] = $this->convertTimeToUTCzone($startTime[$key].$startAside[$key], $userTimeZone);
                             } else {
                                 $data['selected_time'] = '';
                             }
@@ -127,8 +127,8 @@
                         if(!empty($endTime) && !empty($endAside)){
                             $data['schedule_type'] = 'stop';
                             if(!empty($endTime[$key]) && !empty($endAside[$key])){
-                                $data['selected_time'] = date('h:i A', strtotime($endTime[$key].$endAside[$key]));
-//                                $data['selected_time'] = $this->convertTimeToUTCzone($endTime[$key].$endAside[$key], $userTimeZone);
+//                                $data['selected_time'] = date('h:i A', strtotime($endTime[$key].$endAside[$key]));
+                                $data['selected_time'] = $this->convertTimeToUTCzone($endTime[$key].$endAside[$key], $userTimeZone);
                             } else {
                                 $data['selected_time'] = '';
                             }

@@ -87,9 +87,13 @@
             start_time = start_time.split(" ");
         }
 
-        @for($i = 1; $i <= 12; $i++)
+        @for($i = 1; $i <= 24; $i++)
             @php
+            if($i%2 == 0){
                 $time = date('h:i', strtotime("$i:00"));
+            } else {
+                $time = date('h:i', strtotime("$i:30"));
+            }
             @endphp
         var time = "{{$time}}";
         row += '<option value="' + time + '"';
@@ -133,12 +137,18 @@
         if (end_time != null) {
             end_time = end_time.split(" ");
         }
-            @for($i = 1; $i <= 12; $i++)
+            @for($i = 1; $i <= 24; $i++)
             @php
+            if($i%2 == 0){
                 $time = date('h:i', strtotime("$i:00"));
+            } else {
+                $time = date('h:i', strtotime("$i:30"));
+            }
             @endphp
 
         var endtime = "{{$time}}";
+        console.log(endtime);
+        console.log(end_time[0]);
 
         row += '<option value="' + endtime + '"';
 
