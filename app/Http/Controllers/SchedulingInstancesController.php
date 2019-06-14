@@ -3,6 +3,8 @@
 	namespace App\Http\Controllers;
 
 	use App\SchedulingInstancesDetails;
+    use DateTime;
+    use DateTimeZone;
     use Illuminate\Http\Request;
 	use App\AwsConnection;
 	use App\BaseModel;
@@ -75,11 +77,28 @@
 		* @param  \Illuminate\Http\Request  $request
 		* @return \Illuminate\Http\Response
 		*/
+
+        public function convertTimeToUTCzone($str, $userTimezone, $format = 'h:i A'){
+            $new_str = new DateTime($str, new DateTimeZone(  $userTimezone  ) );
+            $new_str->setTimeZone(new DateTimeZone('UTC'));
+            return $new_str->format($format);
+        }
+
+        public function convertTimeToUSERzone($str, $userTimezone, $format = 'Y-m-d h:i:s A'){
+            if(empty($str)){
+                return '';
+            }
+            $new_str = new DateTime($str, new DateTimeZone('UTC') );
+            $new_str->setTimeZone(new DateTimeZone( $userTimezone ));
+            return $new_str->format( $format);
+        }
+
 		public function store(Request $request)
 		{
 			try {
 				$user_id = Auth::user()->id;
 				$userInstanceId = isset($request->instance_id) ? $request->instance_id : '';
+				$userTimeZone = isset($request->userTimeZone) ? $request->userTimeZone : '';
 				$days = isset($request->day) ? $request->day : '';
 				$requestData = [];
 				foreach ($days as $key => $day){
@@ -95,6 +114,7 @@
                             $data['schedule_type'] = 'start';
                             if(!empty($startTime[$key]) && !empty($startAside[$key])){
                                 $data['selected_time'] = date('h:i A', strtotime($startTime[$key].$startAside[$key]));
+//                                $data['selected_time'] = $this->convertTimeToUTCzone($startTime[$key].$startAside[$key], $userTimeZone);
                             } else {
                                 $data['selected_time'] = '';
                             }
@@ -108,6 +128,7 @@
                             $data['schedule_type'] = 'stop';
                             if(!empty($endTime[$key]) && !empty($endAside[$key])){
                                 $data['selected_time'] = date('h:i A', strtotime($endTime[$key].$endAside[$key]));
+//                                $data['selected_time'] = $this->convertTimeToUTCzone($endTime[$key].$endAside[$key], $userTimeZone);
                             } else {
                                 $data['selected_time'] = '';
                             }

@@ -12,6 +12,7 @@
         <div class="modal-content">
             <form id="CreateSchedulerForm" action="{{route('user.scheduling.store')}}" method="post">
                 <input type="hidden" id="instance-id" name="instance_id" value="">
+                <input type="hidden" id="user-time-zone" name="userTimeZone" value="">
                 @csrf
                 <div class="modal-header">
                     <h4 class="modal-title">Create Scheduler For <span id="bot-name"></span></h4>
@@ -34,56 +35,6 @@
                         </div>
                     </div>
                     <div id="scheduler-row">
-                        <div class="row">
-                            <div class="col-sm-2 border-right">
-                                <div class="form-group">
-                                    <select name="day[]" id="" class="form-control">
-                                        <option value="">-select-</option>
-                                        @foreach($weekDays as $day)
-                                            <option value="{{$day}}">{{$day}}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-sm-3">
-                                <div class="form-group">
-                                    <select name="start_time[]" id="" class="form-control">
-                                        <option value="">-Select-</option>
-                                        @for($i = 1; $i <= 12; $i++)
-                                            <option value="{{date('h:i', strtotime("$i:00"))}}">{{$i}}:00</option>
-                                        @endfor
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-sm-2 border-right">
-                                <div class="form-group">
-                                    <select name="start_aside[]" id="" class="form-control">
-                                        <option value="">-Select-</option>
-                                        <option value="AM">AM</option>
-                                        <option value="PM">PM</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-sm-3">
-                                <div class="form-group">
-                                    <select name="end_time[]" id="" class="form-control">
-                                        <option value="">-Select-</option>
-                                        @for($i = 1; $i <= 12; $i++)
-                                            <option value="{{date('h:i', strtotime("$i:00"))}}">{{$i}}:00</option>
-                                        @endfor
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-sm-2">
-                                <div class="form-group">
-                                    <select name="end_aside[]" id="" class="form-control">
-                                        <option value="">-Select-</option>
-                                        <option value="AM">AM</option>
-                                        <option value="PM">PM</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -95,31 +46,35 @@
     </div>
 </div>
 
-
 <script>
     let weekDays = <?= json_encode($weekDays) ?>;
+
+    window.onload = function () {
+        addSchedulerRow();
+    };
 
     function addSchedulerRow(ids = null, day = null, start_time = null, end_time = null) {
         var asides = ['AM', 'PM'];
         var row =
             '<div class="row">\n';
-        if(ids === null){
-            ids = [0,0];
+        if (ids === null) {
+            ids = [0, 0];
         }
-        row += '<input type="hidden" name="ids[]" value="'+ids+'" >';
+        row += '<input type="hidden" name="ids[]" value="' + ids + '" >';
 
         row += '    <div class="col-sm-2 border-right">\n' +
             '        <div class="form-group">\n' +
             '            <select name="day[]" id="" class="form-control">\n' +
             '                <option value="">-select-</option>\n';
+
         $.each(weekDays, function (key, val) {
             row += '<option value="' + val + '"';
             if (day != null && day == val) {
                 row += 'selected';
             }
             row += '>' + val + '</option>';
-
         });
+
         row += '            </select>\n' +
             '        </div>\n' +
             '    </div>\n' +
@@ -127,21 +82,26 @@
             '        <div class="form-group">\n' +
             '            <select name="start_time[]" id="" class="form-control">\n' +
             '                <option value="">-Select-</option>\n';
-        if(start_time != null) {
+
+        if (start_time != null) {
             start_time = start_time.split(" ");
         }
-            @for($i = 1; $i <= 12; $i++)
+
+        @for($i = 1; $i <= 12; $i++)
             @php
                 $time = date('h:i', strtotime("$i:00"));
             @endphp
         var time = "{{$time}}";
-        row += '<option value="'+time+'"';
-        if(start_time != null){
-            if(time == start_time[0]){
+        row += '<option value="' + time + '"';
+
+        if (start_time != null) {
+            if (time == start_time[0]) {
                 row += 'selected';
             }
         }
-        row += '>'+time+'</option>';
+
+        row += '>' + time + '</option>';
+
         @endfor
 
             row += '            </select>\n' +
@@ -151,15 +111,17 @@
             '        <div class="form-group">\n' +
             '            <select name="start_aside[]" id="" class="form-control">\n' +
             '                <option value="">-Select-</option>\n';
+
         $.each(asides, function (aKey, aVal) {
-            row += '<option value="'+aVal+'"';
-            if(start_time != null){
-                if(aVal == start_time[1]){
+            row += '<option value="' + aVal + '"';
+            if (start_time != null) {
+                if (aVal == start_time[1]) {
                     row += 'selected';
                 }
             }
-            row += '>'+aVal+'</option>\n';
+            row += '>' + aVal + '</option>\n';
         });
+
         row += '            </select>\n' +
             '        </div>\n' +
             '    </div>\n' +
@@ -167,21 +129,26 @@
             '        <div class="form-group">\n' +
             '            <select name="end_time[]" id="" class="form-control">\n' +
             '                <option value="">-Select-</option>\n';
-        if(end_time != null) {
+
+        if (end_time != null) {
             end_time = end_time.split(" ");
         }
             @for($i = 1; $i <= 12; $i++)
             @php
                 $time = date('h:i', strtotime("$i:00"));
             @endphp
+
         var endtime = "{{$time}}";
-        row += '<option value="'+endtime+'"';
-        if(end_time != null){
-            if(endtime == end_time[0]){
+
+        row += '<option value="' + endtime + '"';
+
+        if (end_time != null) {
+            if (endtime == end_time[0]) {
                 row += 'selected';
             }
         }
-        row += '>'+endtime+'</option>';
+
+        row += '>' + endtime + '</option>';
         @endfor
 
             row += '            </select>\n' +
@@ -191,15 +158,17 @@
             '        <div class="form-group">\n' +
             '            <select name="end_aside[]" id="" class="form-control">\n' +
             '                <option value="">-Select-</option>\n';
+
         $.each(asides, function (aKey, aVal) {
-            row += '<option value="'+aVal+'"';
-            if(end_time != null) {
+            row += '<option value="' + aVal + '"';
+            if (end_time != null) {
                 if (aVal == end_time[1]) {
                     row += 'selected';
                 }
             }
-            row += '>'+aVal+'</option>\n';
+            row += '>' + aVal + '</option>\n';
         });
+
         row += '            </select>\n' +
             '        </div>\n' +
             '    </div>\n' +
@@ -215,7 +184,7 @@
         checkSchedule(id);
     }
 
-    function checkSchedule(id){
+    function checkSchedule(id) {
         console.log(id);
         var url = '{{url('user/scheduling/check-scheduled')}}/' + id;
         $.ajax({
@@ -242,10 +211,9 @@
                         var row =
                             '<div class="row">\n';
                         var ids = [];
-                        if(scheduling_instance_details[i] != '' && scheduling_instance_details[i+1] != '')
-                        {
+                        if (scheduling_instance_details[i] != '' && scheduling_instance_details[i + 1] != '') {
                             ids.push(scheduling_instance_details[i].id);
-                            ids.push(scheduling_instance_details[i+1].id);
+                            ids.push(scheduling_instance_details[i + 1].id);
                         }
                         addSchedulerRow(ids, day, start_time, end_time);
 

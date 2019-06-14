@@ -92,8 +92,7 @@ Scheduling instances
     <script src="{{ asset('js/jquery.validate.min.js')  }}" type="text/javascript"></script>
     <script type="text/javascript">
        
-        function get_local_to_utc_time(time)
-        {
+        function get_local_to_utc_time(time) {
             var current_d = moment().format('YYYY-MM-DD')+' '+time;
             var localDate = new Date(current_d);
             return moment.utc( localDate ).format('HH:mm');

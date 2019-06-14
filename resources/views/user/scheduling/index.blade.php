@@ -78,8 +78,11 @@
 @endsection
 
 @section('script')
+    <script type="text/javascript" src="{{ asset('js/moment.min.js')}}"></script>
+    <script type="text/javascript" src="{{ asset('js/tempusdominus-bootstrap-4.min.js')}}"></script>
     <script>
-
+        var current_time_zone =  moment().format('Z');
+        $('#user-time-zone').val(current_time_zone);
         $(document).on('change', '.schedulingStatus', function () {
             var status = $(this).val();
             var schedulingId = $(this).data('id');
