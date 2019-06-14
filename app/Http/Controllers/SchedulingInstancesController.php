@@ -32,7 +32,6 @@
 		    	$user_id = Auth::user()->id;
 		    	$results = SchedulingInstance::findByUserId($user_id)->get();
 
-		    	// dd($results);
 		    	return view('user.scheduling.index',compact('results'));
 	    	}
 	        catch (\Exception $e) {
@@ -60,6 +59,7 @@
             try {
                 $user_id = Auth::user()->id;
                 $scheduleInstanceObj = SchedulingInstance::findByUserInstanceId($id, $user_id)->first()->toArray();
+
                 $return['status'] = 'true';
                 $return['data'] = $scheduleInstanceObj;
                 return json_encode($return);
@@ -242,23 +242,21 @@
 
 		public function changeStatus(Request $request){
         	try{
-
 	            $Scheduling = SchedulingInstance::find($request->id);
-	           
 	            $Scheduling->status = $request->status;
-
 	            if($Scheduling->save()){
-
+                    session()->flash('success', 'Schedule '.$request->status.' successfully!');
 	            	return 'true';
 	            }
 	            else
 	            {
+                    session()->flash('error', 'Schedule '.$request->status.' Not successfully!');
 	            	return 'false';
 	            }
 
 	        } catch (\Exception $e){
-	            session()->flash('error', $e->getMessage());
-	            
+                session()->flash('error', 'Schedule '.$request->status.' Not successfully!');
+                return 'false';
 	        }
     	}
 	}

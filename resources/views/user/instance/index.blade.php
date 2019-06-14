@@ -62,7 +62,7 @@ Instance Listing
                                     <a href="{{!empty($instance->aws_public_ip) ? 'http://'.$instance->aws_public_ip : ''}}" target="_blank"><i class="fa fa-eye"></i></a>
                                 </div>
                                 <div class="col-md-1 col-sm-1">
-                                    @php $bot_name=isset($instance->bots->bot_name)?$instance->bots->bot_name:'';@endphp
+                                    @php $bot_name=isset($instance->bots->bot_name)?$instance->bots->bot_name:''@endphp
                                     <a href="javascript:void(0)" data-toggle="modal" data-target="#create-scheduler"
                                        onclick="SetBotName('{{$bot_name}}','{{$instance->id}}')" class="badge badge-primary font-size-16"><i class="fa fa-pen"></i></a>
                                 </div>
@@ -73,7 +73,7 @@ Instance Listing
         @endif
     </div>
 
-    @include('user.scheduling.include-schedule-popup');
+    @include('user.scheduling.include-schedule-popup')
 @endsection
 
 @section('script')

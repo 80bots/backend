@@ -215,13 +215,15 @@
         checkSchedule(id);
     }
 
-    function checkSchedule(id) {
+    function checkSchedule(id){
+        console.log(id);
         var url = '{{url('user/scheduling/check-scheduled')}}/' + id;
         $.ajax({
             type: 'get',
             url: url,
             cache: false,
             success: function (data) {
+                console.log(data);
                 var response = JSON.parse(data);
                 if (response.status == 'true') {
                     $('#scheduler-row').empty();

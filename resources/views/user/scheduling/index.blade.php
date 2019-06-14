@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title')
-Scheduling instances
+    Scheduling instances
 @endsection
 
 @section('css')
@@ -19,14 +19,13 @@ Scheduling instances
         </div>
         @include('layouts.imports.messages')
         @if(!empty($results) && isset($results))
-            
+
             <div class="table-responsive">
                 <table id="scheduling_instances" class="table thead-default vertical-middle mb-0">
                     <thead>
                     <tr>
                         <th>Instance Id</th>
-                        <th>Start Time</th>
-                        <th>End Time</th>
+                        <th>Bot Name</th>
                         <th>Status</th>
                         <th>Action</th>
                     </tr>
@@ -36,28 +35,34 @@ Scheduling instances
                         @foreach($results as $row)
                             <tr>
                                 <td> {{!empty($row->userInstances['aws_instance_id']) ? $row->userInstances['aws_instance_id'] : ''}}</td>
-                                <td> {{!empty($row->start_time) ? $row->start_time : ''}}</td>
-                                <td> {{!empty($row->end_time) ? $row->end_time : ''}}</td>
-                                <td> 
-                                <select name="status" class="form-control schedulingStatus" data-id="{{$row->id}}">
+                                <td>{{isset($row->userInstances->bots) && !empty($row->userInstances->bots->bot_name) ? $row->userInstances->bots->bot_name : ''}}</td>
+                                <td>
+                                    <select name="status" class="form-control schedulingStatus" data-id="{{$row->id}}">
                                         @if(!empty($row->status) && $row->status == 'active')
-                                            <option selected="selected"   value="active">Active</option>
+                                            <option selected="selected" value="active">Active</option>
                                             <option value="inactive">Inactive</option>
                                         @else
-                                            <option selected="selected"  value="inactive">Inactive</option>
-                                            <option  value="active">Active</option>
+                                            <option selected="selected" value="inactive">Inactive</option>
+                                            <option value="active">Active</option>
                                         @endif
                                     </select>
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <a href="{{route('user.scheduling.edit',$row->id)}}" class="form-group btn btn-icon btn-primary change-credit-model mb-0 mr-1"
-                                        title="Edit Bot"><i class="fa fa-edit"></i></a>
-                                       <form action="{{ route('user.scheduling.destroy',$row->id) }}" method="POST">
-                                         @csrf
+                                        @php $bot_name=isset($row->userInstances->bots) && !empty($row->userInstances->bots->bot_name) ? $row->userInstances->bots->bot_name : ''@endphp
+
+                                        <a href="javascript:void(0)" data-toggle="modal" data-target="#create-scheduler"
+                                           onclick="SetBotName('{{$bot_name}}','{{$row->userInstances->id}}')"
+                                           class="form-group btn btn-icon btn-primary change-credit-model mb-0 mr-1"
+                                           title="Edit Bot"><i class="fa fa-edit"></i></a>
+
+                                        <form action="{{ route('user.scheduling.destroy',$row->id) }}" method="POST">
+                                            @csrf
                                             @method('DELETE')
-                                                <button type="submit" onclick="return confirm('Are you sure? you want to remove this record')" class="form-group btn btn-icon btn-danger change-credit-model mb-0"><i class="fa fa-trash"></i></button>
-                                            </div>
+                                            <button type="submit"
+                                                    onclick="return confirm('Are you sure? you want to remove this record')"
+                                                    class="form-group btn btn-icon btn-danger change-credit-model mb-0">
+                                                <i class="fa fa-trash"></i></button>
                                         </form>
                                     </div>
                                 </td>
@@ -69,11 +74,12 @@ Scheduling instances
             </div>
         @endif
     </div>
+    @include('user.scheduling.include-schedule-popup')
 @endsection
 
 @section('script')
     <script>
-       
+
         $(document).on('change', '.schedulingStatus', function () {
             var status = $(this).val();
             var schedulingId = $(this).data('id');
@@ -83,14 +89,14 @@ Scheduling instances
                 url: URL,
                 cache: false,
                 data: {
-                    _token : function () {
+                    _token: function () {
                         return '{{csrf_token()}}';
                     },
-                    id : schedulingId,
+                    id: schedulingId,
                     status: status
                 },
                 success: function (data) {
-                   // location.reload();
+                    location.reload();
                 }
             });
         })
