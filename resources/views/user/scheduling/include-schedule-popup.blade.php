@@ -59,8 +59,8 @@
                                 <div class="form-group">
                                     <select name="start_aside[]" id="" class="form-control">
                                         <option value="">-Select-</option>
-                                        <option value="am">AM</option>
-                                        <option value="pm">PM</option>
+                                        <option value="AM">AM</option>
+                                        <option value="PM">PM</option>
                                     </select>
                                 </div>
                             </div>
@@ -78,8 +78,8 @@
                                 <div class="form-group">
                                     <select name="end_aside[]" id="" class="form-control">
                                         <option value="">-Select-</option>
-                                        <option value="am">AM</option>
-                                        <option value="pm">PM</option>
+                                        <option value="AM">AM</option>
+                                        <option value="PM">PM</option>
                                     </select>
                                 </div>
                             </div>
@@ -100,9 +100,11 @@
     let weekDays = <?= json_encode($weekDays) ?>;
 
     function addSchedulerRow() {
+        var ids = [0,0];
         var row =
-            '<div class="row">\n' +
-            '    <div class="col-sm-2 border-right">\n' +
+            '<div class="row">\n';
+            row += '<input type="hidden" name="ids[]" value="'+ids+'" >';
+            row += '    <div class="col-sm-2 border-right">\n' +
             '        <div class="form-group">\n' +
             '            <select name="day[]" id="" class="form-control">\n' +
             '                <option value="">-select-</option>\n' +
@@ -129,8 +131,8 @@
             '        <div class="form-group">\n' +
             '            <select name="start_aside[]" id="" class="form-control">\n' +
             '                <option value="">-Select-</option>\n' +
-            '                <option value="am">AM</option>\n' +
-            '                <option value="pm">PM</option>\n' +
+            '                <option value="AM">AM</option>\n' +
+            '                <option value="PM">PM</option>\n' +
             '            </select>\n' +
             '        </div>\n' +
             '    </div>\n' +
@@ -151,8 +153,8 @@
             '        <div class="form-group">\n' +
             '            <select name="end_aside[]" id="" class="form-control">\n' +
             '                <option value="">-Select-</option>\n' +
-            '                <option value="am">AM</option>\n' +
-            '                <option value="pm">PM</option>\n' +
+            '                <option value="AM">AM</option>\n' +
+            '                <option value="PM">PM</option>\n' +
             '            </select>\n' +
             '        </div>\n' +
             '    </div>\n' +
@@ -165,7 +167,7 @@
         $('#instance-id').val(id);
         $('#bot-name').text(name);
 
-        // checkSchedule(id);
+        checkSchedule(id);
     }
 
     function checkSchedule(id) {
@@ -177,31 +179,123 @@
             success: function (data) {
                 var response = JSON.parse(data);
                 if (response.status == 'true') {
-                    // $('#scheduler-row').empty();
+                    $('#scheduler-row').empty();
 
                     var schedulingInstance = response.data;
-                    var scheduling_instance_details = schedulingInstance.scheduling_instance_details;/*
-                    for(i=0;i<scheduling_instance_details.length;i+2){
+                    var scheduling_instance_details = schedulingInstance.scheduling_instance_details;
+                    var lenth = scheduling_instance_details.length;
+                    for (i = 0; i < lenth;) {
                         var day = scheduling_instance_details[i].day;
                         var start = scheduling_instance_details[i].schedule_type;
                         var start_time = scheduling_instance_details[i].selected_time;
-                        var end = scheduling_instance_details[i+1].schedule_type;
-                        var end_time = scheduling_instance_details[i+1].selected_time;
-
-                        console.log(day);
-                        console.log(start);
-                        console.log(start_time);
-                        console.log(end);
-                        console.log(end_time);
-                    }*/
-
-                    /*$.each(scheduling_instance_details, function (key, val) {
-                        var i = 0;
+                        var end = scheduling_instance_details[i + 1].schedule_type;
+                        var end_time = scheduling_instance_details[i + 1].selected_time;
+                        var asides = ['AM', 'PM'];
 
 
-                    });*/
+
+                        var row =
+                            '<div class="row">\n';
+
+                        var ids = [];
+                        if(scheduling_instance_details[i] != '' && scheduling_instance_details[i+1] != '')
+                        {
+                            ids.push(scheduling_instance_details[i].id);
+                            ids.push(scheduling_instance_details[i+1].id);
+                        }
+                        row += '<input type="hidden" name="ids[]" value="'+ids+'" >';
+
+                            row += '    <div class="col-sm-2 border-right">\n' +
+                            '        <div class="form-group">\n' +
+                            '            <select name="day[]" id="" class="form-control">\n' +
+                            '                <option value="">-select-</option>\n';
+                        $.each(weekDays, function (key, val) {
+                            row += '<option value="' + val + '"';
+                            if (day == val) {
+                                row += 'selected';
+                            }
+                            row += '>' + val + '</option>';
+
+                        });
+                        row += '            </select>\n' +
+                        '        </div>\n' +
+                        '    </div>\n' +
+                        '    <div class="col-sm-3">\n' +
+                        '        <div class="form-group">\n' +
+                        '            <select name="start_time[]" id="" class="form-control">\n' +
+                        '                <option value="">-Select-</option>\n';
+                        start_time = start_time.split(" ");
+                        @for($i = 1; $i <= 12; $i++)
+                            @php
+                                $time = date('h:i', strtotime("$i:00"));
+                            @endphp
+                            var time = "{{$time}}";
+                            row += '<option value="'+time+'"';
+                                if(time == start_time[0]){
+                                    row += 'selected';
+                                }
+                                row += '>'+time+'</option>';
+                        @endfor
+
+                        row += '            </select>\n' +
+                        '        </div>\n' +
+                        '    </div>\n' +
+                        '    <div class="col-sm-2 border-right">\n' +
+                        '        <div class="form-group">\n' +
+                        '            <select name="start_aside[]" id="" class="form-control">\n' +
+                        '                <option value="">-Select-</option>\n';
+                        $.each(asides, function (aKey, aVal) {
+                            row += '<option value="'+aVal+'"';
+                                if(aVal == start_time[1]){
+                                    row += 'selected';
+                                }
+                            row += '>'+aVal+'</option>\n';
+                        });
+                        row += '            </select>\n' +
+                        '        </div>\n' +
+                        '    </div>\n' +
+                        '    <div class="col-sm-3">\n' +
+                        '        <div class="form-group">\n' +
+                        '            <select name="end_time[]" id="" class="form-control">\n' +
+                            '                <option value="">-Select-</option>\n';
+                        end_time = end_time.split(" ");
+                            @for($i = 1; $i <= 12; $i++)
+                            @php
+                                $time = date('h:i', strtotime("$i:00"));
+                            @endphp
+                        var endtime = "{{$time}}";
+                        row += '<option value="'+endtime+'"';
+                        if(endtime == end_time[0]){
+                            row += 'selected';
+                        }
+                        row += '>'+endtime+'</option>';
+                        @endfor
+
+                            row += '            </select>\n' +
+                        '        </div>\n' +
+                        '    </div>\n' +
+                        '    <div class="col-sm-2">\n' +
+                        '        <div class="form-group">\n' +
+                        '            <select name="end_aside[]" id="" class="form-control">\n' +
+                            '                <option value="">-Select-</option>\n';
+                        $.each(asides, function (aKey, aVal) {
+                            row += '<option value="'+aVal+'"';
+                            if(aVal == end_time[1]){
+                                row += 'selected';
+                            }
+                            row += '>'+aVal+'</option>\n';
+                        });
+                        row += '            </select>\n' +
+                        '        </div>\n' +
+                        '    </div>\n' +
+                        '</div>';
+
+                        $('#scheduler-row').append(row);
+                        i = i + 2;
+                    }
+
                 } else {
-
+                    // give an error
                 }
             }
         });

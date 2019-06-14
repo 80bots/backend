@@ -86,6 +86,7 @@
 				    if(!empty($day)){
                         $data = [];
                         $data['day'] = $day;
+                        $ids = isset($request->ids) ? explode(',',$request->ids[$key]) : '';
                         $startTime = isset($request->start_time) ? $request->start_time : '';
                         $endTime = isset($request->end_time) ? $request->end_time : '';
                         $startAside = isset($request->start_aside) ? $request->start_aside : '';
@@ -93,9 +94,12 @@
                         if(!empty($startTime) && !empty($startAside)){
                             $data['schedule_type'] = 'start';
                             if(!empty($startTime[$key]) && !empty($startAside[$key])){
-                                $data['selected_time'] = date('h:iA', strtotime($startTime[$key].$startAside[$key]));
+                                $data['selected_time'] = date('h:i A', strtotime($startTime[$key].$startAside[$key]));
                             } else {
                                 $data['selected_time'] = '';
+                            }
+                            if(!empty($ids) && $ids[0] != "0"){
+                                $data['id'] = $ids[0];
                             }
                             array_push($requestData, $data);
                         }
@@ -103,21 +107,31 @@
                         if(!empty($endTime) && !empty($endAside)){
                             $data['schedule_type'] = 'stop';
                             if(!empty($endTime[$key]) && !empty($endAside[$key])){
-                                $data['selected_time'] = date('h:iA', strtotime($endTime[$key].$endAside[$key]));
+                                $data['selected_time'] = date('h:i A', strtotime($endTime[$key].$endAside[$key]));
                             } else {
                                 $data['selected_time'] = '';
+                            }
+                            if(!empty($ids) && $ids[1] != "0"){
+                                $data['id'] = $ids[1];
                             }
                             array_push($requestData, $data);
                         }
                     }
                 }
 
-				$schedulingInstance = new SchedulingInstance();
+                $schedulingInstance = SchedulingInstance::findByUserInstanceId($userInstanceId, $user_id)->first();
+				if(empty($schedulingInstance)){
+                    $schedulingInstance = new SchedulingInstance();
+                }
 			    $schedulingInstance->user_id = $user_id;
 			    $schedulingInstance->user_instances_id = $userInstanceId;
 			 	if($schedulingInstance->save()){
 			 	    foreach ($requestData as $scheduleDetail){
-			 	        $schedulingInstanceDetail = new SchedulingInstancesDetails();
+			 	        if(isset($scheduleDetail['id']) && !empty($scheduleDetail['id'])){
+			 	            $schedulingInstanceDetail = SchedulingInstancesDetails::findById($scheduleDetail['id'])->first();
+                        } else {
+			 	            $schedulingInstanceDetail = new SchedulingInstancesDetails();
+                        }
                         $schedulingInstanceDetail->scheduling_instances_id = $schedulingInstance->id;
                         $schedulingInstanceDetail->schedule_type = $scheduleDetail['schedule_type'];
                         $schedulingInstanceDetail->day = $scheduleDetail['day'];

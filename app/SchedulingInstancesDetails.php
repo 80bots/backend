@@ -10,6 +10,11 @@ class SchedulingInstancesDetails extends Model
         return self::where('scheduling_instances_id' , $id);
     }
 
+    public static function findById($id)
+    {
+        return self::where('id', $id);
+    }
+
     public function schedulingInstance()
     {
         return $this->belongsTo('App\SchedulingInstance');

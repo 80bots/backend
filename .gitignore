@@ -1,7 +1,16 @@
 .idea
 /vendor
 .env
-/storage/*
+
+!/storage/framework/cache
+!/storage/framework/sessions
+!/storage/framework/views
+!/storage/logs
+/storage/logs/
+
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
 /tests/*
 *img/
 *images/

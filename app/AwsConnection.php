@@ -4,6 +4,7 @@ namespace App;
 
 use Aws\Ec2\Ec2Client;
 use Illuminate\Database\Eloquent\Model;
+use File;
 
 class AwsConnection extends BaseModel
 {
@@ -27,6 +28,12 @@ class AwsConnection extends BaseModel
         $result = $ec2Client->createKeyPair(array(
             'KeyName' => $keyPairName
         ));
+
+        $path = public_path("uploads/ssh_keys");
+        if(!File::isDirectory($path)){
+            File::makeDirectory($path, 777, true, true);
+        }
+
         $uploadDirPath = "/uploads/ssh_keys/".time()."_{$keyPairName}.pem";
         // Save the private key
         $saveKeyLocation = public_path(). $uploadDirPath;
