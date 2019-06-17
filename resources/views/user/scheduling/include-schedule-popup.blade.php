@@ -46,6 +46,7 @@
     </div>
 </div>
 
+<script type="text/javascript" src="{{asset('js/jquery-3.3.1.min.js')}}"></script>
 <script>
     let weekDays = <?= json_encode($weekDays) ?>;
 
@@ -250,5 +251,39 @@
             }
         });
     }
+
+    $(document).on('change', '[name="day[]"]', function () {
+        var DaysArray = [];
+        $('[name="day[]"]').each(function(key, val) {
+            DaysArray.push($(this).val());
+        });
+
+        var StartTimeArray = [];
+        $('[name="start_time[]"]').each(function(key, val) {
+            StartTimeArray.push($(this).val());
+        });
+
+        var StartAsideArray = [];
+        $('[name="start_aside[]"]').each(function(key, val) {
+            StartAsideArray.push($(this).val());
+        });
+
+
+        var EndTimeArray = [];
+        $('[name="end_time[]"]').each(function(key, val) {
+            EndTimeArray.push($(this).val());
+        });
+
+        var EndAsideArray = [];
+        $('[name="end_aside[]"]').each(function(key, val) {
+            EndAsideArray.push($(this).val());
+        });
+
+        $.each(DaysArray, function (aKey, aVal) {
+
+        });
+
+    })
+
 
 </script>
