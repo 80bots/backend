@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use phpDocumentor\Reflection\Types\Self_;
 
 class SchedulingInstance extends Model
 {
@@ -17,19 +18,10 @@ class SchedulingInstance extends Model
     }
 
     public static function findScheduling($type)
-    {	
-        // Check type start or stop
-    	$where = 'utc_start_time';
-    	if($type == 'stop')
-    	{
-    		$where = 'utc_end_time';
-    	}
-    	
-        // Get Current Time   
-    	$time = date('H:i');
-       
-        // Get start and edit time data with active scheduling
-     	return self::with('userInstances')->where($where , $time)->where('status', 'active')->get();
+    {
+        return self::where('status', '=', 'active')->with(['schedulingInstanceDetails' => function ($query) use ($type) {
+            $query->where('schedule_type', '=', $type);
+        }, 'userInstances']);
     }
 
     public function userInstances()

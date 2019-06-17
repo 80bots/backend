@@ -188,6 +188,7 @@
 
         $('#scheduler-row').append(row);
     }
+
     function convertUtcToUser(time){
         var url = '{{url('user/scheduling/convert-time-utc-to-user')}}/'+time+'/'+current_time_zone;
         var value = '';
@@ -204,9 +205,9 @@
     }
 
     function SetBotName(name, id) {
+        $('#scheduler-row').empty();
         $('#instance-id').val(id);
         $('#bot-name').text(name);
-
         checkSchedule(id);
     }
 
@@ -219,8 +220,6 @@
             success: function (data) {
                 var response = JSON.parse(data);
                 if (response.status == 'true') {
-                    $('#scheduler-row').empty();
-
                     var schedulingInstance = response.data;
                     var scheduling_instance_details = schedulingInstance.scheduling_instance_details;
                     var lenth = scheduling_instance_details.length;
@@ -245,7 +244,8 @@
                     }
 
                 } else {
-                    // give an error
+                    console.log('Hello');
+                    addSchedulerRow();
                 }
             }
         });

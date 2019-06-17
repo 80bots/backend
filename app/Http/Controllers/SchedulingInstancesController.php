@@ -57,7 +57,7 @@
 
 		}
 
-        public function convertTimeToUTCzone($str, $userTimezone, $format = 'h:i A'){
+        public function convertTimeToUTCzone($str, $userTimezone, $format = 'D h:i A'){
             $new_str = new DateTime($str, new DateTimeZone(  $userTimezone  ) );
             $new_str->setTimeZone(new DateTimeZone('UTC'));
             return $new_str->format($format);
@@ -75,10 +75,15 @@
 		public function CheckScheduled($id){
             try {
                 $user_id = Auth::user()->id;
-                $scheduleInstanceObj = SchedulingInstance::findByUserInstanceId($id, $user_id)->first()->toArray();
-
-                $return['status'] = 'true';
-                $return['data'] = $scheduleInstanceObj;
+                $scheduleInstanceObj = SchedulingInstance::findByUserInstanceId($id, $user_id)->first();
+                if(!empty($scheduleInstanceObj)){
+                    $scheduleInstanceObj = $scheduleInstanceObj->toArray();
+                    $return['status'] = 'true';
+                    $return['data'] = $scheduleInstanceObj;
+                } else {
+                    $return['status'] = 'false';
+                    $return['data'] = $scheduleInstanceObj;
+                }
                 return json_encode($return);
             } catch (\Exception $e) {
                 $return['status'] = 'false';
@@ -96,7 +101,6 @@
 
 		public function store(Request $request)
 		{
-		    dd($request);
 			try {
 				$user_id = Auth::user()->id;
 				$userInstanceId = isset($request->instance_id) ? $request->instance_id : '';
@@ -116,7 +120,9 @@
                             $data['schedule_type'] = 'start';
                             if(!empty($startTime[$key]) && !empty($startAside[$key])){
 //                                $data['selected_time'] = date('h:i A', strtotime($startTime[$key].$startAside[$key]));
-                                $data['selected_time'] = $this->convertTimeToUTCzone($startTime[$key].$startAside[$key], $userTimeZone);
+                                $selected_time = $this->convertTimeToUTCzone($startTime[$key].$startAside[$key], $userTimeZone);
+                                $data['selected_time'] = date('h:i A', strtotime($selected_time));
+                                $data['cron_data'] = $selected_time.' '.$userTimeZone;
                             } else {
                                 $data['selected_time'] = '';
                             }
@@ -130,7 +136,9 @@
                             $data['schedule_type'] = 'stop';
                             if(!empty($endTime[$key]) && !empty($endAside[$key])){
 //                                $data['selected_time'] = date('h:i A', strtotime($endTime[$key].$endAside[$key]));
-                                $data['selected_time'] = $this->convertTimeToUTCzone($endTime[$key].$endAside[$key], $userTimeZone);
+                                $selected_time = $this->convertTimeToUTCzone($endTime[$key].$endAside[$key], $userTimeZone);
+                                $data['selected_time'] = date('h:i A', strtotime($selected_time));
+                                $data['cron_data'] = $selected_time.' '.$userTimeZone;
                             } else {
                                 $data['selected_time'] = '';
                             }
@@ -159,6 +167,7 @@
                         $schedulingInstanceDetail->schedule_type = $scheduleDetail['schedule_type'];
                         $schedulingInstanceDetail->day = $scheduleDetail['day'];
                         $schedulingInstanceDetail->selected_time = $scheduleDetail['selected_time'];
+                        $schedulingInstanceDetail->cron_data = $scheduleDetail['cron_data'];
 			 	        $schedulingInstanceDetail->save();
                     }
 			 		session()->flash('success', 'Scheduling Create successfully');

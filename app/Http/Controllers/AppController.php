@@ -8,6 +8,7 @@ use App\Notifications;
 use App\User;
 use App\UserInstances;
 use App\SchedulingInstance;
+use App\UserInstancesDetails;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -136,7 +137,7 @@ class AppController extends Controller
         }
     }*/
     
-    public function startScheduling()
+    /*public function startScheduling()
     {
         Log::info('cron call start scheduling');
         try {
@@ -235,5 +236,134 @@ class AppController extends Controller
 
             Log::info('Catch Error Message '. $e->getMessage());
         }    
+    }*/
+
+    public function startScheduling()
+    {
+        Log::info('cron call start scheduling');
+        $currentDate = date('Y-m-d H:i:s');
+        try {
+            $instancesIds = [];
+            $startSchedule = SchedulingInstance::findScheduling('start')->get();
+            foreach ($startSchedule as $scheduler){
+                $UserInstanceObj = isset($scheduler->userInstances) ? $scheduler->userInstances : '';
+                $scheduleDetails = isset($scheduler->schedulingInstanceDetails) ? $scheduler->schedulingInstanceDetails : '';
+                if(!empty($scheduleDetails)){
+                    foreach ($scheduleDetails as $detail){
+                        if(!empty($UserInstanceObj)){
+                            $CronDate = explode(' ',$detail->cron_data);
+                            $currentTime = strtotime(date('D H:i A'));
+                            $cronTime = strtotime($CronDate[0].$CronDate[1].$CronDate[2]);
+                            if($currentTime == $cronTime){
+                                array_push($instancesIds, $UserInstanceObj->aws_instance_id);
+                            }
+                        }
+                    }
+                }
+            }
+            if(count($instancesIds) > 0){
+                $result = AwsConnection::StartInstance($instancesIds);
+                if(!empty($result))
+                {
+                    $startInstance = $result->getPath('StartingInstances');
+                    foreach ($startInstance as $instanceDetail){
+                        $CurrentState = $instanceDetail['CurrentState'];
+                        $instanceId = $instanceDetail['InstanceId'];
+                        if($CurrentState['Name'] == 'pending' || $CurrentState['Name'] == 'running'){
+                            $UserInstance = UserInstances::findByInstanceId($instanceId)->first();
+                            $UserInstance->status = 'running';
+                            if($UserInstance->save()){
+                                $instanceDetail = UserInstancesDetails::where(['user_instance_id' => $UserInstance->id, 'end_time' => null])->latest()->first();
+                                if(empty($instanceDetail)){
+                                    $instanceDetail = new UserInstancesDetails();
+                                    $instanceDetail->user_instance_id = $UserInstance->id;
+                                    $instanceDetail->start_time = $currentDate;
+                                    $instanceDetail->save();
+                                }
+                                Log::info('Instance Id '. $instanceId . ' Started');
+                            }
+                        } else {
+                            Log::info('Instance Id '. $instanceId . ' Not Started Successfully');
+                        }
+                    }
+                } else {
+                    Log::info('Instances are not Started ['.$instancesIds.']');
+                }
+            } else {
+                Log::info('No Instances Are there to Start');
+            }
+        }
+        catch (\Exception $e) {
+            Log::info('Catch Error Message '. $e->getMessage());
+        }
+    }
+
+    public function stopScheduling()
+    {
+        Log::info('cron call stop scheduling');
+        $currentDate = date('Y-m-d H:i:s');
+        try {
+            $instancesIds = [];
+            $startSchedule = SchedulingInstance::findScheduling('stop')->get();
+            foreach ($startSchedule as $scheduler){
+                $UserInstanceObj = isset($scheduler->userInstances) ? $scheduler->userInstances : '';
+                $scheduleDetails = isset($scheduler->schedulingInstanceDetails) ? $scheduler->schedulingInstanceDetails : '';
+                if(!empty($scheduleDetails)){
+                    foreach ($scheduleDetails as $detail){
+                        if(!empty($UserInstanceObj)){
+                            $CronDate = explode(' ',$detail->cron_data);
+                            $currentTime = strtotime(date('D H:i A'));
+                            $cronTime = strtotime($CronDate[0].$CronDate[1].$CronDate[2]);
+                            if($currentTime == $cronTime){
+                                array_push($instancesIds, $UserInstanceObj->aws_instance_id);
+                            }
+                        }
+                    }
+                }
+            }
+            if(count($instancesIds) > 0){
+                $result = AwsConnection::StopInstance($instancesIds);
+                if(!empty($result))
+                {
+                    $startInstance = $result->getPath('StoppingInstances');
+                    foreach ($startInstance as $instanceDetail){
+                        $CurrentState = $instanceDetail['CurrentState'];
+                        $instanceId = $instanceDetail['InstanceId'];
+                        if($CurrentState['Name'] == 'stopped' || $CurrentState['Name'] == 'stopping'){
+                            $UserInstance = UserInstances::findByInstanceId($instanceId)->first();
+                            $UserInstance->status = 'stop';
+                            $instanceDetail = UserInstancesDetails::where(['user_instance_id' => $UserInstance->id, 'end_time' => null])->latest()->first();
+                            if(!empty($instanceDetail)){
+                                $instanceDetail->end_time = $currentDate;
+                                $diffTime = $this->DiffTime($instanceDetail->start_time, $instanceDetail->end_date);
+                                $instanceDetail->total_time = $diffTime;
+                                if($instanceDetail->save()){
+                                    if($diffTime > $UserInstance->cron_up_time){
+                                        $UserInstance->cron_up_time = 0;
+                                        $tempUpTime = !empty($UserInstance->temp_up_time) ? $UserInstance->temp_up_time: 0;
+                                        $upTime = $diffTime + $tempUpTime;
+                                        $UserInstance->temp_up_time = $upTime;
+                                        $UserInstance->up_time = $upTime;
+                                        $UserInstance->used_credit = $this->CalUsedCredit($upTime);
+                                    }
+                                }
+                            }
+                            if($UserInstance->save()){
+                                Log::info('Instance Id '. $instanceId . ' Stopped');
+                            }
+                        } else {
+                            Log::info('Instance Id '. $instanceId . ' Not Stopped Successfully');
+                        }
+                    }
+                } else {
+                    Log::info('Instances are not Stopped ['.$instancesIds.']');
+                }
+            } else {
+                Log::info('No Instances Are there to stop');
+            }
+        }
+        catch (\Exception $e) {
+            Log::info('Catch Error Message '. $e->getMessage());
+        }
     }
 }
