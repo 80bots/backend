@@ -50,7 +50,7 @@
     let weekDays = <?= json_encode($weekDays) ?>;
 
     window.onload = function () {
-        addSchedulerRow();
+        // addSchedulerRow();
     };
 
     function addSchedulerRow(ids = null, day = null, start_time = null, end_time = null) {
@@ -84,16 +84,18 @@
             '                <option value="">-Select-</option>\n';
 
         if (start_time != null) {
+            start_time = convertUtcToUser(start_time);
             start_time = start_time.split(" ");
         }
 
-        @for($i = 1; $i <= 24; $i++)
+            @for($i = 1; $i <= 12; $i++)
+            @for($j=1; $j<=2; $j++)
             @php
-            if($i%2 == 0){
-                $time = date('h:i', strtotime("$i:00"));
-            } else {
-                $time = date('h:i', strtotime("$i:30"));
-            }
+                if($j%2 == 0){
+                    $time = date('h:i', strtotime("$i:30"));
+                } else {
+                    $time = date('h:i', strtotime("$i:00"));
+                }
             @endphp
         var time = "{{$time}}";
         row += '<option value="' + time + '"';
@@ -105,8 +107,8 @@
         }
 
         row += '>' + time + '</option>';
-
         @endfor
+            @endfor
 
             row += '            </select>\n' +
             '        </div>\n' +
@@ -135,21 +137,20 @@
             '                <option value="">-Select-</option>\n';
 
         if (end_time != null) {
+            end_time = convertUtcToUser(end_time);
             end_time = end_time.split(" ");
         }
-            @for($i = 1; $i <= 24; $i++)
+            @for($i = 1; $i <= 12; $i++)
+            @for($j=1; $j<=2; $j++)
             @php
-            if($i%2 == 0){
-                $time = date('h:i', strtotime("$i:00"));
-            } else {
-                $time = date('h:i', strtotime("$i:30"));
-            }
+                if($j%2 == 0){
+                    $time = date('h:i', strtotime("$i:30"));
+                } else {
+                    $time = date('h:i', strtotime("$i:00"));
+                }
             @endphp
 
         var endtime = "{{$time}}";
-        console.log(endtime);
-        console.log(end_time[0]);
-
         row += '<option value="' + endtime + '"';
 
         if (end_time != null) {
@@ -160,6 +161,7 @@
 
         row += '>' + endtime + '</option>';
         @endfor
+            @endfor
 
             row += '            </select>\n' +
             '        </div>\n' +
@@ -186,6 +188,20 @@
 
         $('#scheduler-row').append(row);
     }
+    function convertUtcToUser(time){
+        var url = '{{url('user/scheduling/convert-time-utc-to-user')}}/'+time+'/'+current_time_zone;
+        var value = '';
+        $.ajax({
+            type: 'get',
+            async: false,
+            url: url,
+            cache: false,
+            success: function (data) {
+                value = data;
+            }
+        });
+        return value;
+    }
 
     function SetBotName(name, id) {
         $('#instance-id').val(id);
@@ -195,14 +211,12 @@
     }
 
     function checkSchedule(id) {
-        console.log(id);
         var url = '{{url('user/scheduling/check-scheduled')}}/' + id;
         $.ajax({
             type: 'get',
             url: url,
             cache: false,
             success: function (data) {
-                console.log(data);
                 var response = JSON.parse(data);
                 if (response.status == 'true') {
                     $('#scheduler-row').empty();

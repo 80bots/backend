@@ -57,6 +57,21 @@
 
 		}
 
+        public function convertTimeToUTCzone($str, $userTimezone, $format = 'h:i A'){
+            $new_str = new DateTime($str, new DateTimeZone(  $userTimezone  ) );
+            $new_str->setTimeZone(new DateTimeZone('UTC'));
+            return $new_str->format($format);
+        }
+
+        public function convertTimeToUSERzone($str, $userTimezone, $format = 'h:i A'){
+            if(empty($str)){
+                return '';
+            }
+            $new_str = new DateTime($str, new DateTimeZone('UTC') );
+            $new_str->setTimeZone(new DateTimeZone( $userTimezone ));
+            return $new_str->format( $format);
+        }
+
 		public function CheckScheduled($id){
             try {
                 $user_id = Auth::user()->id;
@@ -78,23 +93,10 @@
 		* @return \Illuminate\Http\Response
 		*/
 
-        public function convertTimeToUTCzone($str, $userTimezone, $format = 'h:i A'){
-            $new_str = new DateTime($str, new DateTimeZone(  $userTimezone  ) );
-            $new_str->setTimeZone(new DateTimeZone('UTC'));
-            return $new_str->format($format);
-        }
-
-        public function convertTimeToUSERzone($str, $userTimezone, $format = 'Y-m-d h:i:s A'){
-            if(empty($str)){
-                return '';
-            }
-            $new_str = new DateTime($str, new DateTimeZone('UTC') );
-            $new_str->setTimeZone(new DateTimeZone( $userTimezone ));
-            return $new_str->format( $format);
-        }
 
 		public function store(Request $request)
 		{
+		    dd($request);
 			try {
 				$user_id = Auth::user()->id;
 				$userInstanceId = isset($request->instance_id) ? $request->instance_id : '';

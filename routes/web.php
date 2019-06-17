@@ -62,10 +62,10 @@ Route::group(['prefix' => 'user', 'as' => 'user.', 'middleware' => ['auth', 'use
     Route::get('bots-all-list/{id}', 'UserInstancesController@BotAllList')->name('bots.all.list');
 
     Route::resource('scheduling', 'SchedulingInstancesController');
-
     Route::group(['prefix' => 'scheduling', 'as' => 'scheduling.'], function() {
         Route::get('check-scheduled/{id}', 'SchedulingInstancesController@CheckScheduled')->name('check-scheduled');
         Route::post('change-status', 'SchedulingInstancesController@changeStatus')->name('change-status');
+        Route::get('convert-time-utc-to-user/{str}/{userTimezone}', 'SchedulingInstancesController@convertTimeToUSERzone')->name('convert-time-utc-to-user');
     });
 
     Route::resource('instance','UserInstancesController');
