@@ -5,12 +5,24 @@
         $weekDays[] = strftime('%A', $timestamp);
         $timestamp = strtotime('+1 day', $timestamp);
     }
+
+    $timesArr = [];
+    for($i = 1; $i <= 12; $i++){
+        for($j=1; $j<=2; $j++){
+            if($j%2 == 0){
+                $time = date('h:i', strtotime("$i:30"));
+            } else {
+                $time = date('h:i', strtotime("$i:00"));
+            }
+            array_push($timesArr, $time);
+        }
+    }
 @endphp
 
 <div class="modal fade" id="create-scheduler" role="dialog">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form id="CreateSchedulerForm" action="{{route('user.scheduling.store')}}" method="post">
+            <form id="CreateSchedulerForm" name="" action="{{route('user.scheduling.store')}}" method="post">
                 <input type="hidden" id="instance-id" name="instance_id" value="">
                 <input type="hidden" id="user-time-zone" name="userTimeZone" value="">
                 @csrf
@@ -46,15 +58,31 @@
     </div>
 </div>
 
+<input type="hidden" name="row-data-val" id="row-data-val">
+
 <script type="text/javascript" src="{{asset('js/jquery-3.3.1.min.js')}}"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-form-validator/2.3.26/jquery.form-validator.min.js"></script>
 <script>
     let weekDays = <?= json_encode($weekDays) ?>;
-
+    let TimeArray = <?= json_encode($timesArr) ?>;
+    let AsideArray = ['AM', 'PM'];
+    let fullTime = [];
+    let rowEndTimeVal = [];
     window.onload = function () {
-        // addSchedulerRow();
+        $.each(weekDays, function (weekKey, weekVal) {
+            var data = [];
+            $.each(AsideArray, function (key, val) {
+                $.each(TimeArray, function (TimeKey, TimeVal) {
+                    data.push(TimeVal+' '+val);
+                });
+            });
+            fullTime[weekVal] = data;
+        });
     };
 
     function addSchedulerRow(ids = null, day = null, start_time = null, end_time = null) {
+        storeRow();
+        var numRow = $('#scheduler-row .row').length;
         var asides = ['AM', 'PM'];
         var row =
             '<div class="row">\n';
@@ -65,7 +93,7 @@
 
         row += '    <div class="col-sm-2 border-right">\n' +
             '        <div class="form-group">\n' +
-            '            <select name="day[]" id="" class="form-control">\n' +
+            '            <select name="day[]" id="day_'+numRow+'" class="form-control">\n' +
             '                <option value="">-select-</option>\n';
 
         $.each(weekDays, function (key, val) {
@@ -81,7 +109,7 @@
             '    </div>\n' +
             '    <div class="col-sm-3">\n' +
             '        <div class="form-group">\n' +
-            '            <select name="start_time[]" id="" class="form-control">\n' +
+            '            <select name="start_time[]" id="start_time_'+numRow+'" class="form-control">\n' +
             '                <option value="">-Select-</option>\n';
 
         if (start_time != null) {
@@ -89,34 +117,22 @@
             start_time = start_time.split(" ");
         }
 
-            @for($i = 1; $i <= 12; $i++)
-            @for($j=1; $j<=2; $j++)
-            @php
-                if($j%2 == 0){
-                    $time = date('h:i', strtotime("$i:30"));
-                } else {
-                    $time = date('h:i', strtotime("$i:00"));
+        $.each(TimeArray, function (key, val) {
+            row += '<option value="' + val + '"';
+            if (start_time != null) {
+                if (val == start_time[0]) {
+                    row += 'selected';
                 }
-            @endphp
-        var time = "{{$time}}";
-        row += '<option value="' + time + '"';
-
-        if (start_time != null) {
-            if (time == start_time[0]) {
-                row += 'selected';
             }
-        }
-
-        row += '>' + time + '</option>';
-        @endfor
-            @endfor
+            row += '>' + val + '</option>';
+        });
 
             row += '            </select>\n' +
             '        </div>\n' +
             '    </div>\n' +
             '    <div class="col-sm-2 border-right">\n' +
             '        <div class="form-group">\n' +
-            '            <select name="start_aside[]" id="" class="form-control">\n' +
+            '            <select name="start_aside[]" id="start_aside_'+numRow+'" class="form-control">\n' +
             '                <option value="">-Select-</option>\n';
 
         $.each(asides, function (aKey, aVal) {
@@ -134,42 +150,29 @@
             '    </div>\n' +
             '    <div class="col-sm-3">\n' +
             '        <div class="form-group">\n' +
-            '            <select name="end_time[]" id="" class="form-control">\n' +
+            '            <select name="end_time[]" id="end_time_'+numRow+'" class="form-control">\n' +
             '                <option value="">-Select-</option>\n';
 
         if (end_time != null) {
             end_time = convertUtcToUser(end_time);
             end_time = end_time.split(" ");
         }
-            @for($i = 1; $i <= 12; $i++)
-            @for($j=1; $j<=2; $j++)
-            @php
-                if($j%2 == 0){
-                    $time = date('h:i', strtotime("$i:30"));
-                } else {
-                    $time = date('h:i', strtotime("$i:00"));
+
+        $.each(TimeArray, function (key, val) {
+            row += '<option value="' + val + '"';
+            if (end_time != null) {
+                if (val == end_time[0]) {
+                    row += 'selected';
                 }
-            @endphp
-
-        var endtime = "{{$time}}";
-        row += '<option value="' + endtime + '"';
-
-        if (end_time != null) {
-            if (endtime == end_time[0]) {
-                row += 'selected';
             }
-        }
-
-        row += '>' + endtime + '</option>';
-        @endfor
-            @endfor
-
+            row += '>' + val + '</option>';
+        });
             row += '            </select>\n' +
             '        </div>\n' +
             '    </div>\n' +
             '    <div class="col-sm-2">\n' +
             '        <div class="form-group">\n' +
-            '            <select name="end_aside[]" id="" class="form-control">\n' +
+            '            <select name="end_aside[]" id="end_aside_'+numRow+'" class="form-control">\n' +
             '                <option value="">-Select-</option>\n';
 
         $.each(asides, function (aKey, aVal) {
@@ -245,7 +248,6 @@
                     }
 
                 } else {
-                    console.log('Hello');
                     addSchedulerRow();
                 }
             }
@@ -253,6 +255,45 @@
     }
 
     $(document).on('change', '[name="day[]"]', function () {
+        var id = $(this).attr('id').split("_");
+        var selectedVal = $(this).val();
+        var NewTimeArray = fullTime;
+        id = id[1];
+        var rowData = JSON.parse($('#row-data-val').val());
+        var removeItem = [];
+        $.each(rowData, function (key, val) {
+            var ValArr = val.split('|');
+            var day = ValArr[0];
+            var start = ValArr[1];
+            var end = ValArr[2];
+            var startKey, endKey;
+            startKey = NewTimeArray[day].indexOf(start);
+            endKey = NewTimeArray[day].indexOf(end);
+            removeItem = removeItem.concat(NewTimeArray[day].slice(startKey, endKey));
+            NewTimeArray[day] = NewTimeArray[day].filter(a => !removeItem.includes(a));
+        });
+        rowEndTimeVal = NewTimeArray;
+        CreateOptions(selectedVal, id, 'start_time');
+    });
+
+    function CreateOptions(selectedVal, id, field){
+        var optionVal = [];
+        $.each(rowEndTimeVal[selectedVal], function (Key, Val) {
+            Val = Val.split(' ');
+            if(jQuery.inArray(Val[0], optionVal) === -1){
+                console.log('hi');
+                optionVal.push(Val[0]);
+            }
+        });
+        var row = '<option value=""> -Select- </option>';
+        $.each(optionVal, function (Key, Val) {
+            row += '<option value="'+Val+'">'+Val+'</option>';
+        });
+
+        $('#'+field+'_'+id).empty().append(row);
+    }
+
+    function storeRow(){
         var DaysArray = [];
         $('[name="day[]"]').each(function(key, val) {
             DaysArray.push($(this).val());
@@ -279,11 +320,43 @@
             EndAsideArray.push($(this).val());
         });
 
-        $.each(DaysArray, function (aKey, aVal) {
+        var rowDataArray = [];
+        $.each(DaysArray, function (key, val) {
+            var dayVal,startTimeVal,startAsideVal,endTimeVal,endAsideVal;
+            if(val === ''){
+                dayVal = 'null';
+            } else {
+                dayVal = val;
+            }
 
+            if(StartTimeArray[key] === ''){
+                startTimeVal = 'null';
+            } else {
+                startTimeVal = StartTimeArray[key];
+            }
+
+            if(StartAsideArray[key] === ''){
+                startAsideVal = 'null';
+            } else {
+                startAsideVal = StartAsideArray[key];
+            }
+
+            if(EndTimeArray[key] === ''){
+                endTimeVal = 'null';
+            } else {
+                endTimeVal = EndTimeArray[key];
+            }
+
+            if(EndAsideArray[key] === ''){
+                endAsideVal = 'null';
+            } else {
+                endAsideVal = EndAsideArray[key];
+            }
+            var tempVal = dayVal+'|'+startTimeVal+' '+startAsideVal+'|'+endTimeVal+' '+endAsideVal;
+            rowDataArray.push(tempVal);
         });
-
-    })
+        $('#row-data-val').val(JSON.stringify(rowDataArray));
+    }
 
 
 </script>
