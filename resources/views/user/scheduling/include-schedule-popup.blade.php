@@ -250,7 +250,7 @@
         if(keyArray.length > 0){
             minKey = Math.min.apply(Math,keyArray);
         }
-        var endTime = NewEndTimeArray[selectedDay].slice(selectedValueIndex, minKey+1);
+        var endTime = NewEndTimeArray[selectedDay].slice(selectedValueIndex+1, minKey+1);
         CreateOptions(endTime, id, 'end_time');
     });
 
