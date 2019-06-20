@@ -114,13 +114,11 @@
                         $ids = isset($request->ids) ? explode(',',$request->ids[$key]) : '';
                         $startTime = isset($request->start_time) ? $request->start_time : '';
                         $endTime = isset($request->end_time) ? $request->end_time : '';
-                        $startAside = isset($request->start_aside) ? $request->start_aside : '';
-                        $endAside = isset($request->end_aside) ? $request->end_aside : '';
-                        if(!empty($startTime) && !empty($startAside)){
+                        if(!empty($startTime)){
                             $data['schedule_type'] = 'start';
-                            if(!empty($startTime[$key]) && !empty($startAside[$key])){
+                            if(!empty($startTime[$key])){
 //                                $data['selected_time'] = date('h:i A', strtotime($startTime[$key].$startAside[$key]));
-                                $selected_time = $this->convertTimeToUTCzone($startTime[$key].$startAside[$key], $userTimeZone);
+                                $selected_time = $this->convertTimeToUTCzone($startTime[$key], $userTimeZone);
                                 $data['selected_time'] = date('h:i A', strtotime($selected_time));
                                 $data['cron_data'] = $selected_time.' '.$userTimeZone;
                             } else {
@@ -132,11 +130,11 @@
                             array_push($requestData, $data);
                         }
 
-                        if(!empty($endTime) && !empty($endAside)){
+                        if(!empty($endTime)){
                             $data['schedule_type'] = 'stop';
-                            if(!empty($endTime[$key]) && !empty($endAside[$key])){
+                            if(!empty($endTime[$key])){
 //                                $data['selected_time'] = date('h:i A', strtotime($endTime[$key].$endAside[$key]));
-                                $selected_time = $this->convertTimeToUTCzone($endTime[$key].$endAside[$key], $userTimeZone);
+                                $selected_time = $this->convertTimeToUTCzone($endTime[$key], $userTimeZone);
                                 $data['selected_time'] = date('h:i A', strtotime($selected_time));
                                 $data['cron_data'] = $selected_time.' '.$userTimeZone;
                             } else {

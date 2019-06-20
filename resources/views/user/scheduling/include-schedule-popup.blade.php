@@ -36,13 +36,13 @@
                                 class="fa fa-plus"></i></button>
                     </div>
                     <div class="row">
-                        <div class="col-sm-2 border-right">
+                        <div class="col-sm-4 border-right">
                             Days
                         </div>
-                        <div class="col-sm-5 border-right">
+                        <div class="col-sm-4 border-right">
                             Start Time
                         </div>
-                        <div class="col-sm-5 align-items-center">
+                        <div class="col-sm-4 align-items-center">
                             End Time
                         </div>
                     </div>
@@ -66,8 +66,10 @@
     let weekDays = <?= json_encode($weekDays) ?>;
     let TimeArray = <?= json_encode($timesArr) ?>;
     let AsideArray = ['AM', 'PM'];
-    let fullTime = [];
+    const fullTime = {};
+    let rowStartTimeVal = [];
     let rowEndTimeVal = [];
+    let endFulltime = [];
     window.onload = function () {
         $.each(weekDays, function (weekKey, weekVal) {
             var data = [];
@@ -77,6 +79,7 @@
                 });
             });
             fullTime[weekVal] = data;
+            endFulltime[weekVal] = data;
         });
     };
 
@@ -91,106 +94,38 @@
         }
         row += '<input type="hidden" name="ids[]" value="' + ids + '" >';
 
-        row += '    <div class="col-sm-2 border-right">\n' +
+        row += '    <div class="col-sm-4 border-right">\n' +
             '        <div class="form-group">\n' +
             '            <select name="day[]" id="day_'+numRow+'" class="form-control">\n' +
-            '                <option value="">-select-</option>\n';
-
-        $.each(weekDays, function (key, val) {
-            row += '<option value="' + val + '"';
-            if (day != null && day == val) {
-                row += 'selected';
-            }
-            row += '>' + val + '</option>';
-        });
-
-        row += '            </select>\n' +
+            '            </select>\n' +
             '        </div>\n' +
             '    </div>\n' +
-            '    <div class="col-sm-3">\n' +
+            '    <div class="col-sm-4">\n' +
             '        <div class="form-group">\n' +
             '            <select name="start_time[]" id="start_time_'+numRow+'" class="form-control">\n' +
             '                <option value="">-Select-</option>\n';
-
-        if (start_time != null) {
-            start_time = convertUtcToUser(start_time);
-            start_time = start_time.split(" ");
-        }
-
-        $.each(TimeArray, function (key, val) {
-            row += '<option value="' + val + '"';
-            if (start_time != null) {
-                if (val == start_time[0]) {
-                    row += 'selected';
-                }
-            }
-            row += '>' + val + '</option>';
-        });
-
             row += '            </select>\n' +
             '        </div>\n' +
             '    </div>\n' +
-            '    <div class="col-sm-2 border-right">\n' +
-            '        <div class="form-group">\n' +
-            '            <select name="start_aside[]" id="start_aside_'+numRow+'" class="form-control">\n' +
-            '                <option value="">-Select-</option>\n';
-
-        $.each(asides, function (aKey, aVal) {
-            row += '<option value="' + aVal + '"';
-            if (start_time != null) {
-                if (aVal == start_time[1]) {
-                    row += 'selected';
-                }
-            }
-            row += '>' + aVal + '</option>\n';
-        });
-
-        row += '            </select>\n' +
-            '        </div>\n' +
-            '    </div>\n' +
-            '    <div class="col-sm-3">\n' +
+            '    <div class="col-sm-4">\n' +
             '        <div class="form-group">\n' +
             '            <select name="end_time[]" id="end_time_'+numRow+'" class="form-control">\n' +
             '                <option value="">-Select-</option>\n';
-
-        if (end_time != null) {
-            end_time = convertUtcToUser(end_time);
-            end_time = end_time.split(" ");
-        }
-
-        $.each(TimeArray, function (key, val) {
-            row += '<option value="' + val + '"';
-            if (end_time != null) {
-                if (val == end_time[0]) {
-                    row += 'selected';
-                }
-            }
-            row += '>' + val + '</option>';
-        });
             row += '            </select>\n' +
-            '        </div>\n' +
-            '    </div>\n' +
-            '    <div class="col-sm-2">\n' +
-            '        <div class="form-group">\n' +
-            '            <select name="end_aside[]" id="end_aside_'+numRow+'" class="form-control">\n' +
-            '                <option value="">-Select-</option>\n';
-
-        $.each(asides, function (aKey, aVal) {
-            row += '<option value="' + aVal + '"';
-            if (end_time != null) {
-                if (aVal == end_time[1]) {
-                    row += 'selected';
-                }
-            }
-            row += '>' + aVal + '</option>\n';
-        });
-
-        row += '            </select>\n' +
             '        </div>\n' +
             '    </div>\n' +
             '</div>';
 
         $('#scheduler-row').append(row);
+        CreateOptions(weekDays, numRow, 'day', day);
+        if(start_time != null){
+            start_time = convertUtcToUser(start_time);
+            CreateOptions(fullTime[day], numRow, 'start_time', start_time);
+        }
+        if(end_time != null){
+            end_time = convertUtcToUser(end_time);
+            CreateOptions(fullTime[day], numRow, 'end_time', end_time);
+        }
     }
 
     function convertUtcToUser(time){
@@ -257,39 +192,77 @@
     $(document).on('change', '[name="day[]"]', function () {
         var id = $(this).attr('id').split("_");
         var selectedVal = $(this).val();
-        var NewTimeArray = fullTime;
+        var newfull = Object.assign({},fullTime);
+        var NewStartTimeArray = newfull;
         id = id[1];
         var rowData = JSON.parse($('#row-data-val').val());
-        var removeItem = [];
+        var removeItemStart = [];
         $.each(rowData, function (key, val) {
             var ValArr = val.split('|');
             var day = ValArr[0];
             var start = ValArr[1];
             var end = ValArr[2];
             var startKey, endKey;
-            startKey = NewTimeArray[day].indexOf(start);
-            endKey = NewTimeArray[day].indexOf(end);
-            removeItem = removeItem.concat(NewTimeArray[day].slice(startKey, endKey));
-            NewTimeArray[day] = NewTimeArray[day].filter(a => !removeItem.includes(a));
-        });
-        rowEndTimeVal = NewTimeArray;
-        CreateOptions(selectedVal, id, 'start_time');
-    });
+            startKey = fullTime[day].indexOf(start);
+            endKey = fullTime[day].indexOf(end);
+            if(endKey == 47){
+                endKey += 1;
+            }
 
-    function CreateOptions(selectedVal, id, field){
-        var optionVal = [];
-        $.each(rowEndTimeVal[selectedVal], function (Key, Val) {
-            Val = Val.split(' ');
-            if(jQuery.inArray(Val[0], optionVal) === -1){
-                console.log('hi');
-                optionVal.push(Val[0]);
+            if(selectedVal == day){
+                removeItemStart = removeItemStart.concat(newfull[day].slice(startKey, endKey));
             }
         });
-        var row = '<option value=""> -Select- </option>';
-        $.each(optionVal, function (Key, Val) {
-            row += '<option value="'+Val+'">'+Val+'</option>';
+        NewStartTimeArray[selectedVal] = NewStartTimeArray[selectedVal].filter(a => !removeItemStart.includes(a));
+        var startTime = NewStartTimeArray[selectedVal];
+        CreateOptions(startTime, id, 'start_time');
+        CreateOptions(startTime, id, 'end_time');
+    });
+
+    $(document).on('change', '[name="start_time[]"]', function () {
+        var id = $(this).attr('id').split("_");
+        id = id[2];
+        var selectedVal = $(this).val();
+        var selectedDay = $('#day_'+id).val();
+        var rowData = JSON.parse($('#row-data-val').val());
+        var NewEndTimeArray = endFulltime;
+        var removeItemEnd = [];
+        var keyArray = [];
+        var selectedValueIndex = NewEndTimeArray[selectedDay].indexOf(selectedVal);
+        if(selectedValueIndex == -1){
+            selectedValueIndex = 0;
+        }
+        $.each(rowData, function (key, val) {
+            var ValArr = val.split('|');
+            var day = ValArr[0];
+            var start = ValArr[1];
+            var end = ValArr[2];
+
+            if(selectedDay === day){
+                var startKey = NewEndTimeArray[day].indexOf(start); //4
+                if(startKey > selectedValueIndex){
+                    keyArray.push(startKey);
+                }
+            }
         });
 
+        var minKey = 48;
+        if(keyArray.length > 0){
+            minKey = Math.min.apply(Math,keyArray);
+        }
+        var endTime = NewEndTimeArray[selectedDay].slice(selectedValueIndex, minKey+1);
+        CreateOptions(endTime, id, 'end_time');
+    });
+
+    function CreateOptions(Time, id, field, selectedVal = null){
+        var row = '<option value=""> -Select- </option>';
+        $.each(Time, function (Key, Val) {
+            row += '<option value="'+Val+'"';
+                if (selectedVal != null && selectedVal === Val) {
+                    row += 'selected';
+                }
+            row += '>'+Val+'</option>';
+        });
         $('#'+field+'_'+id).empty().append(row);
     }
 
@@ -304,25 +277,14 @@
             StartTimeArray.push($(this).val());
         });
 
-        var StartAsideArray = [];
-        $('[name="start_aside[]"]').each(function(key, val) {
-            StartAsideArray.push($(this).val());
-        });
-
-
         var EndTimeArray = [];
         $('[name="end_time[]"]').each(function(key, val) {
             EndTimeArray.push($(this).val());
         });
 
-        var EndAsideArray = [];
-        $('[name="end_aside[]"]').each(function(key, val) {
-            EndAsideArray.push($(this).val());
-        });
-
         var rowDataArray = [];
         $.each(DaysArray, function (key, val) {
-            var dayVal,startTimeVal,startAsideVal,endTimeVal,endAsideVal;
+            var dayVal,startTimeVal,endTimeVal;
             if(val === ''){
                 dayVal = 'null';
             } else {
@@ -335,24 +297,13 @@
                 startTimeVal = StartTimeArray[key];
             }
 
-            if(StartAsideArray[key] === ''){
-                startAsideVal = 'null';
-            } else {
-                startAsideVal = StartAsideArray[key];
-            }
-
             if(EndTimeArray[key] === ''){
                 endTimeVal = 'null';
             } else {
                 endTimeVal = EndTimeArray[key];
             }
 
-            if(EndAsideArray[key] === ''){
-                endAsideVal = 'null';
-            } else {
-                endAsideVal = EndAsideArray[key];
-            }
-            var tempVal = dayVal+'|'+startTimeVal+' '+startAsideVal+'|'+endTimeVal+' '+endAsideVal;
+            var tempVal = dayVal+'|'+startTimeVal+'|'+endTimeVal;
             rowDataArray.push(tempVal);
         });
         $('#row-data-val').val(JSON.stringify(rowDataArray));
