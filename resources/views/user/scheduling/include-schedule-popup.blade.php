@@ -83,7 +83,12 @@
                     if(TimeVal == '12:00' && val == 'AM' || TimeVal == '12:30' && val == 'AM'){
                         data.push(TimeVal+' '+'PM');
                     }else if(TimeVal == '12:00' && val == 'PM' || TimeVal == '12:30' && val == 'PM'){
-                        data.push(TimeVal+' '+'AM');
+                        // data.push(TimeVal+' '+'AM');
+                        if(TimeVal == '12:00'){
+                            data.splice(0, 0, TimeVal+' '+'AM');
+                        } else {
+                            data.splice(1, 0, TimeVal+' '+'AM');
+                        }
                     } else {
                         data.push(TimeVal+' '+val);
                     }
