@@ -117,6 +117,7 @@
         storeRow();
         var numRow = $('#scheduler-row .row').length;
         var asides = ['AM', 'PM'];
+        var newfull = Object.assign({},fullTime);
         var row =
             '<div class="row">\n';
         if (ids === null) {
@@ -148,18 +149,38 @@
 
         $('#scheduler-row').append(row);
         CreateOptions(weekDays, numRow, 'day', day);
-        if(start_time != null){
-            start_time = convertUtcToUser(start_time);
-            CreateOptions(fullTime[day], numRow, 'start_time', start_time);
-        }
-        if(end_time != null){
+
+        if(end_time != ''){
             end_time = convertUtcToUser(end_time);
-            CreateOptions(fullTime[day], numRow, 'end_time', end_time);
+        }
+
+        if(start_time != ''){
+            start_time = convertUtcToUser(start_time);
+        }
+
+        if(start_time != ''){
+            CreateOptions(newfull[day], numRow, 'start_time', start_time);
+        } else {
+            if(end_time != ''){
+                var endKey = newfull[day].indexOf(end_time);
+                start_time = newfull[day].slice(0,endKey);
+                CreateOptions(start_time, numRow, 'start_time');
+            }
+        }
+
+        if(end_time != ''){
+            CreateOptions(newfull[day], numRow, 'end_time', end_time);
+        } else {
+            if(start_time != ''){
+                var startKey = newfull[day].indexOf(start_time);
+                start_time = newfull[day].slice(startKey+1, 48);
+                CreateOptions(start_time, numRow, 'end_time');
+            }
         }
     }
 
-    function convertUtcToUser(time){
-        var url = '{{url('user/scheduling/convert-time-utc-to-user')}}/'+time+'/'+current_time_zone;
+    function convertUtcToUser(str){
+        var url = '{{url('user/scheduling/convert-time-utc-to-user')}}/'+str+'/'+current_time_zone;
         var value = '';
         $.ajax({
             type: 'get',
@@ -244,7 +265,7 @@
             }
             var end = ValArr[2];
             if(end == 'null'){
-                end = '12:30 PM';
+                end = '12:30 AM';
             }
             var startKey, endKey;
             startKey = fullTime[day].indexOf(start);
@@ -253,30 +274,35 @@
                 endKey += 1;
             }
 
-            if(aboveSelectedDay == day && aboveSelectEndTime == ''){
+            /*if(aboveSelectedDay == day && aboveSelectEndTime == ''){
                 if(startKey > preTimeKey){
                     preTimeKey = startKey;
                     isEndTimeProvide = 1;
                 }
-            }
+                if(endKey > preTimeKey && end != 'null'){
+                    preTimeKey = startKey;
+                    isEndTimeProvide = 1;
+                }
+            }*/
 
             if(selectedVal == day){
+
                 removeItemStart = removeItemStart.concat(newfull[day].slice(startKey, endKey));
-            } else {
-                if(isEndTimeProvide == 1){
-                    removeItemStart = removeItemStart.concat(newfull[day].slice(0, preTimeKey));
-                }
+            // } else {
+                // if(isEndTimeProvide == 1){
+                //     removeItemStart = removeItemStart.concat(newfull[day].slice(0, preTimeKey));
+                // }
             }
         });
-
         NewStartTimeArray[selectedVal] = NewStartTimeArray[selectedVal].filter(a => !removeItemStart.includes(a));
         var startTime = NewStartTimeArray[selectedVal];
         CreateOptions(startTime, id, 'start_time');
-        if(selectedValKey != -1 && aboveselectedDayKey != -1){
-            if(selectedValKey > aboveselectedDayKey){
+        // if(selectedValKey != -1 && aboveselectedDayKey != -1){
+        //     if(selectedValKey > aboveselectedDayKey){
                 CreateOptions(startTime, id, 'end_time');
-            }
-        }
+            // }
+        // }
+        storeRow();
     });
 
     $(document).on('change', '[name="start_time[]"]', function () {
@@ -312,6 +338,7 @@
         }
         var endTime = NewEndTimeArray[selectedDay].slice(selectedValueIndex+1, minKey+1);
         CreateOptions(endTime, id, 'end_time');
+        storeRow();
     });
 
     function CreateOptions(Time, id, field, selectedVal = null){

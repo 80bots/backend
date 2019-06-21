@@ -58,7 +58,7 @@
 		}
 
         public function convertTimeToUTCzone($str, $userTimezone, $format = 'D h:i A'){
-            $new_str = new DateTime($str, new DateTimeZone(  $userTimezone  ) );
+            $new_str = new DateTime($str, new DateTimeZone($userTimezone));
             $new_str->setTimeZone(new DateTimeZone('UTC'));
             return $new_str->format($format);
         }
@@ -68,8 +68,8 @@
                 return '';
             }
             $new_str = new DateTime($str, new DateTimeZone('UTC') );
-            $new_str->setTimeZone(new DateTimeZone( $userTimezone ));
-            return $new_str->format( $format);
+            $new_str->setTimeZone(new DateTimeZone($userTimezone));
+            return $new_str->format($format);
         }
 
 		public function CheckScheduled($id){
@@ -123,6 +123,7 @@
                                 $data['cron_data'] = $selected_time.' '.$userTimeZone;
                             } else {
                                 $data['selected_time'] = '';
+                                $data['cron_data'] = '';
                             }
                             if(!empty($ids) && $ids[0] != "0"){
                                 $data['id'] = $ids[0];
@@ -148,7 +149,6 @@
                         }
                     }
                 }
-                dd($requestData);
 
                 $schedulingInstance = SchedulingInstance::findByUserInstanceId($userInstanceId, $user_id)->first();
 				if(empty($schedulingInstance)){
