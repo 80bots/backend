@@ -22,7 +22,7 @@
 <div class="modal fade" id="create-scheduler" role="dialog">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form id="CreateSchedulerForm" name="" action="{{route('user.scheduling.store')}}" method="post">
+            <form id="CreateSchedulerForm" name="CreateSchedulerForm" action="{{route('user.scheduling.store')}}" method="post">
                 <input type="hidden" id="instance-id" name="instance_id" value="">
                 <input type="hidden" id="user-time-zone" name="userTimeZone" value="">
                 @csrf
@@ -60,9 +60,14 @@
 
 <input type="hidden" name="row-data-val" id="row-data-val">
 
-<script type="text/javascript" src="{{asset('js/jquery-3.3.1.min.js')}}"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-form-validator/2.3.26/jquery.form-validator.min.js"></script>
+{{--<script type="text/javascript" src="{{asset('js/jquery-3.3.1.min.js')}}"></script>--}}
+@section('script')
+<script src="{{asset('js/jquery.validate.min.js')}}" type="text/javascript"></script>
+<script type="text/javascript" src="{{ asset('js/moment.min.js')}}"></script>
 <script>
+    var current_time_zone =  moment().format('Z');
+    $('#user-time-zone').val(current_time_zone);
+
     let weekDays = <?= json_encode($weekDays) ?>;
     let TimeArray = <?= json_encode($timesArr) ?>;
     let AsideArray = ['AM', 'PM'];
@@ -88,6 +93,25 @@
             endFulltime[weekVal] = data;
         });
     };
+
+    // $('#launch-inspection-submit-btn').click(function () {
+        /*$("form[name='CreateSchedulerForm']").validate({
+            ignore: [],
+            rules: {
+                'start_time[]': {
+                    required: true
+                },
+                'end_time[]': {
+                    required: true
+                }
+            },
+            messages: {
+            },
+            submitHandler: function(form) {
+                form.submit();
+            }
+        });*/
+    // });
 
     function addSchedulerRow(ids = null, day = null, start_time = null, end_time = null) {
         storeRow();
@@ -347,3 +371,4 @@
 
 
 </script>
+@endsection

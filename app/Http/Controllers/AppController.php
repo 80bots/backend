@@ -140,7 +140,7 @@ class AppController extends Controller
                 $scheduleDetails = isset($scheduler->schedulingInstanceDetails) ? $scheduler->schedulingInstanceDetails : '';
                 if(!empty($scheduleDetails)){
                     foreach ($scheduleDetails as $detail){
-                        if(!empty($UserInstanceObj)){
+                        if(!empty($UserInstanceObj) && !empty($detail->cron_data)){
                             $CronDate = explode(' ',$detail->cron_data);
                             $currentTime = strtotime(date('D H:i A'));
                             $cronTime = strtotime($CronDate[0].$CronDate[1].$CronDate[2]);
@@ -200,7 +200,7 @@ class AppController extends Controller
                 $scheduleDetails = isset($scheduler->schedulingInstanceDetails) ? $scheduler->schedulingInstanceDetails : '';
                 if(!empty($scheduleDetails)){
                     foreach ($scheduleDetails as $detail){
-                        if(!empty($UserInstanceObj)){
+                        if(!empty($UserInstanceObj) && !empty($detail->cron_data)){
                             $CronDate = explode(' ',$detail->cron_data);
                             $currentTime = strtotime(date('D H:i A'));
                             $cronTime = strtotime($CronDate[0].$CronDate[1].$CronDate[2]);

@@ -139,6 +139,7 @@
                                 $data['cron_data'] = $selected_time.' '.$userTimeZone;
                             } else {
                                 $data['selected_time'] = '';
+                                $data['cron_data'] = '';
                             }
                             if(!empty($ids) && $ids[1] != "0"){
                                 $data['id'] = $ids[1];
@@ -147,6 +148,7 @@
                         }
                     }
                 }
+                dd($requestData);
 
                 $schedulingInstance = SchedulingInstance::findByUserInstanceId($userInstanceId, $user_id)->first();
 				if(empty($schedulingInstance)){
