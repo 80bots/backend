@@ -75,7 +75,13 @@
             var data = [];
             $.each(AsideArray, function (key, val) {
                 $.each(TimeArray, function (TimeKey, TimeVal) {
-                    data.push(TimeVal+' '+val);
+                    if(TimeVal == '12:00' && val == 'AM' || TimeVal == '12:30' && val == 'AM'){
+                        data.push(TimeVal+' '+'PM');
+                    }else if(TimeVal == '12:00' && val == 'PM' || TimeVal == '12:30' && val == 'PM'){
+                        data.push(TimeVal+' '+'AM');
+                    } else {
+                        data.push(TimeVal+' '+val);
+                    }
                 });
             });
             fullTime[weekVal] = data;
@@ -100,7 +106,7 @@
             '            </select>\n' +
             '        </div>\n' +
             '    </div>\n' +
-            '    <div class="col-sm-4">\n' +
+            '    <div class="col-sm-4 border-right">\n' +
             '        <div class="form-group">\n' +
             '            <select name="start_time[]" id="start_time_'+numRow+'" class="form-control">\n' +
             '                <option value="">-Select-</option>\n';
@@ -197,11 +203,25 @@
         id = id[1];
         var rowData = JSON.parse($('#row-data-val').val());
         var removeItemStart = [];
+        var isEndTimeProvide = 0;
+        var preTimeKey = 0;
+
+        var preId = id-1;
+        var aboveSelectEndTime = $('#end_time_'+preId).val();
+        var aboveSelectedDay = $('#day_'+preId).val();
+        var selectedValKey = weekDays.indexOf(selectedVal);
+        var aboveselectedDayKey = weekDays.indexOf(aboveSelectedDay);
         $.each(rowData, function (key, val) {
             var ValArr = val.split('|');
             var day = ValArr[0];
             var start = ValArr[1];
+            if(start == 'null'){
+                start = '01:00 AM';
+            }
             var end = ValArr[2];
+            if(end == 'null'){
+                end = '12:30 PM';
+            }
             var startKey, endKey;
             startKey = fullTime[day].indexOf(start);
             endKey = fullTime[day].indexOf(end);
@@ -209,14 +229,30 @@
                 endKey += 1;
             }
 
+            if(aboveSelectedDay == day && aboveSelectEndTime == ''){
+                if(startKey > preTimeKey){
+                    preTimeKey = startKey;
+                    isEndTimeProvide = 1;
+                }
+            }
+
             if(selectedVal == day){
                 removeItemStart = removeItemStart.concat(newfull[day].slice(startKey, endKey));
+            } else {
+                if(isEndTimeProvide == 1){
+                    removeItemStart = removeItemStart.concat(newfull[day].slice(0, preTimeKey));
+                }
             }
         });
+
         NewStartTimeArray[selectedVal] = NewStartTimeArray[selectedVal].filter(a => !removeItemStart.includes(a));
         var startTime = NewStartTimeArray[selectedVal];
         CreateOptions(startTime, id, 'start_time');
-        CreateOptions(startTime, id, 'end_time');
+        if(selectedValKey != -1 && aboveselectedDayKey != -1){
+            if(selectedValKey > aboveselectedDayKey){
+                CreateOptions(startTime, id, 'end_time');
+            }
+        }
     });
 
     $(document).on('change', '[name="start_time[]"]', function () {
