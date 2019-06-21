@@ -36,7 +36,7 @@
                                 class="fa fa-plus"></i></button>
                     </div>
                     <div class="row">
-                        <div class="col-sm-4 border-right">
+                        <div class="col-sm-3 border-right">
                             Days
                         </div>
                         <div class="col-sm-4 border-right">
@@ -44,6 +44,9 @@
                         </div>
                         <div class="col-sm-4 align-items-center">
                             End Time
+                        </div>
+                        <div class="col-sm-1 align-items-center">
+                            Action
                         </div>
                     </div>
                     <div id="scheduler-row">
@@ -124,13 +127,13 @@
         var asides = ['AM', 'PM'];
         var newfull = Object.assign({},fullTime);
         var row =
-            '<div class="row">\n';
+            '<div class="row" id="row_'+numRow+'">\n';
         if (ids === null) {
             ids = [0, 0];
         }
         row += '<input type="hidden" name="ids[]" value="' + ids + '" >';
 
-        row += '    <div class="col-sm-4 border-right">\n' +
+        row += '    <div class="col-sm-3 border-right">\n' +
             '        <div class="form-group">\n' +
             '            <select name="day[]" id="day_'+numRow+'" class="form-control">\n' +
             '            </select>\n' +
@@ -143,13 +146,16 @@
             row += '            </select>\n' +
             '        </div>\n' +
             '    </div>\n' +
-            '    <div class="col-sm-4">\n' +
+            '    <div class="col-sm-4 border-right">\n' +
             '        <div class="form-group">\n' +
             '            <select name="end_time[]" id="end_time_'+numRow+'" class="form-control">\n' +
             '                <option value="">-Select-</option>\n';
             row += '            </select>\n' +
             '        </div>\n' +
             '    </div>\n' +
+                '<div class="col-sm-1 border-right">' +
+                '<a href="javascript:void(0)" onclick="deleteRow('+ids+','+numRow+')" class="btn btn-round btn-icon btn-danger">x</a>' +
+                '</div>' +
             '</div>';
 
         $('#scheduler-row').append(row);
@@ -182,6 +188,10 @@
                 CreateOptions(start_time, numRow, 'end_time');
             }
         }
+    }
+
+    function deleteRow(ids, numRow){
+        console.log(ids);
     }
 
     function convertUtcToUser(str){
