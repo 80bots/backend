@@ -72,6 +72,27 @@
             return $new_str->format($format);
         }
 
+        public function deleteSchedulerDetails(Request $request){
+		    $ids = isset($request->ids) ? $request->ids : '';
+		    if(!empty($ids)){
+                try {
+                    SchedulingInstancesDetails::destroy($ids);
+                    $return['status'] = 'true';
+                    $return['message'] = 'Delete Successfully';
+                    return json_encode($return);
+                }
+                catch(\Exception $e) {
+                    $return['status'] = 'false';
+                    $return['message'] = 'Please try again';
+                    return json_encode($return);
+                }
+            } else {
+		        $return['status'] = 'false';
+                $return['message'] = 'No Ids Found';
+		        return json_encode($return);
+            }
+        }
+
 		public function CheckScheduled($id){
             try {
                 $user_id = Auth::user()->id;

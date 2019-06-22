@@ -21,7 +21,6 @@
         <strong>{{ $message }}</strong>
     </div>
 @endif
-
 <script type="text/javascript">
     setTimeout(()=>{
         $('.alert').fadeOut();

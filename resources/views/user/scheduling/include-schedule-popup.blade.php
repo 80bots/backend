@@ -22,6 +22,8 @@
 <div class="modal fade" id="create-scheduler" role="dialog">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
+            <div id="message">
+            </div>
             <form id="CreateSchedulerForm" name="CreateSchedulerForm" action="{{route('user.scheduling.store')}}" method="post">
                 <input type="hidden" id="instance-id" name="instance_id" value="">
                 <input type="hidden" id="user-time-zone" name="userTimeZone" value="">
@@ -154,7 +156,7 @@
             '        </div>\n' +
             '    </div>\n' +
                 '<div class="col-sm-1 border-right">' +
-                '<a href="javascript:void(0)" onclick="deleteRow('+ids+','+numRow+')" class="btn btn-round btn-icon btn-danger">x</a>' +
+                '<a href="javascript:void(0)" onclick="deleteRow(['+ids+'],'+numRow+')" class="btn btn-round btn-icon btn-danger">x</a>' +
                 '</div>' +
             '</div>';
 
@@ -191,7 +193,40 @@
     }
 
     function deleteRow(ids, numRow){
-        console.log(ids);
+        var url = '{{route('user.scheduling.delete-scheduler-details')}}';
+        $.ajax({
+            type: 'post',
+            async: false,
+            url: url,
+            cache: false,
+            data: {
+                _token : function () {
+                    return '{{csrf_token()}}';
+                },
+                ids : ids
+            },
+            success: function (data) {
+                var response = JSON.parse(data);
+                if(response.status == 'true'){
+                    $("#message").fadeIn().html("<div class='alert alert-success fade show'>" +
+                        "<button data-dismiss='alert' class='close close-sm' type='button'>" +
+                        "<i class='fa fa-times'></i>" +
+                        "</button><p>"+response.message+"</p></div>").delay(3000).fadeOut();
+                    $('#row_'+numRow).remove();
+                } else {
+                    $("#message").fadeIn().html("<div class='alert alert-danger fade show'>" +
+                        "<button data-dismiss='alert' class='close close-sm' type='button'>" +
+                        "<i class='fa fa-times'></i>" +
+                        "</button><p>"+response.message+"</p></div>").delay(3000).fadeOut();
+                }
+            },
+            complete: function() {
+                var row_lenth = $('#scheduler-row .row').length;
+                if(row_lenth == 0){
+                    addSchedulerRow();
+                }
+            }
+        });
     }
 
     function convertUtcToUser(str){
@@ -246,6 +281,9 @@
                         addSchedulerRow(ids, day, start_time, end_time);
 
                         i = i + 2;
+                    }
+                    if(lenth == 0){
+                        addSchedulerRow();
                     }
 
                 } else {
