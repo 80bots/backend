@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\admin;
 
+use App\Http\Controllers\AppController;
 use App\SubscriptionPlan;
 use Illuminate\Http\Request;
 
-class SubscriptionPlanController extends Controller
+class SubscriptionPlanController extends AppController
 {
     /**
      * Display a listing of the resource.
@@ -14,7 +15,17 @@ class SubscriptionPlanController extends Controller
      */
     public function index()
     {
-        //
+        try{
+            $planListObj = SubscriptionPlan::all();
+            if(!$planListObj->isEmpty()){
+                return view('admin.subscription.index',compact('planListObj'));
+            }
+//            session()->flash('error', 'Subscription Plan Not Found');
+            return view('admin.subscription.index');
+        } catch (\Exception $exception){
+            session()->flash('error', $exception->getMessage());
+            return view('admin.subscription.index');
+        }
     }
 
     /**
@@ -24,7 +35,7 @@ class SubscriptionPlanController extends Controller
      */
     public function create()
     {
-        //
+        return view('admin.subscription.create');
     }
 
     /**
@@ -35,7 +46,24 @@ class SubscriptionPlanController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $plan_name = isset($request->plan_name) ? $request->plan_name : '';
+        $price = isset($request->price) ? $request->price : '';
+        $credit = isset($request->credit) ? $request->credit : '';
+        try{
+            $subscriptionPlanObj = New SubscriptionPlan();
+            $subscriptionPlanObj->name = $plan_name;
+            $subscriptionPlanObj->price = $price;
+            $subscriptionPlanObj->credit = $credit;
+            if($subscriptionPlanObj->save())
+            {
+                return redirect(route('admin.subscription.index'))->with('success', 'Subscription Plan Added Successfully');
+            }
+            session()->flash('error', 'Subscription Plan Can not Added Successfully');
+            return redirect()->back();
+        } catch (\Exception $exception){
+            session()->flash('error', $exception->getMessage());
+            return view('admin.subscription.create');
+        }
     }
 
     /**
@@ -55,9 +83,19 @@ class SubscriptionPlanController extends Controller
      * @param  \App\SubscriptionPlan  $subscriptionPlan
      * @return \Illuminate\Http\Response
      */
-    public function edit(SubscriptionPlan $subscriptionPlan)
+    public function edit($id)
     {
-        //
+        try{
+            $plan = SubscriptionPlan::find($id);
+            if(isset($plan) && !empty($plan)){
+                return view('admin.subscription.edit',compact('plan', 'id'));
+            }
+            session()->flash('error', 'Please Try Again');
+            return redirect()->back();
+        } catch (\Exception $exception){
+            session()->flash('error', $exception->getMessage());
+            return redirect()->back();
+        }
     }
 
     /**
@@ -67,9 +105,26 @@ class SubscriptionPlanController extends Controller
      * @param  \App\SubscriptionPlan  $subscriptionPlan
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, SubscriptionPlan $subscriptionPlan)
+    public function update(Request $request, $id)
     {
-        //
+        $plan_name = isset($request->plan_name) ? $request->plan_name : '';
+        $price = isset($request->price) ? $request->price : '';
+        $credit = isset($request->credit) ? $request->credit : '';
+        try {
+            $subscriptionPlanObj = SubscriptionPlan::find($id);
+            $subscriptionPlanObj->name = $plan_name;
+            $subscriptionPlanObj->price = $price;
+            $subscriptionPlanObj->credit = $credit;
+            if($subscriptionPlanObj->save())
+            {
+                return redirect(route('admin.plan.index'))->with('success', 'Subscription Plan Update Successfully');
+            }
+            session()->flash('error', 'Subscription Plan Can not Update Successfully');
+            return redirect()->back();
+        } catch (\Exception $exception){
+            session()->flash('error', $exception->getMessage());
+            return redirect()->back();
+        }
     }
 
     /**
@@ -78,8 +133,34 @@ class SubscriptionPlanController extends Controller
      * @param  \App\SubscriptionPlan  $subscriptionPlan
      * @return \Illuminate\Http\Response
      */
-    public function destroy(SubscriptionPlan $subscriptionPlan)
+    public function destroy($id)
     {
-        //
+        try{
+            $subscription = SubscriptionPlan::find($id);
+            if($subscription->delete()){
+                return redirect(route('admin.plan.index'))->with('success', 'Subscription Plan Delete Successfully');
+            }
+            session()->flash('error', 'Subscription Plan Can not Deleted Successfully');
+            return redirect()->back();
+        } catch (\Exception $exception){
+            session()->flash('error', $exception->getMessage());
+            return redirect()->back();
+        }
+    }
+
+    public function ChangeStatus(Request $request){
+        try{
+            $planObj = SubscriptionPlan::find($request->id);
+            $planObj->status = $request->status;
+            if($planObj->save()){
+                session()->flash('success', 'Status Successfully Change');
+                return 'true';
+            }
+            session()->flash('error', 'Status Change Fail Please Try Again');
+            return 'false';
+        } catch (\Exception $exception){
+            session()->flash('error', $exception->getMessage());
+            return 'false';
+        }
     }
 }

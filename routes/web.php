@@ -44,6 +44,11 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','ad
     Route::group(['prefix' => 'bots', 'as' => 'bots.'], function() {
         Route::post('change-status', 'BotsController@ChangeStatus')->name('change-status');
     });
+
+    Route::resource('plan','SubscriptionPlanController');
+    Route::group(['prefix' => 'plan', 'as' => 'plan.'], function() {
+        Route::post('change-status', 'SubscriptionPlanController@ChangeStatus')->name('change-status');
+    });
 });
 
 Route::group(['prefix' => 'user', 'as' => 'user.', 'middleware' => ['auth', 'user']], function(){
@@ -74,3 +79,6 @@ Route::group(['prefix' => 'user', 'as' => 'user.', 'middleware' => ['auth', 'use
         Route::post('change-status', 'UserInstancesController@changeStatus')->name('change-status');
     });
 });
+
+
+//Route::get('stripe-payment', 'StripeController@SendPayment')->name('stripe-payment');
