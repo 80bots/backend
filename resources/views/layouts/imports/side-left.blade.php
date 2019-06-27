@@ -29,6 +29,12 @@
 
                 </ul>
             </li>
+
+            <li class="sidebar-item">
+                <ul class="sidebar-dropdown list-unstyled">
+                    <li class="sidebar-item"><a href="{{route('user.subscription-plans.index')}}" class="sidebar-link {{ (request()->is('user/subscription-plans')) ? 'active' : '' }}">Subscription Plans</a></li>
+                </ul>
+            </li>
         </ul>
     </div>
 </div>

@@ -78,6 +78,8 @@ Route::group(['prefix' => 'user', 'as' => 'user.', 'middleware' => ['auth', 'use
     Route::group(['prefix' => 'instance', 'as' => 'instance.'], function() {
         Route::post('change-status', 'UserInstancesController@changeStatus')->name('change-status');
     });
+
+    Route::resource('subscription-plans', 'SubscriptionPlanController');
 });
 
 
