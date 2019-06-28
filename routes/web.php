@@ -80,6 +80,9 @@ Route::group(['prefix' => 'user', 'as' => 'user.', 'middleware' => ['auth', 'use
     });
 
     Route::resource('subscription-plans', 'SubscriptionPlanController');
+
+    Route::post('subscribe', 'StripeController@createSubscription');
+    Route::post('subscription', 'StripeController@createSubscription')->name('subscription.create');
 });
 
 

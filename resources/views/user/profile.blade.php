@@ -36,6 +36,14 @@
                             <input type="text" name="remaining_credits" value="{{!empty($user->remaining_credits) ? $user->remaining_credits : 0}}" readonly class="form-control"/>
                         </div>
                     </div>
+                    @if(!is_null($plan))
+                    <div class="col-md-12 col-sm-12">
+                        <div class="form-group">
+                            <label for="">Active Plan</label>
+                            <input type="text" name="plan" class="form-control" value="{{!empty($plan->name) ? $plan->name : ''}}" readonly/>
+                        </div>
+                    </div>
+                    @endif
                 </div>
             </div>
         </div>

@@ -126,6 +126,11 @@ return [
     'up_time' => env('UP_TIME_MINUTES', '60'),
 
     'credit' => env('CREDIT_UP_TIME', '1'),
+
+    'currency_code' => env('APP_CURRENCY_CODE', 'USD'),
+
+    'currency_symbol' => env('APP_CURRENCY_SYMBOL', '$'),
+
     /*
     |--------------------------------------------------------------------------
     | Autoloaded Service Providers

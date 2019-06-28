@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\User;
+use App\SubscriptionPlan;
 use Illuminate\Http\Request;
 
 class UserController extends AppController
@@ -48,8 +49,13 @@ class UserController extends AppController
     {
         $user = User::find($id);
         $used_credit = $user->userInstances->sum('used_credit');
+        $plan = null;
+        if($user->subscribed('80bots')) { 
+            $subscription = $user->subscription('80bots');
+            $plan = SubscriptionPlan::where('stripe_plan',$subscription->stripe_plan)->first();
+        }
 
-        return view('user.profile', compact('user', 'used_credit'));
+        return view('user.profile', compact('user', 'used_credit', 'plan'));
     }
 
     /**

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\SubscriptionPlan;
+use Illuminate\Support\Facades\Auth;
 
 class SubscriptionPlanController extends Controller
 {
@@ -14,8 +15,16 @@ class SubscriptionPlanController extends Controller
      */
     public function index()
     {
+        $user = Auth::user();
         $plans = SubscriptionPlan::all();
-        return view('user.plans.index', ['plans' => $plans]);
+        $subscriion_ended = true;
+        $activeplan = null;
+        if($user->subscribed('80bots')) { 
+            $subscription = $user->subscription('80bots');
+            $subscriion_ended = $user->subscription('80bots')->ended();
+            $activeplan = SubscriptionPlan::where('stripe_plan',$subscription->stripe_plan)->first();
+        }
+        return view('user.plans.index', ['plans' => $plans, 'user' => $user, 'subscriion_ended' => $subscriion_ended, 'activeplan' => $activeplan ]);
     }
 
     /**
