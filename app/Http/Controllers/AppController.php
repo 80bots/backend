@@ -4,10 +4,9 @@ namespace App\Http\Controllers;
 
 use App\AwsConnection;
 use App\BaseModel;
-use App\Notifications;
+use App\SchedulingInstance;
 use App\User;
 use App\UserInstances;
-use App\SchedulingInstance;
 use App\UserInstancesDetails;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -93,19 +92,19 @@ class AppController extends Controller
                     array_push($usedCreditArray, $usedCredit);
                 }
                 $totalUsedCredit = array_sum($usedCreditArray);
-                if (empty($UserObj->temp_credit_score) || $UserObj->temp_credit_score == 0) {
-                    $UserObj->temp_credit_score = $UserObj->credit_score;
+                if (empty($UserObj->temp_remaining_credits) || $UserObj->temp_remaining_credits == 0) {
+                    $UserObj->temp_remaining_credits = $UserObj->remaining_credits;
                 }
-                $temp_credit = $UserObj->temp_credit_score;
+                $temp_credit = $UserObj->temp_remaining_credits;
                 $creditScore = (float)$temp_credit - (float)$totalUsedCredit;
-                $UserObj->credit_score = $creditScore;
+                $UserObj->remaining_credits = $creditScore;
                 $UserObj->save();
                 /*if($UserObj->save()){
                     if($creditScore <= 1){
                         $this->SendEmailNotification($UserObj);
                     }
                 }*/
-                Log::info('credit Score of email: ' . $UserObj->email . ' is ' . $UserObj->credit_score);
+                Log::info('Credits of email: ' . $UserObj->email . ' is ' . $UserObj->remaining_credits);
             }
         }
 
@@ -135,56 +134,54 @@ class AppController extends Controller
         try {
             $instancesIds = [];
             $startSchedule = SchedulingInstance::findScheduling('start')->get();
-            foreach ($startSchedule as $scheduler){
+            foreach ($startSchedule as $scheduler) {
                 $UserInstanceObj = isset($scheduler->userInstances) ? $scheduler->userInstances : '';
                 $scheduleDetails = isset($scheduler->schedulingInstanceDetails) ? $scheduler->schedulingInstanceDetails : '';
-                if(!empty($scheduleDetails)){
-                    foreach ($scheduleDetails as $detail){
-                        if(!empty($UserInstanceObj) && !empty($detail->cron_data)){
-                            $CronDate = explode(' ',$detail->cron_data);
+                if (!empty($scheduleDetails)) {
+                    foreach ($scheduleDetails as $detail) {
+                        if (!empty($UserInstanceObj) && !empty($detail->cron_data)) {
+                            $CronDate = explode(' ', $detail->cron_data);
                             $currentTime = strtotime(date('D H:i A'));
-                            $cronTime = strtotime($CronDate[0].$CronDate[1].$CronDate[2]);
-                            if($currentTime == $cronTime){
+                            $cronTime = strtotime($CronDate[0] . $CronDate[1] . $CronDate[2]);
+                            if ($currentTime == $cronTime) {
                                 array_push($instancesIds, $UserInstanceObj->aws_instance_id);
                             }
                         }
                     }
                 }
             }
-            if(count($instancesIds) > 0){
+            if (count($instancesIds) > 0) {
                 $result = AwsConnection::StartInstance($instancesIds);
-                if(!empty($result))
-                {
+                if (!empty($result)) {
                     $startInstance = $result->getPath('StartingInstances');
-                    foreach ($startInstance as $instanceDetail){
+                    foreach ($startInstance as $instanceDetail) {
                         $CurrentState = $instanceDetail['CurrentState'];
                         $instanceId = $instanceDetail['InstanceId'];
-                        if($CurrentState['Name'] == 'pending' || $CurrentState['Name'] == 'running'){
+                        if ($CurrentState['Name'] == 'pending' || $CurrentState['Name'] == 'running') {
                             $UserInstance = UserInstances::findByInstanceId($instanceId)->first();
                             $UserInstance->status = 'running';
-                            if($UserInstance->save()){
+                            if ($UserInstance->save()) {
                                 $instanceDetail = UserInstancesDetails::where(['user_instance_id' => $UserInstance->id, 'end_time' => null])->latest()->first();
-                                if(empty($instanceDetail)){
+                                if (empty($instanceDetail)) {
                                     $instanceDetail = new UserInstancesDetails();
                                     $instanceDetail->user_instance_id = $UserInstance->id;
                                     $instanceDetail->start_time = $currentDate;
                                     $instanceDetail->save();
                                 }
-                                Log::info('Instance Id '. $instanceId . ' Started');
+                                Log::info('Instance Id ' . $instanceId . ' Started');
                             }
                         } else {
-                            Log::info('Instance Id '. $instanceId . ' Not Started Successfully');
+                            Log::info('Instance Id ' . $instanceId . ' Not Started Successfully');
                         }
                     }
                 } else {
-                    Log::info('Instances are not Started ['.$instancesIds.']');
+                    Log::info('Instances are not Started [' . $instancesIds . ']');
                 }
             } else {
                 Log::info('No Instances Are there to Start');
             }
-        }
-        catch (\Exception $e) {
-            Log::info('Catch Error Message '. $e->getMessage());
+        } catch (\Exception $e) {
+            Log::info('Catch Error Message ' . $e->getMessage());
         }
     }
 
@@ -195,42 +192,41 @@ class AppController extends Controller
         try {
             $instancesIds = [];
             $startSchedule = SchedulingInstance::findScheduling('stop')->get();
-            foreach ($startSchedule as $scheduler){
+            foreach ($startSchedule as $scheduler) {
                 $UserInstanceObj = isset($scheduler->userInstances) ? $scheduler->userInstances : '';
                 $scheduleDetails = isset($scheduler->schedulingInstanceDetails) ? $scheduler->schedulingInstanceDetails : '';
-                if(!empty($scheduleDetails)){
-                    foreach ($scheduleDetails as $detail){
-                        if(!empty($UserInstanceObj) && !empty($detail->cron_data)){
-                            $CronDate = explode(' ',$detail->cron_data);
+                if (!empty($scheduleDetails)) {
+                    foreach ($scheduleDetails as $detail) {
+                        if (!empty($UserInstanceObj) && !empty($detail->cron_data)) {
+                            $CronDate = explode(' ', $detail->cron_data);
                             $currentTime = strtotime(date('D H:i A'));
-                            $cronTime = strtotime($CronDate[0].$CronDate[1].$CronDate[2]);
-                            if($currentTime == $cronTime){
+                            $cronTime = strtotime($CronDate[0] . $CronDate[1] . $CronDate[2]);
+                            if ($currentTime == $cronTime) {
                                 array_push($instancesIds, $UserInstanceObj->aws_instance_id);
                             }
                         }
                     }
                 }
             }
-            if(count($instancesIds) > 0){
+            if (count($instancesIds) > 0) {
                 $result = AwsConnection::StopInstance($instancesIds);
-                if(!empty($result))
-                {
+                if (!empty($result)) {
                     $startInstance = $result->getPath('StoppingInstances');
-                    foreach ($startInstance as $instanceDetail){
+                    foreach ($startInstance as $instanceDetail) {
                         $CurrentState = $instanceDetail['CurrentState'];
                         $instanceId = $instanceDetail['InstanceId'];
-                        if($CurrentState['Name'] == 'stopped' || $CurrentState['Name'] == 'stopping'){
+                        if ($CurrentState['Name'] == 'stopped' || $CurrentState['Name'] == 'stopping') {
                             $UserInstance = UserInstances::findByInstanceId($instanceId)->first();
                             $UserInstance->status = 'stop';
                             $instanceDetail = UserInstancesDetails::where(['user_instance_id' => $UserInstance->id, 'end_time' => null])->latest()->first();
-                            if(!empty($instanceDetail)){
+                            if (!empty($instanceDetail)) {
                                 $instanceDetail->end_time = $currentDate;
                                 $diffTime = $this->DiffTime($instanceDetail->start_time, $instanceDetail->end_date);
                                 $instanceDetail->total_time = $diffTime;
-                                if($instanceDetail->save()){
-                                    if($diffTime > $UserInstance->cron_up_time){
+                                if ($instanceDetail->save()) {
+                                    if ($diffTime > $UserInstance->cron_up_time) {
                                         $UserInstance->cron_up_time = 0;
-                                        $tempUpTime = !empty($UserInstance->temp_up_time) ? $UserInstance->temp_up_time: 0;
+                                        $tempUpTime = !empty($UserInstance->temp_up_time) ? $UserInstance->temp_up_time : 0;
                                         $upTime = $diffTime + $tempUpTime;
                                         $UserInstance->temp_up_time = $upTime;
                                         $UserInstance->up_time = $upTime;
@@ -238,22 +234,21 @@ class AppController extends Controller
                                     }
                                 }
                             }
-                            if($UserInstance->save()){
-                                Log::info('Instance Id '. $instanceId . ' Stopped');
+                            if ($UserInstance->save()) {
+                                Log::info('Instance Id ' . $instanceId . ' Stopped');
                             }
                         } else {
-                            Log::info('Instance Id '. $instanceId . ' Not Stopped Successfully');
+                            Log::info('Instance Id ' . $instanceId . ' Not Stopped Successfully');
                         }
                     }
                 } else {
-                    Log::info('Instances are not Stopped ['.$instancesIds.']');
+                    Log::info('Instances are not Stopped [' . $instancesIds . ']');
                 }
             } else {
                 Log::info('No Instances Are there to stop');
             }
-        }
-        catch (\Exception $e) {
-            Log::info('Catch Error Message '. $e->getMessage());
+        } catch (\Exception $e) {
+            Log::info('Catch Error Message ' . $e->getMessage());
         }
     }
 }

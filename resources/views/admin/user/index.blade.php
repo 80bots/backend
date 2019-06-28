@@ -23,7 +23,7 @@
                         <tr>
                             <th>Name</th>
                             <th>Email</th>
-                            <th>Credit Score</th>
+                            <th>Credits</th>
                             <th>Register Date</th>
                             <th>Status</th>
                             <th>Action</th>
@@ -35,7 +35,7 @@
                                 <tr>
                                     <td>{{!empty($user->name) ? $user->name : ''}}</td>
                                     <td>{{!empty($user->email) ? $user->email : ''}}</td>
-                                    <td>{{!empty($user->credit_score) ? $user->credit_score : 0.0}}</td>
+                                    <td>{{!empty($user->remaining_credits) ? $user->remaining_credits : 0.0}}</td>
                                     <td>{{!empty($user->created_at) ? date('Y-m-d', strtotime($user->created_at)) : ''}}</td>
                                     <td>
                                         @if(!empty($user->status) && $user->status == 'active')
@@ -53,8 +53,8 @@
                                     <td>
                                         <div class="d-flex align-items-center">
                                             <button class="form-group btn btn-icon btn-primary change-credit-model mb-0 mr-1"
-                                                    value="{{$user->id}}" title="update credit score"><i
-                                                    class="fa fa-edit"></i></button>
+                                                    value="{{$user->id}}" title="update credits"><i
+                                                        class="fa fa-edit"></i></button>
                                             <a href="{{route('admin.user.instance.list',['id' => $user->id])}}"
                                                class="form-group btn btn-icon btn-secondary mb-0"
                                                title="List Of All Instances"><i class="fa fa-eye"></i></a>
@@ -82,7 +82,7 @@
                     <div class="modal-body">
                         <div class="input-group">
                             <input type="hidden" name="id" id="user_id" value="">
-                            <input type="text" id="credit-score" name="credit_score" class="form-control" required>
+                            <input type="text" id="credit-score" name="remaining_credits" class="form-control" required>
                         </div>
                     </div>
                     <div class="modal-footer">

@@ -125,7 +125,7 @@ return [
 
     'up_time' => env('UP_TIME_MINUTES', '60'),
 
-    'credit' => env('CRADIT_UP_TIME', '1'),
+    'credit' => env('CREDIT_UP_TIME', '1'),
     /*
     |--------------------------------------------------------------------------
     | Autoloaded Service Providers

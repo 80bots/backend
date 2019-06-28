@@ -25,7 +25,7 @@ class CreateUsersTable extends Migration
             $table->string('password_reset_token')->nullable();
             $table->string('auth_token')->nullable();
             $table->rememberToken();
-            $table->double('credit_score')->default(0);
+            $table->double('remaining_credits')->default(0);
             $table->enum('status', ['pending', 'active', 'inactive'])->default('pending');
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'));

@@ -23,7 +23,7 @@
                         <tr>
                             <th>Plan Name</th>
                             <th>Price</th>
-                            <th>Credit Score</th>
+                            <th>Credits</th>
                             <th>Status</th>
                             <th>Action</th>
                         </tr>

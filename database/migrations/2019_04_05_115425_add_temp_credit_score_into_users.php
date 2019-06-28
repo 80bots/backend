@@ -14,7 +14,7 @@ class AddTempCreditScoreIntoUsers extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->double('temp_credit_score')->default(0)->after('credit_score');
+            $table->double('temp_remaining_credits')->default(0)->after('remaining_credits');
         });
     }
 
@@ -26,7 +26,7 @@ class AddTempCreditScoreIntoUsers extends Migration
     public function down()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('temp_credit_score');
+            $table->dropColumn('temp_remaining_credits');
         });
     }
 }

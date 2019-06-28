@@ -33,7 +33,7 @@
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
                             <label for="">Credit Remaining</label>
-                            <input type="text" name="credit_score" value="{{!empty($user->credit_score) ? $user->credit_score : 0}}" readonly class="form-control"/>
+                            <input type="text" name="remaining_credits" value="{{!empty($user->remaining_credits) ? $user->remaining_credits : 0}}" readonly class="form-control"/>
                         </div>
                     </div>
                 </div>
