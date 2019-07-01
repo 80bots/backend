@@ -34,7 +34,8 @@ class AddUserIdIntoSchedulingInstancesTable extends Migration
     public function down()
     {
         Schema::table('scheduling_instances', function (Blueprint $table) {
-            $table->dropForeign(['user_id','user_instances_id']);
+            $table->dropForeign(['user_id']);
+            $table->dropForeign(['user_instances_id']);
             $table->dropColumn(['user_id', 'user_instances_id']);
         });
     }

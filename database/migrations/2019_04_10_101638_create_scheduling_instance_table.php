@@ -33,6 +33,6 @@ class CreateSchedulingInstanceTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('scheduling_instance');
+        Schema::dropIfExists('scheduling_instances');
     }
 }

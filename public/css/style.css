@@ -373,5 +373,21 @@ body {
     border: #1a2aef 1px solid;
     background-color: #d4efff;
 }
+
+.plancard.inactiveplans * {
+    color: #b3b3b3 !important;
+    background: #f5f5f5 !important;
+    border: black !important;
+}
+
+.plancard.inactiveplans *::selection {
+    background-color: #b3b3b3;
+    color: white;
+}
+
+.plancard.inactiveplans .btn-primary:hover {
+    background-color: hsl(0, 0%, 100%) !important;
+    border-color: #000000 !important;
+}
 /* User Panel styles END */
 

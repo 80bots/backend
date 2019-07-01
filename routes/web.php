@@ -85,5 +85,10 @@ Route::group(['prefix' => 'user', 'as' => 'user.', 'middleware' => ['auth', 'use
     Route::post('subscription', 'StripeController@createSubscription')->name('subscription.create');
 });
 
+Route::post(
+    'stripe/webhook',
+    '\App\Http\Controllers\WebhookController@handleWebhook'
+);
+
 
 //Route::get('stripe-payment', 'StripeController@SendPayment')->name('stripe-payment');

@@ -19,7 +19,7 @@
                 <div class="row w-75 p-3"> 
                     @foreach($plans as $plan)
                     <div class="col-4">
-                        <div class="plancard card shadow text-center w-100 {{ isset($activeplan) && $activeplan->id == $plan->id ? 'activeplan' : '' }}">
+                        <div class="plancard card shadow text-center w-100 {{ isset($activeplan) && $activeplan->id == $plan->id ? 'activeplan' : (!$subscriion_ended ? 'inactiveplans' : '') }}">
                             <div class="card-body">
                                 <h5 class="card-title subscription text-uppercase mt-1">
                                     {{!empty($plan->name) ? $plan->name : ''}}
@@ -47,50 +47,42 @@
 
         @if(isset($user) && is_null($user->stripe_id))
         <div class="card">
-            @if ($errors->any())
-                <div class="alert alert-danger">
-                    <ul>
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
             <div class="card-body d-flex justify-content-center">
                 <div class="row w-100 p-3">
+                    @include('layouts.imports.messages')
                     <form action="{{ route('user.subscription.create') }}" method="post" class="w-100" id="payment-form">
                         @csrf
                         <div class="offset-3 col-md-6 col-sm-12">
                             <div class="form-group">
                                 <label for="customer_name">Name*</label>
-                                <input type="text" id="customer_name" name="customer_name" class="form-control">
+                                <input type="text" value="{{ old('customer_name') }}" id="customer_name" name="customer_name" class="form-control">
                             </div>
                         </div>
                         <div class="offset-3 col-md-6 col-sm-12">
                             <div class="form-group">
                                 <label for="card_number">Credit Card Number*</label>
-                                <input type="text" id="card_number" name="number" maxlength="16" class="form-control"/>
+                                <input type="text" value="{{ old('number') }}" id="card_number" name="number" maxlength="16" class="form-control"/>
                             </div>
                         </div>
                         <div class="offset-3 col-md-6 col-sm-12">
                             <div class="form-group">
                                 <label for="card_month">Expiry Month*</label>
-                                <input type="text" id="card_month" name="month" class="form-control"/>
+                                <input type="text" value="{{ old('month') }}" id="card_month" name="month" class="form-control"/>
                             </div>
                         </div>
                         <div class="offset-3 col-md-6 col-sm-12">
                             <div class="form-group">
                                 <label for="card_year">Expiry Year*</label>
-                                <input type="text" id="card_year" name="year" class="form-control"/>
+                                <input type="text" value="{{ old('year') }}" id="card_year" name="year" class="form-control"/>
                             </div>
                         </div>
                         <div class="offset-3 col-md-6 col-sm-12">
                             <div class="form-group">
                                 <label for="card_cvv">CVV*</label>
-                                <input type="text" id="card_cvv" name="cvv" class="form-control"/>
+                                <input type="text" value="{{ old('cvv') }}" id="card_cvv" name="cvv" class="form-control"/>
                             </div>
                         </div>
-                        <input type="hidden" id="plan_id" name="plan_id"/>
+                        <input type="hidden" id="plan_id" value="{{ old('plan_id') }}" name="plan_id"/>
                         <div class="offset-3 col-md-6 col-sm-12">
                             <input type="submit" form="payment-form" class="btn btn-primary"/>
                         </div>

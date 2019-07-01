@@ -21,8 +21,19 @@
         <strong>{{ $message }}</strong>
     </div>
 @endif
+
+@if ($errors->any())
+    <div class="alert alert-danger w-100">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
 <script type="text/javascript">
     setTimeout(()=>{
         $('.alert').fadeOut();
-    },5000)
+    },10000)
 </script>

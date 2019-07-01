@@ -117,7 +117,7 @@ class UserController extends AppController
         try{
             $userObj = User::find($request->id);
             $userObj->remaining_credits = $userObj->remaining_credits + $request->remaining_credits;
-            if ($userObj->save()){
+            if ($userObj->save()) {
                 session()->flash('success', 'Credit Add Successfully');
                 return redirect()->back();
             }

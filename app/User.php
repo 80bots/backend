@@ -65,6 +65,14 @@ class User extends Authenticatable
         }
     }
 
+    public function updateCredit($credits){
+        $this->remaining_credits = $this->remaining_credits + $credits;
+        if ($this->save()){
+            return true;
+        }
+        return false;
+    }
+
     public function role()
     {
         return $this->belongsTo('App\Roles');

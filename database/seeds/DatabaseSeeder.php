@@ -14,7 +14,8 @@ class DatabaseSeeder extends Seeder
          $this->call([
              RolesTableseeder::class,
              AddUserSeeder::class,
-             AddPlatformsSeeder::class
+             AddPlatformsSeeder::class,
+             SubscriptionPlansTableSeeder::class,
          ]);
     }
 }
