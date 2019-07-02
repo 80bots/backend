@@ -41,11 +41,8 @@
                         <div class="col-sm-3 border-right">
                             Days
                         </div>
-                        <div class="col-sm-4 border-right">
-                            Start Time
-                        </div>
-                        <div class="col-sm-4 align-items-center">
-                            End Time
+                        <div class="col-sm-8 border-right">
+                            Scheduled Time
                         </div>
                         <div class="col-sm-1 align-items-center">
                             Action
@@ -108,7 +105,7 @@
         /*$("form[name='CreateSchedulerForm']").validate({
             ignore: [],
             rules: {
-                'start_time[]': {
+                'scheduled_time[]': {
                     required: true
                 },
                 'end_time[]': {
@@ -123,7 +120,7 @@
         });*/
     // });
 
-    function addSchedulerRow(ids = null, day = null, start_time = null, end_time = null) {
+    function addSchedulerRow(ids = null, day = null, scheduled_time = null, end_time = null) {
         storeRow();
         var numRow = $('#scheduler-row .row').length;
         var asides = ['AM', 'PM'];
@@ -141,20 +138,13 @@
             '            </select>\n' +
             '        </div>\n' +
             '    </div>\n' +
-            '    <div class="col-sm-4 border-right">\n' +
+            '    <div class="col-sm-8 border-right">\n' +
             '        <div class="form-group">\n' +
-            '            <select name="start_time[]" id="start_time_'+numRow+'" class="form-control">\n' +
+            '            <select name="scheduled_time[]" id="scheduled_time_'+numRow+'" class="form-control">\n' +
             '                <option value="">-Select-</option>\n';
             row += '            </select>\n' +
             '        </div>\n' +
-            '    </div>\n' +
-            '    <div class="col-sm-4 border-right">\n' +
-            '        <div class="form-group">\n' +
-            '            <select name="end_time[]" id="end_time_'+numRow+'" class="form-control">\n' +
-            '                <option value="">-Select-</option>\n';
-            row += '            </select>\n' +
-            '        </div>\n' +
-            '    </div>\n' +
+            '    </div>\n' + 
                 '<div class="col-sm-1 border-right">' +
                 '<a href="javascript:void(0)" onclick="deleteRow(['+ids+'],'+numRow+')" class="btn btn-round btn-icon btn-danger">x</a>' +
                 '</div>' +
@@ -167,27 +157,27 @@
             end_time = convertUtcToUser(end_time);
         }
 
-        if(start_time != ''){
-            start_time = convertUtcToUser(start_time);
+        if(scheduled_time != ''){
+            scheduled_time = convertUtcToUser(scheduled_time);
         }
 
-        if(start_time != ''){
-            CreateOptions(newfull[day], numRow, 'start_time', start_time);
+        if(scheduled_time != ''){
+            CreateOptions(newfull[day], numRow, 'scheduled_time', scheduled_time);
         } else {
             if(end_time != ''){
                 var endKey = newfull[day].indexOf(end_time);
-                start_time = newfull[day].slice(0,endKey);
-                CreateOptions(start_time, numRow, 'start_time');
+                scheduled_time = newfull[day].slice(0,endKey);
+                CreateOptions(scheduled_time, numRow, 'scheduled_time');
             }
         }
 
         if(end_time != ''){
             CreateOptions(newfull[day], numRow, 'end_time', end_time);
         } else {
-            if(start_time != ''){
-                var startKey = newfull[day].indexOf(start_time);
-                start_time = newfull[day].slice(startKey+1, 48);
-                CreateOptions(start_time, numRow, 'end_time');
+            if(scheduled_time != ''){
+                var startKey = newfull[day].indexOf(scheduled_time);
+                scheduled_time = newfull[day].slice(startKey+1, 48);
+                CreateOptions(scheduled_time, numRow, 'end_time');
             }
         }
     }
@@ -266,7 +256,7 @@
                     for (i = 0; i < lenth;) {
                         var day = scheduling_instance_details[i].day;
                         var start = scheduling_instance_details[i].schedule_type;
-                        var start_time = scheduling_instance_details[i].selected_time;
+                        var scheduled_time = scheduling_instance_details[i].selected_time;
                         var end = scheduling_instance_details[i + 1].schedule_type;
                         var end_time = scheduling_instance_details[i + 1].selected_time;
 
@@ -278,7 +268,7 @@
                             ids.push(scheduling_instance_details[i].id);
                             ids.push(scheduling_instance_details[i + 1].id);
                         }
-                        addSchedulerRow(ids, day, start_time, end_time);
+                        addSchedulerRow(ids, day, scheduled_time, end_time);
 
                         i = i + 2;
                     }
@@ -347,9 +337,9 @@
                 // }
             }
         });
-        NewStartTimeArray[selectedVal] = NewStartTimeArray[selectedVal].filter(a => !removeItemStart.includes(a));
+        //NewStartTimeArray[selectedVal] = NewStartTimeArray[selectedVal].filter(a => !removeItemStart.includes(a));
         var startTime = NewStartTimeArray[selectedVal];
-        CreateOptions(startTime, id, 'start_time');
+        CreateOptions(startTime, id, 'scheduled_time');
         // if(selectedValKey != -1 && aboveselectedDayKey != -1){
         //     if(selectedValKey > aboveselectedDayKey){
                 CreateOptions(startTime, id, 'end_time');
@@ -358,7 +348,7 @@
         storeRow();
     });
 
-    $(document).on('change', '[name="start_time[]"]', function () {
+    $(document).on('change', '[name="scheduled_time[]"]', function () {
         var id = $(this).attr('id').split("_");
         id = id[2];
         var selectedVal = $(this).val();
@@ -413,7 +403,7 @@
         });
 
         var StartTimeArray = [];
-        $('[name="start_time[]"]').each(function(key, val) {
+        $('[name="scheduled_time[]"]').each(function(key, val) {
             StartTimeArray.push($(this).val());
         });
 

@@ -64,10 +64,10 @@
         }
 
         public function convertTimeToUSERzone($str, $userTimezone, $format = 'h:i A'){
-            if(empty($str)){
+            if(is_null($str) || empty($str) || $str === "null"){
                 return '';
-            }
-            $new_str = new DateTime($str, new DateTimeZone('UTC') );
+			}
+            $new_str = new DateTime($str, new DateTimeZone('UTC'));
             $new_str->setTimeZone(new DateTimeZone($userTimezone));
             return $new_str->format($format);
         }
@@ -120,7 +120,7 @@
 		*/
 
 
-		public function store(Request $request)
+		/* public function store(Request $request)
 		{
 			try {
 				$user_id = Auth::user()->id;
@@ -138,7 +138,7 @@
                         if(!empty($startTime)){
                             $data['schedule_type'] = 'start';
                             if(!empty($startTime[$key])){
-//                                $data['selected_time'] = date('h:i A', strtotime($startTime[$key].$startAside[$key]));
+								//$data['selected_time'] = date('h:i A', strtotime($startTime[$key].$startAside[$key]));
                                 $selected_time = $this->convertTimeToUTCzone($startTime[$key], $userTimeZone);
                                 $data['selected_time'] = date('h:i A', strtotime($selected_time));
                                 $data['cron_data'] = $selected_time.' '.$userTimeZone;
@@ -155,7 +155,7 @@
                         if(!empty($endTime)){
                             $data['schedule_type'] = 'stop';
                             if(!empty($endTime[$key])){
-//                                $data['selected_time'] = date('h:i A', strtotime($endTime[$key].$endAside[$key]));
+								//$data['selected_time'] = date('h:i A', strtotime($endTime[$key].$endAside[$key]));
                                 $selected_time = $this->convertTimeToUTCzone($endTime[$key], $userTimeZone);
                                 $data['selected_time'] = date('h:i A', strtotime($selected_time));
                                 $data['cron_data'] = $selected_time.' '.$userTimeZone;
@@ -170,6 +170,96 @@
                         }
                     }
                 }
+
+                $schedulingInstance = SchedulingInstance::findByUserInstanceId($userInstanceId, $user_id)->first();
+				if(empty($schedulingInstance)){
+                    $schedulingInstance = new SchedulingInstance();
+                }
+			    $schedulingInstance->user_id = $user_id;
+			    $schedulingInstance->user_instances_id = $userInstanceId;
+			 	if($schedulingInstance->save()){
+			 	    foreach ($requestData as $scheduleDetail){
+			 	        if(isset($scheduleDetail['id']) && !empty($scheduleDetail['id'])){
+			 	            $schedulingInstanceDetail = SchedulingInstancesDetails::findById($scheduleDetail['id'])->first();
+                        } else {
+			 	            $schedulingInstanceDetail = new SchedulingInstancesDetails();
+                        }
+                        $schedulingInstanceDetail->scheduling_instances_id = $schedulingInstance->id;
+                        $schedulingInstanceDetail->schedule_type = $scheduleDetail['schedule_type'];
+                        $schedulingInstanceDetail->day = $scheduleDetail['day'];
+                        $schedulingInstanceDetail->selected_time = $scheduleDetail['selected_time'];
+                        $schedulingInstanceDetail->cron_data = $scheduleDetail['cron_data'];
+			 	        $schedulingInstanceDetail->save();
+                    }
+			 		session()->flash('success', 'Scheduling Create successfully');
+			 		return redirect(route('user.scheduling.index'));
+			 	}
+			 	else
+			 	{
+			 		session()->flash('error', 'Please Try again later');
+           			return redirect(route('user.scheduling.index'));
+			 	}
+			}
+	        catch (\Exception $e) {
+	            session()->flash('error', $e->getMessage());
+	            return redirect(route('user.scheduling.index'));
+	        }    
+		} */
+
+		public function store(Request $request)
+		{
+			try {
+				$user_id = Auth::user()->id;
+				$userInstanceId = isset($request->instance_id) ? $request->instance_id : '';
+				$userTimeZone = isset($request->userTimeZone) ? $request->userTimeZone : '';
+				$days = isset($request->day) ? $request->day : '';
+				$requestData = [];
+				$count = 1;
+				foreach ($days as $key => $day){
+				    if(!empty($day)){
+                        $data = [];
+                        $data['day'] = $day;
+                        $ids = isset($request->ids) ? explode(',',$request->ids[$key]) : '';
+                        $scheduled_time = isset($request->scheduled_time) ? $request->scheduled_time : '';
+                        $endTime = isset($request->end_time) ? $request->end_time : '';
+                        if(!empty($scheduled_time)){
+							if( $count%2 != 0 ) $data['schedule_type'] = 'start';
+							else $data['schedule_type'] = 'stop';
+							
+							if(!empty($scheduled_time[$key])){
+                                $selected_time = $this->convertTimeToUTCzone($scheduled_time[$key], $userTimeZone);
+                                $data['selected_time'] = date('h:i A', strtotime($selected_time));
+                                $data['cron_data'] = $selected_time.' '.$userTimeZone;
+                            } else {
+                                $data['selected_time'] = '';
+                                $data['cron_data'] = '';
+                            }
+                            if(!empty($ids) && $ids[0] != "0"){
+                                $data['id'] = $ids[0];
+                            }
+                            array_push($requestData, $data);
+                        }
+
+                        /* if(!empty($endTime)){
+                            $data['schedule_type'] = 'stop';
+                            if(!empty($endTime[$key])){
+								//$data['selected_time'] = date('h:i A', strtotime($endTime[$key].$endAside[$key]));
+                                $selected_time = $this->convertTimeToUTCzone($endTime[$key], $userTimeZone);
+                                $data['selected_time'] = date('h:i A', strtotime($selected_time));
+                                $data['cron_data'] = $selected_time.' '.$userTimeZone;
+                            } else {
+                                $data['selected_time'] = '';
+                                $data['cron_data'] = '';
+                            }
+                            if(!empty($ids) && $ids[1] != "0"){
+                                $data['id'] = $ids[1];
+                            }
+                            array_push($requestData, $data);
+						} */
+						$count++;
+                    }
+				}
+				//dd($requestData);
 
                 $schedulingInstance = SchedulingInstance::findByUserInstanceId($userInstanceId, $user_id)->first();
 				if(empty($schedulingInstance)){
