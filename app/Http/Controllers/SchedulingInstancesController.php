@@ -214,18 +214,16 @@
 				$userTimeZone = isset($request->userTimeZone) ? $request->userTimeZone : '';
 				$days = isset($request->day) ? $request->day : '';
 				$requestData = [];
-				$count = 1;
 				foreach ($days as $key => $day){
 				    if(!empty($day)){
                         $data = [];
                         $data['day'] = $day;
                         $ids = isset($request->ids) ? explode(',',$request->ids[$key]) : '';
-                        $scheduled_time = isset($request->scheduled_time) ? $request->scheduled_time : '';
+						$scheduled_time = isset($request->scheduled_time) ? $request->scheduled_time : '';
+						$type = isset($request->type) ? $request->type : '';
                         $endTime = isset($request->end_time) ? $request->end_time : '';
                         if(!empty($scheduled_time)){
-							if( $count%2 != 0 ) $data['schedule_type'] = 'start';
-							else $data['schedule_type'] = 'stop';
-							
+							$data['schedule_type'] = $type[$key];							
 							if(!empty($scheduled_time[$key])){
                                 $selected_time = $this->convertTimeToUTCzone($scheduled_time[$key], $userTimeZone);
                                 $data['selected_time'] = date('h:i A', strtotime($selected_time));
@@ -256,10 +254,8 @@
                             }
                             array_push($requestData, $data);
 						} */
-						$count++;
                     }
 				}
-				//dd($requestData);
 
                 $schedulingInstance = SchedulingInstance::findByUserInstanceId($userInstanceId, $user_id)->first();
 				if(empty($schedulingInstance)){

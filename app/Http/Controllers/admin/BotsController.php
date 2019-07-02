@@ -64,6 +64,7 @@ class BotsController extends AppController
             $botObj->aws_ami_name = isset($request->aws_ami_name) ? $request->aws_ami_name : '';
             $botObj->aws_instance_type = isset($request->aws_instance_type) ? $request->aws_instance_type : '';
             $botObj->aws_startup_script = isset($request->aws_startup_script) ? $request->aws_startup_script : '';
+            $botObj->aws_custom_script = isset($request->aws_custom_script) ? $request->aws_custom_script : '';
             $botObj->aws_storage_gb = isset($request->aws_storage_gb) ? $request->aws_storage_gb : '';
 
             $platform_name = isset($request->Platform) ? $request->Platform : '';
@@ -169,6 +170,7 @@ class BotsController extends AppController
             $botObj->aws_ami_name = isset($request->aws_ami_name) ? $request->aws_ami_name : '';
             $botObj->aws_instance_type = isset($request->aws_instance_type) ? $request->aws_instance_type : '';
             $botObj->aws_startup_script = isset($request->aws_startup_script) ? $request->aws_startup_script : '';
+            $botObj->aws_custom_script = isset($request->aws_custom_script) ? $request->aws_custom_script : '';
             $botObj->aws_storage_gb = isset($request->aws_storage_gb) ? $request->aws_storage_gb : '';
 
             $platform_name = isset($request->Platform) ? $request->Platform : '';

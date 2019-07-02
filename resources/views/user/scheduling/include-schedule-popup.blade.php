@@ -39,9 +39,12 @@
                     </div>
                     <div class="row">
                         <div class="col-sm-3 border-right">
+                            Type
+                        </div>
+                        <div class="col-sm-3 border-right">
                             Days
                         </div>
-                        <div class="col-sm-8 border-right">
+                        <div class="col-sm-5 border-right">
                             Scheduled Time
                         </div>
                         <div class="col-sm-1 align-items-center">
@@ -131,14 +134,21 @@
             ids = [0, 0];
         }
         row += '<input type="hidden" name="ids[]" value="' + ids + '" >';
-
-        row += '    <div class="col-sm-3 border-right">\n' +
+        row += '<div class="col-sm-3 border-right">\n' +
+            '        <div class="form-group">\n' +
+            '            <select name="type[]" id="type_'+numRow+'" class="form-control">\n' +
+            '               <option value="start">Start</option>\n' +
+            '               <option value="stop">Stop</option>\n' +
+            '            </select>\n' +
+            '        </div>\n' +
+            '    </div>\n';
+        row += '<div class="col-sm-3 border-right">\n' +
             '        <div class="form-group">\n' +
             '            <select name="day[]" id="day_'+numRow+'" class="form-control">\n' +
             '            </select>\n' +
             '        </div>\n' +
             '    </div>\n' +
-            '    <div class="col-sm-8 border-right">\n' +
+            '    <div class="col-sm-5 border-right">\n' +
             '        <div class="form-group">\n' +
             '            <select name="scheduled_time[]" id="scheduled_time_'+numRow+'" class="form-control">\n' +
             '                <option value="">-Select-</option>\n';
