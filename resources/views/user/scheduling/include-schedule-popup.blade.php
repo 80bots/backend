@@ -47,9 +47,7 @@
                         <div class="col-sm-5 border-right">
                             Scheduled Time
                         </div>
-                        <div class="col-sm-1 align-items-center">
-                            Action
-                        </div>
+                        <div class="col-sm-1 align-items-center"></div>
                     </div>
                     <div id="scheduler-row">
                     </div>
