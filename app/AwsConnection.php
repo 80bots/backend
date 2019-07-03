@@ -97,29 +97,34 @@ class AwsConnection extends BaseModel
 
     public static function AwsLaunchInstance($keyPairName, $securityGroupName, $bots){
 
-        if(!empty($bots)){
-            $startup = '
-            file=\'script.js\'
-            if [ -f $file ]
-                then
-                rm -rf $file
-            fi
-            SOMEVAR="%CUSTOM_SCRIPT%"
-            ############## Output variable to script file ###############
-            printf "$SOMEVAR" > $file
-            chmod +x $file
-            node $file';
-            
+        if(!empty($bots)) {
 
-            $custom_script = isset($bots->aws_custom_script) ? $bots->aws_custom_script : '';
-            
             $imageId = isset($bots->aws_ami_image_id) ? $bots->aws_ami_image_id : env('AWS_IMAGEID','ami-0cd3dfa4e37921605');
             $instanceType = isset($bots->aws_instance_type) ? $bots->aws_instance_type : env('AWS_INSTANCE_TYPE', 't2.micro');
             $volumeSize = isset($bots->aws_storage_gb) ? $bots->aws_storage_gb : env('AWS_Volume_Size', '8');
             $userData = isset($bots->aws_startup_script) ? $bots->aws_startup_script : '';
-            $shebang = '#!/bin/bash';
-            $replacedText = "{$shebang}\n" . "{$userData}\n" . str_replace("%CUSTOM_SCRIPT%", $custom_script, $startup);
-            $userData = base64_encode($replacedText);
+            $bot_script = isset($bots->aws_custom_script) ? $bots->aws_custom_script : '';
+            $_shebang = '#!/bin/bash';
+            $userData = "{$_shebang}\n {$userData}\n";
+
+            if( !is_null($bot_script) || !empty($bot_script) ) {
+                $staticBotScript = '
+file="script.js"
+if [ -f $file ]
+    then
+    rm -rf $file
+fi
+
+############## Output variable to script file ###############
+cat > $file <<EOF
+    ' . $bot_script . '
+EOF
+
+chmod +x $file
+node $file';
+                $userData = "{$userData}\n {$staticBotScript}";
+            }
+            $userData = base64_encode($userData);
         } else {
             $imageId = env('AWS_IMAGEID','ami-0cd3dfa4e37921605');
             $instanceType = env('AWS_INSTANCE_TYPE', 't2.micro');
