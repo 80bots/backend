@@ -199,8 +199,9 @@ class AppController extends Controller
                     foreach ($scheduleDetails as $detail) {
                         if (!empty($UserInstanceObj) && !empty($detail->cron_data)) {
                             $CronDate = explode(' ', $detail->cron_data);
-                            $currentTime = strtotime(date('D H:i A'));
-                            $cronTime = strtotime($CronDate[0] . $CronDate[1] . $CronDate[2]);
+                            $currentTime = date_timestamp_get(date_create());
+                            $cronTimeDate = date_create($CronDate[0] . $CronDate[1] . $CronDate[2], timezone_open('GMT'.$CronDate[3]));
+                            $cronTime = date_timestamp_get($cronTimeDate);
                             if ($currentTime == $cronTime) {
                                 array_push($instancesIds, $UserInstanceObj->aws_instance_id);
                             }
