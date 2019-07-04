@@ -121,7 +121,7 @@
         });*/
     // });
 
-    function addSchedulerRow(ids = null, day = null, scheduled_time = null, end_time = null) {
+    function addSchedulerRow(ids = null, day = null, scheduled_time = null, end_time = null, schedule_type = null) {
         storeRow();
         var numRow = $('#scheduler-row .row').length;
         var asides = ['AM', 'PM'];
@@ -135,8 +135,8 @@
         row += '<div class="col-sm-3 border-right">\n' +
             '        <div class="form-group">\n' +
             '            <select name="type[]" id="type_'+numRow+'" class="form-control">\n' +
-            '               <option value="start">Start</option>\n' +
-            '               <option value="stop">Stop</option>\n' +
+            '               <option value="start" ' + ((schedule_type == 'start') ? 'selected' : '') + '>Start</option>\n' +
+            '               <option value="stop" ' + ((schedule_type == 'stop') ? 'selected' : '') + '>Stop</option>\n' +
             '            </select>\n' +
             '        </div>\n' +
             '    </div>\n';
@@ -261,24 +261,18 @@
                     var schedulingInstance = response.data;
                     var scheduling_instance_details = schedulingInstance.scheduling_instance_details;
                     var lenth = scheduling_instance_details.length;
-                    for (i = 0; i < lenth;) {
+                    for (i = 0; i < lenth; i++) {
                         var day = scheduling_instance_details[i].day;
-                        var start = scheduling_instance_details[i].schedule_type;
+                        var schedule_type = scheduling_instance_details[i].schedule_type;
                         var scheduled_time = scheduling_instance_details[i].selected_time;
-                        var end = scheduling_instance_details[i + 1].schedule_type;
-                        var end_time = scheduling_instance_details[i + 1].selected_time;
-
-
+                        var end_time = '';
                         var row =
                             '<div class="row">\n';
                         var ids = [];
-                        if (scheduling_instance_details[i] != '' && scheduling_instance_details[i + 1] != '') {
+                        if (scheduling_instance_details[i] != '' && typeof scheduling_instance_details[i] != 'undefined') {
                             ids.push(scheduling_instance_details[i].id);
-                            ids.push(scheduling_instance_details[i + 1].id);
                         }
-                        addSchedulerRow(ids, day, scheduled_time, end_time);
-
-                        i = i + 2;
+                        addSchedulerRow(ids, day, scheduled_time, end_time, schedule_type);
                     }
                     if(lenth == 0){
                         addSchedulerRow();
