@@ -162,11 +162,11 @@
         CreateOptions(weekDays, numRow, 'day', day);
 
         if(end_time != ''){
-            end_time = convertUtcToUser(end_time);
+            //end_time = convertUtcToUser(end_time);
         }
 
         if(scheduled_time != ''){
-            scheduled_time = convertUtcToUser(scheduled_time);
+            //scheduled_time = convertUtcToUser(scheduled_time);
         }
 
         if(scheduled_time != ''){

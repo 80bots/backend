@@ -57,9 +57,8 @@
 
 		}
 
-        public function convertTimeToUTCzone($str, $userTimezone, $format = 'D h:i A'){
-            $new_str = new DateTime($str, new DateTimeZone($userTimezone));
-            $new_str->setTimeZone(new DateTimeZone('UTC'));
+        public function convertTimeToUserTime($day, $str, $userTimezone, $format = 'D h:i A'){
+			$new_str = new DateTime("{$day} {$str}", new DateTimeZone($userTimezone));
             return $new_str->format($format);
         }
 
@@ -139,7 +138,7 @@
                             $data['schedule_type'] = 'start';
                             if(!empty($startTime[$key])){
 								//$data['selected_time'] = date('h:i A', strtotime($startTime[$key].$startAside[$key]));
-                                $selected_time = $this->convertTimeToUTCzone($startTime[$key], $userTimeZone);
+                                $selected_time = $this->convertTimeToUserTime($day, $startTime[$key], $userTimeZone);
                                 $data['selected_time'] = date('h:i A', strtotime($selected_time));
                                 $data['cron_data'] = $selected_time.' '.$userTimeZone;
                             } else {
@@ -156,7 +155,7 @@
                             $data['schedule_type'] = 'stop';
                             if(!empty($endTime[$key])){
 								//$data['selected_time'] = date('h:i A', strtotime($endTime[$key].$endAside[$key]));
-                                $selected_time = $this->convertTimeToUTCzone($endTime[$key], $userTimeZone);
+                                $selected_time = $this->convertTimeToUserTime($day, $endTime[$key], $userTimeZone);
                                 $data['selected_time'] = date('h:i A', strtotime($selected_time));
                                 $data['cron_data'] = $selected_time.' '.$userTimeZone;
                             } else {
@@ -217,15 +216,15 @@
 				foreach ($days as $key => $day){
 				    if(!empty($day)){
                         $data = [];
-                        $data['day'] = $day;
+						$data['day'] = $day;
                         $ids = isset($request->ids) ? explode(',',$request->ids[$key]) : '';
 						$scheduled_time = isset($request->scheduled_time) ? $request->scheduled_time : '';
 						$type = isset($request->type) ? $request->type : '';
                         $endTime = isset($request->end_time) ? $request->end_time : '';
-                        if(!empty($scheduled_time)){
-							$data['schedule_type'] = $type[$key];							
+                        if(!empty($scheduled_time)) {
+							$data['schedule_type'] = $type[$key];
 							if(!empty($scheduled_time[$key])){
-                                $selected_time = $this->convertTimeToUTCzone($scheduled_time[$key], $userTimeZone);
+                                $selected_time = $this->convertTimeToUserTime($day, $scheduled_time[$key], $userTimeZone);
                                 $data['selected_time'] = date('h:i A', strtotime($selected_time));
                                 $data['cron_data'] = $selected_time.' '.$userTimeZone;
                             } else {
@@ -234,26 +233,9 @@
                             }
                             if(!empty($ids) && $ids[0] != "0"){
                                 $data['id'] = $ids[0];
-                            }
+							}
                             array_push($requestData, $data);
                         }
-
-                        /* if(!empty($endTime)){
-                            $data['schedule_type'] = 'stop';
-                            if(!empty($endTime[$key])){
-								//$data['selected_time'] = date('h:i A', strtotime($endTime[$key].$endAside[$key]));
-                                $selected_time = $this->convertTimeToUTCzone($endTime[$key], $userTimeZone);
-                                $data['selected_time'] = date('h:i A', strtotime($selected_time));
-                                $data['cron_data'] = $selected_time.' '.$userTimeZone;
-                            } else {
-                                $data['selected_time'] = '';
-                                $data['cron_data'] = '';
-                            }
-                            if(!empty($ids) && $ids[1] != "0"){
-                                $data['id'] = $ids[1];
-                            }
-                            array_push($requestData, $data);
-						} */
                     }
 				}
 
