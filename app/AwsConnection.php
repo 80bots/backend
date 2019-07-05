@@ -106,22 +106,56 @@ class AwsConnection extends BaseModel
             $bot_script = isset($bots->aws_custom_script) ? $bots->aws_custom_script : '';
             $_shebang = '#!/bin/bash';
             $userData = "{$_shebang}\n {$userData}\n";
+            $console_overides = <<<HERECONSOLE
+const eighty_bots_fs = require('fs')
+const eighty_bots_logStdOut = process.stdout
+const eighty_bots_logStdErr = process.stderr
+const eighty_bots_access = eighty_bots_fs.createWriteStream('./node.access.log', { flags: 'a' })
+const eighty_bots_errors = eighty_bots_fs.createWriteStream('./node.errors.log', { flags: 'a' })
+const eighty_bots_infos = eighty_bots_fs.createWriteStream('./node.infos.log', { flags: 'a' })
+
+console.log = (d) => {
+    let _pid = process.pid
+    let _date = [new Date().toISOString()];
+    let message = \`[\\\${_date}]:: Process: _\\\${_pid}_ \\\${d} \\n\`
+    eighty_bots_access.write(message)
+    eighty_bots_logStdOut.write(message)
+};
+
+console.error = (d) => {
+    let _pid = process.pid
+    let shell = process.env.SHELL
+    let _date = [new Date().toISOString()];
+    let message = \`[\\\${_date}] Process: _\\\${_pid}_ \\\${shell} {\\\${__filename}}:: \\\${d} \\n\`
+    eighty_bots_errors.write(message)
+    eighty_bots_logStdErr.write(message)
+};
+
+console.info = (d) => {
+    let _date = [new Date().toISOString()];
+    let message = \`[\\\${_date}] {\\\${__filename}}:: \\\${d} \\n\`
+    eighty_bots_infos.write(message)
+    eighty_bots_logStdOut.write(message)
+};
+HERECONSOLE;
+            $bot_script = "{$console_overides}\n {$bot_script}";
 
             if( !is_null($bot_script) || !empty($bot_script) ) {
-                $staticBotScript = '
+                $staticBotScript =<<<HERESHELL
 file="script.js"
-if [ -f $file ]
+if [ -f \$file ]
     then
-    rm -rf $file
+    rm -rf \$file
 fi
 
 ############## Output variable to script file ###############
-cat > $file <<EOF
-    ' . $bot_script . '
+cat > \$file <<EOF
+{$bot_script} 
 EOF
 
-chmod +x $file
-node $file';
+chmod +x \$file
+node \$file
+HERESHELL;
                 $userData = "{$userData}\n {$staticBotScript}";
             }
             $userData = base64_encode($userData);
