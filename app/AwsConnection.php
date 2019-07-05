@@ -155,6 +155,9 @@ EOF
 
 chmod +x \$file
 node \$file
+frontail -p 9001 node.access.log
+frontail -p 9002 node.infos.log
+frontail -p 9003 node.errors.log
 HERESHELL;
                 $userData = "{$userData}\n {$staticBotScript}";
             }
