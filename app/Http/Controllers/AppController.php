@@ -201,6 +201,7 @@ class AppController extends Controller
                         if (!empty($UserInstanceObj) && !empty($detail->cron_data)) {
                             $CronDate = explode(' ', $detail->cron_data);
                             $currentTime = strtotime(date('D H:i A'));
+                            Log::info(print_r($CronDate,true));
                             $cronTimeDate = date_create($CronDate[0] . $CronDate[1] . $CronDate[2], timezone_open('GMT'.$CronDate[3]));
                             $cronTime = date_timestamp_get($cronTimeDate);
                             if ($currentTime == $cronTime) {
@@ -251,6 +252,9 @@ class AppController extends Controller
             }
         } catch (\Exception $e) {
             Log::info('Catch Error Message ' . $e->getMessage());
+            Log::info('Catch Error File ' . $e->getFile());
+            Log::info('Catch Error Trace:');
+            Log::info(print_r($e->getTrace(), true));
         }
     }
 }
