@@ -110,9 +110,9 @@ class AwsConnection extends BaseModel
 const eighty_bots_fs = require('fs')
 const eighty_bots_logStdOut = process.stdout
 const eighty_bots_logStdErr = process.stderr
-const eighty_bots_access = eighty_bots_fs.createWriteStream('\$HOME/node.access.log', { mode: 0o755, flags: 'a' })
-const eighty_bots_errors = eighty_bots_fs.createWriteStream('\$HOME/node.errors.log', { mode: 0o755, flags: 'a' })
-const eighty_bots_infos = eighty_bots_fs.createWriteStream('\$HOME/node.infos.log', { mode: 0o755, flags: 'a' })
+const eighty_bots_access = eighty_bots_fs.createWriteStream('/home/ec2-user/node.access.log', { mode: 0o755, flags: 'a' })
+const eighty_bots_errors = eighty_bots_fs.createWriteStream('/home/ec2-user/node.errors.log', { mode: 0o755, flags: 'a' })
+const eighty_bots_infos = eighty_bots_fs.createWriteStream('/home/ec2-user/node.infos.log', { mode: 0o755, flags: 'a' })
 
 console.log = (d) => {
     let _pid = process.pid
@@ -156,7 +156,7 @@ EOF
 chmod +x \$file
 node \$file
 changedir() {
-    cd \$HOME
+    cd /home/ec2-user
     frontail -p 9001 node.access.log
     frontail -p 9002 node.infos.log
     frontail -p 9003 node.errors.log
