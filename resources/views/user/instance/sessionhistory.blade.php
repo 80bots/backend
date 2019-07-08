@@ -24,10 +24,10 @@ Instance Sessions Listing
                         <thead>
                             <tr>
                                 <th width="3%"></th>
-                                <th width="12%">User</th>
-                                <th width="20%">Instance Id</th>
-                                <th width="20%">Type</th>
-                                <th width="20%">Ran On</th>
+                                <th width="15%">User</th>
+                                <th width="29%">Instance Id</th>
+                                <th width="15%">Type</th>
+                                <th width="30%">Ran On</th>
                             </tr>
                         </thead>
                     </table>
@@ -51,7 +51,7 @@ Instance Sessions Listing
                                     {{!empty($session->schedule_type) ? $session->schedule_type : ''}}
                                 </div>
                                 <div class="col-md-4 col-sm-2">
-                                    {{!empty($session->created_at) ? date("jS F, Y H:i:s", strtotime($session->created_at)) : ''}}
+                                    {{!empty($session->created_at) ? date("jS F, Y H:i A", strtotime($session->created_at)) : ''}}
                                 </div>
                             </div>
                         </div>
