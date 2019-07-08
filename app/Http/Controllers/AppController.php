@@ -145,6 +145,7 @@ class AppController extends Controller
                             $cronTimeDate = date_create($CronDate[0] . $CronDate[1] . $CronDate[2], timezone_open('GMT'.$CronDate[3]));
                             $cronTime = date_timestamp_get($cronTimeDate);
                             if ($currentTime == $cronTime) {
+                                Log::info($detail->scheduling_instances_id);
                                 array_push($instancesIds, $UserInstanceObj->aws_instance_id);
                             }
                         }
