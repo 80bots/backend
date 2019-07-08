@@ -24,12 +24,14 @@ class InstanceSessionsHistoryController extends Controller
        // dd(InstanceSessionsHistory::where('user_id', $user->id)->with('schedulingInstance.userInstances')->get());
         if($user->role->name === 'User'){
             return view('user.instance.sessionhistory', [
-                'sessions' => InstanceSessionsHistory::where('user_id', $user->id)->with('schedulingInstance.userInstances')->paginate(5)
+                'sessions' => InstanceSessionsHistory::where('user_id', $user->id)->with('schedulingInstance.userInstances')->paginate(5),
+                'admin' => false
             ]);
         }
 
         return view('user.instance.sessionhistory', [
-            'sessions' => InstanceSessionsHistory::with('schedulingInstance.userInstances')->paginate(5)
+            'sessions' => InstanceSessionsHistory::with('schedulingInstance.userInstances')->paginate(5),
+            'admin' => true
         ]);
     }
 }

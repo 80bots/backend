@@ -50,7 +50,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','ad
         Route::post('change-status', 'SubscriptionPlanController@ChangeStatus')->name('change-status');
     });
 
-    Route::get('list-sessions', 'InstanceSessionsHistoryController@index');
+    Route::get('list-sessions', 'InstanceSessionsHistoryController@index')->name('listsessions');
 });
 
 Route::group(['prefix' => 'user', 'as' => 'user.', 'middleware' => ['auth', 'user']], function(){
@@ -76,7 +76,7 @@ Route::group(['prefix' => 'user', 'as' => 'user.', 'middleware' => ['auth', 'use
         Route::post('delete-scheduler-details', 'SchedulingInstancesController@deleteSchedulerDetails')->name('delete-scheduler-details'); 
     });
 
-    Route::get('list-sessions', 'InstanceSessionsHistoryController@index');
+    Route::get('list-sessions', 'InstanceSessionsHistoryController@index')->name('listsessions');
 
     Route::resource('instance','UserInstancesController');
     Route::group(['prefix' => 'instance', 'as' => 'instance.'], function() {

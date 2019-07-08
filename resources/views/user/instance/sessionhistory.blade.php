@@ -17,47 +17,44 @@ Instance Sessions Listing
                 <small>Since 2019</small>
             </div>
         </div>
-        @if(!empty($sessions) && isset($sessions))
+        @if(isset($sessions) && !empty($sessions))
             <div class="my-3 p-3 bg-white rounded shadow-sm">
-                <h6 class="border-bottom  pb-2 mb-0">Instance Schedules</h6>
-                    <table id="scheduling_instances" class="table thead-default vertical-middle mb-0">
-                        <thead>
-                            <tr>
-                                <th width="3%"></th>
-                                <th width="15%">User</th>
-                                <th width="29%">Instance Id</th>
-                                <th width="15%">Type</th>
-                                <th width="30%">Ran On</th>
-                            </tr>
-                        </thead>
-                    </table>
-                    @foreach($sessions as $session)
-                        <div class="media text-muted pt-3 d-flex align-items-start">
-                            <svg class="bd-placeholder-img mr-2 rounded flex-shrink-0" width="32" height="32"
-                                 xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"
-                                 focusable="false" role="img" aria-label="Placeholder: 32x32"><title>
-                                    Placeholder</title>
-                                <rect width="100%" height="100%" fill="#007bff"></rect>
-                                <text x="50%" y="50%" fill="#007bff" dy=".3em">32x32</text>
-                            </svg>
-                            <div class="row flex-grow-1 ml-0 mr-0 border-bottom pb-3">
-                                <div class="col-md-2 col-sm-2">
-                                    {{!empty($session->schedulingInstance->userInstances->user) ? $session->schedulingInstance->userInstances->user->name : ' -- '}}
-                                </div>
-                                <div class="col-md-4 col-sm-2">
-                                    {{!empty($session->schedulingInstance->userInstances) ? $session->schedulingInstance->userInstances->aws_instance_id : ' -- '}}
-                                </div>
-                                <div class="col-md-2 col-sm-2">
-                                    {{!empty($session->schedule_type) ? $session->schedule_type : ''}}
-                                </div>
-                                <div class="col-md-4 col-sm-2">
-                                    {{!empty($session->created_at) ? date("jS F, Y H:i A", strtotime($session->created_at)) : ''}}
-                                </div>
-                            </div>
-                        </div>
-                @endforeach
+                <h6 class="border-bottom pb-6">Instance Schedules</h6>
+                <table id="instances_sessions" class="table thead-default vertical-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th width="3%"></th>
+                            @if($admin)
+                            <th width="15%">User</th>
+                            @endif
+                            <th width="29%">Instance Id</th>
+                            <th width="15%">Type</th>
+                            <th width="30%">Ran On</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($sessions as $session) 
+                            <tr role="row" class="odd">
+                                <td>
+                                    <svg class="bd-placeholder-img mr-2 rounded flex-shrink-0" width="32" height="32"
+                                        xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"
+                                        focusable="false" role="img" aria-label="Placeholder: 32x32"><title>
+                                            Placeholder</title>
+                                        <rect width="100%" height="100%" fill="#007bff"></rect>
+                                        <text x="50%" y="50%" fill="#007bff" dy=".3em">32x32</text>
+                                    </svg>
+                                </td>
+                                @if($admin)
+                                <td>{{!empty($session->schedulingInstance->userInstances->user) ? $session->schedulingInstance->userInstances->user->name : ' -- '}}</td>
+                                @endif
+                                <td>{{!empty($session->schedulingInstance->userInstances) ? $session->schedulingInstance->userInstances->aws_instance_id : ''}}</td>
+                                <td>{{!empty($session->schedule_type) ? $session->schedule_type : ''}}</td>
+                                <td>{{!empty($session->created_at) ? date("jS F, Y H:i A", strtotime($session->created_at)) : ''}}</td>
+                            </tr>                                
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
-
             {{ $sessions->links() }}
         @endif
     </div>
@@ -71,7 +68,7 @@ Instance Sessions Listing
         $('#user-time-zone').val(current_time_zone);
 
         $(document).ready(function() {
-            $('#instance-list').DataTable();
+            $('#instances_sessions').DataTable();
         });
     </script>
 @endsection
