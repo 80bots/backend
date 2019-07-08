@@ -32,4 +32,8 @@ class SchedulingInstance extends Model
     public function schedulingInstanceDetails(){
    	    return $this->hasMany('App\SchedulingInstancesDetails','scheduling_instances_id','id');
     }
+
+    public function schedulingInstanceHistory(){
+        return $this->hasMany('App\InstanceSessionsHistory','scheduling_instances_id');
+    }
 }

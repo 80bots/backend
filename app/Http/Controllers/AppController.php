@@ -8,6 +8,7 @@ use App\SchedulingInstance;
 use App\User;
 use App\UserInstances;
 use App\UserInstancesDetails;
+use App\InstanceSessionsHistory as SessionsHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -146,12 +147,22 @@ class AppController extends Controller
                             $cronTime = date_timestamp_get($cronTimeDate);
                             if ($currentTime == $cronTime) {
                                 Log::info($detail->scheduling_instances_id);
+
+                                //Save the session history
+                                $history = new SessionsHistory;
+                                $history->scheduling_instances_id = $scheduler->id;
+                                $history->user_id = $scheduler->user_id;
+                                $history->schedule_type = $detail->schedule_type;
+                                $history->selected_time = $detail->selected_time;
+                                $history->save();
+
                                 array_push($instancesIds, $UserInstanceObj->aws_instance_id);
                             }
                         }
                     }
                 }
             }
+
             if (count($instancesIds) > 0) {
                 $result = AwsConnection::StartInstance($instancesIds);
                 if (!empty($result)) {
@@ -206,6 +217,15 @@ class AppController extends Controller
                             $cronTimeDate = date_create($CronDate[0] . $CronDate[1] . $CronDate[2], timezone_open('GMT'.$CronDate[3]));
                             $cronTime = date_timestamp_get($cronTimeDate);
                             if ($currentTime == $cronTime) {
+
+                                //Save the session history
+                                $history = new SessionsHistory;
+                                $history->scheduling_instances_id = $scheduler->id;
+                                $history->user_id = $scheduler->user_id;
+                                $history->schedule_type = $detail->schedule_type;
+                                $history->selected_time = $detail->selected_time;
+                                $history->save();
+
                                 array_push($instancesIds, $UserInstanceObj->aws_instance_id);
                             }
                         }
