@@ -51,7 +51,7 @@ Instance Sessions Listing
                                 <td>{{!empty($session->schedule_type) ? $session->schedule_type : ''}}</td>
                                 @php
                                     $currentDate = new DateTime(date("d-m-Y H:i P", strtotime($session->created_at)));
-                                    $currentDate = $currentDate->setTimezone( new DateTimeZone($session->current_time_zone ?? 'UTC') )->format('jS F, Y H:i');
+                                    $currentDate = $currentDate->setTimezone( new DateTimeZone($session->current_time_zone ?? 'UTC') )->format('jS F, Y h:i A');
                                 @endphp
                                 <td>{{!empty($currentDate) ? $currentDate : ''}}</td>
                             </tr>                                

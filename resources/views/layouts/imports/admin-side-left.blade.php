@@ -35,9 +35,9 @@
                 <div id="percentage" class="collapse in {{ (request()->is('admin/percent*')) ? 'show' : '' }}">
                     <ul class="sidebar-dropdown list-unstyled">
 
-                        <li class="sidebar-item "><a href="{{route('percent.index')}}" class="sidebar-link {{ (request()->is('admin/percent')) ? 'active' : '' }}">List</a></li>
+                        <li class="sidebar-item "><a href="{{route('admin.percent.index')}}" class="sidebar-link {{ (request()->is('admin/percent')) ? 'active' : '' }}">List</a></li>
 
-                        <li class="sidebar-item "><a href="{{route('percent.create')}}" class="sidebar-link {{ (request()->is('admin/percent/create')) ? 'active' : '' }}">Create</a></li>
+                        <li class="sidebar-item "><a href="{{route('admin.percent.create')}}" class="sidebar-link {{ (request()->is('admin/percent/create')) ? 'active' : '' }}">Create</a></li>
                     </ul>
                 </div>
             </li>
