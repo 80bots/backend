@@ -32,7 +32,9 @@ Instance Listing
                             </svg>
                             <div class="row flex-grow-1 ml-0 mr-0 border-bottom pb-3">
                                 <div class="col-md-2 col-sm-2">
-                                    <strong class="d-block text-gray-dark">{{isset($instance->bots->bot_name)?$instance->bots->bot_name:''}}</strong>
+                                    <strong data-toggle="tooltip" title="{{isset($instance->aws_instance_id)?$instance->aws_instance_id:''}}" class="d-block text-gray-dark">
+                                        {{isset($instance->bots->bot_name)?$instance->bots->bot_name:' - '}}
+                                    </strong>
                                 </div>
                                 <div class="col-md-2 col-sm-2">
                                     {{!empty($instance->up_time) ? $instance->up_time : 0}}
@@ -87,7 +89,7 @@ Instance Listing
             $('#instance-list').DataTable();
         });
 
-        $(document).on('change', '.instStatus', function () {
+        $(document).on('change', '.instStatus', function (e) {
             var status = $(this).val();
             var instanceId = $(this).data('id');
             var URL = '{{route('user.instance.change-status')}}';
@@ -103,9 +105,11 @@ Instance Listing
                     status: status
                 },
                 success: function (data) {
+                    console.log(data); return false;
                     location.reload();
                 }
             });
         })
     </script>
+    @include('user.scheduling.schedulerscripts')
 @endsection
