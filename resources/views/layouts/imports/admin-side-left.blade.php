@@ -27,6 +27,22 @@
                     </ul>
                 </div>
             </li>
+            <li class="sidebar-item">
+                    <span data-toggle="collapse" data-target="#percentage" class="sidebar-link {{ (request()->is('admin/creditPercent')) ? '' : 'collapsed' }}"
+                          aria-expanded="{{ (request()->is('admin/creditPercent*')) ? 'true' : 'false' }}">
+                        <span class="align-middle">Credit Percentage</span>
+                    </span>
+                <div id="percentage" class="collapse in {{ (request()->is('admin/percent*')) ? 'show' : '' }}">
+                    <ul class="sidebar-dropdown list-unstyled">
+
+                        <li class="sidebar-item "><a href="{{route('percent.index')}}" class="sidebar-link {{ (request()->is('admin/percent')) ? 'active' : '' }}">List</a></li>
+
+                        <li class="sidebar-item "><a href="{{route('percent.create')}}" class="sidebar-link {{ (request()->is('admin/percent/create')) ? 'active' : '' }}">Create</a></li>
+                    </ul>
+                </div>
+            </li>
+            <!-- END -->
+
         </ul>
     </div>
 </div>
