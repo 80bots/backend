@@ -13,6 +13,8 @@ class InstanceSessionsHistory extends Model
         'user_id',
         'schedule_type',
         'selected_time',
+        'cron_data',
+        'current_time_zone',
         'status',
     ];
 

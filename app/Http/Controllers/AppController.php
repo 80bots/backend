@@ -148,11 +148,18 @@ class AppController extends Controller
                             if ($currentTime == $cronTime) {
                                 Log::info($detail->scheduling_instances_id);
 
+                                $timezoneoffset = explode('+',$detail->cron_data);
+                                $hourmins = explode(':',$timezoneoffset[1]);
+                                $offsetinseconds = $hourmins[0] * 3600 + $hourmins[1] * 60;
+                                $timezone = timezone_name_from_abbr("", $offsetinseconds, 0);
+                                
                                 //Save the session history
                                 $history = new SessionsHistory;
                                 $history->scheduling_instances_id = $scheduler->id;
                                 $history->user_id = $scheduler->user_id;
                                 $history->schedule_type = $detail->schedule_type;
+                                $history->cron_data = $detail->cron_data;
+                                $history->current_time_zone = $timezone;
                                 $history->selected_time = $detail->selected_time;
                                 $history->save();
 

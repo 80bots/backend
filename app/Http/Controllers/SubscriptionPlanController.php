@@ -17,14 +17,19 @@ class SubscriptionPlanController extends Controller
     {
         $user = Auth::user();
         $plans = SubscriptionPlan::all();
-        $subscriion_ended = true;
+        $subscription_ended = true;
         $activeplan = null;
-        if($user->subscribed('80bots')) { 
+        if($user->subscribed('80bots')) {
             $subscription = $user->subscription('80bots');
-            $subscriion_ended = $user->subscription('80bots')->ended();
+            $subscription_ended = $user->subscription('80bots')->ended();
             $activeplan = SubscriptionPlan::where('stripe_plan',$subscription->stripe_plan)->first();
         }
-        return view('user.plans.index', ['plans' => $plans, 'user' => $user, 'subscriion_ended' => $subscriion_ended, 'activeplan' => $activeplan ]);
+        return view('user.plans.index', [
+            'plans' => $plans,
+            'user' => $user,
+            'subscription_ended' => $subscription_ended,
+            'activeplan' => $activeplan 
+        ]);
     }
 
     /**
