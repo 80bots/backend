@@ -29,7 +29,7 @@ Instance Sessions Listing
                             @endif
                             <th width="29%">Instance Id</th>
                             <th width="15%">Type</th>
-                            <th width="30%">Ran On</th>
+                            <th width="30%">Date & Time</th>
                         </tr>
                     </thead>
                     <tbody>
