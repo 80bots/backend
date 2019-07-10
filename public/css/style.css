@@ -374,20 +374,18 @@ body {
     background-color: #d4efff;
 }
 
-.plancard.inactiveplans * {
-    color: #b3b3b3 !important;
+.plancard.inactiveplans {
     background: #f5f5f5 !important;
+}
+
+.plancard.inactiveplans .card-body * {
+    color: #b3b3b3 !important;
     border: black !important;
 }
 
-.plancard.inactiveplans *::selection {
+.plancard.inactiveplans .card-body *::selection {
     background-color: #b3b3b3;
     color: white;
-}
-
-.plancard.inactiveplans .btn-primary:hover {
-    background-color: hsl(0, 0%, 100%) !important;
-    border-color: #000000 !important;
 }
 /* User Panel styles END */
 

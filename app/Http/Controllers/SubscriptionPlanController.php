@@ -19,6 +19,8 @@ class SubscriptionPlanController extends Controller
         $plans = SubscriptionPlan::all();
         $subscription_ended = true;
         $activeplan = null;
+        
+        //dd($subscription_ended);
         if($user->subscribed('80bots')) {
             $subscription = $user->subscription('80bots');
             $subscription_ended = $user->subscription('80bots')->ended();

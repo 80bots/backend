@@ -41,6 +41,7 @@ $user = Auth::user();
 </div>
 <script type="text/javascript" src="{{asset('js/jquery-3.3.1.min.js')}}"></script>
 <script type="text/javascript" src="{{asset('js/bootstrap.min.js')}}"></script>
+<script type="text/javascript" src="{{asset('js/bootbox.all.min.js')}}"></script>
 <script type="text/javascript" src="{{asset('js/datatables.min.js')}}"></script>
 <script type="text/javascript" src="{{asset('vendors/select2/js/select2.full.min.js')}}"></script>
 <script type="text/javascript" src="{{asset('js/script.js')}}"></script>
