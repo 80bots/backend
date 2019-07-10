@@ -10,7 +10,7 @@
 
 @section('content')
 <div class="wrapper">
-    <form class="card" id="percentage-create" action="{{route('percent.update',['id' => $percentage->id])}}" method="POST">
+    <form class="card" id="percentage-create" action="{{route('admin.percent.update',['id' => $percentage->id])}}" method="POST">
 
         @method('PUT')
         @csrf

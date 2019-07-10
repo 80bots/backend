@@ -13,6 +13,9 @@
                     <li class="sidebar-item "><a href="{{route('admin.bots.index')}}" class="sidebar-link {{ (request()->is('admin/bots')) ? 'active' : '' }}">All Bots</a></li>
                     <li class="sidebar-item "><a href="{{route('admin.bots.create')}}" class="sidebar-link {{ (request()->is('admin/bots/create')) ? 'active' : '' }}">Create Bot</a></li>
                     <li class="sidebar-item "><a href="{{route('admin.listsessions')}}" class="sidebar-link {{ (request()->is('admin/list-sessions')) ? 'active' : '' }}">Instance Sessions</a></li>
+                    <li class="sidebar-item "><a href="{{route('admin.bots.list')}}" class="sidebar-link {{ (request()->is('admin/bots-list')) ? 'active' : '' }}">Bots List</a></li>
+                    <li class="sidebar-item "><a href="{{route('admin.my-bots')}}" class="sidebar-link {{ (request()->is('admin/my-bots')) ? 'active' : '' }}">My Bots</a></li>
+
                 </ul>
             </li>
             <li class="sidebar-item">
@@ -35,12 +38,14 @@
                 <div id="percentage" class="collapse in {{ (request()->is('admin/percent*')) ? 'show' : '' }}">
                     <ul class="sidebar-dropdown list-unstyled">
 
-                        <li class="sidebar-item "><a href="{{route('percent.index')}}" class="sidebar-link {{ (request()->is('admin/percent')) ? 'active' : '' }}">List</a></li>
+                        <li class="sidebar-item "><a href="{{route('admin.percent.index')}}" class="sidebar-link {{ (request()->is('admin/percent')) ? 'active' : '' }}">List</a></li>
 
-                        <li class="sidebar-item "><a href="{{route('percent.create')}}" class="sidebar-link {{ (request()->is('admin/percent/create')) ? 'active' : '' }}">Create</a></li>
+                        <li class="sidebar-item "><a href="{{route('admin.percent.create')}}" class="sidebar-link {{ (request()->is('admin/percent/create')) ? 'active' : '' }}">Create</a></li>
                     </ul>
                 </div>
             </li>
+            {{--<li class="sidebar-item "><a href="{{route('user.instance.index')}}" class="sidebar-link {{ (request()->is('user/instance')) ? 'active' : '' }}">My Bots</a></li>--}}
+
             <!-- END -->
 
         </ul>

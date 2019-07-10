@@ -31,7 +31,7 @@ class CreditPercentController extends AppController
 		$percentage = new CreditPercentage();
 		$percentage->percentage = $request->percentage;
 		if($percentage->save()){
-			return redirect()->route('percent.index')->with('success','Credit Percentage Successfully Added.');
+			return redirect()->route('admin.percent.index')->with('success','Credit Percentage Successfully Added.');
 		} else {
 			return redirect()->back()->with('error','Credit Percentage Not Added.');
 		}
@@ -42,7 +42,6 @@ class CreditPercentController extends AppController
     public function show($id){
 
     }
-
 
     /* display edit form */
     public function edit($id){
@@ -62,7 +61,7 @@ class CreditPercentController extends AppController
 		$percentage = CreditPercentage::findOrFail($request->id);
 		$percentage->percentage = $request->percentage;
 		if($percentage->save()){
-			return redirect()->route('percent.index')->with('success','Credit Percentage Successfully Updated.');
+			return redirect()->route('admin.percent.index')->with('success','Credit Percentage Successfully Updated.');
 		}
 
     }

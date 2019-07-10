@@ -6,6 +6,7 @@ use App\AwsConnection;
 use App\BaseModel;
 use App\SchedulingInstance;
 use App\User;
+use App\CreditPercentage;
 use App\UserInstances;
 use App\UserInstancesDetails;
 use App\InstanceSessionsHistory as SessionsHistory;
@@ -71,7 +72,6 @@ class AppController extends Controller
         }
     }
 
-
     public function CalUsedCredit($UpTime)
     {
         if ($UpTime > 0) {
@@ -84,6 +84,16 @@ class AppController extends Controller
     public function CalUserCreditScore()
     {
         $users = User::findUserInstances();
+
+        // Get Low CreditPercentage
+        $CreditPercentage = CreditPercentage::get();
+        $lowPercentage  = array();
+        foreach ($CreditPercentage  as $row)
+        {
+            $lowPercentage[] = $row->percentage;
+        }
+        //End Get low CreditPercentage
+
         foreach ($users as $UserObj) {
             $UserInstances = isset($UserObj->UserInstances) ? $UserObj->UserInstances : '';
             if (!empty($UserInstances)) {
@@ -99,16 +109,35 @@ class AppController extends Controller
                 $temp_credit = $UserObj->temp_remaining_credits;
                 $creditScore = (float)$temp_credit - (float)$totalUsedCredit;
                 $UserObj->remaining_credits = $creditScore;
-                $UserObj->save();
-                /*if($UserObj->save()){
-                    if($creditScore <= 1){
-                        $this->SendEmailNotification($UserObj);
+
+                //User relation to get packages amount what package buy.
+
+                if(count($UserObj->UserSubscriptionPlan) > 0){
+                    $packageAmount = $UserObj->UserSubscriptionPlan[0]->credit;
+
+                    // Find  Percentage by current credit and user package amount
+                    // Percentage get on round and then match
+                    $creditScorePercentage = round(($creditScore * 100) / $packageAmount);
+
+                    // Check low percentge and if match then sent mail user credit is low please add credit.
+                    if(in_array($creditScorePercentage, $lowPercentage))
+                    {
+                        // Check last mail Percentage sent and current creditScorePercentage if not match then send mail
+                        if($UserObj->sent_email_status != $creditScorePercentage)
+                        {
+                           // if send mail then save on usres table on
+                            $UserObj->sent_email_status = $creditScorePercentage;
+                            $User = new User;
+                            $dataResult = $User->UserCreditSendEmail($UserObj);
+                        }
                     }
-                }*/
+                }
+
+                $UserObj->save();
+
                 Log::info('Credits of email: ' . $UserObj->email . ' is ' . $UserObj->remaining_credits);
             }
         }
-
     }
 
     public function UserActivation($id)

@@ -45,7 +45,9 @@ class User extends Authenticatable
 
     public static function findUserInstances()
     {
-        return self::with('userInstances')->whereHas('userInstances')->get();
+        return self::with(['userInstances','UserSubscriptionPlan'=>function($query){
+            return $query->orderBy('id','Desc')->first();
+        }])->whereHas('userInstances')->get();
     }
 
     public function userInstances(){
@@ -76,5 +78,24 @@ class User extends Authenticatable
     public function role()
     {
         return $this->belongsTo('App\Roles');
+    }
+
+    public function UserSubscriptionPlan()
+    {
+        return $this->hasMany('App\UserSubscriptionPlan','user_id');
+    }
+
+    public function UserCreditSendEmail($user){
+
+        try {
+            Mail::send('mail.user_credit', ['user' => $user], function($mail) use ($user) {
+                $mail->to($user->email, $user->name);
+                $mail->subject('Your credit is low please check your credit.');
+                $mail->from(env('MAIL_FROM_ADDRESS', '80bots@inforca.com'), env('MAIL_FROM_NAME', '80bots'));
+            });
+            return "Success";
+        } catch (Exception $ex) {
+            return "We've got errors!";
+        }
     }
 }

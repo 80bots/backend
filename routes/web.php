@@ -17,6 +17,7 @@ Route::get('/', function () {
 
 
 Auth::routes();
+Route::get('CalUserCreditScore', 'AppController@CalUserCreditScore')->name('CreditScoreEmail');
 
 //Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/user-activation/{id}', 'AppController@UserActivation')->name('user-activation');
@@ -30,7 +31,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','ad
         Route::post('update-credit', 'UserController@updateCredit')->name('update-credit');
 
         Route::group(['prefix' => 'instance', 'as' => 'instance.'], function() {
-            Route::get('list/{id}', 'UserInstancesController@index')->name('list');
+            Route::any('list/{id}', 'UserInstancesController@index')->name('list');
             Route::get('running', 'UserInstancesController@runningInstances')->name('running');
             Route::post('change-status', 'UserInstancesController@changeStatus')->name('change-status');
         });
@@ -38,7 +39,9 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','ad
 
     Route::group(['prefix' => 'instance', 'as' => 'instance.'], function() {
         Route::get('running', 'UserInstancesController@runningInstances')->name('running');
+        Route::post('change-status', 'UserInstancesController@changeStatus')->name('change-status');
     });
+    Route::resource('instance','UserInstancesController');
 
     Route::resource('bots','BotsController');
     Route::group(['prefix' => 'bots', 'as' => 'bots.'], function() {
@@ -51,7 +54,12 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','ad
     });
 
     Route::get('list-sessions', 'InstanceSessionsHistoryController@index')->name('listsessions');
+
     Route::resource('percent','CreditPercentController');
+
+    Route::get('bots-list', 'UserInstancesController@BotList')->name('bots.list');
+    Route::get('my-bots', 'UserInstancesController@MyBots')->name('my-bots');
+    Route::get('bots-all-list/{id}', 'UserInstancesController@BotAllList')->name('bots.all.list');
 });
 
 Route::group(['prefix' => 'user', 'as' => 'user.', 'middleware' => ['auth', 'user']], function(){
@@ -64,7 +72,6 @@ Route::group(['prefix' => 'user', 'as' => 'user.', 'middleware' => ['auth', 'use
     Route::get('cron-stop-scheduling','AppController@stopScheduling')->name('cron-stop-scheduling');
 
     Route::get('cron-scheduling','AppController@Scheduling')->name('cron-scheduling');
-
 
     Route::get('bots-list', 'UserInstancesController@BotList')->name('bots.list');
     Route::get('bots-all-list/{id}', 'UserInstancesController@BotAllList')->name('bots.all.list');

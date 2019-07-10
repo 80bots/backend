@@ -34,13 +34,13 @@
                                     <td>{{ $i }}</td>
                                     <td>{{!empty($percentage->percentage) ? $percentage->percentage : ''}} %</td>
                                     <td>
-                                        <form action="{{ route('percent.destroy',$percentage->id) }}" method="POST">
+                                        <form action="{{ route('admin.percent.destroy',$percentage->id) }}" method="POST">
                                             <div class="d-flex align-items-center">
                                                 {{--<a href="{{route('admin.plan.show',$percentage->id)}}"
                                                    class="form-group btn btn-icon btn-primary change-credit-model mb-0 mr-1"
                                                    title="Show Plan"><i class="fa fa-eye"></i></a>--}}
 
-                                                <a href="{{route('percent.edit',$percentage->id)}}"
+                                                <a href="{{route('admin.percent.edit',$percentage->id)}}"
                                                    class="form-group btn btn-icon btn-primary change-credit-model mb-0 mr-1"
                                                    title="Edit Plan"><i class="fa fa-edit"></i></a>
 

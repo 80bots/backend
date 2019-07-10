@@ -10,7 +10,7 @@
 
 @section('content')
 <div class="wrapper">
-    <form class="card" id="percentage-create" action="{{route('percent.store')}}" method="post">
+    <form class="card" id="percentage-create" action="{{route('admin.percent.store')}}" method="post">
         @csrf
         <div class="card-header d-flex align-items-center justify-content-between">
             <h5 class="mb-0">Add Credit Percentage</h5>
