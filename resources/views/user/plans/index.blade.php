@@ -19,7 +19,7 @@
                 <div class="row w-75 p-3"> 
                     @foreach($plans as $plan)
                     <div class="col-4">
-                        <div class="plancard card shadow text-center w-100 {{ isset($activeplan) && $activeplan->id == $plan->id ? 'activeplan' : (!$subscriion_ended ? 'inactiveplans' : '') }}">
+                        <div class="plancard card shadow text-center w-100 {{ isset($activeplan) && $activeplan->id == $plan->id ? 'activeplan' : (!$subscription_ended ? 'inactiveplans' : '') }}">
                             <div class="card-body">
                                 <h5 class="card-title subscription text-uppercase mt-1">
                                     {{!empty($plan->name) ? $plan->name : ''}}
@@ -33,7 +33,7 @@
                                 </h6>
                             </div>
                             <div class="card-footer">
-                                <button {{ !$subscriion_ended ? 'disabled' : '' }} class="mb-2 plan-btn mt-1 btn btn-primary btn-round text-uppercase" data-plan_id="{{!empty($plan->stripe_plan) ? $plan->stripe_plan : ''}}">
+                                <button {{ !$subscription_ended ? 'disabled' : '' }} class="mb-2 plan-btn mt-1 btn btn-primary btn-round text-uppercase" data-plan_id="{{!empty($plan->stripe_plan) ? $plan->stripe_plan : ''}}">
                                     {{ __('keywords.subscribe-btn-text') }}
                                 </button>
                             </div>

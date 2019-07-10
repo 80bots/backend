@@ -26,19 +26,19 @@ class UserInstancesController extends AwsConnectionController
             if(!$UserInstance->isEmpty()){
                 $instancesId = [];
                 array_push($instancesId,$UserInstance[0]->aws_instance_id);
-//                $this->InstanceMonitoring($instancesId);
+                //$this->InstanceMonitoring($instancesId);
                 return view('user.instance.index',compact('UserInstance','botsArr'));
             }
             session()->flash('error', 'Instance Not Found');
             return view('user.instance.index');
-        } catch (\Exception $e){
+        } catch (\Exception $e) {
             session()->flash('error', $e->getMessage());
             return view('user.instance.index');
         }
     }
 
 
-    public function BotList(){
+    public function BotList() {
         try{
             $platforms = Platforms::findWithBots()->get();
             return view('user.bots.index',compact('platforms'));
@@ -48,7 +48,7 @@ class UserInstancesController extends AwsConnectionController
         }
     }
 
-    public function BotAllList($id){
+    public function BotAllList($id) {
         try{
             $platform = Platforms::findBotsWithPlatformId($id)->first();
             return view('user.bots.list',compact('platform'));
@@ -86,7 +86,7 @@ class UserInstancesController extends AwsConnectionController
             if(empty($reservationObj)){
                 $instanceObj->status = 'terminated';
                 $instanceObj->save();
-                session()->flash('error', 'This instance is not exist');
+                session()->flash('error', 'This instance does not exist');
                 return 'false';
             }
             $InstStatus = $reservationObj[0]['Instances'][0]['State']['Name'];
@@ -104,7 +104,6 @@ class UserInstancesController extends AwsConnectionController
                 $instanceDetail->user_instance_id = $request->id;
                 $instanceDetail->start_time = $currentDate;
                 $instanceDetail->save();
-
             } elseif($request->status == 'stop') {
                 $instanceObj->status = 'stop';
                 $stopObj = $this->StopInstance($instanceIds);
