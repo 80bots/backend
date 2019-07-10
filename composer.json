@@ -36,9 +36,7 @@
         "optimize-autoloader": true,
         "preferred-install": "dist",
         "sort-packages": true,
-        "github-oauth": {
-
-        }
+        "github-oauth": {}
     },
     "extra": {
         "laravel": {

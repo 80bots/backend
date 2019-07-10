@@ -114,10 +114,15 @@
                     title: "Change Subscription",
                     message: "Are you sure you want to change from your current plan?",
                     callback: function(result) {
+<<<<<<< f4a37f87e692b8fda66cdad0794460c08fbf7e6a
                         if(result) {
                             document.getElementById("payment-form").submit()
                         }
                         return true
+=======
+                        document.getElementById("payment-form").submit()
+                        return result
+>>>>>>> Issue #2, Subscription upgrade downgrade with proration - without validation / messages
                     }
                 })
                 return true
