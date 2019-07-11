@@ -50,7 +50,7 @@ class StripeController extends Controller
         } catch (Exception $e) {
             return redirect()->back();
         }
-        $plan = SubscriptionPlan::where('stripe_plan',$request->plan_id)->first();
+        
         $this->user->updateCredit($plan->credit);
         session()->flash('success', 'Changed Subscription Successfully');
         return redirect()->back();

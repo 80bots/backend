@@ -10,6 +10,7 @@
 
 @section('content')
     <div class="wrapper">
+        @include('layouts.imports.messages')
         @if(isset($plans) && !empty($plans))
         <div class="card border-bottom-0 rounded-0 rounded-top">
             <div class="card-header d-flex align-items-center justify-content-between">
@@ -49,7 +50,6 @@
         <div class="card border-top-0 rounded-0 rounded-bottom">
             <div class="card-body d-flex justify-content-center">
                 <div class="row w-100 p-3">
-                    @include('layouts.imports.messages')
                     @if(isset($user) && is_null($user->stripe_id))
                         <form action="{{ route('user.subscription.create') }}" method="post" class="w-100" id="payment-form">
                             @csrf
@@ -112,20 +112,14 @@
                 bootbox.confirm({
                     size: "small",
                     title: "Change Subscription",
-                    message: "Are you sure you want to change from your current plan?",
+                    message: "Are you sure you want to change your current plan?",
                     callback: function(result) {
-<<<<<<< f4a37f87e692b8fda66cdad0794460c08fbf7e6a
                         if(result) {
                             document.getElementById("payment-form").submit()
                         }
                         return true
-=======
-                        document.getElementById("payment-form").submit()
-                        return result
->>>>>>> Issue #2, Subscription upgrade downgrade with proration - without validation / messages
                     }
                 })
-                return true
             } else {
                 bootbox.alert({
                     size: "small",
