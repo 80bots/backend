@@ -37,4 +37,8 @@
             </li>
         </ul>
     </div>
+    <hr>
+    <div class>
+        <a href="{{route('chatter.home')}}" class="text-light p-5 white"><i class="fa fa-comments mr-2"></i>Forum</a>
+    </div>
 </div>

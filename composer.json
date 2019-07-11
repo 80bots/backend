@@ -14,9 +14,15 @@
         "laravel/framework": "5.8.*",
         "laravel/tinker": "^1.0",
         "lavary/crunz": "^2.0",
-        "riari/laravel-forum": "~4.0",
-        "riari/laravel-forum-frontend": "~1.0"
+        "riari/laravel-forum-frontend": "~1.0",
+        "devdojo/chatter": "dev-master"
     },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/palashCItobuz/chatter"
+        }
+    ],
     "require-dev": {
         "beyondcode/laravel-dump-server": "^1.0",
         "filp/whoops": "^2.0",
@@ -30,7 +36,10 @@
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",
-        "sort-packages": true
+        "sort-packages": true,
+        "github-oauth": {
+
+        }
     },
     "extra": {
         "laravel": {
