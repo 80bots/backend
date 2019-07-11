@@ -52,7 +52,7 @@
                                     </td>
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            <button class="form-group btn btn-icon btn-primary change-credit-model mb-0 mr-1"
+                                            <button class="form-group btn btn-icon btn-primary change-credit-model mb-0 mr-1"  data-val="{{$user->remaining_credits}}"
                                                     value="{{$user->id}}" title="update credits"><i
                                                         class="fa fa-edit"></i></button>
                                             <a href="{{route('admin.user.instance.list',['id' => $user->id])}}"
@@ -124,7 +124,11 @@
         }
 
         $(document).on('click', '.change-credit-model', function () {
+            // Get user id for click button
             var userId = $(this).val();
+            // Get amount from user list
+            var amount = $(this).attr('data-val');
+            $('#credit-score').val(amount);
             $('#update-credit-form').attr('action', '{{route("admin.user.update-credit")}}');
             $('#user_id').val(userId);
             $('#updateCredit').modal('show');

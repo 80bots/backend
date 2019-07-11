@@ -98,4 +98,18 @@ class User extends Authenticatable
             return "We've got errors!";
         }
     }
+
+    public function updateUserCreditSendEmail($user){
+
+        try {
+            Mail::send('mail.update_user_credit', ['user' => $user], function($mail) use ($user) {
+                $mail->to($user->email, $user->name);
+                $mail->subject('Your account credit is update by admin.');
+                $mail->from(env('MAIL_FROM_ADDRESS', '80bots@inforca.com'), env('MAIL_FROM_NAME', '80bots'));
+            });
+            return "Success";
+        } catch (Exception $ex) {
+            return "We've got errors!";
+        }
+    }
 }

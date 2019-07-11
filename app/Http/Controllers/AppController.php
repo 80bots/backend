@@ -133,7 +133,7 @@ class AppController extends Controller
                            // if send mail then save on usres table on
                             $UserObj->sent_email_status = $creditScorePercentage;
                             $User = new User;
-//                            $dataResult = $User->UserCreditSendEmail($UserObj);
+                            $dataResult = $User->UserCreditSendEmail($UserObj);
                         }
                     }
                 }
@@ -361,3 +361,4 @@ class AppController extends Controller
         }
     }
 }
+

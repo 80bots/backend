@@ -116,8 +116,12 @@ class UserController extends AppController
     public function updateCredit(Request $request){
         try{
             $userObj = User::find($request->id);
-            $userObj->remaining_credits = $userObj->remaining_credits + $request->remaining_credits;
+//            $total_credit = $userObj->remaining_credits + $request->remaining_credits;
+            $userObj->remaining_credits = $request->remaining_credits;
             if ($userObj->save()) {
+                $User = new User;
+                $dataResult = $User->updateUserCreditSendEmail($userObj);
+
                 session()->flash('success', 'Credit Add Successfully');
                 return redirect()->back();
             }
