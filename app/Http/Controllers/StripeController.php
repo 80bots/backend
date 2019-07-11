@@ -44,12 +44,23 @@ class StripeController extends Controller
     {
         $this->user = Auth::user();
         $plan_id = $request->plan_id;
+        $upgrade = false;
+        $current = $this->user->subscription('80bots')->stripe_plan;
+        $currentPlan = SubscriptionPlan::where('stripe_plan',$current)->first();
+        $requestedPlan = SubscriptionPlan::where('stripe_plan',$request->plan_id)->first();
+        if($currentPlan->price < $requestedPlan->price) $upgrade = true;
+
         try{
-            $this->user->subscription('80bots')->swap($plan_id);
+            if($upgrade) {
+                $this->user->subscription('80bots')->swap($plan_id);
+            }
+/*             dump($this->user->invoices()->first()->invoice->lines);
+            dd($this->user->asStripeCustomer()->subscriptions->data);
+ */        
         } catch (Exception $e) {
             return redirect()->back();
         }
-        $plan = SubscriptionPlan::where('stripe_plan',$request->plan_id)->first();
+        
         $this->user->updateCredit($plan->credit);
         session()->flash('success', 'Changed Subscription Successfully');
         return redirect()->back();

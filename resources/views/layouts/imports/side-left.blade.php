@@ -37,4 +37,11 @@
             </li>
         </ul>
     </div>
+
+    <div class="bottom-box p-4">
+        <hr class="my-4">
+        <a href="{{route('chatter.home')}}" class="nav-link text-light {{ (request()->is('/forum')) ? 'active' : '' }}">
+            <i class="fa fa-comments mr-2"></i>Forum
+        </a>
+    </div>
 </div>
