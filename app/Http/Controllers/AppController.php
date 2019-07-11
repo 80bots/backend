@@ -84,7 +84,7 @@ class AppController extends Controller
     public function CalUserCreditScore()
     {
         $users = User::findUserInstances();
-
+        $currentDate = date('Y-m-d H:i:s');
         // Get Low CreditPercentage
         $CreditPercentage = CreditPercentage::get();
         $lowPercentage  = array();
@@ -95,12 +95,17 @@ class AppController extends Controller
         //End Get low CreditPercentage
 
         foreach ($users as $UserObj) {
+
             $UserInstances = isset($UserObj->UserInstances) ? $UserObj->UserInstances : '';
             if (!empty($UserInstances)) {
                 $usedCreditArray = [];
+                $instancesIds = [];
                 foreach ($UserInstances as $userInstance) {
                     $usedCredit = isset($userInstance->used_credit) ? $userInstance->used_credit : '0';
                     array_push($usedCreditArray, $usedCredit);
+
+                    // add instancesIds
+                    array_push($instancesIds, $userInstance->aws_instance_id);
                 }
                 $totalUsedCredit = array_sum($usedCreditArray);
                 if (empty($UserObj->temp_remaining_credits) || $UserObj->temp_remaining_credits == 0) {
@@ -128,7 +133,48 @@ class AppController extends Controller
                            // if send mail then save on usres table on
                             $UserObj->sent_email_status = $creditScorePercentage;
                             $User = new User;
-                            $dataResult = $User->UserCreditSendEmail($UserObj);
+//                            $dataResult = $User->UserCreditSendEmail($UserObj);
+                        }
+                    }
+                }
+
+                // user credits score is 0 then we will they user all instance will stop
+                if($creditScore == 0)
+                {
+                    // below if in we check admin role 1-is admin Role so we have checked.
+                    if($UserObj->role_id != 1)
+                    {
+                        // Stop Instance for the user
+                        $result = AwsConnection::StopInstance($instancesIds);
+                        $startInstance = $result->getPath('StoppingInstances');
+                        // Update instance  on user instance table
+                        foreach ($startInstance as $instanceDetail) {
+                            $CurrentState = $instanceDetail['CurrentState'];
+                            $instanceId = $instanceDetail['InstanceId'];
+                            if ($CurrentState['Name'] == 'stopped' || $CurrentState['Name'] == 'stopping') {
+                                $UserInstance = UserInstances::findByInstanceId($instanceId)->first();
+                                $UserInstance->status = 'stop';
+                                $instanceDetail = UserInstancesDetails::where(['user_instance_id' => $UserInstance->id, 'end_time' => null])->latest()->first();
+                                if (!empty($instanceDetail)) {
+                                    $instanceDetail->end_time = $currentDate;
+                                    $diffTime = $this->DiffTime($instanceDetail->start_time, $instanceDetail->end_date);
+                                    $instanceDetail->total_time = $diffTime;
+                                    if ($instanceDetail->save()) {
+                                        if ($diffTime > $UserInstance->cron_up_time) {
+                                            $UserInstance->cron_up_time = 0;
+                                            $tempUpTime = !empty($UserInstance->temp_up_time) ? $UserInstance->temp_up_time : 0;
+                                            $upTime = $diffTime + $tempUpTime;
+                                            $UserInstance->temp_up_time = $upTime;
+                                            $UserInstance->up_time = $upTime;
+                                        }
+                                    }
+                                }
+                                if ($UserInstance->save()) {
+                                    Log::info('Instance Id ' . $instanceId . ' Stopped');
+                                }
+                            } else {
+                                Log::info('Instance Id ' . $instanceId . ' Not Stopped Successfully');
+                            }
                         }
                     }
                 }
@@ -315,6 +361,3 @@ class AppController extends Controller
         }
     }
 }
-
-
-
