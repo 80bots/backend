@@ -205,23 +205,16 @@ return [
             'by' => 'ASC'
         ],
         'discussions' => [
-<<<<<<< 45aa34eea8846e9f25ea60947a2f41ecae1ba2a8
             'order' => 'dynamicpopularity',
-=======
-            'order' => 'last_reply_at',
->>>>>>> Forum changes: Templates and Crud
             'by' => 'DESC'
         ]
     ],
 
-<<<<<<< 45aa34eea8846e9f25ea60947a2f41ecae1ba2a8
     'discussions_hotness' => [
         'decay_rate' => 0.005,
         'key' => 'dynamicpopularity'
     ],
 
-=======
->>>>>>> Forum changes: Templates and Crud
     /*
     |--------------------------------------------------------------------------
     | Email Notification Settings
@@ -293,11 +286,7 @@ return [
     */
 
     'middleware' => [
-<<<<<<< 45aa34eea8846e9f25ea60947a2f41ecae1ba2a8
         'global'     => ['web','auth'],
-=======
-        'global'     => ['web'],
->>>>>>> Forum changes: Templates and Crud
         'home'       => [],
         'discussion' => [
             'index'   => [],

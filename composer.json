@@ -14,7 +14,12 @@
         "laravel/framework": "5.8.*",
         "laravel/tinker": "^1.0",
         "lavary/crunz": "^2.0",
+<<<<<<< b9c69da3ff691355b7b0e55f73f306865d03d42d
         "devdojo/chatter": "dev-master"
+=======
+        "riari/laravel-forum": "~4.0",
+        "riari/laravel-forum-frontend": "~1.0"
+>>>>>>> removed laravel-forum changes
     },
     "repositories": [
         {
