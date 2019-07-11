@@ -86,7 +86,6 @@ class User extends Authenticatable
     }
 
     public function UserCreditSendEmail($user){
-
         try {
             Mail::send('mail.user_credit', ['user' => $user], function($mail) use ($user) {
                 $mail->to($user->email, $user->name);

@@ -82,7 +82,7 @@
                     <div class="modal-body">
                         <div class="input-group">
                             <input type="hidden" name="id" id="user_id" value="">
-                            <input type="text" id="credit-score" name="remaining_credits" class="form-control" required>
+                            <input type="text" id="credit-score" minlength="1" on  name="remaining_credits" class="form-control" required>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -94,14 +94,16 @@
         </div>
     </div>
 
-
 @endsection
 
 @section('script')
     <script>
-
         $(document).ready(function () {
             $('#user-list').DataTable();
+            // Check on input value is 0 to 9 and , alow
+            $('#credit-score').on('input', function (event) {
+                    this.value = this.value.replace(/[^0-9\.]/g,'', '');
+            });
         });
 
         function ChangeStatus(userId, status) {
