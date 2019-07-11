@@ -76,7 +76,7 @@
                 <form id="update-credit-form" action="" method="post">
                     <input type="hidden" name="_token" value="{{ csrf_token() }}">
                     <div class="modal-header">
-                        <h4 class="modal-title">Credit Score</h4>
+                        <h4 class="modal-title">Credits</h4>
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                     </div>
                     <div class="modal-body">

@@ -30,3 +30,6 @@ class AddNewColumnUserTbl extends Migration
         });
     }
 }
+
+
+

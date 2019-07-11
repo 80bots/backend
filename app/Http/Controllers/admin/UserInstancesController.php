@@ -117,14 +117,14 @@ class UserInstancesController extends AwsConnectionController
                 $userInstanceDetail->start_time = $created_at;
                 $userInstanceDetail->save();
                 session()->flash('success', 'Instance Create successfully');
-                return redirect(route('user.instance.index'));
+                return redirect(route('admin.my-bots'));
             }
             session()->flash('error', 'Please Try again later');
-            return redirect(route('user.instance.index'));
+            return redirect(route('admin.my-bots'));
         }
         catch (\Exception $e) {
             session()->flash('error', $e->getMessage());
-            return redirect(route('user.instance.index'));
+            return redirect(route('admin.my-bots'));
         }
     }
 
