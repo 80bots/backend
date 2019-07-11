@@ -46,6 +46,7 @@ $user = Auth::user();
 <script type="text/javascript" src="{{asset('vendors/select2/js/select2.full.min.js')}}"></script>
 <script type="text/javascript" src="{{asset('js/script.js')}}"></script>
 @yield('script')
+@yield('js')
 
 
 </body>
