@@ -281,7 +281,7 @@ return [
     */
 
     'middleware' => [
-        'global'     => ['web'],
+        'global'     => ['web','auth'],
         'home'       => [],
         'discussion' => [
             'index'   => [],
