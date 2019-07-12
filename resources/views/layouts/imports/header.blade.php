@@ -2,7 +2,7 @@
     use Illuminate\Support\Facades\Auth;
 
     $requestUrl = explode('/', ltrim($_SERVER['REQUEST_URI'],'/'));
-    $role = $user->role->name;
+    $role = $user->role->name ?? null;
 @endphp
 @if (!empty($role) && $role == 'User' || $role == 'Admin')
     <nav class="bg-white navbar navbar-expand d-flex justify-content-between align-items-center border-bottom">

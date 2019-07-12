@@ -23,14 +23,20 @@ $user = Auth::user();
     <link rel="stylesheet" href="{{asset('css/theme.css')}}">
     <link rel="stylesheet" href="{{ URL::asset('css/all.min.css') }}">
     @yield('css')
+
+    @if(Request::is( Config::get('chatter.routes.home') ) || Request::is( Config::get('chatter.routes.home') . '/*' ))
+    <!-- LINK TO YOUR CUSTOM STYLESHEET FOR FORUM -->
+    <link rel="stylesheet" href="{{asset('css/forums.css')}}" />
+    @endif
 </head>
 <body>
 <div class="main-wrapper d-flex align-items-stretch">
-
-    @if($user->role->name == 'User')
-        @include('layouts.imports.side-left')
-    @else
-        @include('layouts.imports.admin-side-left')
+    @if(isset($user))
+        @if($user->role->name == 'User')
+            @include('layouts.imports.side-left')
+        @else
+            @include('layouts.imports.admin-side-left')
+        @endif
     @endif
 
     <div class="body-content flex-grow-1">

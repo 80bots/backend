@@ -1,0 +1,7 @@
+#chatter #new_discussion_btn {
+    color: #aee3ff;
+    border-radius: unset;
+}
+#chatter .left-column{
+    border-right: 1px #003edc63 dotted;
+}
