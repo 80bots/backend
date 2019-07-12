@@ -111,4 +111,8 @@ class User extends Authenticatable
             return "We've got errors!";
         }
     }
+
+    public function DiscussionLikes() {
+        return $this->hasMany('App\DiscussionLikes','user_id');
+    }
 }
