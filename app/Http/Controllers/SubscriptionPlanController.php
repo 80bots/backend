@@ -19,11 +19,9 @@ class SubscriptionPlanController extends Controller
         $plans = SubscriptionPlan::all();
         $subscription_ended = true;
         $activeplan = null;
-        
-        //dd($subscription_ended);
-        if($user->subscribed('80bots')) {
-            $subscription = $user->subscription('80bots');
-            $subscription_ended = $user->subscription('80bots')->ended();
+        if($user->subscribed(config('services.stripe.product'))) {
+            $subscription = $user->subscription(config('services.stripe.product'));
+            $subscription_ended = $user->subscription(config('services.stripe.product'))->ended();
             $activeplan = SubscriptionPlan::where('stripe_plan',$subscription->stripe_plan)->first();
         }
         return view('user.plans.index', [

@@ -29,7 +29,7 @@ class StripeController extends Controller
             return redirect('user/subscription-plans')->with('message', 'Subscription Plan Can not Added Successfully');
         }
         try{
-            $this->user->newSubscription('80bots', $request->plan_id)->create($token->id);           
+            $this->user->newSubscription(config('services.stripe.product'), $request->plan_id)->create($token->id);           
         } catch (Exception $e) {
             return redirect()->back();
         }
@@ -45,7 +45,7 @@ class StripeController extends Controller
         $this->user = Auth::user();
         $plan_id = $request->plan_id;
         try{
-            $this->user->subscription('80bots')->swap($plan_id);
+            $this->user->subscription(config('services.stripe.product'))->swap($plan_id);
         } catch (Exception $e) {
             return redirect()->back();
         }

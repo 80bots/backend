@@ -50,8 +50,8 @@ class UserController extends AppController
         $user = User::find($id);
         $used_credit = $user->userInstances->sum('used_credit');
         $plan = null;
-        if($user->subscribed('80bots')) { 
-            $subscription = $user->subscription('80bots');
+        if($user->subscribed(config('services.stripe.product'))) { 
+            $subscription = $user->subscription(config('services.stripe.product'));
             $plan = SubscriptionPlan::where('stripe_plan',$subscription->stripe_plan)->first();
         }
 
