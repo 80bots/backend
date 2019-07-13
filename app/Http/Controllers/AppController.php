@@ -102,8 +102,9 @@ class AppController extends Controller
                 $instancesIds = [];
                 foreach ($UserInstances as $userInstance) {
                     $usedCredit = isset($userInstance->used_credit) ? $userInstance->used_credit : '0';
-                    array_push($usedCreditArray, $usedCredit);
-
+                    if($userInstance->status == 'running'){
+                        array_push($usedCreditArray, $usedCredit);
+                    }
                     // add instancesIds
                     array_push($instancesIds, $userInstance->aws_instance_id);
                 }
@@ -114,7 +115,6 @@ class AppController extends Controller
                 $temp_credit = $UserObj->temp_remaining_credits;
                 $creditScore = (float)$temp_credit - (float)$totalUsedCredit;
                 $UserObj->remaining_credits = $creditScore;
-
                 //User relation to get packages amount what package buy.
 
                 if(count($UserObj->UserSubscriptionPlan) > 0){
@@ -295,7 +295,6 @@ class AppController extends Controller
                         if (!empty($UserInstanceObj) && !empty($detail->cron_data)) {
                             $CronDate = explode(' ', $detail->cron_data);
                             $currentTime = strtotime(date('D h:i A'));
-                            Log::info(print_r($CronDate,true));
                             $cronTimeDate = date_create($CronDate[0] . $CronDate[1] . $CronDate[2], timezone_open('GMT'.$CronDate[3]));
                             $cronTime = date_timestamp_get($cronTimeDate);
                             if ($currentTime == $cronTime) {
