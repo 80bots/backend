@@ -139,7 +139,7 @@ class AppController extends Controller
                 }
 
                 // user credits score is 0 then we will they user all instance will stop
-                if($creditScore == 0)
+                if($creditScore <= 0)
                 {
                     // below if in we check admin role 1-is admin Role so we have checked.
                     if($UserObj->role_id != 1)
