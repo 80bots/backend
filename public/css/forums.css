@@ -22,3 +22,11 @@
     outline: none;
     box-shadow: inset 0.11em 0.1em 0.1em #6f6f6f26;
 }
+
+#chatter a.like_chat i, 
+#chatter a.unlike_chat i {
+    color: #f1f90c;
+    border: #333 1px solid;
+    padding: 5px;
+    border-radius: 20px;
+}
