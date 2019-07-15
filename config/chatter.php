@@ -205,9 +205,14 @@ return [
             'by' => 'ASC'
         ],
         'discussions' => [
-            'order' => 'last_reply_at',
+            'order' => 'dynamicpopularity',
             'by' => 'DESC'
         ]
+    ],
+
+    'discussions_hotness' => [
+        'decay_rate' => 0.005,
+        'key' => 'dynamicpopularity'
     ],
 
     /*

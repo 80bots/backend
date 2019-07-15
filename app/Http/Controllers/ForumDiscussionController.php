@@ -18,13 +18,16 @@ class ForumDiscussionController extends ChatterDiscussionController
     public function likeDiscussion(Int $discussion_id)
     {
         $user_id = Auth::user()->id;
-        $liked = DiscussionLikes::where('user_id',$user_id)->where('discussion_id',$discussion_id)->count();
+        $likedQuery = DiscussionLikes::where('user_id',$user_id)->where('discussion_id',$discussion_id);
 
-        if($liked) {
+        if($likedQuery->count()) {
+            $like = $likedQuery->first();
+            $like->delete();
             return response()->json([
-                'message' => 'failed',
+                'message' => 'failure',
                 'data' => [
-                    'like' => 0,
+                    'reason' => 'unlike',
+                    'object' => $like,
                 ]
             ]);
         }
