@@ -142,41 +142,41 @@ class AppController extends Controller
                 if($creditScore <= 0)
                 {
                     // below if in we check admin role 1-is admin Role so we have checked.
-                    if($UserObj->role_id != 1)
-                    {
-                        // Stop Instance for the user
-                        $result = AwsConnection::StopInstance($instancesIds);
-                        $startInstance = $result->getPath('StoppingInstances');
-                        // Update instance  on user instance table
-                        foreach ($startInstance as $instanceDetail) {
-                            $CurrentState = $instanceDetail['CurrentState'];
-                            $instanceId = $instanceDetail['InstanceId'];
-                            if ($CurrentState['Name'] == 'stopped' || $CurrentState['Name'] == 'stopping') {
-                                $UserInstance = UserInstances::findByInstanceId($instanceId)->first();
-                                $UserInstance->status = 'stop';
-                                $instanceDetail = UserInstancesDetails::where(['user_instance_id' => $UserInstance->id, 'end_time' => null])->latest()->first();
-                                if (!empty($instanceDetail)) {
-                                    $instanceDetail->end_time = $currentDate;
-                                    $diffTime = $this->DiffTime($instanceDetail->start_time, $instanceDetail->end_date);
-                                    $instanceDetail->total_time = $diffTime;
-                                    if ($instanceDetail->save()) {
-                                        if ($diffTime > $UserInstance->cron_up_time) {
-                                            $UserInstance->cron_up_time = 0;
-                                            $tempUpTime = !empty($UserInstance->temp_up_time) ? $UserInstance->temp_up_time : 0;
-                                            $upTime = $diffTime + $tempUpTime;
-                                            $UserInstance->temp_up_time = $upTime;
-                                            $UserInstance->up_time = $upTime;
-                                        }
-                                    }
-                                }
-                                if ($UserInstance->save()) {
-                                    Log::info('Instance Id ' . $instanceId . ' Stopped');
-                                }
-                            } else {
-                                Log::info('Instance Id ' . $instanceId . ' Not Stopped Successfully');
-                            }
-                        }
-                    }
+                    // if($UserObj->role_id != 1)
+                    // {
+                    //     // Stop Instance for the user
+                    //     $result = AwsConnection::StopInstance($instancesIds);
+                    //     $startInstance = $result->getPath('StoppingInstances');
+                    //     // Update instance  on user instance table
+                    //     foreach ($startInstance as $instanceDetail) {
+                    //         $CurrentState = $instanceDetail['CurrentState'];
+                    //         $instanceId = $instanceDetail['InstanceId'];
+                    //         if ($CurrentState['Name'] == 'stopped' || $CurrentState['Name'] == 'stopping') {
+                    //             $UserInstance = UserInstances::findByInstanceId($instanceId)->first();
+                    //             $UserInstance->status = 'stop';
+                    //             $instanceDetail = UserInstancesDetails::where(['user_instance_id' => $UserInstance->id, 'end_time' => null])->latest()->first();
+                    //             if (!empty($instanceDetail)) {
+                    //                 $instanceDetail->end_time = $currentDate;
+                    //                 $diffTime = $this->DiffTime($instanceDetail->start_time, $instanceDetail->end_date);
+                    //                 $instanceDetail->total_time = $diffTime;
+                    //                 if ($instanceDetail->save()) {
+                    //                     if ($diffTime > $UserInstance->cron_up_time) {
+                    //                         $UserInstance->cron_up_time = 0;
+                    //                         $tempUpTime = !empty($UserInstance->temp_up_time) ? $UserInstance->temp_up_time : 0;
+                    //                         $upTime = $diffTime + $tempUpTime;
+                    //                         $UserInstance->temp_up_time = $upTime;
+                    //                         $UserInstance->up_time = $upTime;
+                    //                     }
+                    //                 }
+                    //             }
+                    //             if ($UserInstance->save()) {
+                    //                 Log::info('Instance Id ' . $instanceId . ' Stopped');
+                    //             }
+                    //         } else {
+                    //             Log::info('Instance Id ' . $instanceId . ' Not Stopped Successfully');
+                    //         }
+                    //     }
+                    // }
                 }
 
                 $UserObj->save();
