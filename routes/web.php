@@ -24,6 +24,7 @@ Route::get('/user-activation/{id}', 'AppController@UserActivation')->name('user-
 
 Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','admin'], 'namespace' => 'admin'], function(){
     Route::get('dashboard', 'UserController@index')->name('dashboard');
+    Route::post('/checkBotIdInQueue','UserInstancesController@checkBotIdInQueue');
 
     Route::group(['prefix' => 'user', 'as' => 'user.'], function() {
         Route::get('/', 'UserController@index')->name('index');
@@ -57,6 +58,9 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','ad
 
     Route::resource('percent','CreditPercentController');
 
+    Route::any('storeSession','UserInstancesController@storeBotIdInSession');
+    Route::post('/jobStart','UserInstancesController@storeJob')->name('jobStart');
+
     Route::get('bots-list', 'UserInstancesController@BotList')->name('bots.list');
     Route::get('my-bots', 'UserInstancesController@MyBots')->name('my-bots');
     Route::get('bots-all-list/{id}', 'UserInstancesController@BotAllList')->name('bots.all.list');
@@ -72,6 +76,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','ad
 });
 
 Route::group(['prefix' => 'user', 'as' => 'user.', 'middleware' => ['auth', 'user']], function(){
+    Route::post('/checkBotIdInQueue','UserInstancesController@checkBotIdInQueue');
+    Route::post('/jobStart','UserInstancesController@storeJob')->name('jobStart');
     Route::get('dashboard', 'UserController@index')->name('dashboard');
     Route::get('profile/{id}', 'UserController@show')->name('profile');
     Route::get('cal-used-credit', 'AppController@CalUsedCredit')->name('cal-used-credit');
@@ -93,9 +99,14 @@ Route::group(['prefix' => 'user', 'as' => 'user.', 'middleware' => ['auth', 'use
         Route::post('delete-scheduler-details', 'SchedulingInstancesController@deleteSchedulerDetails')->name('delete-scheduler-details');
     });
 
-    Route::get('list-sessions', 'InstanceSessionsHistoryController@index')->name('listsessions');
 
-    Route::resource('instance','UserInstancesController');
+    /* added at 09/07/2019 by sandip START*/
+    Route::group(['middleware' => ['web']], function () {
+        Route::resource('instance','UserInstancesController');
+    });
+    Route::any('storeSession','UserInstancesController@storeBotIdInSession')->name('storeSession');
+    /* END */
+
     Route::group(['prefix' => 'instance', 'as' => 'instance.'], function() {
         Route::post('change-status', 'UserInstancesController@changeStatus')->name('change-status');
     });

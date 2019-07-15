@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
 @section('title')
-Instance Listing
+    Instance Listing
 @endsection
 
 @section('css')
-
+    <link rel="stylesheet" href="{{ URL::asset('/css/font-awesome.min.css') }}">
 @endsection
 
 @section('content')
@@ -17,30 +17,35 @@ Instance Listing
                 <small>Since 2019</small>
             </div>
         </div>
+        <input type="hidden" name="instance_id" value="{{ Session::get('instance_id') }}" id="instance_id">
         @include('layouts.imports.messages')
         @if(!empty($UserInstance) && isset($UserInstance))
             <div class="my-3 p-3 bg-white rounded shadow-sm">
                 <h6 class="border-bottom  pb-2 mb-0">Running Bots</h6>
-                    @foreach($UserInstance as $instance)
-                        <div class="media text-muted pt-3 d-flex align-items-start">
-                            <svg class="bd-placeholder-img mr-2 rounded flex-shrink-0" width="32" height="32"
-                                 xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"
-                                 focusable="false" role="img" aria-label="Placeholder: 32x32"><title>
-                                    Placeholder</title>
-                                <rect width="100%" height="100%" fill="#007bff"></rect>
-                                <text x="50%" y="50%" fill="#007bff" dy=".3em">32x32</text>
-                            </svg>
-                            <div class="row flex-grow-1 ml-0 mr-0 border-bottom pb-3">
-                                <div class="col-md-2 col-sm-2">
-                                    <strong class="d-block text-gray-dark">{{isset($instance->bots->bot_name)?$instance->bots->bot_name:''}}</strong>
-                                </div>
-                                <div class="col-md-2 col-sm-2">
-                                    {{!empty($instance->up_time) ? $instance->up_time : 0}}
-                                </div>
-                                <div class="col-md-2 col-sm-2">
-                                    {{!empty($instance->aws_public_ip) ? $instance->aws_public_ip : ''}}
-                                </div>
-                                <div class="col-md-2 col-sm-2">
+                @foreach($UserInstance as $instance)
+                    <div class="media text-muted pt-3 d-flex align-items-start">
+                        <svg class="bd-placeholder-img mr-2 rounded flex-shrink-0" width="32" height="32"
+                             xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"
+                             focusable="false" role="img" aria-label="Placeholder: 32x32"><title>
+                                Placeholder</title>
+                            <rect width="100%" height="100%" fill="#007bff"></rect>
+                            <text x="50%" y="50%" fill="#007bff" dy=".3em">32x32</text>
+                        </svg>
+                        <div class="row flex-grow-1 ml-0 mr-0 border-bottom pb-3">
+                            <div class="col-md-2 col-sm-2">
+                                <strong class="d-block text-gray-dark">{{isset($instance->bots->bot_name)?$instance->bots->bot_name:''}}</strong>
+                            </div>
+                            <div class="col-md-2 col-sm-2">
+                                {{!empty($instance->up_time) ? $instance->up_time : 0}}
+                            </div>
+                            <div class="col-md-2 col-sm-2">
+                                {{!empty($instance->aws_public_ip) ? $instance->aws_public_ip : ''}}
+                            </div>
+                            <div class="col-md-2 col-sm-2">
+                                @if($instance->is_in_queue == 1)
+                                    <a href="javascript:void(0)" data-toggle="modal" data-target="#lunch-instance"
+                                       class="badge badge-primary ml-2 font-size-16" title="Process In Queue">IN-Queue</a>
+                                @else
                                     <select name="instStatus" class="form-control instStatus" data-id="{{$instance->id}}">
                                         @if(!empty($instance->status) && $instance->status == 'running')
                                             <option value="running">Running</option>
@@ -54,20 +59,24 @@ Instance Listing
                                             <option value="terminated">Terminated</option>
                                         @endif
                                     </select>
-                                </div>
-                                <div class="col-md-2 col-sm-2">
-                                    {{!empty($instance->created_at) ? date('Y-m-d', strtotime($instance->created_at)) : ''}}
-                                </div>
-                                <div class="col-md-1 col-sm-1">
-                                    <a href="{{!empty($instance->aws_public_ip) ? 'http://'.$instance->aws_public_ip : ''}}" target="_blank"><i class="fa fa-eye"></i></a>
-                                </div>
-                                <div class="col-md-1 col-sm-1">
-                                    @php $bot_name=isset($instance->bots->bot_name)?$instance->bots->bot_name:''@endphp
-                                    <a href="javascript:void(0)" data-toggle="modal" data-target="#create-scheduler"
-                                       onclick="SetBotName('{{$bot_name}}','{{$instance->id}}')" class="badge badge-primary font-size-16"><i class="fa fa-pen"></i></a>
-                                </div>
+                                @endif
+                            </div>
+                            <div class="col-md-2 col-sm-2">
+                                {{!empty($instance->created_at) ? date('Y-m-d', strtotime($instance->created_at)) : ''}}
+                            </div>
+                            <div class="col-md-2 col-sm-2 d-flex align-items-center">
+                                <a href="{{!empty($instance->aws_public_ip) ? 'http://'.$instance->aws_public_ip : ''}}" class="badge badge-primary mr-2 font-size-16" target="_blank"><i class="fa fa-eye"></i></a>
+
+                                @php $bot_name=isset($instance->bots->bot_name)?$instance->bots->bot_name:''@endphp
+                                <a href="javascript:void(0)" data-toggle="modal" data-target="#create-scheduler"
+                                   onclick="SetBotName('{{$bot_name}}','{{$instance->id}}')" class="badge badge-primary font-size-16"><i class="fa fa-pencil"></i></a>
+                                @if($instance->is_in_queue == 1)
+                                    <a href="javascript:void(0)" data-toggle="modal" data-target="#lunch-instance"
+                                       class="badge badge-primary ml-2 font-size-16 refresh" title="Process In Queue"><i class="fa fa-refresh"></i></a>
+                                @endif
                             </div>
                         </div>
+                    </div>
                 @endforeach
             </div>
         @endif
@@ -84,11 +93,16 @@ Instance Listing
         $('#user-time-zone').val(current_time_zone);
 
         $(document).ready(function() {
+
             $('#instance-list').DataTable();
+            let instance_id = $('#instance_id').val();
+
+            if(instance_id.length != ''){
+                storeUserInstance(instance_id);
+            }
         });
 
-        $(document).on('change', '.instStatus', function () {
-
+        $(document).on('change', '.instStatus', function (e) {
             var status = $(this).val();
             var instanceId = $(this).data('id');
             var URL = '{{route('admin.instance.change-status')}}';
@@ -104,10 +118,36 @@ Instance Listing
                     status: status
                 },
                 success: function (data) {
+                    // console.log(data); return false;
                     location.reload();
                 }
             });
         })
+
+        function  storeUserInstance(instance_id){
+            var URL = '{{route('admin.jobStart')}}';
+            $.ajax({
+                type: 'POST',
+                url: URL,
+                cache: false,
+                data: {
+                    _token : function () {
+                        return '{{csrf_token()}}';
+                    },
+                    instance_id : instance_id
+                },
+                success: function (response) {
+                    if(response.type == "success"){
+                        location.reload();
+                    }
+
+                }
+            });
+        }
+
+        $(document).on('click', '.refresh', function () {
+            location.reload();
+        })
     </script>
-    @include('admin.scheduling.schedulerscripts')
+    @include('user.scheduling.schedulerscripts')
 @endsection

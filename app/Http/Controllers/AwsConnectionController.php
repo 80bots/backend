@@ -8,27 +8,27 @@ use Illuminate\Http\Request;
 
 class AwsConnectionController extends AppController
 {
-    public function CreateKeyPair(){
+    public static function CreateKeyPair(){
         $keyPair = AwsConnection::AwsCreateKeyPair();
         return $keyPair;
     }
 
-    public function CreateSecurityGroupId(){
+    public static function CreateSecurityGroupId(){
         $groupId = AwsConnection::AwsCreateSecretGroup();
         return $groupId;
     }
 
-    public function LaunchInstance($keyPair,$group_id, $bots = null){
+    public static function LaunchInstance($keyPair,$group_id, $bots = null){
         $instanceResponse = AwsConnection::AwsLaunchInstance($keyPair,$group_id, $bots);
         return $instanceResponse;
     }
 
-    public function waitUntil($instanceIds){
+    public static function waitUntil($instanceIds){
         $waitUntilResponse = AwsConnection::waitUntil($instanceIds);
         return $waitUntilResponse;
     }
 
-    public function DescribeInstances($instanceIds){
+    public static function DescribeInstances($instanceIds){
         $describeInstances = AwsConnection::DescribeInstances($instanceIds);
         return $describeInstances;
     }

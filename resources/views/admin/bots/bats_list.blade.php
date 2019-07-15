@@ -5,11 +5,11 @@
 @endsection
 
 @section('css')
-
+    <link rel="stylesheet" href="{{ URL::asset('/css/font-awesome.min.css') }}">
 @endsection
 
 @section('content')
-    <div class="wrapper">
+    <div class="wrapper" id="dvBotWrapper">
         <div class="align-items-center bg-purple d-flex p-3 rounded shadow-sm text-white-50 mb-3">
             <h4 class="border mb-0 mr-2 pb-2 pl-3 pr-3 pt-2 rounded text-white">8</h4>
             <div class="lh-100">
@@ -50,7 +50,7 @@
                                     <div class="col-md-2 col-sm-12 text-right">
                                         <a href="javascript:void(0)" data-toggle="modal" data-target="#lunch-instance"
                                            onclick="launchInstance('{{$bot->id}}')"
-                                           class="badge badge-primary font-size-16">Launch</a>
+                                           class="badge badge-primary font-size-16" data-id="{{$bot->id}}">Launch</a>
                                     </div>
                                 </div>
                             </div>
@@ -66,7 +66,7 @@
     <div class="modal fade" id="lunch-instance" role="dialog">
         <div class="modal-dialog modal-sm">
             <div class="modal-content">
-                <form id="lunchInstance" action="{{route('admin.instance.store')}}" method="post">
+                <form id="lunchInstance" >
                     @csrf
                     <input type="hidden" name="bot_id" value="" id="bot_id">
                     <div class="modal-header">
@@ -77,7 +77,7 @@
                         <h4>Are you sure?</h4>
                     </div>
                     <div class="modal-footer">
-                        <input type="submit" id="launch-inspection-submit-btn" class="btn btn-success" value="Ok">
+                        <input type="button" id="launch-inspection-submit-btn" class="btn btn-success" value="Ok">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                     </div>
                 </form>
@@ -87,7 +87,7 @@
 @endsection
 
 @section('script')
-    <script>
+    <!-- <script>
         function launchInstance(bot_id) {
             $('#bot_id').val(bot_id);
         }
@@ -95,5 +95,81 @@
         $(document).on('click', '#launch-inspection-submit-btn', function () {
             $('#lunch-instance').hide();
         });
+    </script> -->
+
+    <script>
+
+        $(document).ready(function(){
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            var bot_ids = 0 ;
+            checkBotIdInQueue();
+        });
+
+        function launchInstance(bot_id) {
+            bot_ids = bot_id;
+        }
+
+        $(document).on('click', '#launch-inspection-submit-btn', function () {
+            $('#lunch-instance').hide();
+
+            $.ajax({
+                url : "/admin/storeSession",
+                type : "POST",
+                data : {
+                    _token : function () {
+                        return '{{csrf_token()}}';
+                    },
+                    user_id : '{{ Auth::user()->id }}',
+                    bot_id : bot_ids,
+
+                },
+                success : function(response){
+
+                    if(response.type === 'success'){
+                        window.location = "/admin/my-bots";
+                    }
+
+                },
+                error : function(response){
+
+                }
+            });
+
+        });
+
+
+        function checkBotIdInQueue(){
+            $.ajax({
+                url : "/admin/checkBotIdInQueue",
+                type : "POST",
+                data : {
+                    _token : function () {
+                        return '{{csrf_token()}}';
+                    }
+
+                },
+                success : function(response){
+
+                    if(response.type === 'success'){
+                        console.log(response);
+                        if(response.data !== undefined && response.data.length) {
+                            let $botWrapper = $('#dvBotWrapper');
+                            for(let eachData of response.data) {
+                                $botWrapper.find('[data-id="'+eachData+'"]').attr('data-target','').prepend('<i class="fa fa-spinner fa-spin"></i>');
+                            }
+                        }
+                    }
+
+                },
+                error : function(response){
+
+                }
+            });
+
+        }
     </script>
 @endsection
