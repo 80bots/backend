@@ -102,12 +102,12 @@ class AppController extends Controller
                 $instancesIds = [];
                 foreach ($UserInstances as $userInstance) {
                     $usedCredit = isset($userInstance->used_credit) ? $userInstance->used_credit : '0';
-                    array_push($usedCreditArray, $usedCredit);
-
+                    if($userInstance->status == 'running'){
+                        array_push($usedCreditArray, $usedCredit);
+                    }
                     // add instancesIds
                     array_push($instancesIds, $userInstance->aws_instance_id);
                 }
-
                 $totalUsedCredit = array_sum($usedCreditArray);
                 if (empty($UserObj->temp_remaining_credits) || $UserObj->temp_remaining_credits == 0) {
                     $UserObj->temp_remaining_credits = $UserObj->remaining_credits;
@@ -115,7 +115,6 @@ class AppController extends Controller
                 $temp_credit = $UserObj->temp_remaining_credits;
                 $creditScore = (float)$temp_credit - (float)$totalUsedCredit;
                 $UserObj->remaining_credits = $creditScore;
-
                 //User relation to get packages amount what package buy.
 
                 if(count($UserObj->UserSubscriptionPlan) > 0){
@@ -140,7 +139,7 @@ class AppController extends Controller
                 }
 
                 // user credits score is 0 then we will they user all instance will stop
-               if($creditScore == 0)
+                if($creditScore == 0)
                 {
                     // below if in we check admin role 1-is admin Role so we have checked.
                     if($UserObj->role_id != 1)
