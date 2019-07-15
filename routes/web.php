@@ -118,6 +118,7 @@ Route::group(['prefix' => 'user', 'as' => 'user.', 'middleware' => ['auth', 'use
     Route::post('change-subscription', 'StripeController@swapSubscriptionPlan')->name('subscription.swap');
 
     Route::get('forums/like-discussion/{discussion_id}', 'ForumDiscussionController@likeDiscussion');
+    Route::get('forums/dislike-discussion/{discussion_id}', 'ForumDiscussionController@dislikeDiscussion');
 });
 
 Route::post(

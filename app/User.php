@@ -115,4 +115,7 @@ class User extends Authenticatable
     public function DiscussionLikes() {
         return $this->hasMany('App\DiscussionLikes','user_id');
     }
+    public function DiscussionDislikes() {
+        return $this->hasMany('App\DiscussionDislikes','user_id');
+    }
 }
