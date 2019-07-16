@@ -114,8 +114,10 @@
                     title: "Change Subscription",
                     message: "Are you sure you want to change from your current plan?",
                     callback: function(result) {
-                        document.getElementById("payment-form").submit()
-                        return result
+                        if(result) {
+                            document.getElementById("payment-form").submit()
+                        }
+                        return true
                     }
                 })
                 return true
@@ -140,7 +142,7 @@
                         if(result) {
                             document.getElementById("payment-form").submit()
                         }
-                        return result
+                        return false
                     }
                 })
                 return true

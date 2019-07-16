@@ -44,8 +44,9 @@ class StripeController extends Controller
     {
         $this->user = Auth::user();
         $plan_id = $request->plan_id;
+        $plan = SubscriptionPlan::where('stripe_plan',$request->plan_id)->first();
         try{
-            $this->user->subscription(config('services.stripe.product'))->swap($plan_id);
+            $this->user->subscription(config('services.stripe.product'))->noProrate()->swap($plan_id);
         } catch (Exception $e) {
             return redirect()->back();
         }

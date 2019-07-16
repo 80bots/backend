@@ -26,7 +26,7 @@
                 <div id="plan" class="collapse in {{ (request()->is('admin/plan*')) ? 'show' : '' }}">
                     <ul class="sidebar-dropdown list-unstyled">
                         <li class="sidebar-item "><a href="{{route('admin.plan.index')}}" class="sidebar-link {{ (request()->is('admin/plan')) ? 'active' : '' }}">List</a></li>
-                        <li class="sidebar-item "><a href="{{route('admin.plan.create')}}" class="sidebar-link {{ (request()->is('admin/plan/create')) ? 'active' : '' }}">Create</a></li>
+                        <!--li class="sidebar-item "><a href="{{route('admin.plan.create')}}" class="sidebar-link {{ (request()->is('admin/plan/create')) ? 'active' : '' }}">Create</a></li-->
                     </ul>
                 </div>
             </li>
