@@ -35,3 +35,10 @@
     border-radius: 20px;
     margin-right: 0;
 }
+
+.chatter_middle_title .popularity,
+.chatter_middle_title i {
+    font-weight: normal;
+    font-size: 12px;
+    color: #7D8DA4;
+}
