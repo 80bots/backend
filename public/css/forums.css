@@ -5,8 +5,12 @@
 #chatter .left-column{
     border-right: 1px #003edc63 dotted;
 }
-#chatter .like_chat{
+#chatter .simulacrum a{
     color: white;
+}
+#chatter .simulacrum a{
+    color: white;
+    text-decoration: none;
 }
 #chatter a.like_chat.liked i {
     color: #f1f90c;
@@ -29,4 +33,5 @@
     border: #333 1px solid;
     padding: 5px;
     border-radius: 20px;
+    margin-right: 0;
 }
