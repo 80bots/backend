@@ -19,6 +19,7 @@ class ForumDiscussionController extends ChatterDiscussionController
     public function likeDiscussion(Int $discussion_id)
     {
         $user_id = Auth::user()->id;
+        $total = DiscussionLikes::where('discussion_id',$discussion_id)->count();
 
         $dislikedQuery = DiscussionDislikes::where('user_id',$user_id)->where('discussion_id',$discussion_id);
         if($dislikedQuery->count()) {
@@ -26,8 +27,9 @@ class ForumDiscussionController extends ChatterDiscussionController
             return response()->json([
                 'message' => 'failure',
                 'data' => [
-                    'reason' => 'removed dislike',
+                    'status' => 'Disliked Already',
                     'object' => $dislike,
+                    'count' => $total
                 ]
             ]);
         }
@@ -37,11 +39,13 @@ class ForumDiscussionController extends ChatterDiscussionController
         if($likedQuery->count()) {
             $like = $likedQuery->first();
             $like->delete();
+            $total = $total-1;
             return response()->json([
                 'message' => 'failure',
                 'data' => [
-                    'reason' => 'unlike',
+                    'status' => 'Unliked',
                     'object' => $like,
+                    'count' => $total
                 ]
             ]);
         }
@@ -53,11 +57,13 @@ class ForumDiscussionController extends ChatterDiscussionController
             'discussion_id' => $discussion_id,
             'user_id' => $user_id
         ]);
-        
+        $total = $total+1;
         return response()->json([
             'message' => 'success',
             'data' => [
-                'like' => $like,
+                'status' => 'Liked',
+                'object' => $like,
+                'count' => $total
             ]
         ]);
     }
@@ -70,14 +76,17 @@ class ForumDiscussionController extends ChatterDiscussionController
     public function dislikeDiscussion(Int $discussion_id)
     {
         $user_id = Auth::user()->id;
+        $total = DiscussionDislikes::where('discussion_id',$discussion_id)->count();
+
         $likedQuery = DiscussionLikes::where('user_id',$user_id)->where('discussion_id',$discussion_id); 
         if($likedQuery->count()) {
             $like = $likedQuery->first();
             return response()->json([
                 'message' => 'failure',
                 'data' => [
-                    'reason' => 'liked already',
+                    'status' => 'Liked Already',
                     'object' => $like,
+                    'count' => $total
                 ]
             ]);
         }
@@ -86,29 +95,36 @@ class ForumDiscussionController extends ChatterDiscussionController
         if($dislikedQuery->count()) {
             $dislike = $dislikedQuery->first();
             $dislike->delete();
+            $total = $total-1;
             return response()->json([
                 'message' => 'failure',
                 'data' => [
-                    'reason' => 'removed dislike',
+                    'status' => 'Removed Dislike',
                     'object' => $dislike,
+                    'count' => $total
                 ]
             ]);
         }
-
-        
         
         $discussion = Models::discussion()->find($discussion_id);
-        if($discussion->popularity > 10) $discussion->popularity = $discussion->popularity - 10;
+        if($discussion->popularity >= 10) {
+            $discussion->popularity = $discussion->popularity - 10;
+        } else {
+            $discussion->popularity = 0;
+        }
         $discussion->save();
         $dislike = DiscussionDislikes::create([
             'discussion_id' => $discussion_id,
             'user_id' => $user_id
         ]);
         
+        $total = $total+1;
         return response()->json([
             'message' => 'success',
             'data' => [
-                'like' => $dislike,
+                'status' => 'Disliked',
+                'object' => $dislike,
+                'count' => $total
             ]
         ]);
     }
