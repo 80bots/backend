@@ -100,19 +100,19 @@ class AwsConnection extends BaseModel
 
     public static function AwsLaunchInstance($keyPairName, $securityGroupName, $bots){
         if(!empty($bots)){
-            $imageId = isset($bots->aws_ami_image_id) ? $bots->aws_ami_image_id : env('AWS_IMAGEID','ami-0cd3dfa4e37921605');
+            $imageId = isset($bots->aws_ami_image_id) ? $bots->aws_ami_image_id : env('AWS_IMAGEID','ami-02f706d959cedf892');
             $instanceType = isset($bots->aws_instance_type) ? $bots->aws_instance_type : env('AWS_INSTANCE_TYPE', 't2.micro');
             $volumeSize = isset($bots->aws_storage_gb) ? $bots->aws_storage_gb : env('AWS_Volume_Size', '8');
             $userData = isset($bots->aws_startup_script) ? base64_encode($bots->aws_startup_script) : '';
         } else {
-            $imageId = env('AWS_IMAGEID','ami-0cd3dfa4e37921605');
+            $imageId = env('AWS_IMAGEID','ami-02f706d959cedf892');
             $instanceType = env('AWS_INSTANCE_TYPE', 't2.micro');
             $volumeSize = env('AWS_Volume_Size', '8');
         }
         $ec2Client = self::AwsConnection();
 
         $instanceLaunchRequest = array(
-            'ImageId'        => 'ami-082b5a644766e0e6f',
+            'ImageId'        => $imageId,
             'MinCount'       => 1,
             'MaxCount'       => 1,
             'BlockDeviceMappings'     => array(
