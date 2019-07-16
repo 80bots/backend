@@ -2,19 +2,18 @@
 
 namespace App\Http\Controllers\admin;
 
-use App\Http\Controllers\AwsConnectionController;
-
 use App\Bots;
+use App\Http\Controllers\AwsConnectionController;
+use App\Jobs\StoreUserInstance;
 use App\Platforms;
 use App\UserInstances;
 use App\UserInstancesDetails;
-use function GuzzleHttp\Promise\all;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Session;
-use App\Jobs\StoreUserInstance;
+use function GuzzleHttp\Promise\all;
 
 class UserInstancesController extends AwsConnectionController
 {
@@ -25,15 +24,14 @@ class UserInstancesController extends AwsConnectionController
      */
     public function index($id)
     {
-        try
-        {
+        try {
             $UserInstance = UserInstances::findByUserId($id)->get();
-            if(!$UserInstance->isEmpty()){
-                return view('admin.instance.index',compact('UserInstance'));
+            if (!$UserInstance->isEmpty()) {
+                return view('admin.instance.index', compact('UserInstance'));
             }
             session()->flash('error', 'Instance Not Found');
             return view('admin.instance.index');
-        } catch (\Exception $exception){
+        } catch (\Exception $exception) {
             session()->flash('error', $exception->getMessage());
             return view('admin.instance.index');
         }
@@ -52,7 +50,7 @@ class UserInstancesController extends AwsConnectionController
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
@@ -62,7 +60,7 @@ class UserInstancesController extends AwsConnectionController
         try {
             $bots = null;
             $botObj = Bots::find($bot_id);
-            if(empty($botObj)){
+            if (empty($botObj)) {
                 return redirect()->back()->with('error', 'Bot Not Found Please Try Again');
             } else {
                 $bots = $botObj;
@@ -97,7 +95,7 @@ class UserInstancesController extends AwsConnectionController
             $publicIp = isset($instanceArray['PublicIpAddress']) ? $instanceArray['PublicIpAddress'] : '';
             $publicDnsName = isset($instanceArray['PublicDnsName']) ? $instanceArray['PublicDnsName'] : '';
 
-            $awsAmiId = env('AWS_IMAGEID','ami-0cd3dfa4e37921605');
+            $awsAmiId = env('AWS_IMAGEID', 'ami-0cd3dfa4e37921605');
 
             $created_at = date('Y-m-d H:i:s', strtotime($LaunchTime));
 
@@ -114,7 +112,7 @@ class UserInstancesController extends AwsConnectionController
             $userInstance->aws_public_dns = $publicDnsName;
             $userInstance->aws_pem_file_path = $keyPairPath;
             $userInstance->created_at = $created_at;
-            if($userInstance->save()){
+            if ($userInstance->save()) {
                 $userInstanceDetail = new UserInstancesDetails();
                 $userInstanceDetail->user_instance_id = $userInstance->id;
                 $userInstanceDetail->start_time = $created_at;
@@ -124,8 +122,7 @@ class UserInstancesController extends AwsConnectionController
             }
             session()->flash('error', 'Please Try again later');
             return redirect(route('admin.my-bots'));
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             session()->flash('error', $e->getMessage());
             return redirect(route('admin.my-bots'));
         }
@@ -135,7 +132,7 @@ class UserInstancesController extends AwsConnectionController
     /**
      * Display the specified resource.
      *
-     * @param  \App\UserInstances  $userInstances
+     * @param  \App\UserInstances $userInstances
      * @return \Illuminate\Http\Response
      */
     public function show(UserInstances $userInstances)
@@ -146,7 +143,7 @@ class UserInstancesController extends AwsConnectionController
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\UserInstances  $userInstances
+     * @param  \App\UserInstances $userInstances
      * @return \Illuminate\Http\Response
      */
     public function edit(UserInstances $userInstances)
@@ -157,8 +154,8 @@ class UserInstancesController extends AwsConnectionController
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\UserInstances  $userInstances
+     * @param  \Illuminate\Http\Request $request
+     * @param  \App\UserInstances $userInstances
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, UserInstances $userInstances)
@@ -169,7 +166,7 @@ class UserInstancesController extends AwsConnectionController
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\UserInstances  $userInstances
+     * @param  \App\UserInstances $userInstances
      * @return \Illuminate\Http\Response
      */
     public function destroy(UserInstances $userInstances)
@@ -177,23 +174,25 @@ class UserInstancesController extends AwsConnectionController
         //
     }
 
-    public function runningInstances(){
+    public function runningInstances()
+    {
 
-        try{
+        try {
             $UserInstance = UserInstances::findRunningInstance();
-            if(!$UserInstance->isEmpty()){
-                return view('admin.instance.index',compact('UserInstance'));
+            if (!$UserInstance->isEmpty()) {
+                return view('admin.instance.index', compact('UserInstance'));
             }
             session()->flash('error', 'Instance Not Found');
             return view('admin.instance.index');
-        } catch (\Exception $exception){
+        } catch (\Exception $exception) {
             session()->flash('error', $exception->getMessage());
             return view('admin.instance.index');
         }
     }
 
-    public function changeStatus(Request $request){
-        try{
+    public function changeStatus(Request $request)
+    {
+        try {
             $instanceObj = UserInstances::find($request->id);
             $instanceDetail = UserInstancesDetails::where(['user_instance_id' => $request->id])->latest()->first();
             $instanceIds = [];
@@ -202,21 +201,21 @@ class UserInstancesController extends AwsConnectionController
 
             $describeInstancesResponse = $this->DescribeInstances($instanceIds);
             $reservationObj = $describeInstancesResponse->getPath('Reservations');
-            if(empty($reservationObj)){
+            if (empty($reservationObj)) {
                 $instanceObj->status = 'terminated';
                 $instanceObj->save();
                 session()->flash('error', 'This instance is not exist');
                 return 'false';
             }
             $InstStatus = $reservationObj[0]['Instances'][0]['State']['Name'];
-            if($InstStatus == 'terminated'){
+            if ($InstStatus == 'terminated') {
                 $instanceObj->status = 'terminated';
                 $instanceObj->save();
                 session()->flash('error', 'This instance is already terminated');
                 return 'false';
             }
 
-            if($request->status == 'start'){
+            if ($request->status == 'start') {
                 $instanceObj->status = 'running';
                 $startObj = $this->StartInstance($instanceIds);
                 $instanceDetail = new UserInstancesDetails();
@@ -224,16 +223,16 @@ class UserInstancesController extends AwsConnectionController
                 $instanceDetail->start_time = $currentDate;
                 $instanceDetail->save();
 
-            } elseif($request->status == 'stop') {
+            } elseif ($request->status == 'stop') {
                 $instanceObj->status = 'stop';
                 $stopObj = $this->StopInstance($instanceIds);
                 $instanceDetail->end_time = $currentDate;
                 $diffTime = $this->DiffTime($instanceDetail->start_time, $instanceDetail->end_date);
                 $instanceDetail->total_time = $diffTime;
-                if($instanceDetail->save()){
-                    if($diffTime > $instanceObj->cron_up_time){
+                if ($instanceDetail->save()) {
+                    if ($diffTime > $instanceObj->cron_up_time) {
                         $instanceObj->cron_up_time = 0;
-                        $tempUpTime = !empty($instanceObj->temp_up_time) ? $instanceObj->temp_up_time: 0;
+                        $tempUpTime = !empty($instanceObj->temp_up_time) ? $instanceObj->temp_up_time : 0;
                         $upTime = $diffTime + $tempUpTime;
                         $instanceObj->temp_up_time = $upTime;
                         $instanceObj->up_time = $upTime;
@@ -245,34 +244,36 @@ class UserInstancesController extends AwsConnectionController
                 $terminateInstance = $this->TerminateInstance($instanceIds);
             }
 
-            if($instanceObj->save()){
-                session()->flash('success', 'Instance '.$request->status.' successfully!');
+            if ($instanceObj->save()) {
+                session()->flash('success', 'Instance ' . $request->status . ' successfully!');
                 return 'true';
             }
-            session()->flash('error', 'Instance '.$request->status.' Not successfully!');
+            session()->flash('error', 'Instance ' . $request->status . ' Not successfully!');
             return 'false';
-        } catch (\Exception $e){
+        } catch (\Exception $e) {
             session()->flash('error', $e->getMessage());
             return 'false';
         }
     }
 
-    public function BotList(){
-        try{
+    public function BotList()
+    {
+        try {
             $platforms = Platforms::findWithBots()->get();
 
-            return view('admin.bots.bats_list',compact('platforms'));
-        } catch (\Exception $exception){
+            return view('admin.bots.bats_list', compact('platforms'));
+        } catch (\Exception $exception) {
             session()->flash('error', $exception->getMessage());
             return view('admin.bots.bats_list');
         }
     }
 
-    public function BotAllList($id){
-        try{
+    public function BotAllList($id)
+    {
+        try {
             $platform = Platforms::findBotsWithPlatformId($id)->first();
-            return view('admin.bots.list',compact('platform'));
-        } catch (\Exception $exception){
+            return view('admin.bots.list', compact('platform'));
+        } catch (\Exception $exception) {
             session()->flash('error', $exception->getMessage());
             return view('admin.bots.index');
         }
@@ -282,55 +283,58 @@ class UserInstancesController extends AwsConnectionController
     {
         $user_id = Auth::user()->id;
 
-        try{
+        try {
             $UserInstance = UserInstances::findByUserId($user_id)->get();
             $botsArr = Bots::all();
-            if(!$UserInstance->isEmpty()){
+            if (!$UserInstance->isEmpty()) {
                 $instancesId = [];
-                array_push($instancesId,$UserInstance[0]->aws_instance_id);
-                return view('admin.instance.my-bots',compact('UserInstance','botsArr'));
+                array_push($instancesId, $UserInstance[0]->aws_instance_id);
+                return view('admin.instance.my-bots', compact('UserInstance', 'botsArr'));
             }
             session()->flash('error', 'Instance Not Found');
             return view('admin.instance.my-bots');
-        } catch (\Exception $e){
+        } catch (\Exception $e) {
             session()->flash('error', $e->getMessage());
             return view('admin.instance.my-bots');
         }
     }
 
     /* store bot_id in session */
-    public function storeBotIdInSession(Request $request){
+    public function storeBotIdInSession(Request $request)
+    {
         $userInstance = new UserInstances();
         $userInstance->user_id = $request->user_id;
         $userInstance->bot_id = $request->bot_id;
-        if($userInstance->save()){
-            Log::debug('Saved Instance : '.json_encode($userInstance));
-            Session::put('instance_id',$userInstance->id);
-            return response()->json(['type' => 'success','data' => $userInstance->id],200);
+        if ($userInstance->save()) {
+            Log::debug('Saved Instance : ' . json_encode($userInstance));
+            Session::put('instance_id', $userInstance->id);
+            return response()->json(['type' => 'success', 'data' => $userInstance->id], 200);
         }
 
-        return response()->json(['type' => 'error','data' => ''],200);
+        return response()->json(['type' => 'error', 'data' => ''], 200);
 
     }
 
     /* execute job to store user instance data */
-    public function storeJob(Request $request){
-        $result =  dispatch(new StoreUserInstance($request->all()));
-        Session::put('instance_id','');
-        return response()->json(['type' => 'success'],200);
+    public function storeJob(Request $request)
+    {
+        $result = dispatch(new StoreUserInstance($request->all()));
+        Session::put('instance_id', '');
+        return response()->json(['type' => 'success'], 200);
     }
 
 
-    public function checkBotIdInQueue(Request $request){
+    public function checkBotIdInQueue(Request $request)
+    {
 
         $bot_ids = array();
-        $userInstances = UserInstances::select('bot_id')->where('user_id',Auth::user()->id)->where('is_in_queue','=',1)->get();
+        $userInstances = UserInstances::select('bot_id')->where('user_id', Auth::user()->id)->where('is_in_queue', '=', 1)->get();
 
-        foreach ($userInstances as  $value) {
+        foreach ($userInstances as $value) {
             array_push($bot_ids, $value->bot_id);
         }
         $bot_ids = array_unique($bot_ids);
-        return response()->json(['type' => 'success','data' => $bot_ids],200);
+        return response()->json(['type' => 'success', 'data' => $bot_ids], 200);
     }
 
 }

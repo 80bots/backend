@@ -21,37 +21,47 @@
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
                             <label for="">Bot Name*</label>
-                            <input type="text" name="bot_name" value="{{isset($bots->bot_name) ? $bots->bot_name : ''}}" class="form-control" readonly />
+                            <input type="text" name="bot_name" value="{{isset($bots->bot_name) ? $bots->bot_name : ''}}"
+                                   class="form-control" readonly/>
                         </div>
                     </div>
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
                             <label for="">AMI Image Id*</label>
-                            <input type="text" name="aws_ami_image_id" value="{{isset($bots->aws_ami_image_id) ? $bots->aws_ami_image_id : ''}}" class="form-control" readonly/>
+                            <input type="text" name="aws_ami_image_id"
+                                   value="{{isset($bots->aws_ami_image_id) ? $bots->aws_ami_image_id : ''}}"
+                                   class="form-control" readonly/>
                         </div>
                     </div>
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
                             <label for="">AMI Name*</label>
-                            <input type="text" name="aws_ami_name" value="{{isset($bots->aws_ami_name) ? $bots->aws_ami_name : ''}}" class="form-control" readonly/>
+                            <input type="text" name="aws_ami_name"
+                                   value="{{isset($bots->aws_ami_name) ? $bots->aws_ami_name : ''}}"
+                                   class="form-control" readonly/>
                         </div>
                     </div>
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
                             <label for="">Instance Type*</label>
-                            <input type="text" name="aws_instance_type" value="{{isset($bots->aws_instance_type) ? $bots->aws_instance_type : ''}}" class="form-control" readonly/>
+                            <input type="text" name="aws_instance_type"
+                                   value="{{isset($bots->aws_instance_type) ? $bots->aws_instance_type : ''}}"
+                                   class="form-control" readonly/>
                         </div>
                     </div>
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label for="">StartUp Script*</label>
-                            <textarea name="aws_startup_script" class="form-control" readonly>{{isset($bots->aws_startup_script)?$bots->aws_startup_script:''}}</textarea>
+                            <label for="">Startup Script*</label>
+                            <textarea name="aws_startup_script" class="form-control"
+                                      readonly>{{isset($bots->aws_startup_script)?$bots->aws_startup_script:''}}</textarea>
                         </div>
                     </div>
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
                             <label for="">Storage GB*</label>
-                            <input type="text" name="aws_storage_gb" value="{{isset($bots->aws_storage_gb) ? $bots->aws_storage_gb : ''}}" class="form-control" readonly/>
+                            <input type="text" name="aws_storage_gb"
+                                   value="{{isset($bots->aws_storage_gb) ? $bots->aws_storage_gb : ''}}"
+                                   class="form-control" readonly/>
                         </div>
                     </div>
                 </div>
