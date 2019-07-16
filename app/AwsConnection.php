@@ -10,7 +10,7 @@ class AwsConnection extends BaseModel
 {
     public static function AwsConnection(){
         $ec2Client = new Ec2Client([
-            'region' => 'us-west-2',
+            'region' => 'us-east-2',
             'version' => 'latest',
             'credentials' => [
                 'key'    => 'AKIAQOGPXKZ2FNR2TFXX',
