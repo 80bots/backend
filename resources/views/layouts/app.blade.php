@@ -21,6 +21,7 @@ $user = Auth::user();
     <link href="https://fonts.googleapis.com/css?family=Nunito:400,500,600" rel="stylesheet">
     <link rel="stylesheet" href="{{asset('css/style.css')}}">
     <link rel="stylesheet" href="{{asset('css/theme.css')}}">
+    <link rel="stylesheet" href="{{ URL::asset('css/all.min.css') }}">
     @yield('css')
 </head>
 <body>

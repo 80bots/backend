@@ -9,7 +9,7 @@
 @endsection
 
 @section('content')
-    <div class="wrapper" id="dvBotWrapper">
+    <div class="wrapper" >
         <div class="align-items-center bg-purple d-flex p-3 rounded shadow-sm text-white-50 mb-3">
             <h4 class="border mb-0 mr-2 pb-2 pl-3 pr-3 pt-2 rounded text-white">8</h4>
             <div class="lh-100">
@@ -155,13 +155,13 @@
                 success : function(response){
 
                     if(response.type === 'success'){
-                        console.log(response);
-                        if(response.data !== undefined && response.data.length) {
-                            let $botWrapper = $('#dvBotWrapper');
-                            for(let eachData of response.data) {
-                                $botWrapper.find('[data-id="'+eachData+'"]').attr('data-target','').prepend('<i class="fa fa-spinner fa-spin"></i>');
-                            }
-                        }
+                        // console.log(response);
+                        // if(response.data !== undefined && response.data.length) {
+                        //     let $botWrapper = $('#dvBotWrapper');
+                        //     for(let eachData of response.data) {
+                        //         $botWrapper.find('[data-id="'+eachData+'"]').attr('data-target','').prepend('<i class="fa fa-spinner fa-spin"></i>');
+                        //     }
+                        // }
                     }
 
                 },
