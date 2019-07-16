@@ -109,12 +109,13 @@ class AppController extends Controller
                     array_push($instancesIds, $userInstance->aws_instance_id);
                 }
                 $totalUsedCredit = array_sum($usedCreditArray);
+                $user = User::find($UserObj->id);
                 if (empty($UserObj->temp_remaining_credits) || $UserObj->temp_remaining_credits == 0) {
-                    $UserObj->temp_remaining_credits = $UserObj->remaining_credits;
+                    $user->temp_remaining_credits = $UserObj->remaining_credits;
                 }
                 $temp_credit = $UserObj->temp_remaining_credits;
                 $creditScore = (float)$temp_credit - (float)$totalUsedCredit;
-                $UserObj->remaining_credits = $creditScore;
+                $user->remaining_credits = $creditScore;
                 //User relation to get packages amount what package buy.
 
                 if(count($UserObj->UserSubscriptionPlan) > 0){
@@ -132,14 +133,14 @@ class AppController extends Controller
                         {
                            // if send mail then save on usres table on
                             $UserObj->sent_email_status = $creditScorePercentage;
-                            $User = new User;
-                            $dataResult = $User->UserCreditSendEmail($UserObj);
+                            $dataResult = User::UserCreditSendEmail($UserObj);
                         }
                     }
                 }
+                $user->save();
 
                 // user credits score is 0 then we will they user all instance will stop
-                if($creditScore == 0)
+                if($creditScore <= 0)
                 {
                     // below if in we check admin role 1-is admin Role so we have checked.
                     if($UserObj->role_id != 1)
@@ -179,7 +180,7 @@ class AppController extends Controller
                     }
                 }
 
-                $UserObj->save();
+
 
                 Log::info('Credits of email: ' . $UserObj->email . ' is ' . $UserObj->remaining_credits);
             }
