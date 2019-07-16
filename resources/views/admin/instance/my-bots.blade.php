@@ -5,7 +5,6 @@
 @endsection
 
 @section('css')
-    <link rel="stylesheet" href="{{ URL::asset('/css/font-awesome.min.css') }}">
 @endsection
 
 @section('content')
@@ -69,10 +68,10 @@
 
                                 @php $bot_name=isset($instance->bots->bot_name)?$instance->bots->bot_name:''@endphp
                                 <a href="javascript:void(0)" data-toggle="modal" data-target="#create-scheduler"
-                                   onclick="SetBotName('{{$bot_name}}','{{$instance->id}}')" class="badge badge-primary font-size-16"><i class="fa fa-pencil"></i></a>
+                                   onclick="SetBotName('{{$bot_name}}','{{$instance->id}}')" class="badge badge-primary font-size-16"><i class="fa fa-pencil-alt"></i></a>
                                 @if($instance->is_in_queue == 1)
                                     <a href="javascript:void(0)" data-toggle="modal" data-target="#lunch-instance"
-                                       class="badge badge-primary ml-2 font-size-16 refresh" title="Process In Queue"><i class="fa fa-refresh"></i></a>
+                                       class="badge badge-primary ml-2 font-size-16 refresh" title="Process In Queue"><i class="fa fa-sync-alt"></i></a>
                                 @endif
                             </div>
                         </div>
