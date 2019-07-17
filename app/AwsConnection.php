@@ -5,6 +5,7 @@ namespace App;
 use Aws\Ec2\Ec2Client;
 use Illuminate\Database\Eloquent\Model;
 use File;
+use Auth;
 
 class AwsConnection extends BaseModel
 {
@@ -172,6 +173,7 @@ HERESHELL;
             $volumeSize = env('AWS_Volume_Size', '8');
         }
         $ec2Client = self::AwsConnection();
+        $user = Auth::user();
 
         $instanceLaunchRequest = array(
             'ImageId'        => $imageId,
@@ -187,7 +189,18 @@ HERESHELL;
             ),
             'InstanceType'   => $instanceType,
             'KeyName'        => $keyPairName,
-            'SecurityGroups' => array($securityGroupName)
+            'SecurityGroups' => array($securityGroupName),
+            'TagSpecifications' => [
+                [
+                    'ResourceType' => 'instance',
+                    'Tags' => [
+                        [
+                            'Key' => 'Name',
+                            'Value' => $user->email,
+                        ],
+                    ],
+                ],
+            ],
         );
         if(!empty($userData) && isset($userData)){
             $instanceLaunchRequest = array_add($instanceLaunchRequest,'UserData', $userData);
