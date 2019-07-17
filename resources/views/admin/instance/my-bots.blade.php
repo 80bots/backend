@@ -20,7 +20,7 @@
         @include('layouts.imports.messages')
         @if(!empty($UserInstance) && isset($UserInstance))
             <div class="my-3 p-3 bg-white rounded shadow-sm">
-                <h6 class="border-bottom  pb-2 mb-0">Running Bots</h6>
+                <h6 class="border-bottom  pb-2 mb-0">My Bots</h6>
                 @foreach($UserInstance as $instance)
                     <div class="media text-muted pt-3 d-flex align-items-start">
                         <svg class="bd-placeholder-img mr-2 rounded flex-shrink-0" width="32" height="32"

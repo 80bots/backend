@@ -12,7 +12,7 @@ Running Bots
     <div class="wrapper">
         <div class="card">
             <div class="card-header d-flex align-items-center justify-content-between">
-                <h5 class="mb-0">Running Bots List</h5>
+                <h5 class="mb-0">Running Bots</h5>
             </div>
             <div class="card-body">
                 @include('layouts.imports.messages')
