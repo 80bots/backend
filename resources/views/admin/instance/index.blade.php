@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title')
-Instance Listing
+Running Bots
 @endsection
 
 @section('css')
@@ -12,7 +12,7 @@ Instance Listing
     <div class="wrapper">
         <div class="card">
             <div class="card-header d-flex align-items-center justify-content-between">
-                <h5 class="mb-0">Instance List</h5>
+                <h5 class="mb-0">Running Bots List</h5>
             </div>
             <div class="card-body">
                 @include('layouts.imports.messages')

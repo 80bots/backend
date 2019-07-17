@@ -13,7 +13,7 @@
         <div class="card">
             <div class="card-header d-flex align-items-center justify-content-between">
                 <h5 class="mb-0">Bots List</h5>
-                {{--<a href="{{route('user.instance.create')}}" class="btn btn-round btn-primary"><i class="fas fa-plus"></i> Launch Bot</a>--}}
+                <h5 class="mb-0"><a href="{{route('admin.bots.create')}}" class="btn btn-round btn-primary"><i class="fas fa-plus-circle"></i></a></h5>
             </div>
             <div class="card-body">
                 @include('layouts.imports.messages')

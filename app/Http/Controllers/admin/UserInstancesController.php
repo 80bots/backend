@@ -176,13 +176,12 @@ class UserInstancesController extends AwsConnectionController
 
     public function runningInstances()
     {
-
         try {
             $UserInstance = UserInstances::findRunningInstance();
             if (!$UserInstance->isEmpty()) {
                 return view('admin.instance.index', compact('UserInstance'));
             }
-            session()->flash('error', 'Instance Not Found');
+            session()->flash('error', 'Running Bots Not Found');
             return view('admin.instance.index');
         } catch (\Exception $exception) {
             session()->flash('error', $exception->getMessage());
