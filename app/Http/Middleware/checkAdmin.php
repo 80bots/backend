@@ -18,8 +18,7 @@ class checkAdmin
     {
         if (Auth::check() && Auth::user()->role->name == 'Admin') {
             return $next($request);
-        }
-        else {
+        } else {
             Auth::logout();
             return redirect('/login')->with('error','Unauthorized');
         }

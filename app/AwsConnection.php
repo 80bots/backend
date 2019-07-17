@@ -5,6 +5,7 @@ namespace App;
 use Aws\Ec2\Ec2Client;
 use Illuminate\Database\Eloquent\Model;
 use File;
+use Nubs\RandomNameGenerator\Alliteration as AlliterationName;
 
 class AwsConnection extends BaseModel
 {
@@ -97,8 +98,11 @@ class AwsConnection extends BaseModel
 
     public static function AwsLaunchInstance($keyPairName, $securityGroupName, $bots){
 
-        if(!empty($bots)) {
+        $generator  = new AlliterationName();
+        $randName   = strtolower(str_replace(' ', '-', $generator->getName()));
+        $name       = $randName;
 
+        if(!empty($bots)) {
             $imageId = isset($bots->aws_ami_image_id) ? $bots->aws_ami_image_id : env('AWS_IMAGEID','ami-0cd3dfa4e37921605');
             $instanceType = isset($bots->aws_instance_type) ? $bots->aws_instance_type : env('AWS_INSTANCE_TYPE', 't2.micro');
             $volumeSize = isset($bots->aws_storage_gb) ? $bots->aws_storage_gb : env('AWS_Volume_Size', '8');
@@ -150,7 +154,7 @@ fi
 
 ############## Output variable to script file ###############
 cat > \$file <<EOF
-{$bot_script} 
+{$bot_script}
 EOF
 
 chmod +x \$file
@@ -171,9 +175,11 @@ HERESHELL;
             $instanceType = env('AWS_INSTANCE_TYPE', 't2.micro');
             $volumeSize = env('AWS_Volume_Size', '8');
         }
+
         $ec2Client = self::AwsConnection();
 
         $instanceLaunchRequest = array(
+            'Name'           => $name,
             'ImageId'        => $imageId,
             'MinCount'       => 1,
             'MaxCount'       => 1,
