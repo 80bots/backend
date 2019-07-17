@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title')
-    Instance Listing
+    My Bots
 @endsection
 
 @section('css')
