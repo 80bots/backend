@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title')
-    Plans Listing
+    Subscription Plans
 @endsection
 
 @section('css')

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title')
-Instance Sessions Listing
+Instance Sessions
 @endsection
 
 @section('css')
