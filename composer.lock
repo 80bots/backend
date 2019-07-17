@@ -4,11 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-<<<<<<< b9c69da3ff691355b7b0e55f73f306865d03d42d
     "content-hash": "684ff8d59636b53f0b4cd4bfdb667c4d",
-=======
-    "content-hash": "d2bf77b67d6837ee21beaa3eee6ecf12",
->>>>>>> removed laravel-forum changes
     "packages": [
         {
             "name": "devdojo/chatter",
