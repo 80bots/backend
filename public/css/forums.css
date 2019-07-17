@@ -42,3 +42,14 @@
     font-size: 12px;
     color: #7D8DA4;
 }
+.simulacrum{ position: relative; }
+.simulacrum .message{
+    clear: both;
+    display: block;
+    position: absolute;
+    min-width: 100px;
+    height: 15px;
+    top: 22px;
+    line-height: 15px;
+    left: 1px;
+}
