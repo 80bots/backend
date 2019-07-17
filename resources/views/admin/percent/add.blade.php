@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title')
-    Add Credit Percentage
+    Add Low Credit Notification
 @endsection
 
 @section('css')
@@ -13,7 +13,7 @@
     <form class="card" id="percentage-create" action="{{route('admin.percent.store')}}" method="post">
         @csrf
         <div class="card-header d-flex align-items-center justify-content-between">
-            <h5 class="mb-0">Add Credit Percentage</h5>
+            <h5 class="mb-0">Add Low Credit Notification</h5>
         </div>
         <div class="card-body">
             <div class="row">

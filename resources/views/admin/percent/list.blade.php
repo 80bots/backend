@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title')
-    Credit Percentage List
+    Low Credit Notification List
 @endsection
 
 @section('css')
@@ -12,7 +12,7 @@
     <div class="wrapper">
         <div class="card">
             <div class="card-header d-flex align-items-center justify-content-between">
-                <h5 class="mb-0">Credit Percentage List</h5>
+                <h5 class="mb-0">Low Credit Notification List</h5>
                 {{--<a href="{{route('percent.create')}}" class="btn btn-round btn-primary"><i class="fas fa-plus"></i> Add Credit Percentage</a>--}}
             </div>
             <div class="card-body">
