@@ -8,7 +8,7 @@ return [
     |--------------------------------------------------------------------------
     |
     */
-    'prcing_plans' => 'Pricing Plans',
+    'prcing_plans' => 'Subscription Plans',
     'credits' => [
         'singular' => 'Credit',
         'plural' => 'Credits',
