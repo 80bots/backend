@@ -66,18 +66,18 @@
                                    class="form-control"/>
                         </div>
                     </div>
-                    <div class="col-md-6 col-sm-12">
+                    <div class="col-md-12 col-sm-12">
                         <div class="form-group">
                             <label for="aws_custom_script">Bot Script*</label>
                             <textarea id="aws_custom_script" name="aws_custom_script"
-                                      class="form-control">{{isset($bots->aws_custom_script)?$bots->aws_custom_script:''}}</textarea>
+                                      class="form-control" rows="80">{{isset($bots->aws_custom_script)?$bots->aws_custom_script:''}}</textarea>
                         </div>
                     </div>
-                    <div class="col-md-6 col-sm-12">
+                    <div class="col-md-12 col-sm-12">
                         <div class="form-group">
                             <label for="">Startup Script*</label>
                             <textarea name="aws_startup_script"
-                                      class="form-control">{{isset($bots->aws_startup_script)?$bots->aws_startup_script:''}}</textarea>
+                                      class="form-control" rows="80">{{isset($bots->aws_startup_script)?$bots->aws_startup_script:''}}</textarea>
                         </div>
                     </div>
                     <div class="col-md-6 col-sm-12">
@@ -91,7 +91,7 @@
                         <div class="form-group">
                             <label for="">Tags*</label>
                             <textarea name="tags" class="form-control"
-                                      placeholder="Comma(,) consider as new Tags">{{isset($tags)?$tags:''}}</textarea>
+                                      placeholder="Comma (,) separated">{{isset($tags)?$tags:''}}</textarea>
                         </div>
                     </div>
                 </div>

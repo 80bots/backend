@@ -53,16 +53,16 @@
                         <input type="text" name="aws_storage_gb" class="form-control"/>
                     </div>
                 </div>
-                <div class="col-md-6 col-sm-12">
+                <div class="col-md-12 col-sm-12">
                     <div class="form-group">
                         <label for="aws_custom_script">Bot Script*</label>
-                        <textarea id="aws_custom_script" name="aws_custom_script" class="form-control"></textarea>
+                        <textarea id="aws_custom_script" name="aws_custom_script" class="form-control" rows="80"></textarea>
                     </div>
                 </div>
-                <div class="col-md-6 col-sm-12">
+                <div class="col-md-12 col-sm-12">
                     <div class="form-group">
-                        <label for="">StartUp Script*</label>
-                        <textarea name="aws_startup_script" class="form-control"></textarea>
+                        <label for="">Startup Script*</label>
+                        <textarea name="aws_startup_script" class="form-control" rows="80"></textarea>
                     </div>
                 </div>
                 <div class="col-md-6 col-sm-12">
