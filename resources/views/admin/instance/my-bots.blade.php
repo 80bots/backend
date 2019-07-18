@@ -108,7 +108,6 @@
                     status: status
                 },
                 success: function (data) {
-                    // console.log(data); return false;
                     location.reload();
                 }
             });
