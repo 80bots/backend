@@ -8,9 +8,14 @@ use App\Http\Controllers\AppController;
 use App\Platforms;
 use App\Tags;
 use Illuminate\Http\Request;
+use Auth;
+use App\UserInstances;
+use App\UserInstancesDetails;
 
 class BotsController extends AppController
 {
+    public $limit;
+
     /**
      * Display a listing of the resource.
      *
@@ -55,7 +60,6 @@ class BotsController extends AppController
      */
     public function store(Request $request)
     {
-
         try{
             $botObj = new Bots();
             $botObj->bot_name = isset($request->bot_name) ? $request->bot_name : '';
@@ -231,7 +235,8 @@ class BotsController extends AppController
         }
     }
 
-    public function ChangeStatus(Request $request){
+    public function ChangeStatus(Request $request)
+    {
         try{
             $botObj = Bots::find($request->id);
             $botObj->status = $request->status;
@@ -246,4 +251,33 @@ class BotsController extends AppController
             return 'false';
         }
     }
+
+    public function list($platformId = null)
+    {
+        if(!$platformId) {
+          $this->limit = 5;
+        }
+
+        $platforms = new Platforms;
+
+        $platforms = $platforms->hasBots($this->limit, $platformId)->paginate(5);
+
+        return view('admin.bots.list',compact('platforms'));
+    }
+
+    public function mineBots()
+    {
+        $userId = Auth::id();
+        $instancesId = [];
+
+        $userInstances = UserInstances::findByUserId($userId)->get();
+        $bots = Bots::all();
+
+        if(!$userInstances->count()) {
+          session()->flash('error', 'Instance Not Found');
+        }
+
+        return view('admin.instance.my-bots', compact('userInstances', 'bots'));
+    }
+
 }

@@ -20,12 +20,22 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','ad
         Route::get('running', 'UserInstancesController@runningInstances')->name('running');
         Route::post('change-status', 'UserInstancesController@changeStatus')->name('change-status');
     });
+
     Route::resource('instance','UserInstancesController');
 
-    Route::resource('bots','BotsController');
-    Route::group(['prefix' => 'bots', 'as' => 'bots.'], function() {
-        Route::post('change-status', 'BotsController@ChangeStatus')->name('change-status');
+
+    Route::group(['prefix' => 'bots'], function() {
+
+        Route::get('list', 'BotsController@list')->name('bots.list');
+        Route::get('{platformId}/list', 'BotsController@list')->name('bots.all.list');
+        Route::get('mine', 'BotsController@mineBots')->name('my-bots');
+
+        Route::group(['as' => 'bots.'], function() {
+          Route::post('change-status', 'BotsController@ChangeStatus')->name('change-status');
+        });
     });
+
+    Route::resource('bots','BotsController');
 
     Route::resource('plan','SubscriptionPlanController');
     Route::group(['prefix' => 'plan', 'as' => 'plan.'], function() {
@@ -39,9 +49,6 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','ad
     Route::any('storeSession','UserInstancesController@storeBotIdInSession');
     Route::post('/jobStart','UserInstancesController@storeJob')->name('jobStart');
 
-    Route::get('bots-list', 'UserInstancesController@BotList')->name('bots.list');
-    Route::get('my-bots', 'UserInstancesController@MyBots')->name('my-bots');
-    Route::get('bots-all-list/{id}', 'UserInstancesController@BotAllList')->name('bots.all.list');
 
     Route::resource('scheduling', 'SchedulingInstancesController');
     Route::group(['prefix' => 'scheduling', 'as' => 'scheduling.'], function() {
