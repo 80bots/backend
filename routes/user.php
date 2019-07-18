@@ -1,7 +1,7 @@
 <?php
 Route::group(['prefix' => 'user', 'as' => 'user.', 'middleware' => ['auth', 'user']], function(){
     Route::post('/checkBotIdInQueue','UserInstancesController@checkBotIdInQueue');
-    Route::post('/jobStart','UserInstancesController@storeJob')->name('jobStart');
+    Route::post('/dispatch/launch-instance','UserInstancesController@dispatchLaunchInstance')->name('dispatch.launch_instance');
     Route::get('dashboard', 'UserController@index')->name('dashboard');
     Route::get('profile/{id}', 'UserController@show')->name('profile');
     Route::get('cal-used-credit', 'AppController@CalUsedCredit')->name('cal-used-credit');

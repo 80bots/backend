@@ -13,13 +13,18 @@ class AwsConnectionController extends AppController
         return $keyPair;
     }
 
+    public static function CreateTagName(){
+        $tagName = AwsConnection::AwsCreateTagName();
+        return $tagName;
+    }
+
     public static function CreateSecurityGroupId(){
         $groupId = AwsConnection::AwsCreateSecretGroup();
         return $groupId;
     }
 
-    public static function LaunchInstance($keyPair,$group_id, $bots = null){
-        $instanceResponse = AwsConnection::AwsLaunchInstance($keyPair,$group_id, $bots);
+    public static function LaunchInstance($keyPair,$group_id, $bots = null, $tagName = 'aws-instance'){
+        $instanceResponse = AwsConnection::AwsLaunchInstance($keyPair,$group_id, $bots, $tagName);
         return $instanceResponse;
     }
 

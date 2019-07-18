@@ -66,64 +66,72 @@
     <script type="text/javascript" src="{{ asset('js/moment.min.js')}}"></script>
     <script>
 
-        $(document).ready(function(){
-            var botId = null ;
-            checkBotIdInQueue();
-        });
+      $(document).ready(function(){
+          checkBotIdInQueue();
+      });
 
-        $(document).on('click', '#launch-inspection-submit-btn', function () {
-            $('#launch-instance').hide();
+      function launchInstance(botId) {
+        $('#launch-instance').modal('show');
+        $('[name="bot_id"]').val(botId);
+      }
 
-            $.ajax({
-                url : "/user/storeSession",
-                type : "POST",
-                data : {
-                    _token : function () {
-                        return '{{csrf_token()}}';
-                    },
-                    user_id : '{{ Auth::id() }}',
-                    bot_id : botId,
+      $(document).on('click', '#launch-inspection-submit-btn', function () {
+          $.ajax({
+              url : "/user/storeSession",
+              type : "POST",
+              beforeSend: function() {
+                $('#launch-inspection-submit-btn').attr('disabled', true);
+              },
+              data : {
+                  _token : function () {
+                      return '{{csrf_token()}}';
+                  },
+                  user_id : '{{ Auth::id() }}',
+                  bot_id : $('[name="bot_id"]').val(),
+              },
+              success : function(response){
+                  if(response.type === 'success'){
+                      window.location = "/user/instance";
+                  }
+                  $('[name="bot_id"]').val('');
+                  $('#launch-instance').modal('hide');
+                  $('#launch-inspection-submit-btn').removeAttr('disabled');
+              },
+              error : function(response){
+                console.log(response);
+                alert('Something went wrong!');
+                $('#launch-inspection-submit-btn').removeAttr('disabled');
+              }
+          });
 
-                },
-                success : function(response){
-                    if(response.type === 'success'){
-                        window.location = "/user/instance";
-                    }
-                },
-                error : function(response){
-                  console.log(response);
-                  alert('Something went wrong!');
-                }
-            });
+      });
 
-        });
+      function checkBotIdInQueue(){
+          $.ajax({
+              url : "/user/checkBotIdInQueue",
+              type : "POST",
+              data : {
+                  _token : function () {
+                      return '{{csrf_token()}}';
+                  }
+              },
+              success : function(response){
+                  if(response.type === 'success'){
+                      // console.log(response);
+                      // if(response.data !== undefined && response.data.length) {
+                      //     let $botWrapper = $('#dvBotWrapper');
+                      //     for(let eachData of response.data) {
+                      //         $botWrapper.find('[data-id="'+eachData+'"]').attr('data-target','').prepend('<i class="fa fa-spinner fa-spin"></i>');
+                      //     }
+                      // }
+                  }
+              },
+              error : function(response){
+                console.log(response);
+                alert('Something went wrong!');
+              }
+          });
 
-        function checkBotIdInQueue(){
-            $.ajax({
-                url : "/user/checkBotIdInQueue",
-                type : "POST",
-                data : {
-                    _token : function () {
-                        return '{{csrf_token()}}';
-                    }
-                },
-                success : function(response){
-                    if(response.type === 'success'){
-                        // console.log(response);
-                        // if(response.data !== undefined && response.data.length) {
-                        //     let $botWrapper = $('#dvBotWrapper');
-                        //     for(let eachData of response.data) {
-                        //         $botWrapper.find('[data-id="'+eachData+'"]').attr('data-target','').prepend('<i class="fa fa-spinner fa-spin"></i>');
-                        //     }
-                        // }
-                    }
-                },
-                error : function(response){
-                  console.log(response);
-                  alert('Something went wrong!');
-                }
-            });
-
-        }
+      }
     </script>
 @endsection

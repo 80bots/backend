@@ -101,7 +101,7 @@
             let instance_id = $('#instance_id').val();
 
             if(instance_id.length != ''){
-                storeUserInstance(instance_id);
+                dispatchLaunchInstance(instance_id);
             }
         });
 
@@ -127,8 +127,8 @@
             });
         })
 
-        function  storeUserInstance(instance_id){
-            var URL = '{{route('user.jobStart')}}';
+        function  dispatchLaunchInstance(instance_id){
+            var URL = '{{route('user.dispatch.launch_instance')}}';
             $.ajax({
                 type: 'POST',
                 url: URL,

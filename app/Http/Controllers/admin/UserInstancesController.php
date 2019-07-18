@@ -116,7 +116,7 @@ class UserInstancesController extends AwsConnectionController
                 $userInstanceDetail->user_instance_id = $userInstance->id;
                 $userInstanceDetail->start_time = $created_at;
                 $userInstanceDetail->save();
-                session()->flash('success', 'Instance Create successfully');
+                session()->flash('success', 'Instance Created successfully');
                 return redirect(route('admin.my-bots'));
             }
             session()->flash('error', 'Please Try again later');
@@ -271,10 +271,10 @@ class UserInstancesController extends AwsConnectionController
     }
 
     /* execute job to store user instance data */
-    public function storeJob(Request $request)
+    public function dispatchLaunchInstance(Request $request)
     {
         $result = dispatch(new StoreUserInstance($request->all()));
-        Session::put('instance_id', '');
+        Session::forget('instance_id');
         return response()->json(['type' => 'success'], 200);
     }
 

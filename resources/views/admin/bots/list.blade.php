@@ -38,17 +38,10 @@
                                   @endif
                                 @endforeach
                             </div>
-                            @if(!empty(Session::get('bot_id')))
-                                <div class="col-md-2 col-sm-12 text-right">
-                                    <a href="javascript:void(0)" data-toggle="modal" data-target="#launch-instance"
-                                       class="badge badge-primary font-size-16" data-id="{{$bot->id}}">Launch</a>
-                                </div>
-                            @else
-                                <div class="col-md-2 col-sm-12 text-right">
-                                    <a href="javascript:void(0)" data-toggle="modal" data-target="#launch-instance"
-                                       class="badge badge-primary font-size-16" data-id="{{$bot->id}}">Launch</a>
-                                </div>
-                            @endif
+                            <div class="col-md-2 col-sm-12 text-right">
+                              <a href="javascript:void(0)" onclick="launchInstance({{$bot->id}});"
+                                class="badge badge-primary font-size-16" data-id="{{$bot->id}}">Launch</a>
+                            </div>
                         </div>
                     </div>
                 @endforeach
@@ -68,32 +61,41 @@
 <script>
 
     $(document).ready(function(){
-        var botId = null ;
         checkBotIdInQueue();
     });
 
-    $(document).on('click', '#launch-inspection-submit-btn', function () {
-        $('#launch-instance').hide();
+    function launchInstance(botId) {
+      $('#launch-instance').modal('show');
+      $('[name="bot_id"]').val(botId);
+    }
 
+    $(document).on('click', '#launch-inspection-submit-btn', function () {
         $.ajax({
-            url : "/user/storeSession",
+            url : "/admin/storeSession",
             type : "POST",
+            beforeSend: function() {
+              $('#launch-inspection-submit-btn').attr('disabled', true);
+            },
             data : {
                 _token : function () {
                     return '{{csrf_token()}}';
                 },
                 user_id : '{{ Auth::id() }}',
-                bot_id : botId,
-
+                bot_id : $('[name="bot_id"]').val(),
             },
             success : function(response){
                 if(response.type === 'success'){
-                    window.location = "/admin/my-bots";
+                    window.location = "/admin/bots/mine";
                 }
+                $('[name="bot_id"]').val('');
+                $('#launch-instance').modal('hide');
+                $('#launch-inspection-submit-btn').removeAttr('disabled');
+
             },
             error : function(response){
               console.log(response);
               alert('Something went wrong!');
+              $('#launch-inspection-submit-btn').removeAttr('disabled');
             }
         });
 

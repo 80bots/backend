@@ -38,6 +38,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','ad
     Route::resource('bots','BotsController');
 
     Route::resource('plan','SubscriptionPlanController');
+
     Route::group(['prefix' => 'plan', 'as' => 'plan.'], function() {
         Route::post('change-status', 'SubscriptionPlanController@ChangeStatus')->name('change-status');
     });
@@ -47,7 +48,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','ad
     Route::resource('percent','CreditPercentController');
 
     Route::any('storeSession','UserInstancesController@storeBotIdInSession');
-    Route::post('/jobStart','UserInstancesController@storeJob')->name('jobStart');
+    Route::post('/dispatch/launch-instance','UserInstancesController@dispatchLaunchInstance')->name('dispatch.launch_instance');
 
 
     Route::resource('scheduling', 'SchedulingInstancesController');
