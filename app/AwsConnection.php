@@ -5,6 +5,7 @@ namespace App;
 use Aws\Ec2\Ec2Client;
 use Illuminate\Database\Eloquent\Model;
 use File;
+use Nubs\RandomNameGenerator\Alliteration as AlliterationName;
 use Auth;
 
 class AwsConnection extends BaseModel
@@ -47,6 +48,18 @@ class AwsConnection extends BaseModel
         $return['path'] = $filePath;
         $return['keyName'] = $keyPairName;
         return $return;
+    }
+
+    public static function AwsCreateTagName() {
+        $generator  = new AlliterationName();
+        $randName   = strtolower(str_replace(' ', '-', $generator->getName()));
+
+        $name   = $randName;
+        $name   = str_replace(' ', '-', $name);
+        $name   = preg_replace('/[^A-Za-z\-]/', '', $name);
+        $name   = preg_replace('/-+/', '-', $name);
+
+        return $name;
     }
 
     public static function AwsSetSecretGroupIngress($securityGroupName){
@@ -96,18 +109,17 @@ class AwsConnection extends BaseModel
         return $return;
     }
 
-    public static function AwsLaunchInstance($keyPairName, $securityGroupName, $bots){
+    public static function AwsLaunchInstance($keyPairName, $securityGroupName, $bot, $tagName){
 
-        if(!empty($bots)) {
-
-            $imageId = isset($bots->aws_ami_image_id) ? $bots->aws_ami_image_id : env('AWS_IMAGEID','ami-0cd3dfa4e37921605');
-            $instanceType = isset($bots->aws_instance_type) ? $bots->aws_instance_type : env('AWS_INSTANCE_TYPE', 't2.micro');
-            $volumeSize = isset($bots->aws_storage_gb) ? $bots->aws_storage_gb : env('AWS_Volume_Size', '8');
-            $userData = isset($bots->aws_startup_script) ? $bots->aws_startup_script : '';
-            $bot_script = isset($bots->aws_custom_script) ? $bots->aws_custom_script : '';
-            $_shebang = '#!/bin/bash';
-            $userData = "{$_shebang}\n {$userData}\n";
-            $console_overides = <<<HERECONSOLE
+        if($bot) {
+            $imageId      = $bot->aws_ami_image_id ??  env('AWS_IMAGEID','ami-0cd3dfa4e37921605');
+            $instanceType = $bot->aws_instance_type ?? env('AWS_INSTANCE_TYPE', 't2.micro');
+            $volumeSize   = $bot->aws_storage_gb ?? env('AWS_Volume_Size', '8');
+            $userData     = $bot->aws_startup_script ?? '';
+            $botScript   = $bot->aws_custom_script ?? '';
+            $_shebang     = '#!/bin/bash';
+            $userData     = "{$_shebang}\n {$userData}\n";
+            $consoleOverides = <<<HERECONSOLE
 const eighty_bots_fs = require('fs')
 const eighty_bots_logStdOut = process.stdout
 const eighty_bots_logStdErr = process.stderr
@@ -139,9 +151,9 @@ console.info = (d) => {
     eighty_bots_logStdOut.write(message)
 };
 HERECONSOLE;
-            $bot_script = "{$console_overides}\n {$bot_script}";
+            $botScript = "{$consoleOverides}\n {$botScript}";
 
-            if( !is_null($bot_script) || !empty($bot_script) ) {
+            if( !is_null($botScript) || !empty($botScript) ) {
                 $staticBotScript =<<<HERESHELL
 file="script.js"
 if [ -f \$file ]
@@ -151,7 +163,7 @@ fi
 
 ############## Output variable to script file ###############
 cat > \$file <<EOF
-{$bot_script} 
+{$botScript}
 EOF
 
 chmod +x \$file
@@ -166,12 +178,16 @@ changedir
 HERESHELL;
                 $userData = "{$userData}\n {$staticBotScript}";
             }
+
+
             $userData = base64_encode($userData);
+
         } else {
             $imageId = env('AWS_IMAGEID','ami-0cd3dfa4e37921605');
             $instanceType = env('AWS_INSTANCE_TYPE', 't2.micro');
             $volumeSize = env('AWS_Volume_Size', '8');
         }
+
         $ec2Client = self::AwsConnection();
         $user = Auth::user();
 
@@ -189,24 +205,26 @@ HERESHELL;
             ),
             'InstanceType'   => $instanceType,
             'KeyName'        => $keyPairName,
-            'SecurityGroups' => array($securityGroupName),
             'TagSpecifications' => [
                 [
                     'ResourceType' => 'instance',
                     'Tags' => [
                         [
                             'Key' => 'Name',
-                            'Value' => $user->email,
+                            'Value' => $tagName,
                         ],
                     ],
                 ],
             ],
+            'SecurityGroups' => array($securityGroupName)
         );
-        if(!empty($userData) && isset($userData)){
+
+        if(isset($userData) && !empty($userData)){
             $instanceLaunchRequest = array_add($instanceLaunchRequest,'UserData', $userData);
         }
 
         $result = $ec2Client->runInstances($instanceLaunchRequest);
+
         return $result;
     }
 

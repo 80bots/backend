@@ -42,12 +42,12 @@
                                     <td>
                                         @if(!empty($bots->status) && $bots->status == 'active')
                                             <button type="button" class="form-group btn btn-success mb-0"
-                                                    onclick="ChangeStatus('{{$bots->id}}','inactive')"
+                                                    onclick="changeStatus('{{$bots->id}}','inactive')"
                                                     title="make it inactive">Active
                                             </button>
                                         @else
                                             <button type="button" class="form-group btn btn-danger mb-0"
-                                                    onclick="ChangeStatus('{{$bots->id}}','active')"
+                                                    onclick="changeStatus('{{$bots->id}}','active')"
                                                     title="make it active">Inactive
                                             </button>
                                         @endif
@@ -87,7 +87,8 @@
         $(document).ready(function () {
             $('#bot-list').DataTable();
         });
-        function ChangeStatus(id, status) {
+
+        function changeStatus(id, status) {
             var URL = '{{route('admin.bots.change-status')}}';
             $.ajax({
                 type: 'post',

@@ -39,53 +39,51 @@ class StoreUserInstance implements ShouldQueue
      */
     public function handle()
     {
-        try{
-        ini_set('memory_limit', '-1');
-        $result = $this->data;
-        $userInstance = UserInstances::findOrFail($result['instance_id']);
+        try {
 
-        $bots = null;
-        $botObj = Bots::find($userInstance->bot_id);
-        if(empty($botObj)){
-            return redirect()->back()->with('error', 'Bot Not Found Please Try Again');
-        } else {
-            $bots = $botObj;
-        }
+            ini_set('memory_limit', '-1');
 
-        //$keyPair = $this->CreateKeyPair();
-            $keyPair = AwsConnectionController::CreateKeyPair();
-            
-            //$SecurityGroup = $this->CreateSecurityGroupId();
-            $SecurityGroup = AwsConnectionController::CreateSecurityGroupId();
+            $request = $this->data;
+
+            $userInstance = UserInstances::findOrFail($request['instance_id']);
+
+            $bot = Bots::find($userInstance->bot_id);
+
+            if(!$bot){
+                session()->flash('error', 'Bot Not Found Please Try Again');
+                return response()->json(['message' => 'Bot Not Found Please Try Again'], 404);
+            }
+
+            $keyPair       = AwsConnectionController::CreateKeyPair();
+            $tagName       = AwsConnectionController::CreateTagName();
+            $securityGroup = AwsConnectionController::CreateSecurityGroupId();
 
             $keyPairName = $keyPair['keyName'];
             $keyPairPath = $keyPair['path'];
 
-            $groupId = $SecurityGroup['securityGroupId'];
-            $groupName = $SecurityGroup['securityGroupName'];
+            $groupId = $securityGroup['securityGroupId'];
+            $groupName = $securityGroup['securityGroupName'];
+
             $instanceIds = [];
 
             // Instance Create
-            /*$newInstanceResponse = $this->LaunchInstance($keyPairName, $groupName, $bots);*/
-            $newInstanceResponse = AwsConnectionController::LaunchInstance($keyPairName, $groupName, $bots);
+            $newInstanceResponse = AwsConnectionController::LaunchInstance($keyPairName, $groupName, $bot, $tagName);
 
             $instanceId = $newInstanceResponse->getPath('Instances')[0]['InstanceId'];
 
             array_push($instanceIds, $instanceId);
-            //$waitUntilResponse = $this->waitUntil($instanceIds);
-            $waitUntilResponse = AwsConnectionController::waitUntil($instanceIds);         
+            $waitUntilResponse = AwsConnectionController::waitUntil($instanceIds);
 
-            //$describeInstancesResponse = $this->DescribeInstances($instanceIds);
             $describeInstancesResponse = AwsConnectionController::DescribeInstances($instanceIds);
 
             $instanceArray = $describeInstancesResponse->getPath('Reservations')[0]['Instances'][0];
 
-            $LaunchTime = isset($instanceArray['LaunchTime']) ? $instanceArray['LaunchTime'] : '';
-            $publicIp = isset($instanceArray['PublicIpAddress']) ? $instanceArray['PublicIpAddress'] : '';
-            $publicDnsName = isset($instanceArray['PublicDnsName']) ? $instanceArray['PublicDnsName'] : '';
+            $launchTime    = $instanceArray['LaunchTime'] ??  '';
+            $publicIp      = $instanceArray['PublicIpAddress'] ?? '';
+            $publicDnsName = $instanceArray['PublicDnsName'] ?? '';
 
-            $awsAmiId = env('AWS_IMAGEID','ami-0cd3dfa4e37921605');
-            $created_at = date('Y-m-d H:i:s', strtotime($LaunchTime));
+            $awsAmiId   = env('AWS_IMAGEID','ami-0cd3dfa4e37921605');
+            $created_at = date('Y-m-d H:i:s', strtotime($launchTime));
 
             // store instance details in database
 
@@ -99,6 +97,7 @@ class StoreUserInstance implements ShouldQueue
             $userInstance->aws_pem_file_path = $keyPairPath;
             $userInstance->created_at = $created_at;
             $userInstance->is_in_queue = 0;
+
             if($userInstance->save()){
                 Log::debug('Saved Instance : '.json_encode($userInstance));
                 Session::put('instance_id','');
@@ -106,20 +105,15 @@ class StoreUserInstance implements ShouldQueue
                 $userInstanceDetail->user_instance_id = $userInstance->id;
                 $userInstanceDetail->start_time = $created_at;
                 $userInstanceDetail->save();
-                session()->flash('success', 'Instance Create successfully');
-                return response()->json(['status' => 'success'],200);
-                //return redirect(route('user.instance.index'));
+                session()->flash('success', 'Instance Created successfully');
             }
 
-            //UserInstancesController::store($result);
-        }catch (Exception $e)
-        {
+            return response()->json(['message' => 'Instance Created successfully'], 200);
+
+        } catch (Exception $e) {
             Log::debug('Error on catch : '.$e->getMessage());
             return false;
         }
     }
 
 }
-
-
-

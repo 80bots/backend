@@ -7,14 +7,19 @@ use Illuminate\Database\Eloquent\Model;
 class Platforms extends Model
 {
 
-    public static function findWithBots(){
-        return self::with(['bots' => function($query){
-            $query->take(5);
+    public function hasBots($limit = null, $platformId = null)
+    {
+        $query = $this->with(['bots' => function($query) use($limit){
+            if($limit) {
+              $query->take(5);
+            }
         }])->whereHas('bots');
-    }
 
-    public static function findBotsWithPlatformId($id){
-        return self::with(['bots'])->where('id', $id);
+        if($platformId) {
+          $query =  $query->where('id', $platformId);
+        }
+
+        return $query;
     }
 
     public static function findByName(string $platform_name)
