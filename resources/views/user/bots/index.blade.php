@@ -10,10 +10,10 @@
 @section('content')
     <div  class="wrapper">
         @include('includes.banner')
-        @foreach($platforms as $platform)
+        @forelse($platforms as $platform)
             <div class="mb-3 p-3 bg-white rounded shadow-sm">
                 <h6 class="border-bottom  pb-2 mb-0">{{$platform->name}}</h6>
-                @foreach($platform->bots as $bot)
+                @forelse ($platform->activeBots()->get() as $bot)
                     <div class="media text-muted pt-3 d-flex align-items-start">
                         <svg class="bd-placeholder-img mr-2 rounded flex-shrink-0" width="32" height="32"
                              xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"
@@ -51,12 +51,16 @@
                             @endif
                         </div>
                     </div>
-                @endforeach
+                @empty
+                    <h3>No active bots found!</h3>
+                @endforelse
                 <small class="d-block text-right mt-3">
                     <a href="{{route('user.bots.all.list', ['id' => $platform->id])}}">All Bots</a>
                 </small>
             </div>
-        @endforeach
+        @empty
+            <h3>No active bots found!</h3>
+        @endforelse
     </div>
     @include('includes.launch-instance')
 @endsection
