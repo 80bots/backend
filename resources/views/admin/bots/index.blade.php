@@ -28,6 +28,7 @@
                             <th>Storage GB</th>
                             <th>Status</th>
                             <th>Action</th>
+                            <th></th>
                         </tr>
                         </thead>
                         <tbody>
@@ -69,6 +70,11 @@
                                             </div>
                                         </form>
                                     </td>
+                                    <td>
+                                        <a href="javascript:void(0)" data-toggle="modal" data-target="#lunch-instance"
+                                               onclick="launchInstance('{{$bots->id}}')"
+                                               class="badge badge-primary font-size-16" data-id="{{$bots->id}}">Launch</a>
+                                    </td>
                                 </tr>
                             @endforeach
                         @endif
@@ -79,7 +85,27 @@
         </div>
     </div>
 
-
+    <div class="modal fade" id="lunch-instance" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <form id="lunchInstance" >
+                    @csrf
+                    <input type="hidden" name="bot_id" value="" id="bot_id">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Launch Bot</h4>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <h4>Are you sure?</h4>
+                    </div>
+                    <div class="modal-footer">
+                        <input type="button" id="launch-inspection-submit-btn" class="btn btn-success" value="Ok">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('script')
@@ -105,6 +131,79 @@
                     location.reload();
                 }
             });
+        }
+
+        $(document).ready(function(){
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            var bot_ids = 0 ;
+            checkBotIdInQueue();
+        });
+
+        function launchInstance(bot_id) {
+            bot_ids = bot_id;
+        }
+
+        $(document).on('click', '#launch-inspection-submit-btn', function () {
+            $('#lunch-instance').hide();
+
+            $.ajax({
+                url : "/admin/storeSession",
+                type : "POST",
+                data : {
+                    _token : function () {
+                        return '{{csrf_token()}}';
+                    },
+                    user_id : '{{ Auth::user()->id }}',
+                    bot_id : bot_ids,
+
+                },
+                success : function(response){
+
+                    if(response.type === 'success'){
+                        window.location = "/admin/instance/running?bots_filter=mybots";
+                    }
+
+                },
+                error : function(response){
+
+                }
+            });
+
+        });
+
+
+        function checkBotIdInQueue(){
+            $.ajax({
+                url : "/admin/checkBotIdInQueue",
+                type : "POST",
+                data : {
+                    _token : function () {
+                        return '{{csrf_token()}}';
+                    }
+
+                },
+                success : function(response){
+
+                    if(response.type === 'success'){
+                        // console.log(response);
+                        // if(response.data !== undefined && response.data.length) {
+                        //     let $botWrapper = $('#dvBotWrapper');
+                        //     for(let eachData of response.data) {
+                        //         $botWrapper.find('[data-id="'+eachData+'"]').attr('data-target','').prepend('<i class="fa fa-spinner fa-spin"></i>');
+                        //     }
+                        // }
+                    }
+
+                },
+                error : function(response){
+
+                }
+            });
+
         }
     </script>
 @endsection

@@ -25,6 +25,7 @@ Running Bots
                 </h5>
             </div>
             <div class="card-body">
+                <input type="hidden" name="instance_id" value="{{ Session::get('instance_id') }}" id="instance_id">
                 @include('layouts.imports.messages')
                 <div class="table-responsive">
                     <table id="instance-list" class="table thead-default vertical-middle mb-0">
@@ -50,19 +51,24 @@ Running Bots
                                     <td>{{!empty($instance->up_time) ? $instance->up_time : 0}}</td>
                                     <td>{{!empty($instance->aws_public_ip) ? $instance->aws_public_ip : ''}}</td>
                                     <td>
-                                        <select name="instStatus" class="form-control instStatus" data-id="{{$instance->id}}">
-                                            @if(!empty($instance->status) && $instance->status == 'running')
-                                                <option value="running">Running</option>
-                                                <option value="stop">Stop</option>
-                                                <option value="terminated">Terminate</option>
-                                            @elseif(!empty($instance->status) && $instance->status == 'stop')
-                                                <option value="stop">Stop</option>
-                                                <option value="start">Start</option>
-                                                <option value="terminated">Terminate</option>
-                                            @else
-                                                <option value="terminated">Terminate</option>
-                                            @endif
-                                        </select>
+                                        @if($instance->is_in_queue == 1)
+                                            <a href="javascript:void(0)" data-toggle="modal" data-target="#launch-instance"
+                                            class="badge badge-primary ml-2 font-size-16" title="Process In Queue">IN-Queue</a>
+                                        @else
+                                            <select name="instStatus" class="form-control instStatus" data-id="{{$instance->id}}">
+                                                @if(!empty($instance->status) && $instance->status == 'running')
+                                                    <option value="running">Running</option>
+                                                    <option value="stop">Stop</option>
+                                                    <option value="terminated">Terminate</option>
+                                                @elseif(!empty($instance->status) && $instance->status == 'stop')
+                                                    <option value="stop">Stop</option>
+                                                    <option value="start">Start</option>
+                                                    <option value="terminated">Terminate</option>
+                                                @else
+                                                    <option value="terminated">Terminate</option>
+                                                @endif
+                                            </select>
+                                        @endif
                                     </td>
                                     <td>{{!empty($instance->created_at) ? $instance->created_at : ''}}</td>
                                     <td><a href="{{!empty($instance->aws_pem_file_path) ? $instance->aws_pem_file_path : 'javascript:void(0)'}}" title="Download pem file" download>
@@ -89,6 +95,37 @@ Running Bots
                 $('#filter-my-bot').submit();
             });
         });
+
+        $(document).ready(function() {
+
+            $('#instance-list').DataTable();
+            let instance_id = $('#instance_id').val();
+
+            if(instance_id.length != ''){
+                dispatchLaunchInstance(instance_id);
+            }
+        });
+
+        function  dispatchLaunchInstance(instance_id){
+            var URL = '{{route('admin.dispatch.launch_instance')}}';
+            $.ajax({
+                type: 'POST',
+                url: URL,
+                cache: false,
+                data: {
+                    _token : function () {
+                        return '{{csrf_token()}}';
+                    },
+                    instance_id : instance_id
+                },
+                success: function (response) {
+                    if(response.type == "success"){
+                        location.reload();
+                    }
+
+                }
+            });
+        }
 
         $(document).on('change', '.instStatus', function () {
             var status = $(this).val();
