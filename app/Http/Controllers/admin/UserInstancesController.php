@@ -173,15 +173,26 @@ class UserInstancesController extends AwsConnectionController
         //
     }
 
-    public function runningInstances()
+    public function runningInstances(Request $request)
     {
+        $filter = 'all';
+        if($request->has('bots_filter'))
+        {
+            $filter = $request->get('bots_filter');
+        }
+
         try {
-            $UserInstance = UserInstances::findRunningInstance();
+            if($filter == 'all') {
+                $UserInstance = UserInstances::with('user')->where('status', 'running')->get();
+            }else{
+                $UserInstance = UserInstances::with('user')->where('status', 'running')->where('user_id', auth()->user()->id)->get();
+            }
+
             if (!$UserInstance->isEmpty()) {
-                return view('admin.instance.index', compact('UserInstance'));
+                return view('admin.instance.index', compact('UserInstance', 'filter'));
             }
             session()->flash('error', 'Running Bots Not Found');
-            return view('admin.instance.index');
+            return view('admin.instance.index', compact('filter'));
         } catch (\Exception $exception) {
             session()->flash('error', $exception->getMessage());
             return view('admin.instance.index');
