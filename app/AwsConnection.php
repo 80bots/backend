@@ -126,6 +126,7 @@ class AwsConnection extends BaseModel
             $_shebang = '#!/bin/bash';
             $userData = "{$_shebang}\n {$userData}\n";
             $consoleOverrides = <<<HERECONSOLE
+/*            
 const eighty_bots_fs = require('fs')
 const eighty_bots_logStdOut = process.stdout
 const eighty_bots_logStdErr = process.stderr
@@ -156,6 +157,7 @@ console.info = (d) => {
     eighty_bots_infos.write(message)
     eighty_bots_logStdOut.write(message)
 };
+*/
 HERECONSOLE;
             $botScript = "{$consoleOverrides}\n {$botScript}";
 
@@ -173,7 +175,8 @@ fi
 cat > \$file <<EOF
 {$botScript}
 EOF
-
+apt-get install dos2unix -y
+dos2unix \$file
 chown \$username:\$username \$file
 chmod +x \$file
 su - \$username -c "DISPLAY=:1 node \$file"
