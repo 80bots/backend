@@ -235,7 +235,7 @@ class BotsController extends AppController
         }
     }
 
-    public function ChangeStatus(Request $request)
+    public function changeStatus(Request $request)
     {
         try{
             $botObj = Bots::find($request->id);

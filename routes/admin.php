@@ -31,7 +31,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','ad
         Route::get('mine', 'BotsController@mineBots')->name('my-bots');
 
         Route::group(['as' => 'bots.'], function() {
-          Route::post('change-status', 'BotsController@ChangeStatus')->name('change-status');
+          Route::post('change-status', 'BotsController@changeStatus')->name('change-status');
         });
     });
 
