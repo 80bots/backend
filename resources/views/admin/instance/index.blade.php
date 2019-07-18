@@ -13,6 +13,16 @@ Running Bots
         <div class="card">
             <div class="card-header d-flex align-items-center justify-content-between">
                 <h5 class="mb-0">Running Bots</h5>
+                <h5 class="mb-0">
+                    <div class="form-check">
+                        <form action="{{ route('admin.instance.running') }}" method="get" id="filter-my-bot">
+                            <select name="bots_filter" id="bot-filter-dropdown" class="form-control">
+                                <option value="all" {{ $filter == 'all'? 'selected' : '' }}>All</option>
+                                <option value="mybots" {{ $filter == 'mybots'? 'selected' : '' }}>My Bots</option>
+                            </select>
+                        </form>
+                    </div>
+                </h5>
             </div>
             <div class="card-body">
                 @include('layouts.imports.messages')
@@ -20,6 +30,7 @@ Running Bots
                     <table id="instance-list" class="table thead-default vertical-middle mb-0">
                         <thead>
                         <tr>
+                            <th>Launched By</th>
                             <th>Name</th>
                             <th>Instance Id</th>
                             <th>Up-Time</th>
@@ -34,6 +45,7 @@ Running Bots
                         @if(isset($UserInstance) && !empty($UserInstance))
                             @foreach($UserInstance as $instance)
                                 <tr>
+                                    <td>{{ $instance->user->email }}</td>
                                     <td>{{!empty($instance->name) ? $instance->name : ''}}</td>
                                     <td>{{!empty($instance->aws_instance_id) ? $instance->aws_instance_id : ''}}</td>
                                     <td>{{!empty($instance->up_time) ? $instance->up_time : 0}}</td>
@@ -54,7 +66,7 @@ Running Bots
                                             @endif
                                         </select>
                                     </td>
-                                    <td>{{!empty($instance->created_at) ? date('Y-m-d', strtotime($instance->created_at)) : ''}}</td>
+                                    <td>{{!empty($instance->created_at) ? $instance->created_at : ''}}</td>
                                     <td><a href="{{!empty($instance->aws_pem_file_path) ? $instance->aws_pem_file_path : 'javascript:void(0)'}}" title="Download pem file" download>
                                             <i class="fa fa-download"></i>
                                         </a></td>
@@ -74,6 +86,10 @@ Running Bots
 
         $(document).ready(function() {
             $('#instance-list').DataTable();
+
+            $('#bot-filter-dropdown').on('change',function(){
+                $('#filter-my-bot').submit();
+            });
         });
 
         $(document).on('change', '.instStatus', function () {
