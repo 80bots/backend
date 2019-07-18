@@ -35,7 +35,6 @@ Running Bots
                             <th>Instance Id</th>
                             <th>Up-Time</th>
                             <th>AWS Public Ip</th>
-                            <th>AWS Public DNS</th>
                             <th>Status</th>
                             <th>Launch Time</th>
                             <th></th>
@@ -50,7 +49,6 @@ Running Bots
                                     <td>{{!empty($instance->aws_instance_id) ? $instance->aws_instance_id : ''}}</td>
                                     <td>{{!empty($instance->up_time) ? $instance->up_time : 0}}</td>
                                     <td>{{!empty($instance->aws_public_ip) ? $instance->aws_public_ip : ''}}</td>
-                                    <td>{{!empty($instance->aws_public_dns) ? $instance->aws_public_dns : ''}}</td>
                                     <td>
                                         <select name="instStatus" class="form-control instStatus" data-id="{{$instance->id}}">
                                             @if(!empty($instance->status) && $instance->status == 'running')
