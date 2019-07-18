@@ -55,34 +55,33 @@ class UserInstancesController extends AwsConnectionController
      */
     public function store(Request $request)
     {
-        $user_id = Auth::user()->id;
-        $bot_id = isset($request->bot_id) ? $request->bot_id : '';
         try {
-            $bots = null;
-            $botObj = Bots::find($bot_id);
-            if (empty($botObj)) {
+
+            $bot = Bots::find($request->bot_id);
+
+            if (!$bot) {
                 return redirect()->back()->with('error', 'Bot Not Found Please Try Again');
-            } else {
-                $bots = $botObj;
             }
+
             $keyPair = $this->CreateKeyPair();
-            $SecurityGroup = $this->CreateSecurityGroupId();
+            $securityGroup = $this->CreateSecurityGroupId();
 
             $keyPairName = $keyPair['keyName'];
             $keyPairPath = $keyPair['path'];
 
-            $groupId = $SecurityGroup['securityGroupId'];
-            $groupName = $SecurityGroup['securityGroupName'];
+            $groupId = $securityGroup['securityGroupId'];
+            $groupName = $securityGroup['securityGroupName'];
             $instanceIds = [];
+
             // Instance Create
-            $newInstanceResponse = $this->LaunchInstance($keyPairName, $groupName, $bots);
+            $newInstanceResponse = $this->LaunchInstance($keyPairName, $groupName, $bot);
             $instanceId = $newInstanceResponse->getPath('Instances')[0]['InstanceId'];
 
             array_push($instanceIds, $instanceId);
             $waitUntilResponse = $this->waitUntil($instanceIds);
 
-            /*if(!empty($bots)){
-                $StartUpScriptString = $bots->aws_startup_script;
+            /*if(!empty($bot)){
+                $StartUpScriptString = $bot->aws_startup_script;
                 $StartUpScript = explode(PHP_EOL, $StartUpScriptString);
                 $runScript = $this->RunStartUpScript($StartUpScript);
             }*/
@@ -117,7 +116,7 @@ class UserInstancesController extends AwsConnectionController
                 $userInstanceDetail->user_instance_id = $userInstance->id;
                 $userInstanceDetail->start_time = $created_at;
                 $userInstanceDetail->save();
-                session()->flash('success', 'Instance Create successfully');
+                session()->flash('success', 'Instance Created successfully');
                 return redirect(route('admin.my-bots'));
             }
             session()->flash('error', 'Please Try again later');
@@ -255,49 +254,6 @@ class UserInstancesController extends AwsConnectionController
         }
     }
 
-    public function BotList()
-    {
-        try {
-            $platforms = Platforms::findWithBots()->get();
-
-            return view('admin.bots.bats_list', compact('platforms'));
-        } catch (\Exception $exception) {
-            session()->flash('error', $exception->getMessage());
-            return view('admin.bots.bats_list');
-        }
-    }
-
-    public function BotAllList($id)
-    {
-        try {
-            $platform = Platforms::findBotsWithPlatformId($id)->first();
-            return view('admin.bots.list', compact('platform'));
-        } catch (\Exception $exception) {
-            session()->flash('error', $exception->getMessage());
-            return view('admin.bots.index');
-        }
-    }
-
-    public function MyBots()
-    {
-        $user_id = Auth::user()->id;
-
-        try {
-            $UserInstance = UserInstances::findByUserId($user_id)->get();
-            $botsArr = Bots::all();
-            if (!$UserInstance->isEmpty()) {
-                $instancesId = [];
-                array_push($instancesId, $UserInstance[0]->aws_instance_id);
-                return view('admin.instance.my-bots', compact('UserInstance', 'botsArr'));
-            }
-            session()->flash('error', 'Instance Not Found');
-            return view('admin.instance.my-bots');
-        } catch (\Exception $e) {
-            session()->flash('error', $e->getMessage());
-            return view('admin.instance.my-bots');
-        }
-    }
-
     /* store bot_id in session */
     public function storeBotIdInSession(Request $request)
     {
@@ -315,10 +271,10 @@ class UserInstancesController extends AwsConnectionController
     }
 
     /* execute job to store user instance data */
-    public function storeJob(Request $request)
+    public function dispatchLaunchInstance(Request $request)
     {
         $result = dispatch(new StoreUserInstance($request->all()));
-        Session::put('instance_id', '');
+        Session::forget('instance_id');
         return response()->json(['type' => 'success'], 200);
     }
 

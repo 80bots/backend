@@ -38,7 +38,7 @@ class LoginController extends Controller
                 return '/admin/user';
                 break;
             case 'User':
-                return 'user/bots-list';
+                return 'user/bots';
                 break;
             default:
                 return '/login';
