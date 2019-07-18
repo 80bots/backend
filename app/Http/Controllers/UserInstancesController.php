@@ -44,27 +44,6 @@ class UserInstancesController extends AwsConnectionController
         }
     }
 
-
-    public function BotList() {
-        try{
-            $platforms = Platforms::findWithBots()->get();
-            return view('user.bots.index',compact('platforms'));
-        } catch (\Exception $exception){
-            session()->flash('error', $exception->getMessage());
-            return view('user.bots.index');
-        }
-    }
-
-    public function BotAllList($id) {
-        try{
-            $platform = Platforms::findBotsWithPlatformId($id)->first();
-            return view('user.bots.list',compact('platform'));
-        } catch (\Exception $exception){
-            session()->flash('error', $exception->getMessage());
-            return view('user.bots.index');
-        }
-    }
-
     /**
      * Show the form for creating a new resource.
      *

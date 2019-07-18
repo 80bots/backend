@@ -15,7 +15,8 @@ class Bots extends Model
         return $this->belongsTo('App\Platforms');
     }
 
-    public function botTags(){
+    public function botTags()
+    {
         return $this->hasMany('App\BotTags');
     }
 }
