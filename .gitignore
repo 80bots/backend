@@ -13,8 +13,9 @@
 /storage/framework/views/*
 /tests/*
 *img/
-*images/
+
 /composer.lock
 *ssh_keys/
 public/html
 /public/Shell/
+public/vendor/*
