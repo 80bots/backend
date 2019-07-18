@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title')
-    Instance Listing
+    My Bots
 @endsection
 
 @section('css')
@@ -56,8 +56,7 @@
                             {{ $instance->created_at ? date('Y-m-d', strtotime($instance->created_at)) : ''}}
                         </div>
                         <div class="col-md-2 col-sm-2 d-flex align-items-center">
-                            <a href="{{!empty($instance->aws_public_ip) ? 'http://'.$instance->aws_public_ip : ''}}" class="badge badge-primary mr-2 font-size-16" target="_blank"><i class="fa fa-eye"></i></a>
-
+                            <a href="{{ $instance->aws_public_ip ? 'http://'.$instance->aws_public_ip : '' }}" class="badge badge-primary mr-2 font-size-16" target="_blank"><i class="fa fa-eye"></i></a>
                             @php $botName = $instance->bots ? $instance->bots->bot_name :''; @endphp
                             <a href="javascript:void(0)" data-toggle="modal" data-target="#create-scheduler"
                                onclick="SetBotName('{{$botName}}','{{$instance->id}}')" class="badge badge-primary font-size-16"><i class="fa fa-pencil-alt"></i></a>

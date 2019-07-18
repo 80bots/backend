@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title')
-    User Listing
+    Users List
 @endsection
 
 @section('css')
@@ -12,7 +12,7 @@
     <div class="wrapper">
         <div class="card">
             <div class="card-header d-flex align-items-center justify-content-between">
-                <h5 class="mb-0">User List</h5>
+                <h5 class="mb-0">Users List</h5>
                 {{--<a href="{{route('user.instance.create')}}" class="btn btn-round btn-primary"><i class="fas fa-plus"></i> Add Instance</a>--}}
             </div>
             <div class="card-body">

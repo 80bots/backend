@@ -36,8 +36,12 @@ class ForumDiscussionController extends ChatterDiscussionController
 
         $likedQuery = DiscussionLikes::where('user_id',$user_id)->where('discussion_id',$discussion_id);
 
+        $discussion = Models::discussion()->find($discussion_id);
+
         if($likedQuery->count()) {
             $like = $likedQuery->first();
+            $discussion->popularity = $discussion->popularity - $like->getDecayedValueOfLike();
+            $discussion->save();
             $like->delete();
             $total = $total-1;
             return response()->json([
@@ -50,7 +54,7 @@ class ForumDiscussionController extends ChatterDiscussionController
             ]);
         }
         
-        $discussion = Models::discussion()->find($discussion_id);
+        
         $discussion->popularity = $discussion->popularity + 10;
         $discussion->save();
         $like = DiscussionLikes::create([

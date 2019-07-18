@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title')
-    Edit Credit Percentage
+    Edit Low Credit Notification
 @endsection
 
 @section('css')
@@ -15,7 +15,7 @@
         @method('PUT')
         @csrf
         <div class="card-header d-flex align-items-center justify-content-between">
-            <h5 class="mb-0">Edit Credit Percentage</h5>
+            <h5 class="mb-0">Edit Low Credit Notification</h5>
         </div>
         <input type="hidden" name="id" value="{{$percentage->id}}">
         <div class="card-body">

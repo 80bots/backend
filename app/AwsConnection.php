@@ -6,6 +6,7 @@ use Aws\Ec2\Ec2Client;
 use Illuminate\Database\Eloquent\Model;
 use File;
 use Nubs\RandomNameGenerator\Alliteration as AlliterationName;
+use Auth;
 
 class AwsConnection extends BaseModel
 {
@@ -188,6 +189,7 @@ HERESHELL;
         }
 
         $ec2Client = self::AwsConnection();
+        $user = Auth::user();
 
         $instanceLaunchRequest = array(
             'ImageId'        => $imageId,
@@ -222,7 +224,6 @@ HERESHELL;
         }
 
         $result = $ec2Client->runInstances($instanceLaunchRequest);
-        \Log::info($result);
 
         return $result;
     }

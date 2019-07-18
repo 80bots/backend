@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class DiscussionLikes extends Model
 {
@@ -14,5 +15,11 @@ class DiscussionLikes extends Model
 
     public function user() {
         return $this->belongsTo('App\User','user_id');
+    }
+
+    public function getDecayedValueOfLike()
+    {
+        $result = DB::select(DB::raw('SELECT (10 * EXP( -('.config('chatter.discussions_hotness.decay_rate').') * time_to_sec(timediff(NOW(), \'' . $this->created_at . '\')) / 3600 )) AS newpopularity'));
+        return ($result[0]->newpopularity);
     }
 }
