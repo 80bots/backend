@@ -119,7 +119,7 @@ class AwsConnection extends BaseModel
             $botScript   = $bot->aws_custom_script ?? '';
             $_shebang     = '#!/bin/bash';
             $userData     = "{$_shebang}\n {$userData}\n";
-            $consoleOverides = <<<HERECONSOLE
+            $consoleOverrides = <<<HERECONSOLE
 const eighty_bots_fs = require('fs')
 const eighty_bots_logStdOut = process.stdout
 const eighty_bots_logStdErr = process.stderr
@@ -151,7 +151,7 @@ console.info = (d) => {
     eighty_bots_logStdOut.write(message)
 };
 HERECONSOLE;
-            $botScript = "{$consoleOverides}\n {$botScript}";
+            $botScript = "{$consoleOverrides}\n {$botScript}";
 
             if( !is_null($botScript) || !empty($botScript) ) {
                 $staticBotScript =<<<HERESHELL
@@ -167,7 +167,7 @@ cat > \$file <<EOF
 EOF
 
 chmod +x \$file
-DISPLAY=:1 node \$file
+su - kabas -c "DISPLAY=:1 node \$file"
 changedir() {
     cd ~
     frontail -p 9001 node.access.log
