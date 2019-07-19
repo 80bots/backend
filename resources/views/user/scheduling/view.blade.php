@@ -41,18 +41,18 @@
                                    class="form-control" readonly/>
                         </div>
                     </div>
-                    <div class="col-md-6 col-sm-12">
+                    <div class="col-md-12 col-sm-12">
                         <div class="form-group">
                             <label for="">Instance Type*</label>
                             <input type="text" name="aws_instance_type"
                                    value="{{isset($bots->aws_instance_type) ? $bots->aws_instance_type : ''}}"
-                                   class="form-control" readonly/>
+                                   class="form-control" rows="23" readonly/>
                         </div>
                     </div>
-                    <div class="col-md-6 col-sm-12">
+                    <div class="col-md-12 col-sm-12">
                         <div class="form-group">
                             <label for="">Startup Script*</label>
-                            <textarea name="aws_startup_script" class="form-control"
+                            <textarea name="aws_startup_script" class="form-control" rows="23"
                                       readonly>{{isset($bots->aws_startup_script)?$bots->aws_startup_script:''}}</textarea>
                         </div>
                     </div>
