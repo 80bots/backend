@@ -69,5 +69,12 @@
 @endsection
 
 @section('scripts')
-
+    <script src="{{ asset('js/jstz.min.js') }}"></script>
+    <script language="javascript">
+        getTimezoneName();
+        function getTimezoneName() {
+            timezone = jstz.determine()
+            console.log(timezone.name());
+        }
+    </script>
 @endsection
