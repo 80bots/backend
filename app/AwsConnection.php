@@ -64,9 +64,13 @@ class AwsConnection extends BaseModel
         $randName = strtolower(str_replace(' ', '-', $generator->getName()));
 
         $name = $randName;
-        $name = str_replace(' ', '-', $name);
+        $name = str_replace(' ', '', $name);
         $name = preg_replace('/[^A-Za-z\-]/', '', $name);
-        $name = preg_replace('/-+/', '-', $name);
+        $name = preg_replace('/-+/', '', $name);
+
+        $numbers = rand(0,9) . rand(0,9);
+
+        $name = $name . $numbers;
 
         return $name;
     }
