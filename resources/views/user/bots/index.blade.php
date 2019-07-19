@@ -17,8 +17,8 @@
                     <div class="media text-muted pt-3 d-flex align-items-start">
                         <svg class="bd-placeholder-img mr-2 rounded flex-shrink-0" width="32" height="32"
                              xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"
-                             focusable="false" role="img" aria-label="Placeholder: 32x32"><title>
-                                Placeholder</title>
+                             focusable="false" role="img" aria-label="Placeholder: 32x32">
+                             <title>Placeholder</title>
                             <rect width="100%" height="100%" fill="#007bff"></rect>
                             <text x="50%" y="50%" fill="#007bff" dy=".3em">32x32</text>
                         </svg>
@@ -41,12 +41,14 @@
                             @if(!empty(Session::get('bot_id')))
                                 <div class="col-md-2 col-sm-12 text-right">
                                     <a href="javascript:void(0)" data-toggle="modal" data-target="#launch-instance"
-                                       class="badge badge-primary font-size-16" data-id="{{$bot->id}}">Launch</a>
+                                       class="badge badge-primary font-size-16" onclick="javascript:launchInstance({{$bot->id}});" 
+                                       data-id="{{$bot->id}}">Launch</a>
                                 </div>
                             @else
                                 <div class="col-md-2 col-sm-12 text-right">
                                     <a href="javascript:void(0)" data-toggle="modal" data-target="#launch-instance"
-                                       class="badge badge-primary font-size-16" data-id="{{$bot->id}}">Launch</a>
+                                       class="badge badge-primary font-size-16" onclick="javascript:launchInstance({{$bot->id}});" 
+                                       data-id="{{$bot->id}}">Launch</a>
                                 </div>
                             @endif
                         </div>
@@ -66,9 +68,9 @@
     <script type="text/javascript" src="{{ asset('js/moment.min.js')}}"></script>
     <script>
 
-      $(document).ready(function(){
+      /* $(document).ready(function(){
           checkBotIdInQueue();
-      });
+      }); */
 
       function launchInstance(botId) {
         $('#launch-instance').modal('show');
@@ -106,7 +108,7 @@
 
       });
 
-      function checkBotIdInQueue(){
+      /* function checkBotIdInQueue(){
           $.ajax({
               url : "/user/checkBotIdInQueue",
               type : "POST",
@@ -132,6 +134,6 @@
               }
           });
 
-      }
+      } */
     </script>
 @endsection

@@ -19,3 +19,4 @@
 public/html
 /public/Shell/
 public/vendor/*
+node_modules

@@ -95,13 +95,45 @@
         var current_time_zone =  moment().format('Z');
         $('#user-time-zone').val(current_time_zone);
 
+        $(document).ready(function(){
+            checkBotIdInQueue();
+        });
+
+        function checkBotIdInQueue(){
+          $.ajax({
+              url : "/user/checkBotIdInQueue",
+              type : "POST",
+              data : {
+                  _token : function () {
+                      return '{{csrf_token()}}';
+                  }
+              },
+              success : function(response){
+                  if(response.type === 'success'){
+                       console.log(response);
+                      // if(response.data !== undefined && response.data.length) {
+                      //     let $botWrapper = $('#dvBotWrapper');
+                      //     for(let eachData of response.data) {
+                      //         $botWrapper.find('[data-id="'+eachData+'"]').attr('data-target','').prepend('<i class="fa fa-spinner fa-spin"></i>');
+                      //     }
+                      // }
+                  }
+              },
+              error : function(response){
+                console.log(response);
+                alert('Something went wrong!');
+              }
+          });
+
+        }
+
         $(document).ready(function() {
 
             $('#instance-list').DataTable();
             let instance_id = $('#instance_id').val();
 
             if(instance_id.length != ''){
-                dispatchLaunchInstance(instance_id);
+                //dispatchLaunchInstance(instance_id);
             }
         });
 

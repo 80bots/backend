@@ -14,7 +14,8 @@ $user = Auth::user();
 
     <title>@yield('title') | 80bots</title>
 
-    <link rel="stylesheet" href="{{asset('css/bootstrap.min.css')}}">
+    <link rel="stylesheet" href="{{asset('css/app.css')}}">
+    <!--link rel="stylesheet" href="{{asset('css/bootstrap.min.css')}}"-->
     <link rel="stylesheet" href="{{asset('css/datatables.min.css')}}">
     <link rel="stylesheet" href="{{asset('vendors/font-awesome/css/all.min.css')}}">
     <link rel="stylesheet" href="{{asset('vendors/select2/css/select2.min.css')}}">
@@ -46,8 +47,15 @@ $user = Auth::user();
         @yield('content')
     </div>
 </div>
+<script>
+    window.Laravel = {
+        'csrfToken': '{{ csrf_token() }}',
+        'user': '{{Auth::user()->id}}'
+    };
+</script>
 <script type="text/javascript" src="{{asset('js/jquery-3.3.1.min.js')}}"></script>
-<script type="text/javascript" src="{{asset('js/bootstrap.min.js')}}"></script>
+<!--script type="text/javascript" src="{{asset('js/bootstrap.min.js')}}"></script-->
+<script type="text/javascript" src="{{asset('js/app.js')}}"></script>
 <script type="text/javascript" src="{{asset('js/bootbox.all.min.js')}}"></script>
 <script type="text/javascript" src="{{asset('js/datatables.min.js')}}"></script>
 <script type="text/javascript" src="{{asset('vendors/select2/js/select2.full.min.js')}}"></script>
