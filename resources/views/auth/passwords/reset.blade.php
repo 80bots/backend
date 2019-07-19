@@ -10,7 +10,7 @@
                 <div class="card-body">
                     <form method="POST" action="{{ route('password.update') }}">
                         @csrf
-
+                        <a href="/" class="sidebar-brand text-decoration-none"><img src="{{ asset('assets/images/80bots.svg') }}" alt=""></a>
                         <input type="hidden" name="token" value="{{ $token }}">
 
                         <div class="form-group row">

@@ -16,19 +16,19 @@ class SubscriptionPlanController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $plans = SubscriptionPlan::all();
-        $subscription_ended = true;
+        $plans = SubscriptionPlan::where('status', 'active')->get();
+        $subscriptionEnded = true;
         $activeplan = null;
         if($user->subscribed(config('services.stripe.product'))) {
             $subscription = $user->subscription(config('services.stripe.product'));
-            $subscription_ended = $user->subscription(config('services.stripe.product'))->ended();
+            $subscriptionEnded = $user->subscription(config('services.stripe.product'))->ended();
             $activeplan = SubscriptionPlan::where('stripe_plan',$subscription->stripe_plan)->first();
         }
         return view('user.plans.index', [
             'plans' => $plans,
             'user' => $user,
-            'subscription_ended' => $subscription_ended,
-            'activeplan' => $activeplan 
+            'subscription_ended' => $subscriptionEnded,
+            'activeplan' => $activeplan
         ]);
     }
 

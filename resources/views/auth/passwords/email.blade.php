@@ -16,7 +16,7 @@
 
                     <form method="POST" action="{{ route('password.email') }}">
                         @csrf
-
+                        <a href="/" class="sidebar-brand text-decoration-none"><img src="{{ asset('assets/images/80bots.svg') }}" alt=""></a>
                         <div class="form-group row">
                             <label for="email" class="col-md-4 col-form-label text-md-right">{{ __('E-Mail Address') }}</label>
 

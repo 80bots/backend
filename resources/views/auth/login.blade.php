@@ -15,7 +15,7 @@
         <div class="p-4 login-box mb-3 d-flex align-items-center">
             <form method="POST" action="{{ route('login') }}" id="frmSignin" class="flex-grow-1">
                 @csrf
-                <h2 class="text-primary text-center">80bots</h2>
+                <a href="/" class="sidebar-brand text-decoration-none"><img src="{{ asset('assets/images/80bots.svg') }}" alt=""></a>
                 <h4 class="text-center">Sign In</h4>
                 <div class="form-group">
                     <label for="email">Username / E-mail</label>
@@ -40,6 +40,14 @@
                     @endif
                 </div>
 
+                <div class="form-group">
+                    <label class="checkbox_field">
+                      <input type="checkbox"  name="remember" val="" {{ old('remember')? 'checked':''}} >
+                      Remember me
+                      <span class="checkmark"></span>
+                    </label>
+                </div>
+
                 <button type="submit" class="btn btn-primary btn-block text-uppercase mb-3">Sign in</button>
                 <div class="text-right">
                     <a href="#frmForgotPwd" data-toggle="form" data-slide="left" class="text-dark text-decoration-none">Forgot
@@ -48,6 +56,7 @@
             </form>
             <form id="frmForgotPwd" class="flex-grow-1" action="{{route('password.email')}}" method="post" style="display: none;">
                 @csrf
+                <a href="/" class="sidebar-brand text-decoration-none"><img src="{{ asset('assets/images/80bots.svg') }}" alt=""></a>
                 <h4 class="text-primary text-center">Forgot password?</h4>
                 <p class="text-center">Reset password link will be sent on email id</p>
                 <div class="form-group">
