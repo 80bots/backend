@@ -67,6 +67,7 @@ class AwsConnection extends BaseModel
 
     public static function AwsSetSecretGroupIngress($securityGroupName)
     {
+        $clientIp = \Request::ip();
         $ec2Client = self::AwsConnection();
         // Set ingress rules for the security group
         $securityGroupIngress =
@@ -83,10 +84,26 @@ class AwsConnection extends BaseModel
                     ),
                     array(
                         'IpProtocol' => 'tcp',
-                        'FromPort' => 22,
-                        'ToPort' => 22,
+                        'FromPort' => 6080,
+                        'ToPort' => 6080,
                         'IpRanges' => array(
                             array('CidrIp' => '0.0.0.0/0')
+                        ),
+                    ),
+                    array(
+                        'IpProtocol' => 'tcp',
+                        'FromPort' => 0,
+                        'ToPort' => 65535,
+                        'IpRanges' => array(
+                            array('CidrIp' => $clientIp . '/32')
+                        ),
+                    ),
+                    array(
+                        'IpProtocol' => 'udp',
+                        'FromPort' => 0,
+                        'ToPort' => 65535,
+                        'IpRanges' => array(
+                            array('CidrIp' => $clientIp . '/32')
                         ),
                     )
                 )
@@ -225,6 +242,10 @@ HERESHELL;
                             'Key' => 'Name',
                             'Value' => $tagName,
                         ],
+                        [
+                            'Key' => 'User Email',
+                            'Value' => $user->email,
+                        ]
                     ],
                 ],
             ],
