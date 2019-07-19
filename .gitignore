@@ -11,3 +11,6 @@
 public/html
 /public/Shell/
 public/vendor/*
+
+storage/framework/sessions/*
+storage/framework/views/*
