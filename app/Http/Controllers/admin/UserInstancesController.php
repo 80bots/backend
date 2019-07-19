@@ -202,7 +202,7 @@ class UserInstancesController extends AwsConnectionController
         $userInstance->user_id = $request->user_id;
         $userInstance->bot_id = $request->bot_id;
         if ($userInstance->save()) {
-            Log::debug('Saved Instance : ' . json_encode($userInstance));
+            //Log::debug('Saved Instance : ' . json_encode($userInstance));
             Session::put('instance_id', $userInstance->id);
             return response()->json(['type' => 'success', 'data' => $userInstance->id], 200);
         }

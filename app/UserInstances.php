@@ -11,7 +11,7 @@ class UserInstances extends BaseModel
     protected $hidden = [
     ];
 
-    protected $guarded = [];
+    protected $fillable = ['name'];
 
     use SoftDeletes;
 

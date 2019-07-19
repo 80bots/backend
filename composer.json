@@ -15,7 +15,8 @@
         "laravel/framework": "5.8.*",
         "laravel/tinker": "^1.0",
         "lavary/crunz": "^2.0",
-        "nubs/random-name-generator": "^2.1"
+        "nubs/random-name-generator": "^2.1",
+        "predis/predis": "^1.1"
     },
     "repositories": [
         {

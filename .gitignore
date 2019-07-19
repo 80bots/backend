@@ -16,3 +16,4 @@ storage/framework/sessions/*
 storage/framework/views/*
 storage/logs/*
 storage/framework/cache/*
+node_modules

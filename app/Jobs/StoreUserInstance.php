@@ -14,22 +14,24 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
+use App\Events\dispatchedInstanceEvent;
 
 class StoreUserInstance implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected $data;
+    protected $id;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($request)
+    public function __construct($id)
     {
 
-        $this->data = $request;
+        $this->id = $id;
     }
 
     /**
@@ -40,13 +42,9 @@ class StoreUserInstance implements ShouldQueue
     public function handle()
     {
         try {
-
             ini_set('memory_limit', '-1');
 
-            $request = $this->data;
-
-            $userInstance = UserInstances::findOrFail($request['instance_id']);
-
+            $userInstance = UserInstances::findOrFail($this->id);
             $bot = Bots::find($userInstance->bot_id);
 
             if(!$bot){
@@ -101,15 +99,16 @@ class StoreUserInstance implements ShouldQueue
             $userInstance->is_in_queue              = 0;
 
             if($userInstance->save()){
-                Log::debug('Saved Instance : '.json_encode($userInstance));
-                Session::forget('instance_id');
-                $userInstanceDetail                   = new UserInstancesDetails();
+                Log::debug('Updated Instance : '.json_encode($userInstance));
+                Session::put('instance_id','');
+                $userInstanceDetail = new UserInstancesDetails();
                 $userInstanceDetail->user_instance_id = $userInstance->id;
                 $userInstanceDetail->start_time       = $created_at;
                 $userInstanceDetail->save();
                 session()->flash('success', 'Instance Created successfully');
+                broadcast(new dispatchedInstanceEvent($userInstance));
             }
-
+            
             return response()->json(['message' => 'Instance Created successfully'], 200);
 
         } catch (Exception $e) {
