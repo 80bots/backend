@@ -11,11 +11,13 @@
 @section('content')
 
     <div class="login-box-wrapper d-flex align-items-center justify-content-center flex-column">
-        @include('layouts.imports.messages')
-        <div class="p-4 login-box mb-3 d-flex align-items-center">
+          <div class="mb-3 d-flex align-items-center">
+            @include('layouts.imports.messages')
+          </div>
+          <div class="p-4 login-box mb-3 d-flex align-items-center">
             <form method="POST" action="{{ route('login') }}" id="frmSignin" class="flex-grow-1">
                 @csrf
-                <h2 class="text-primary text-center">80bots</h2>
+                <a href="/" class="sidebar-brand text-decoration-none"><img src="{{ asset('assets/images/80bots.svg') }}" alt=""></a>
                 <h4 class="text-center">Sign In</h4>
                 <div class="form-group">
                     <label for="email">Username / E-mail</label>
@@ -48,6 +50,7 @@
             </form>
             <form id="frmForgotPwd" class="flex-grow-1" action="{{route('password.email')}}" method="post" style="display: none;">
                 @csrf
+                <a href="/" class="sidebar-brand text-decoration-none"><img src="{{ asset('assets/images/80bots.svg') }}" alt=""></a>
                 <h4 class="text-primary text-center">Forgot password?</h4>
                 <p class="text-center">Reset password link will be sent on email id</p>
                 <div class="form-group">
