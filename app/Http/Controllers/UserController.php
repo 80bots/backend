@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Timezone;
 use App\User;
 use App\SubscriptionPlan;
 use Illuminate\Http\Request;
@@ -55,7 +56,8 @@ class UserController extends AppController
             $plan = SubscriptionPlan::where('stripe_plan',$subscription->stripe_plan)->first();
         }
 
-        return view('user.profile', compact('user', 'used_credit', 'plan'));
+        $timezones = Timezone::all();
+        return view('user.profile', compact('user', 'used_credit', 'plan', 'timezones'));
     }
 
     /**
@@ -90,5 +92,14 @@ class UserController extends AppController
     public function destroy($id)
     {
         //
+    }
+
+    public function updateTimezone(Request $request)
+    {
+        $user = auth()->user();
+        $user->timezone = $request->get('timezone');
+        $user->save();
+
+        return redirect()->back();
     }
 }
