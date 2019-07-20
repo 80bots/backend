@@ -47,6 +47,33 @@
                 </div>
             </div>
         </div>
+        <br>
+        <div class="card">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <h5 class="mb-0">Update Timezone</h5>
+            </div>
+            {{ App\Helper\CommonHelper::convertTimeZone(auth()->user()->created_at, auth()->user()->timezone) }}
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12 col-sm-12">
+                        <form action="{{ url('user/update/timezone') }}" method="post">
+                            @csrf
+                            <div class="form-group">
+                                <label for="">Timezone</label>
+                                <select name="timezone" class="form-control">
+                                    @foreach($timezones as $timezone)
+                                        <option value="{{ $timezone->timezone }}" {{ ($timezone->timezone == auth()->user()->timezone)? 'selected' : '' }}>{{ $timezone->timezone }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <button class="btn btn-primary">submit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 @endsection
 

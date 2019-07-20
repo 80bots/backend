@@ -4,6 +4,7 @@ Route::group(['prefix' => 'user', 'as' => 'user.', 'middleware' => ['auth', 'use
     Route::post('/dispatch/launch-instance','UserInstancesController@dispatchLaunchInstance')->name('dispatch.launch_instance');
     Route::get('dashboard', 'UserController@index')->name('dashboard');
     Route::get('profile/{id}', 'UserController@show')->name('profile');
+    Route::post('update/timezone', 'UserController@updateTimezone')->name('user.update.timezone');
     Route::get('cal-used-credit', 'AppController@CalUsedCredit')->name('cal-used-credit');
     Route::get('cal-up-time', 'AppController@CalInstancesUpTime')->name('cal-up-time');
 

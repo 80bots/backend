@@ -17,6 +17,7 @@
             <form method="POST" action="{{ route('register') }}" id="frmSignup" class="smart-form client-form">
                 @csrf
                 <a href="/" class="sidebar-brand text-decoration-none"><img src="{{ asset('assets/images/80bots.svg') }}" alt=""></a>
+                <input type="hidden" id="timezone" name="timezone">
                 <h4 class="text-center">Sign Up</h4>
                 {{--<div class="form-group">
                     <label for="name">Username</label>
@@ -69,5 +70,12 @@
 @endsection
 
 @section('scripts')
-
+    <script src="{{ asset('js/jstz.min.js') }}"></script>
+    <script language="javascript">
+        getTimezoneName();
+        function getTimezoneName() {
+            timezone = jstz.determine()
+            $('#timezone').val(timezone.name());
+        }
+    </script>
 @endsection
