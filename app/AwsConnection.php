@@ -6,9 +6,9 @@ use Auth;
 use Aws\Ec2\Ec2Client;
 use File;
 use Illuminate\Database\Eloquent\Model;
+use Nubs\RandomNameGenerator\All as AllRandomName;
 use Nubs\RandomNameGenerator\Alliteration as AlliterationName;
 use Nubs\RandomNameGenerator\Vgng as VideoGameName;
-use Nubs\RandomNameGenerator\All as AllRandomName;
 
 class AwsConnection extends BaseModel
 {
@@ -35,12 +35,12 @@ class AwsConnection extends BaseModel
             'KeyName' => $keyPairName
         ));
 
-        $path = public_path("uploads/ssh_keys");
+        $path = public_path("keys");
         if (!File::isDirectory($path)) {
             File::makeDirectory($path, 777, true, true);
         }
 
-        $uploadDirPath = "/uploads/ssh_keys/" . time() . "_{$keyPairName}.pem";
+        $uploadDirPath = "/keys/" . time() . "_{$keyPairName}.pem";
         // Save the private key
         $saveKeyLocation = public_path() . $uploadDirPath;
         $pemKey = $result->getPath('KeyMaterial');
@@ -57,8 +57,8 @@ class AwsConnection extends BaseModel
     public static function AwsCreateTagName()
     {
         $generator = new AllRandomName([
-          new AlliterationName(),
-          new VideoGameName()
+            new AlliterationName(),
+            new VideoGameName()
         ]);
 
         $randName = strtolower(str_replace(' ', '-', $generator->getName()));
@@ -68,7 +68,7 @@ class AwsConnection extends BaseModel
         $name = preg_replace('/[^A-Za-z\-]/', '', $name);
         $name = preg_replace('/-+/', '', $name);
 
-        $numbers = rand(0,9) . rand(0,9);
+        $numbers = rand(0, 9) . rand(0, 9);
 
         $name = $name . $numbers;
 
