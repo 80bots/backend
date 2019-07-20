@@ -11,4 +11,8 @@ User Module
 - Instance listing
 - Download pem file of the instance from instance listing
 
+For converting the time to User's Timezone
+```
+ App\Helper\CommonHelper::convertTimeZone(`time`,'timezone`, `format (optional)`)
+```
 
