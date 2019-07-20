@@ -23,17 +23,11 @@ class BotsController extends AppController
      */
     public function index()
     {
-        try{
-            $botLists = Bots::all();
-            if(!$botLists->isEmpty()){
-                return view('admin.bots.index',compact('botLists'));
-            }
-            session()->flash('error', 'Bots Not Found');
-            return view('admin.bots.index');
-        } catch (\Exception $exception){
-            session()->flash('error', $exception->getMessage());
-            return view('admin.bots.index');
+        $bots = Bots::all();
+        if(!$bots->count()){
+          session()->flash('error', 'Bots Not Found');
         }
+        return view('admin.bots.index',compact('bots'));
     }
 
     /**
