@@ -35,6 +35,8 @@ class AwsConnection extends BaseModel
             'KeyName' => $keyPairName
         ));
 
+        #todo: upload to secure S3 bucket (non-private, highly-restricted env)
+
         $path = public_path("keys");
         if (!File::isDirectory($path)) {
             File::makeDirectory($path, 777, true, true);
