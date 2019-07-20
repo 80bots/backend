@@ -11,7 +11,7 @@
                     <li class="sidebar-item "><a href="{{route('admin.user.index')}}" class="sidebar-link {{ (request()->is('admin/user')) ? 'active' : '' }}">Users List</a></li>
                     <li class="sidebar-item "><a href="{{route('admin.instance.running')}}" class="sidebar-link {{ (request()->is('admin/instance/running')) ? 'active' : '' }}">Running Bots</a></li>
                     <li class="sidebar-item "><a href="{{route('admin.bots.index')}}" class="sidebar-link {{ (request()->is('admin/bots')) ? 'active' : '' }}">All Bots</a></li>
-                    <li class="sidebar-item "><a href="{{route('admin.listsessions')}}" class="sidebar-link {{ (request()->is('admin/list-sessions')) ? 'active' : '' }}">Instance Sessions</a></li>
+                    <li class="sidebar-item "><a href="{{route('admin.listsessions')}}" class="sidebar-link {{ (request()->is('admin/list-sessions')) ? 'active' : '' }}">Bot Sessions</a></li>
                 </ul>
             </li>
             <li class="sidebar-item">

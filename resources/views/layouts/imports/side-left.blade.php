@@ -26,7 +26,7 @@
                     <li class="sidebar-item "><a href="{{route('user.scheduling.index')}}" class="sidebar-link {{ (request()->is('user/scheduling')) ? 'active' : '' }}">Scheduling List</a></li>
 
                     {{--<li class="sidebar-item "><a href="{{route('user.scheduling.create')}}" class="sidebar-link {{ (request()->is('user/scheduling/create')) ? 'active' : '' }}">Create Scheduling</a></li>--}}
-                    {{--<li class="sidebar-item "><a href="{{route('user.listsessions')}}" class="sidebar-link {{ (request()->is('user/list-sessions')) ? 'active' : '' }}">Instance Sessions</a></li>--}}
+                    {{--<li class="sidebar-item "><a href="{{route('user.listsessions')}}" class="sidebar-link {{ (request()->is('user/list-sessions')) ? 'active' : '' }}">Bot Sessions</a></li>--}}
                 </ul>
             </li>
 
