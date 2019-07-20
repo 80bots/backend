@@ -14,10 +14,12 @@ $(document).on('click', '.sidebar-toggle', function () {
 });
 
 $(window).on('resize', function () {
-    if (window.matchMedia("(max-width: 992px)").matches && !$('.sidebar').hasClass('closed')) {
+    if(window.screen.width > 1024) {
+      if (window.matchMedia("(max-width: 992px)").matches && !$('.sidebar').hasClass('closed')) {
         $('.sidebar, .sidebar-toggle').addClass('closed');
-    } else if ($('.sidebar').hasClass('closed')) {
+      } else if ($('.sidebar').hasClass('closed')) {
         $('.sidebar, .sidebar-toggle').removeClass('closed');
+      }
     }
 })
 
