@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Auth;
 use App\UserInstances;
 use App\UserInstancesDetails;
+use Aws\Ec2\Ec2Client;
 
 class BotsController extends AppController
 {
@@ -39,11 +40,39 @@ class BotsController extends AppController
     {
         try{
             $platforms = Platforms::get();
-            return view('admin.bots.create',compact('platforms'));
+            return view('admin.bots.create', compact('platforms'));
         } catch (\Exception $exception){
             session()->flash('error', $exception->getMessage());
             return view('admin.bots.create');
         }
+    }
+
+    public function syncInstances()
+    {
+        $ec2Client = new Ec2Client([
+            'region' => config('aws.region'),
+            'version' => config('aws.version'),
+            'credentials' => config('aws.credentials'),
+        ]);
+
+        $result = $ec2Client->describeInstances();
+        $reservations = $result->get('Reservations');
+
+        $test = [];
+        foreach ($reservations as $reservation) {
+            $instances = $reservation['Instances'];
+            if ($instances) {
+                foreach ($instances as $instance) {
+                    Bots::updateOrCreate([
+                        'aws_ami_image_id' => $instance['ImageId'],
+                        'aws_ami_name' => $instance['KeyName'],
+                        'aws_instance_type' => $instance['InstanceType'],
+                    ], ['bot_name' => $instance['KeyName']]);
+                }
+
+            }
+        }
+        return redirect('/admin/bots')->with('success', 'Instances Sync Successfully!');
     }
 
     /**

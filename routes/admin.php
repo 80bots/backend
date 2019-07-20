@@ -26,6 +26,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','ad
 
     Route::group(['prefix' => 'bots'], function() {
 
+        Route::get('sync-instances', 'BotsController@syncInstances');
         Route::get('list', 'BotsController@list')->name('bots.list');
         Route::get('{platformId}/list', 'BotsController@list')->name('bots.all.list');
         Route::get('mine', 'BotsController@mineBots')->name('my-bots');
