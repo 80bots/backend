@@ -52,7 +52,6 @@
             <div class="card-header d-flex align-items-center justify-content-between">
                 <h5 class="mb-0">Update Timezone</h5>
             </div>
-            {{ App\Helper\CommonHelper::convertTimeZone(auth()->user()->created_at, auth()->user()->timezone) }}
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-12 col-sm-12">
