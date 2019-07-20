@@ -28,3 +28,15 @@ $(window).on('load', function () {
         }
     }
 })
+const $menu = $('.sidebar');
+
+$(document).mouseup(function (e) {
+  console.log();
+   if (
+    window.screen.width < 1024
+    && !$menu.is(e.target)
+    && !$menu.has(e.target).length)
+   {
+     $menu.addClass('closed');
+  }
+ });
