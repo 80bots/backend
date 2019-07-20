@@ -7,6 +7,8 @@ use Aws\Ec2\Ec2Client;
 use File;
 use Illuminate\Database\Eloquent\Model;
 use Nubs\RandomNameGenerator\Alliteration as AlliterationName;
+use Nubs\RandomNameGenerator\Vgng as VideoGameName;
+use Nubs\RandomNameGenerator\All as AllRandomName;
 
 class AwsConnection extends BaseModel
 {
@@ -54,13 +56,21 @@ class AwsConnection extends BaseModel
 
     public static function AwsCreateTagName()
     {
-        $generator = new AlliterationName();
+        $generator = new AllRandomName([
+          new AlliterationName(),
+          new VideoGameName()
+        ]);
+
         $randName = strtolower(str_replace(' ', '-', $generator->getName()));
 
         $name = $randName;
-        $name = str_replace(' ', '-', $name);
+        $name = str_replace(' ', '', $name);
         $name = preg_replace('/[^A-Za-z\-]/', '', $name);
-        $name = preg_replace('/-+/', '-', $name);
+        $name = preg_replace('/-+/', '', $name);
+
+        $numbers = rand(0,9) . rand(0,9);
+
+        $name = $name . $numbers;
 
         return $name;
     }
@@ -143,7 +153,7 @@ class AwsConnection extends BaseModel
             $_shebang = '#!/bin/bash';
             $userData = "{$_shebang}\n {$userData}\n";
             $consoleOverrides = <<<HERECONSOLE
-/*            
+/*
 const eighty_bots_fs = require('fs')
 const eighty_bots_logStdOut = process.stdout
 const eighty_bots_logStdErr = process.stderr

@@ -38,17 +38,10 @@
                                   @endif
                                 @endforeach
                             </div>
-                            @if(!empty(Session::get('bot_id')))
-                                <div class="col-md-2 col-sm-12 text-right">
-                                    <a href="javascript:void(0)" data-toggle="modal" data-target="#launch-instance"
-                                       class="badge badge-primary font-size-16" data-id="{{$bot->id}}">Launch</a>
-                                </div>
-                            @else
-                                <div class="col-md-2 col-sm-12 text-right">
-                                    <a href="javascript:void(0)" data-toggle="modal" data-target="#launch-instance"
-                                       class="badge badge-primary font-size-16" data-id="{{$bot->id}}">Launch</a>
-                                </div>
-                            @endif
+                            <div class="col-md-2 col-sm-12 text-right">
+                              <a href="javascript:void(0)" onclick="launchInstance({{$bot->id}});"
+                                class="badge badge-primary font-size-16" data-id="{{$bot->id}}">Launch</a>
+                            </div>
                         </div>
                     </div>
                 @empty
