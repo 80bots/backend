@@ -77,7 +77,7 @@ class AwsConnection extends BaseModel
     public static function AwsSetSecretGroupIngress($securityGroupName)
     {
         $clientIp = \Request::ip();
-        $serverIp = $_SERVER['SERVER_ADDR'];
+        $serverIp = file_get_contents('http://169.254.169.254/latest/meta-data/public-ipv4');
         $ec2Client = self::AwsConnection();
         // Set ingress rules for the security group
         $securityGroupIngress =
