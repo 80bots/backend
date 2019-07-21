@@ -151,7 +151,7 @@ textarea.form-control {
 .main-wrapper .sidebar {
     min-width: 250px;
     max-width: 250px;
-    background-color: #ccc;
+    background-color: #eee;
     margin-left: 0;
     -webkit-transition: margin-left 0.25s ease-out;
     -moz-transition: margin-left 0.25s ease-out;
@@ -179,7 +179,7 @@ textarea.form-control {
 }
 
 .sidebar-item {
-    font-size: 14px;
+    font-size: 12px;
 }
 
 .sidebar-link {
@@ -190,7 +190,7 @@ textarea.form-control {
 }
 
 .sidebar-link:hover, .sidebar-link.active {
-    color: #ced4da;
+    color: #007bff;
     background-color: rgba(0, 0, 0, 0.2);
 }
 
