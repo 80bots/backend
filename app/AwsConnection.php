@@ -92,14 +92,6 @@ class AwsConnection extends BaseModel
                             array('CidrIp' => '0.0.0.0/0')
                         ),
                     ),
-/*                    array(
-                        'IpProtocol' => 'tcp',
-                        'FromPort' => 0,
-                        'ToPort' => 65535,
-                        'IpRanges' => array(
-                            array('CidrIp' => $clientIp . '/32')
-                        ),
-                    ),*/
                     array(
                         'IpProtocol' => 'tcp',
                         'FromPort' => 22,
