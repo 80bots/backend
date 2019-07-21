@@ -86,14 +86,6 @@ class AwsConnection extends BaseModel
                 'IpPermissions' => array(
                     array(
                         'IpProtocol' => 'tcp',
-                        'FromPort' => 80,
-                        'ToPort' => 80,
-                        'IpRanges' => array(
-                            array('CidrIp' => '0.0.0.0/0')
-                        ),
-                    ),
-                    array(
-                        'IpProtocol' => 'tcp',
                         'FromPort' => 6080,
                         'ToPort' => 6080,
                         'IpRanges' => array(
@@ -109,11 +101,11 @@ class AwsConnection extends BaseModel
                         ),
                     ),
                     array(
-                        'IpProtocol' => 'udp',
-                        'FromPort' => 0,
-                        'ToPort' => 65535,
+                        'IpProtocol' => 'tcp',
+                        'FromPort' => 22,
+                        'ToPort' => 22,
                         'IpRanges' => array(
-                            array('CidrIp' => $clientIp . '/32')
+                            array('CidrIp' => $serverIp . '/32')
                         ),
                     ),
                     array(
