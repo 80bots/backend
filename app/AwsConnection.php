@@ -42,16 +42,13 @@ class AwsConnection extends BaseModel
             File::makeDirectory($path, 777, true, true);
         }
 
-        $uploadDirPath = "/keys/" . time() . "_{$keyPairName}.pem";
         // Save the private key
-        $saveKeyLocation = public_path() . $uploadDirPath;
+        $saveKeyLocation = "/home/www/storage/keys/" . time() . "_{$keyPairName}.pem";
         $pemKey = $result->getPath('KeyMaterial');
         file_put_contents($saveKeyLocation, $pemKey);
         // Update the key's permissions so it can be used with SSH
         chmod($saveKeyLocation, 0600);
-        $filePath = config('app.url') . $uploadDirPath;
-
-        $return['path'] = $filePath;
+        $return['path'] = $saveKeyLocation;
         $return['keyName'] = $keyPairName;
         return $return;
     }
