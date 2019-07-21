@@ -2,6 +2,7 @@
 
 body {
     font-family: 'Overpass Mono', monospace;
+    font-size: 13px;
 }
 
 .login-box-wrapper {
@@ -37,6 +38,10 @@ textarea.form-control {
 
 .btn.btn-round {
     border-radius: 50px;
+}
+
+.form-control {
+    font-size: 13px;
 }
 
 /* Select2 style */
