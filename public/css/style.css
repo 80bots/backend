@@ -1,5 +1,7 @@
+@import url('https://fonts.googleapis.com/css?family=Overpass+Mono&display=swap');
+
 body {
-    font-family: 'Nunito', sans-serif;
+    font-family: 'Overpass Mono', monospace;
 }
 
 .login-box-wrapper {
@@ -23,7 +25,7 @@ body {
 }
 
 textarea.form-control {
-    font-family: "Courier New", Courier, monospace;
+    /*font-family: "Courier New", Courier, monospace;*/
 }
 
 /* General style */
