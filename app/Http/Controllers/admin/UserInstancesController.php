@@ -267,9 +267,11 @@ class UserInstancesController extends AwsConnectionController
           }
 
           UserInstances::where(function($query) use($awsInstancesIn) {
-              $query->whereNotIn('aws_instance_id', $awsInstancesIn)
-                    ->orWhere('aws_instance_id', null);
-          })->delete();
+                              $query->whereNotIn('aws_instance_id', $awsInstancesIn)
+                                    ->orWhere('aws_instance_id', null)
+                                    ->orWhere('status', 'terminated');
+                          })->whereNotIn('status', ['start', 'stop'])
+                            ->delete();
         }
 
         session()->flash('success', 'Instances updated successfully!');
