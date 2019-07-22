@@ -22,15 +22,20 @@ trait AWSInstances
             $instances = $reservation['Instances'];
             if ($instances) {
                 foreach ($instances as $instance) {
-                  $instancesByStatus[$instance['State']['Name']][] = [
-                    'aws_instance_id'         => $instance['InstanceId'],
-                    'aws_ami_id'              => $instance['ImageId'],
-                    'aws_security_group_id'   => $instance['SecurityGroups'][0]['GroupId'],
-                    'aws_security_group_name' => $instance['SecurityGroups'][0]['GroupName'],
-                    'aws_public_ip'           => $instance['PublicIpAddress'],
-                    'aws_public_dns'          => $instance['PublicDnsName'],
-                    'created_at'              => date('Y-m-d H:i:s', strtotime($instance['LaunchTime']))
-                  ];
+                    try {
+                        $instancesByStatus[$instance['State']['Name']][] = [
+                            'aws_instance_id'         => $instance['InstanceId'],
+                            'aws_ami_id'              => $instance['ImageId'],
+                            'aws_security_group_id'   => $instance['SecurityGroups'][0]['GroupId'],
+                            'aws_security_group_name' => $instance['SecurityGroups'][0]['GroupName'],
+                            'aws_public_ip'           => $instance['PublicIpAddress'],
+                            'aws_public_dns'          => $instance['PublicDnsName'],
+                            'created_at'              => date('Y-m-d H:i:s', strtotime($instance['LaunchTime']))
+                        ];
+                    } catch (\Exception $e) {
+                        \Log::info('An error occurred while syncing '. $instance['InstanceId']);
+                    }
+
                 }
             }
         }

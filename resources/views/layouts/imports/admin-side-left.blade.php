@@ -9,7 +9,7 @@
             <li class="sidebar-item">
                 <ul class="sidebar-dropdown list-unstyled">
                     <li class="sidebar-item "><a href="{{route('admin.user.index')}}" class="sidebar-link {{ (request()->is('admin/user')) ? 'active' : '' }}">Users List</a></li>
-                    <li class="sidebar-item "><a href="{{route('admin.instance.running')}}" class="sidebar-link {{ (request()->is('admin/instance/running')) ? 'active' : '' }}">Running Bots</a></li>
+                    <li class="sidebar-item "><a href="{{ url('admin/instance/running') }}" class="sidebar-link {{ (request()->is('admin/instance/running')) ? 'active' : '' }}">Running Bots</a></li>
                     <li class="sidebar-item "><a href="{{route('admin.bots.index')}}" class="sidebar-link {{ (request()->is('admin/bots')) ? 'active' : '' }}">All Bots</a></li>
                     <li class="sidebar-item "><a href="{{route('admin.listsessions')}}" class="sidebar-link {{ (request()->is('admin/list-sessions')) ? 'active' : '' }}">Instance Sessions</a></li>
                 </ul>
@@ -40,7 +40,6 @@
                     </ul>
                 </div>
             </li>
-            {{--<li class="sidebar-item "><a href="{{route('user.instance.index')}}" class="sidebar-link {{ (request()->is('user/instance')) ? 'active' : '' }}">My Bots</a></li>--}}
 
             <!-- END -->
 

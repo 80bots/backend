@@ -9,12 +9,11 @@ use App\Platforms;
 use App\UserInstances;
 use App\UserInstancesDetails;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Session;
 use function GuzzleHttp\Promise\all;
 use App\Traits\AWSInstances;
+use Auth, Log;
 
 class UserInstancesController extends AwsConnectionController
 {
@@ -24,29 +23,30 @@ class UserInstancesController extends AwsConnectionController
      *
      * @return \Illuminate\Http\Response
      */
-    public function index($id)
+    public function index(Request $request, $status = 'all', $userId = null)
     {
-        try {
-            $UserInstance = UserInstances::findByUserId($id)->get();
-            if (!$UserInstance->isEmpty()) {
-                return view('admin.instance.index', compact('UserInstance'));
-            }
-            session()->flash('error', 'Instance Not Found');
-            return view('admin.instance.index');
-        } catch (\Exception $exception) {
-            session()->flash('error', $exception->getMessage());
-            return view('admin.instance.index');
+        $userInstances = UserInstances::with('user');
+
+        if($status = 'running') {
+            $request->offsetSet('status', 'running');
         }
-    }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
+        if($request->status = 'running') {
+            $userInstances = $userInstances->where('status', $request->status);
+        }
 
+        if($request->list && $request->list == 'my_bots') {
+            $userInstances = $userInstances->where('status', Auth::id());
+        }
+
+        if($userId) {
+            $userInstances = $userInstances->findByUserId($userId);
+        }
+
+        $userInstances = $userInstances->get();
+
+        $filters = $request->all();
+        return view('admin.instance.index', compact('userInstances', 'filters'));
     }
 
     /**
@@ -126,78 +126,6 @@ class UserInstancesController extends AwsConnectionController
         } catch (\Exception $e) {
             session()->flash('error', $e->getMessage());
             return redirect(route('admin.my-bots'));
-        }
-    }
-
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\UserInstances $userInstances
-     * @return \Illuminate\Http\Response
-     */
-    public function show(UserInstances $userInstances)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\UserInstances $userInstances
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(UserInstances $userInstances)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request $request
-     * @param  \App\UserInstances $userInstances
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, UserInstances $userInstances)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\UserInstances $userInstances
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(UserInstances $userInstances)
-    {
-        //
-    }
-
-    public function runningInstances(Request $request)
-    {
-        $filter = 'all';
-        if($request->has('bots_filter'))
-        {
-            $filter = $request->get('bots_filter');
-        }
-
-        try {
-            if($filter == 'all') {
-                $UserInstance = UserInstances::with('user')->where('status', 'running')->get();
-            }else{
-                $UserInstance = UserInstances::with('user')->where('status', 'running')->where('user_id', auth()->user()->id)->get();
-            }
-
-            if (!$UserInstance->isEmpty()) {
-                return view('admin.instance.index', compact('UserInstance', 'filter'));
-            }
-            session()->flash('error', 'Running Bots Not Found');
-            return view('admin.instance.index', compact('filter'));
-        } catch (\Exception $exception) {
-            session()->flash('error', $exception->getMessage());
-            return view('admin.instance.index');
         }
     }
 
@@ -294,7 +222,6 @@ class UserInstancesController extends AwsConnectionController
 
     public function checkBotIdInQueue(Request $request)
     {
-
         $bot_ids = array();
         $userInstances = UserInstances::select('bot_id')->where('user_id', Auth::user()->id)->where('is_in_queue', '=', 1)->get();
 
@@ -320,8 +247,11 @@ class UserInstancesController extends AwsConnectionController
               $userInstance = UserInstances::where('aws_instance_id' , $instance['aws_instance_id'])->first();
 
               if(!$userInstance) {
-                $instance['user_id'] = Auth::id();
-                $instance['status']  = $status;
+                $instance['user_id']      = Auth::id();
+                $instance['status']       = $status;
+                if($status == 'running') {
+                    $instance['is_in_queue']  = 0;
+                }
                 $userInstance = UserInstances::updateOrCreate([
                   'aws_instance_id' => $instance['aws_instance_id']
                 ], $instance);
@@ -336,7 +266,10 @@ class UserInstancesController extends AwsConnectionController
               $awsInstancesIn[] = $instance['aws_instance_id'];
           }
 
-          UserInstances::whereNotIn('aws_instance_id', $awsInstancesIn)->delete();
+          UserInstances::where(function($query) use($awsInstancesIn) {
+              $query->whereNotIn('aws_instance_id', $awsInstancesIn)
+                    ->orWhere('aws_instance_id', null);
+          })->delete();
         }
 
         session()->flash('success', 'Instances updated successfully!');
