@@ -257,6 +257,7 @@ class UserInstancesController extends AwsConnectionController
                 ], $instance);
               } else {
                 $userInstance->status  = $status;
+                $userInstance->name =  $instance['name'];
                 if($status == 'running') {
                     $userInstance->is_in_queue = 0;
                 }
