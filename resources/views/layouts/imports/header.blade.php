@@ -16,7 +16,12 @@
                     <i class="fa fa-user-circle mr-2"></i> {{!empty($user->name) ? $user->name : ''}}
                 </span>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <a class="dropdown-item d-flex align-items-center justify-content-between" href="{{ route('logout') }}"
+                    <a href="{{route('user.profile',['id' => $user->id])}}"
+                       class="dropdown-item d-flex align-items-center justify-content-between">
+                        Profile <i class="fa fa-user-circle mr-2"></i>
+                    </a>
+                    <a class="dropdown-item d-flex align-items-center justify-content-between"
+                       href="{{ route('logout') }}"
                        onclick="event.preventDefault();
                                                      document.getElementById('logout-form').submit();">
                         <span>Logout</span>
@@ -32,9 +37,6 @@
                     <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                         @csrf
                     </form>
-                    <a href="{{route('user.profile',['id' => $user->id])}}" class="dropdown-item d-flex align-items-center justify-content-between">
-                        Profile <i class="fa fa-user-circle mr-2"></i>
-                    </a>
                 </div>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                     <h1>Hello</h1>
