@@ -13,7 +13,10 @@
         <div class="card">
             <div class="card-header d-flex align-items-center justify-content-between">
                 <h5 class="mb-0">All Bots</h5>
-                <h5 class="mb-0"><a href="{{route('admin.bots.create')}}" class="btn btn-round btn-primary"><i class="fas fa-plus-circle"></i></a></h5>
+                <h5 class="mb-0">
+                    <!-- <a href="/admin/bots/sync-instances" class="btn btn-round btn-info">Sync Instances</a> -->
+                    <a href="{{route('admin.bots.create')}}" class="btn btn-round btn-primary"><i class="fas fa-plus-circle"></i></a>
+                </h5>
             </div>
             <div class="card-body">
                 @include('layouts.imports.messages')

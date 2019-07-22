@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Auth;
 use App\UserInstances;
 use App\UserInstancesDetails;
+use Aws\Ec2\Ec2Client;
 
 class BotsController extends AppController
 {
@@ -39,7 +40,7 @@ class BotsController extends AppController
     {
         try{
             $platforms = Platforms::get();
-            return view('admin.bots.create',compact('platforms'));
+            return view('admin.bots.create', compact('platforms'));
         } catch (\Exception $exception){
             session()->flash('error', $exception->getMessage());
             return view('admin.bots.create');

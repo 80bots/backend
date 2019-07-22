@@ -14,20 +14,26 @@ Running Bots
             <div class="card-header d-flex align-items-center justify-content-between">
                 <h5 class="mb-0">Running Bots</h5>
                 <h5 class="mb-0">
-                    <div class="form-check">
-                        <form action="{{ route('admin.instance.running') }}" method="get" id="filter-my-bot">
-                            <select name="bots_filter" id="bot-filter-dropdown" class="form-control">
-                                <option value="all" {{ $filter == 'all'? 'selected' : '' }}>All</option>
-                                <option value="mybots" {{ $filter == 'mybots'? 'selected' : '' }}>My Bots</option>
+                    <div class="form-check flex">
+                        <form action="{{ url('admin/instance/running') }}" method="get" id="filter-my-bot">
+                            <select name="list" id="bot-filter-dropdown" class="form-control">
+                                <option value="all" {{ isset($filters['list']) && $filters['list'] == 'all' ? 'selected' : '' }}>All</option>
+                                <option value="my_bots" {{ isset($filters['list']) && $filters['list'] == 'my_bots'? 'selected' : '' }}>My Bots</option>
                             </select>
                         </form>
+                        <a href="javascript::void(0);" data-href="{{route('admin.instance.sync')}}" class="sync-instances">
+                          <i class="fa fa-sync-alt" aria-hidden="true"></i>
+                        </a>
                     </div>
                 </h5>
             </div>
             <div class="card-body">
+                <div class="hidden" id="sync-loader">
+                    <img src="/assets/images/loader.gif">
+                </div>
                 <input type="hidden" name="instance_id" value="{{ Session::get('instance_id') }}" id="instance_id">
                 @include('layouts.imports.messages')
-                <div class="table-responsive">
+                <div class="table-responsive" id="instance-div">
                     <table id="instance-list" class="table thead-default vertical-middle mb-0">
                         <thead>
                         <tr>
@@ -42,25 +48,24 @@ Running Bots
                         </tr>
                         </thead>
                         <tbody>
-                        @if(isset($UserInstance) && !empty($UserInstance))
-                            @foreach($UserInstance as $instance)
+                            @foreach($userInstances as $userInstance)
                                 <tr>
-                                    <td>{{ $instance->user->email }}</td>
-                                    <td>{{!empty($instance->name) ? $instance->name : ''}}</td>
-                                    <td>{{!empty($instance->aws_instance_id) ? $instance->aws_instance_id : ''}}</td>
-                                    <td>{{!empty($instance->up_time) ? $instance->up_time : 0}}</td>
-                                    <td>{{!empty($instance->aws_public_ip) ? $instance->aws_public_ip : ''}}</td>
+                                    <td>{{ $userInstance->user ? $userInstance->user->email : '' }}</td>
+                                    <td>{{!empty($userInstance->name) ? $userInstance->name : ''}}</td>
+                                    <td>{{!empty($userInstance->aws_instance_id) ? $userInstance->aws_instance_id : ''}}</td>
+                                    <td>{{!empty($userInstance->up_time) ? $userInstance->up_time : 0}}</td>
+                                    <td>{{!empty($userInstance->aws_public_ip) ? $userInstance->aws_public_ip : ''}}</td>
                                     <td>
-                                        @if($instance->is_in_queue == 1)
+                                        @if($userInstance->is_in_queue == 1)
                                             <a href="javascript:void(0)" data-toggle="modal" data-target="#launch-instance"
                                             class="badge badge-primary ml-2 font-size-16" title="Process In Queue">IN-Queue</a>
                                         @else
-                                            <select name="instStatus" class="form-control instStatus" data-id="{{$instance->id}}">
-                                                @if(!empty($instance->status) && $instance->status == 'running')
+                                            <select name="instStatus" class="form-control instStatus" data-id="{{$userInstance->id}}">
+                                                @if(!empty($userInstance->status) && $userInstance->status == 'running')
                                                     <option value="running">Running</option>
                                                     <option value="stop">Stop</option>
                                                     <option value="terminated">Terminate</option>
-                                                @elseif(!empty($instance->status) && $instance->status == 'stop')
+                                                @elseif(!empty($userInstance->status) && $userInstance->status == 'stop')
                                                     <option value="stop">Stop</option>
                                                     <option value="start">Start</option>
                                                     <option value="terminated">Terminate</option>
@@ -70,13 +75,12 @@ Running Bots
                                             </select>
                                         @endif
                                     </td>
-                                    <td>{{!empty($instance->created_at) ? $instance->created_at : ''}}</td>
-                                    <td><a href="{{!empty($instance->aws_pem_file_path) ? $instance->aws_pem_file_path : 'javascript:void(0)'}}" title="Download pem file" download>
+                                    <td>{{!empty($userInstance->created_at) ? $userInstance->created_at : ''}}</td>
+                                    <td><a href="{{!empty($userInstance->aws_pem_file_path) ? $userInstance->aws_pem_file_path : 'javascript:void(0)'}}" title="Download pem file" download>
                                             <i class="fa fa-download"></i>
                                         </a></td>
                                 </tr>
                             @endforeach
-                        @endif
                         </tbody>
                     </table>
                 </div>

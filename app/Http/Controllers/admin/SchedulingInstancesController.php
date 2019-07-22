@@ -25,8 +25,8 @@
 	    {
 	        // echo 'dsfdsf';exit;
 	    }
-		
-		
+
+
 
 	    public function index()
 	    {
@@ -39,7 +39,7 @@
 	        catch (\Exception $e) {
 	            session()->flash('error', $e->getMessage());
 	            return redirect(route('admin.scheduling.index'));
-	        } 
+	        }
 	    }
 
 		public function create()
@@ -47,13 +47,13 @@
 			try {
 				$user_id = Auth::user()->id;
 
-				$instances = UserInstances::where(['status' => 'stop','user_id'=>$user_id])->get();
+				$instances = UserInstances::where(['status' => 'stop','user_id'=> $user_id])->get();
 				return view('admin.scheduling.create',compact('instances'));
 			}
 	        catch (\Exception $e) {
 	            session()->flash('error', $e->getMessage());
 	            return redirect(route('admin.scheduling.index'));
-	        } 	
+	        }
 
 		}
 
@@ -179,7 +179,7 @@
 	        catch (\Exception $e) {
 	            session()->flash('error', $e->getMessage());
 	            return redirect(route('admin.my-bots'));
-	        }    
+	        }
 		}
 
 		/**
@@ -190,7 +190,7 @@
 		 */
 		public function show($id)
 		{
-		    
+
 		}
 
 		/**
@@ -232,7 +232,7 @@
 			    $schedulingInstance->utc_end_time = $request->utc_end_time;
 				$schedulingInstance->status = $request->status;
 				$schedulingInstance->current_time_zone =  $request->current_time_zone;
-				
+
 			    if($schedulingInstance->save()){
 
 			    	return redirect(route('admin.scheduling.index'))->with('success', 'Scheduling Update Successfully');

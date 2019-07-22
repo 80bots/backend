@@ -404,3 +404,13 @@ textarea.form-control {
 }
 
 /* User Panel styles END */
+.flex{
+  display: flex !important;
+}
+.sync-instances{
+  margin: 10px 30px;
+}
+
+.hidden{
+    display: none;
+}

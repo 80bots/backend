@@ -87,23 +87,25 @@ class StoreUserInstance implements ShouldQueue
 
             // store instance details in database
 
-            $userInstance->aws_instance_id = $instanceId;
-            $userInstance->aws_ami_id = $awsAmiId;
-            $userInstance->aws_security_group_id = $groupId;
-            $userInstance->aws_security_group_name = $groupName;
-            $userInstance->aws_public_ip = $publicIp;
-            $userInstance->status = 'running';
-            $userInstance->aws_public_dns = $publicDnsName;
-            $userInstance->aws_pem_file_path = $keyPairPath;
-            $userInstance->created_at = $created_at;
-            $userInstance->is_in_queue = 0;
+            $userInstance->name                     = $tagName;
+            $userInstance->aws_ami_name             = $bot->aws_ami_name;
+            $userInstance->aws_instance_id          = $instanceId;
+            $userInstance->aws_ami_id               = $awsAmiId;
+            $userInstance->aws_security_group_id    = $groupId;
+            $userInstance->aws_security_group_name  = $groupName;
+            $userInstance->aws_public_ip            = $publicIp;
+            $userInstance->status                   = 'running';
+            $userInstance->aws_public_dns           = $publicDnsName;
+            $userInstance->aws_pem_file_path        = $keyPairPath;
+            $userInstance->created_at               = $created_at;
+            $userInstance->is_in_queue              = 0;
 
             if($userInstance->save()){
                 Log::debug('Saved Instance : '.json_encode($userInstance));
-                Session::put('instance_id','');
-                $userInstanceDetail = new UserInstancesDetails();
+                Session::forget('instance_id');
+                $userInstanceDetail                   = new UserInstancesDetails();
                 $userInstanceDetail->user_instance_id = $userInstance->id;
-                $userInstanceDetail->start_time = $created_at;
+                $userInstanceDetail->start_time       = $created_at;
                 $userInstanceDetail->save();
                 session()->flash('success', 'Instance Created successfully');
             }
