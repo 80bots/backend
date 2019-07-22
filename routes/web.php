@@ -22,6 +22,11 @@ Route::get('CalUserCreditScore', 'AppController@CalUserCreditScore')->name('Cred
 //Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/user-activation/{id}', 'AppController@UserActivation')->name('user-activation');
 
+Route::group(['middleware' => ['auth']], function() {
+    Route::get('profile/{id}', 'UserController@show')->name('user.profile');
+    Route::post('update/timezone', 'UserController@updateTimezone')->name('user.update.timezone');
+});
+
 include('admin.php');
 include('user.php');
 
