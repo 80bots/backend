@@ -23,7 +23,17 @@ trait AWSInstances
             if ($instances) {
                 foreach ($instances as $instance) {
                     try {
+                        $name = false;
+                        if( isset($instance['Tags']) && count($instance['Tags'])) {
+                            foreach ($instance['Tags'] as $key => $tag) {
+                                if(isset($tag['Key']) && $tag['Key'] == 'Name') {
+                                    $name = $tag['Value'];
+                                    break;
+                                }
+                            }
+                        }
                         $instancesByStatus[$instance['State']['Name']][] = [
+                            'name'                    => $name,
                             'aws_instance_id'         => $instance['InstanceId'],
                             'aws_ami_id'              => $instance['ImageId'],
                             'aws_security_group_id'   => $instance['SecurityGroups'][0]['GroupId'],
