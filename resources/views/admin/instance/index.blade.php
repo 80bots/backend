@@ -31,11 +31,11 @@ Running Bots
                     <table id="instance-list" class="table thead-default vertical-middle mb-0">
                         <thead>
                         <tr>
-                            <th>Launched By</th>
+                            <th>Launched by</th>
                             <th>Name</th>
-                            <th>Instance Id</th>
-                            <th>Up-Time</th>
-                            <th>AWS Public Ip</th>
+                            <th>Instance ID</th>
+                            <th>Uptime</th>
+                            <th>AWS Public IP</th>
                             <th>Status</th>
                             <th>Launch Time</th>
                             <th></th>
