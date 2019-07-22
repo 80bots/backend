@@ -3,6 +3,8 @@
 namespace App;
 
 use App\Mail\register;
+use Carbon\Carbon;
+use Carbon\CarbonTimeZone;
 use Exception;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;

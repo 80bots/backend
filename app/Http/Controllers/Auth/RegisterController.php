@@ -74,6 +74,7 @@ class RegisterController extends Controller
         $user->name = $data['email'];
         $user->email = $data['email'];
         $user->password = bcrypt($data['password']);
+        $user->timezone = $data['timezone'];
         $user->verification_token = str_random();
         $user->role_id = 2;
         $user->remaining_credits = 8;

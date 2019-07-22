@@ -32,12 +32,9 @@
                     <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                         @csrf
                     </form>
-                    @if($role == 'User')
-                        <a href="{{route('user.profile',['id' => $user->id])}}" class="dropdown-item d-flex align-items-center justify-content-between">
-                            Profile <i class="fa fa-user-circle mr-2"></i>
-                        </a>
-                    @endif
-
+                    <a href="{{route('user.profile',['id' => $user->id])}}" class="dropdown-item d-flex align-items-center justify-content-between">
+                        Profile <i class="fa fa-user-circle mr-2"></i>
+                    </a>
                 </div>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                     <h1>Hello</h1>

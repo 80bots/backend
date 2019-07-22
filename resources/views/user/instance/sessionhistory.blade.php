@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title')
-Instance Sessions
+Bot Sessions
 @endsection
 
 @section('css')
@@ -19,7 +19,7 @@ Instance Sessions
         </div>
         @if(isset($sessions) && !empty($sessions))
             <div class="my-3 p-3 bg-white rounded shadow-sm">
-                <h6 class="border-bottom pb-6">Instance Sessions</h6>
+                <h6 class="border-bottom pb-6">Bot Sessions</h6>
                 <table id="instances_sessions" class="table thead-default vertical-middle mb-0">
                     <thead>
                         <tr>

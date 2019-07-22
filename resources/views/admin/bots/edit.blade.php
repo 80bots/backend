@@ -36,7 +36,7 @@
                     </div>
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label for="">AMI Image Id*</label>
+                            <label for="">AMI Image ID*</label>
                             <input type="text" name="aws_ami_image_id"
                                    value="{{isset($bots->aws_ami_image_id) ? $bots->aws_ami_image_id : ''}}"
                                    class="form-control"/>
@@ -44,7 +44,7 @@
                     </div>
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label for="">AMI Name*</label>
+                            <label for="">AMI Name</label>
                             <input type="text" name="aws_ami_name"
                                    value="{{isset($bots->aws_ami_name) ? $bots->aws_ami_name : ''}}"
                                    class="form-control"/>
@@ -68,16 +68,18 @@
                     </div>
                     <div class="col-md-12 col-sm-12">
                         <div class="form-group">
-                            <label for="aws_custom_script">Bot Script*</label>
-                            <textarea id="aws_custom_script" name="aws_custom_script"
-                                      class="form-control" rows="23">{{isset($bots->aws_custom_script)?$bots->aws_custom_script:''}}</textarea>
+                            <label for="aws_startup_script">Startup Script</label>
+                            <textarea name="aws_startup_script"
+                                      class="form-control"
+                                      rows="23">{{isset($bots->aws_startup_script)?$bots->aws_startup_script:''}}</textarea>
                         </div>
                     </div>
                     <div class="col-md-12 col-sm-12">
                         <div class="form-group">
-                            <label for="">Startup Script*</label>
-                            <textarea name="aws_startup_script"
-                                      class="form-control" rows="23">{{isset($bots->aws_startup_script)?$bots->aws_startup_script:''}}</textarea>
+                            <label for="aws_custom_script">Bot Script</label>
+                            <textarea id="aws_custom_script" name="aws_custom_script"
+                                      class="form-control"
+                                      rows="23">{{isset($bots->aws_custom_script)?$bots->aws_custom_script:''}}</textarea>
                         </div>
                     </div>
                     <div class="col-md-6 col-sm-12">
@@ -108,6 +110,12 @@
     <script>
         $("#bot-create").validate({
             rules: {
+                platform: {
+                    required: true
+                },
+                description: {
+                    required: true
+                },
                 bot_name: {
                     required: true
                 },
@@ -115,16 +123,22 @@
                     required: true
                 },
                 aws_ami_name: {
-                    required: true
+                    required: false
                 },
                 aws_instance_type: {
                     required: true
                 },
                 aws_startup_script: {
-                    required: true
+                    required: false
+                },
+                aws_custom_script: {
+                    required: false
                 },
                 aws_storage_gb: {
                     required: true
+                },
+                tags: {
+                    required: false
                 }
             }
         });
