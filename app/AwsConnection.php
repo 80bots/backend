@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Nubs\RandomNameGenerator\All as AllRandomName;
 use Nubs\RandomNameGenerator\Alliteration as AlliterationName;
 use Nubs\RandomNameGenerator\Vgng as VideoGameName;
+use Illuminate\Support\Facades\Log;
 
 class AwsConnection extends BaseModel
 {
@@ -77,7 +78,12 @@ class AwsConnection extends BaseModel
     public static function AwsSetSecretGroupIngress($securityGroupName)
     {
         $clientIp = \Request::ip();
-        $serverIp = file_get_contents('http://169.254.169.254/latest/meta-data/public-ipv4');
+        $serverIp = @file_get_contents('http://169.254.169.254/latest/meta-data/public-ipv4');
+        if($serverIp === FALSE) {
+            $serverIp = str_replace('http://', '', env('APP_URL'));
+        }
+
+        //$serverIp = file_get_contents('http://169.254.169.254/latest/meta-data/public-ipv4');
         $ec2Client = self::AwsConnection();
         // Set ingress rules for the security group
         $securityGroupIngress =
@@ -133,9 +139,8 @@ class AwsConnection extends BaseModel
         return $return;
     }
 
-    public static function AwsLaunchInstance($keyPairName, $securityGroupName, $bot, $tagName)
+    public static function AwsLaunchInstance($keyPairName, $securityGroupName, $bot, $tagName, $user)
     {
-
         if ($bot) {
             $imageId = $bot->aws_ami_image_id ??  env('AWS_IMAGEID', 'ami-0cd3dfa4e37921605');
             $instanceType = $bot->aws_instance_type ?? env('AWS_INSTANCE_TYPE', 't2.micro');
@@ -220,7 +225,19 @@ HERESHELL;
         }
 
         $ec2Client = self::AwsConnection();
-        $user = Auth::user();
+        $tags = [
+            [
+                'Key' => 'Name',
+                'Value' => $tagName,
+            ],
+        ];
+
+        if($user) {
+            array_push($tags, [
+                'Key' => 'User Email',
+                'Value' => $user->email,
+            ]);
+        }
 
         $instanceLaunchRequest = array(
             'ImageId' => $imageId,
@@ -239,16 +256,7 @@ HERESHELL;
             'TagSpecifications' => [
                 [
                     'ResourceType' => 'instance',
-                    'Tags' => [
-                        [
-                            'Key' => 'Name',
-                            'Value' => $tagName,
-                        ],
-                        [
-                            'Key' => 'User Email',
-                            'Value' => $user->email,
-                        ]
-                    ],
+                    'Tags' => $tags,
                 ],
             ],
             'SecurityGroups' => array($securityGroupName)

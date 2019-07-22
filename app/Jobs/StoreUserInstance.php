@@ -21,6 +21,7 @@ class StoreUserInstance implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected $data;
+    protected $user;
     protected $id;
 
     /**
@@ -28,10 +29,11 @@ class StoreUserInstance implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($id)
+    public function __construct($id, $user)
     {
 
         $this->id = $id;
+        $this->user = $user;
     }
 
     /**
@@ -65,7 +67,7 @@ class StoreUserInstance implements ShouldQueue
             $instanceIds = [];
 
             // Instance Create
-            $newInstanceResponse = AwsConnectionController::LaunchInstance($keyPairName, $groupName, $bot, $tagName);
+            $newInstanceResponse = AwsConnectionController::LaunchInstance($keyPairName, $groupName, $bot, $tagName, $this->user);
 
             $instanceId = $newInstanceResponse->getPath('Instances')[0]['InstanceId'];
 
@@ -73,6 +75,8 @@ class StoreUserInstance implements ShouldQueue
             $waitUntilResponse = AwsConnectionController::waitUntil($instanceIds);
 
             $describeInstancesResponse = AwsConnectionController::DescribeInstances($instanceIds);
+
+
 
             $instanceArray = $describeInstancesResponse->getPath('Reservations')[0]['Instances'][0];
 
