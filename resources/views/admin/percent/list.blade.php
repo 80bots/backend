@@ -13,7 +13,7 @@
         <div class="card">
             <div class="card-header d-flex align-items-center justify-content-between">
                 <h5 class="mb-0">Low Credit Notification List</h5>
-                {{--<a href="{{route('percent.create')}}" class="btn btn-round btn-primary"><i class="fas fa-plus"></i> Add Credit Percentage</a>--}}
+                <h5 class="mb-0"><a href="{{ route('admin.percent.create') }}" class="btn btn-round btn-primary"><i class="fas fa-plus-circle"></i></a></h5>
             </div>
             <div class="card-body">
                 @include('layouts.imports.messages')

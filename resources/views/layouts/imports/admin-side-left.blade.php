@@ -23,39 +23,30 @@
                 </ul>
             </li>
             <li class="sidebar-item">
-                    <span data-toggle="collapse" data-target="#plan"
-                          class="sidebar-link {{ (request()->is('admin/plan*')) ? '' : 'collapsed' }}"
-                          aria-expanded="{{ (request()->is('admin/plan*')) ? 'true' : 'false' }}">
-                        <span class="align-middle">Subscription Plan</span>
-                    </span>
-                <div id="plan" class="collapse in {{ (request()->is('admin/plan*')) ? 'show' : '' }}">
-                    <ul class="sidebar-dropdown list-unstyled">
-                        <li class="sidebar-item "><a href="{{route('admin.plan.index')}}"
-                                                     class="sidebar-link {{ (request()->is('admin/plan')) ? 'active' : '' }}">List</a>
-                        </li>
-                    <!--li class="sidebar-item "><a href="{{route('admin.plan.create')}}" class="sidebar-link {{ (request()->is('admin/plan/create')) ? 'active' : '' }}">Create</a></li-->
-                    </ul>
-                </div>
+                <ul class="sidebar-dropdown list-unstyled">
+                    <li class="sidebar-item "><a href="{{route('admin.plan.index')}}" class="sidebar-link {{ (request()->is('admin/plan*')) ? 'active' : '' }}">Subscription Plan</a></li>
+                    <li class="sidebar-item "><a href="{{route('admin.percent.index')}}" class="sidebar-link {{ (request()->is('admin/percent*')) ? 'active' : '' }}">Low Credit Notification</a></li>
+                </ul>
             </li>
-            <li class="sidebar-item">
-                    <span data-toggle="collapse" data-target="#percentage"
-                          class="sidebar-link {{ (request()->is('admin/creditPercent')) ? '' : 'collapsed' }}"
-                          aria-expanded="{{ (request()->is('admin/creditPercent*')) ? 'true' : 'false' }}">
-                        <span class="align-middle">Low Credit Notification</span>
-                    </span>
-                <div id="percentage" class="collapse in {{ (request()->is('admin/percent*')) ? 'show' : '' }}">
-                    <ul class="sidebar-dropdown list-unstyled">
+            {{--<li class="sidebar-item">--}}
+                    {{--<span data-toggle="collapse" data-target="#percentage"--}}
+                          {{--class="sidebar-link {{ (request()->is('admin/creditPercent')) ? '' : 'collapsed' }}"--}}
+                          {{--aria-expanded="{{ (request()->is('admin/creditPercent*')) ? 'true' : 'false' }}">--}}
+                        {{--<span class="align-middle">Low Credit Notification</span>--}}
+                    {{--</span>--}}
+                {{--<div id="percentage" class="collapse in {{ (request()->is('admin/percent*')) ? 'show' : '' }}">--}}
+                    {{--<ul class="sidebar-dropdown list-unstyled">--}}
 
-                        <li class="sidebar-item "><a href="{{route('admin.percent.index')}}"
-                                                     class="sidebar-link {{ (request()->is('admin/percent')) ? 'active' : '' }}">List</a>
-                        </li>
+                        {{--<li class="sidebar-item "><a href="{{route('admin.percent.index')}}"--}}
+                                                     {{--class="sidebar-link {{ (request()->is('admin/percent')) ? 'active' : '' }}">List</a>--}}
+                        {{--</li>--}}
 
-                        <li class="sidebar-item "><a href="{{route('admin.percent.create')}}"
-                                                     class="sidebar-link {{ (request()->is('admin/percent/create')) ? 'active' : '' }}">Create</a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
+                        {{--<li class="sidebar-item "><a href="{{route('admin.percent.create')}}"--}}
+                                                     {{--class="sidebar-link {{ (request()->is('admin/percent/create')) ? 'active' : '' }}">Create</a>--}}
+                        {{--</li>--}}
+                    {{--</ul>--}}
+                {{--</div>--}}
+            {{--</li>--}}
         {{--<li class="sidebar-item "><a href="{{route('user.instance.index')}}" class="sidebar-link {{ (request()->is('user/instance')) ? 'active' : '' }}">My Bots</a></li>--}}
 
         <!-- END -->
