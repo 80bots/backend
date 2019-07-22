@@ -5,32 +5,26 @@
                                                                            alt=""></a>
     </div>
     <div class="sidebar-nav">
-        <ul class="list-unstyled mb-0">
-            <li class="sidebar-header">Navigation</li>
+        <ul class="sidebar-dropdown list-unstyled">
+            <li class="sidebar-item "><a href="{{route('user.instance.index')}}"
+                                         class="sidebar-link {{ (request()->is('user/instance')) ? 'active' : '' }}">My
+                    Bots</a></li>
+            <li class="sidebar-item "><a href="{{route('user.bots.list')}}"
+                                         class="sidebar-link {{ (request()->is('user/bots')) ? 'active' : '' }}">Bots
+                    List</a></li>
+            <li class="sidebar-item "><a href="{{route('user.scheduling.index')}}"
+                                         class="sidebar-link {{ (request()->is('user/scheduling')) ? 'active' : '' }}">Scheduling
+                    List</a></li>
             <li class="sidebar-item">
-                <ul class="sidebar-dropdown list-unstyled">
-                    <li class="sidebar-item "><a href="{{route('user.instance.index')}}"
-                                                 class="sidebar-link {{ (request()->is('user/instance')) ? 'active' : '' }}">My
-                            Bots</a></li>
-                    <li class="sidebar-item "><a href="{{route('user.bots.list')}}"
-                                                 class="sidebar-link {{ (request()->is('user/bots')) ? 'active' : '' }}">Bots
-                            List</a></li>
-                    <li class="sidebar-item "><a href="{{route('user.scheduling.index')}}"
-                                                 class="sidebar-link {{ (request()->is('user/scheduling')) ? 'active' : '' }}">Scheduling
-                            List</a></li>
-                    <li class="sidebar-item">
-                        <a href="{{route('user.subscription-plans.index')}}"
-                           class="sidebar-link {{ (request()->is('user/subscription-plans')) ? 'active' : '' }}">
-                            My Subscription
-                        </a>
-                    </li>
-                </ul>
+                <a href="{{route('user.subscription-plans.index')}}"
+                   class="sidebar-link {{ (request()->is('user/subscription-plans')) ? 'active' : '' }}">
+                    My Subscription
+                </a>
             </li>
-
         </ul>
     </div>
     <hr>
     <div class>
-        <a href="{{route('chatter.home')}}" class="text-light pb-5 pl-5 "><i class="fa fa-comments mr-2"></i>Forum</a>
+        <a href="{{route('chatter.home')}}" class="pb-5 pl-5 "><i class="fa fa-comments mr-2"></i>Forum</a>
     </div>
 </div>
