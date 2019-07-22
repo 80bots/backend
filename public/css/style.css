@@ -1,5 +1,8 @@
+@import url('https://fonts.googleapis.com/css?family=Overpass+Mono&display=swap');
+
 body {
-    font-family: 'Nunito', sans-serif;
+    font-family: 'Overpass Mono', monospace;
+    font-size: 13px;
 }
 
 .login-box-wrapper {
@@ -23,10 +26,14 @@ body {
 }
 
 textarea.form-control {
-    font-family: "Courier New", Courier, monospace;
+    /*font-family: "Courier New", Courier, monospace;*/
 }
 
 /* General style */
+
+.btn {
+    font-size: 13px !important;
+}
 
 .btn.btn-icon {
     line-height: 1;
@@ -35,6 +42,10 @@ textarea.form-control {
 
 .btn.btn-round {
     border-radius: 50px;
+}
+
+.form-control {
+    font-size: 13px;
 }
 
 /* Select2 style */
@@ -149,7 +160,7 @@ textarea.form-control {
 .main-wrapper .sidebar {
     min-width: 250px;
     max-width: 250px;
-    background-color: #ccc;
+    background-color: #eee;
     margin-left: 0;
     -webkit-transition: margin-left 0.25s ease-out;
     -moz-transition: margin-left 0.25s ease-out;
@@ -177,7 +188,7 @@ textarea.form-control {
 }
 
 .sidebar-item {
-    font-size: 14px;
+    font-size: 12px;
 }
 
 .sidebar-link {
@@ -188,7 +199,7 @@ textarea.form-control {
 }
 
 .sidebar-link:hover, .sidebar-link.active {
-    color: #ced4da;
+    color: #007bff;
     background-color: rgba(0, 0, 0, 0.2);
 }
 
@@ -304,7 +315,7 @@ textarea.form-control {
 .body-content .navbar .dropdown-toggle {
     padding: 0.5rem 1rem;
     display: block;
-    font-size: 18px;
+    font-size: 13px;
     cursor: pointer;
     position: relative;
 }
@@ -398,4 +409,8 @@ textarea.form-control {
 }
 .sync-instances{
   margin: 10px 30px;
+}
+
+.hidden{
+    display: none;
 }

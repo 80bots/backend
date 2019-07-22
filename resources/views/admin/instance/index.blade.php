@@ -21,24 +21,27 @@ Running Bots
                                 <option value="my_bots" {{ isset($filters['list']) && $filters['list'] == 'my_bots'? 'selected' : '' }}>My Bots</option>
                             </select>
                         </form>
-                        <a href="{{route('admin.instance.sync')}}" class="sync-instances">
+                        <a href="javascript::void(0);" data-href="{{route('admin.instance.sync')}}" class="sync-instances">
                           <i class="fa fa-sync-alt" aria-hidden="true"></i>
                         </a>
                     </div>
                 </h5>
             </div>
             <div class="card-body">
+                <div class="hidden" id="sync-loader">
+                    <img src="/assets/images/loader.gif">
+                </div>
                 <input type="hidden" name="instance_id" value="{{ Session::get('instance_id') }}" id="instance_id">
                 @include('layouts.imports.messages')
-                <div class="table-responsive">
+                <div class="table-responsive" id="instance-div">
                     <table id="instance-list" class="table thead-default vertical-middle mb-0">
                         <thead>
                         <tr>
-                            <th>Launched By</th>
+                            <th>Launched by</th>
                             <th>Name</th>
-                            <th>Instance Id</th>
-                            <th>Up-Time</th>
-                            <th>AWS Public Ip</th>
+                            <th>Instance ID</th>
+                            <th>Uptime</th>
+                            <th>AWS Public IP</th>
                             <th>Status</th>
                             <th>Launch Time</th>
                             <th></th>
