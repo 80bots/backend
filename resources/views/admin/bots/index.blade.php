@@ -85,7 +85,7 @@
         </div>
     </div>
 
-    <div class="modal fade" id="lunch-instance" role="dialog">
+    <!--div class="modal fade" id="lunch-instance" role="dialog">
         <div class="modal-dialog modal-sm">
             <div class="modal-content">
                 <form id="lunchInstance" >
@@ -105,7 +105,8 @@
                 </form>
             </div>
         </div>
-    </div>
+    </div-->
+    @include('includes.launch-instance')
 @endsection
 
 @section('script')
@@ -139,12 +140,14 @@
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 }
             });
-            var bot_ids = 0 ;
-            checkBotIdInQueue();
+            var bot_ids = 0;
+            //checkBotIdInQueue();
         });
 
-        function launchInstance(bot_id) {
-            bot_ids = bot_id;
+        function launchInstance(botId) {
+            $('#launch-instance').modal('show');
+            console.log(botId)
+            $('[name="bot_id"]').val(botId);
         }
 
         $(document).on('click', '#launch-inspection-submit-btn', function () {
@@ -153,28 +156,30 @@
             $.ajax({
                 url : "/admin/storeSession",
                 type : "POST",
+                beforeSend: function() {
+                    $('#launch-inspection-submit-btn').attr('disabled', true);
+                },
                 data : {
                     _token : function () {
                         return '{{csrf_token()}}';
                     },
-                    user_id : '{{ Auth::user()->id }}',
-                    bot_id : bot_ids,
+                    user_id : '{{ Auth::id() }}',
+                    bot_id : $('[name="bot_id"]').val(),
 
                 },
                 success : function(response){
-
+                    $('[name="bot_id"]').val('');
+                    $('#launch-instance').modal('hide');
+                    $('#launch-inspection-submit-btn').removeAttr('disabled');
                     if(response.type === 'success'){
                         window.location = "/admin/instance/running?bots_filter=mybots";
                     }
-
                 },
                 error : function(response){
 
                 }
             });
-
         });
-
 
         function checkBotIdInQueue(){
             $.ajax({
@@ -184,7 +189,6 @@
                     _token : function () {
                         return '{{csrf_token()}}';
                     }
-
                 },
                 success : function(response){
 
@@ -203,7 +207,6 @@
 
                 }
             });
-
         }
     </script>
 @endsection

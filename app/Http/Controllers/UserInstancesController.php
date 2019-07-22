@@ -252,18 +252,17 @@ class UserInstancesController extends AwsConnectionController
 
 
     /* store bot_id in session */
-    public function storeBotIdInSession(Request $request){
-            $userInstance = new UserInstances();
-            $userInstance->user_id = $request->user_id;
-            $userInstance->bot_id = $request->bot_id;
-            if($userInstance->save()){
-                Log::debug('IN-queued Instance : '.json_encode($userInstance));
-                Session::put('instance_id',$userInstance->id);
-                return response()->json(['type' => 'success','data' => $userInstance->id],200);
-            }
-
-            return response()->json(['type' => 'error','data' => ''],200);
-
+    public function storeBotIdInSession(Request $request)
+    {
+        $userInstance = new UserInstances();
+        $userInstance->user_id = $request->user_id;
+        $userInstance->bot_id = $request->bot_id;
+        if($userInstance->save()){
+            Log::debug('IN-queued Instance : '.json_encode($userInstance));
+            Session::put('instance_id',$userInstance->id);
+            return response()->json(['type' => 'success','data' => $userInstance->id],200);
+        }
+        return response()->json(['type' => 'error','data' => ''],200);
     }
 
     /* execute job to store user instance data */
@@ -273,8 +272,8 @@ class UserInstancesController extends AwsConnectionController
         return response()->json(['type' => 'success'],200);
     }
 
-    public function checkBotIdInQueue(Request $request){
-
+    public function checkBotIdInQueue(Request $request)
+    {
         $instance_ids = array();
         $userInstances = UserInstances::select('bot_id', 'id as instance_id', 'user_id')->where('user_id',Auth::user()->id)->where('is_in_queue','=',1)->get();
         foreach ($userInstances as $value) {

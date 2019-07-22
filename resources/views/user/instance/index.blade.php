@@ -100,30 +100,32 @@
         });
 
         function checkBotIdInQueue(){
-          $.ajax({
-              url : "/user/checkBotIdInQueue",
-              type : "POST",
-              data : {
-                  _token : function () {
-                      return '{{csrf_token()}}';
-                  }
-              },
-              success : function(response){
-                  if(response.type === 'success'){
-                       console.log(response);
-                      // if(response.data !== undefined && response.data.length) {
-                      //     let $botWrapper = $('#dvBotWrapper');
-                      //     for(let eachData of response.data) {
-                      //         $botWrapper.find('[data-id="'+eachData+'"]').attr('data-target','').prepend('<i class="fa fa-spinner fa-spin"></i>');
-                      //     }
-                      // }
-                  }
-              },
-              error : function(response){
-                console.log(response);
-                alert('Something went wrong!');
-              }
-          });
+            console.log("Rolling Wheels")
+            return false;
+            $.ajax({
+                url : "/user/checkBotIdInQueue",
+                type : "POST",
+                data : {
+                    _token : function () {
+                        return '{{csrf_token()}}';
+                    }
+                },
+                success : function(response){
+                    if(response.type === 'success'){
+                        console.log(response);
+                        // if(response.data !== undefined && response.data.length) {
+                        //     let $botWrapper = $('#dvBotWrapper');
+                        //     for(let eachData of response.data) {
+                        //         $botWrapper.find('[data-id="'+eachData+'"]').attr('data-target','').prepend('<i class="fa fa-spinner fa-spin"></i>');
+                        //     }
+                        // }
+                    }
+                },
+                error : function(response){
+                    console.log(response);
+                    alert('Something went wrong!');
+                }
+            });
 
         }
 
@@ -175,7 +177,6 @@
                     if(response.type == "success"){
                         location.reload();
                     }
-
                 }
             });
         }
