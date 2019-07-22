@@ -14,9 +14,11 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Session;
 use function GuzzleHttp\Promise\all;
+use App\Traits\AWSInstances;
 
 class UserInstancesController extends AwsConnectionController
 {
+    use AWSInstances;
     /**
      * Display a listing of the resource.
      *
@@ -303,4 +305,39 @@ class UserInstancesController extends AwsConnectionController
         return response()->json(['type' => 'success', 'data' => $bot_ids], 200);
     }
 
+    public function syncInstances(Request $request)
+    {
+        $instancesByStatus = $this->sync();
+        $awsInstancesIn = [];
+        foreach ($instancesByStatus as $status => $instances) {
+          foreach ($instances as $key => $instance) {
+              $bot = Bots::where('aws_ami_image_id', $instance['aws_ami_id'])->first();
+
+              if($bot) {
+                $instance['bot_id'] = $bot->id;
+              }
+
+              $userInstance = UserInstances::where('aws_instance_id' , $instance['aws_instance_id'])->first();
+
+              if(!$userInstance) {
+                $instance['user_id'] = Auth::id();
+                $instance['status']  = $status;
+                $userInstance = UserInstances::updateOrCreate([
+                  'aws_instance_id' => $instance['aws_instance_id']
+                ], $instance);
+              } else {
+                $userInstance->status  = $status;
+                $userInstance->save();
+              }
+
+              $awsInstancesIn[] = $instance['aws_instance_id'];
+          }
+
+          UserInstances::whereNotIn('aws_instance_id', $awsInstancesIn)->delete();
+        }
+
+        session()->flash('success', 'Instances updated successfully!');
+
+        return back();
+    }
 }

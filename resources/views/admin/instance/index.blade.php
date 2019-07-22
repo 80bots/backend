@@ -14,13 +14,16 @@ Running Bots
             <div class="card-header d-flex align-items-center justify-content-between">
                 <h5 class="mb-0">Running Bots</h5>
                 <h5 class="mb-0">
-                    <div class="form-check">
+                    <div class="form-check flex">
                         <form action="{{ route('admin.instance.running') }}" method="get" id="filter-my-bot">
                             <select name="bots_filter" id="bot-filter-dropdown" class="form-control">
                                 <option value="all" {{ $filter == 'all'? 'selected' : '' }}>All</option>
                                 <option value="mybots" {{ $filter == 'mybots'? 'selected' : '' }}>My Bots</option>
                             </select>
                         </form>
+                        <a href="{{route('admin.instance.sync')}}" class="sync-instances">
+                          <i class="fa fa-sync-alt" aria-hidden="true"></i>
+                        </a>
                     </div>
                 </h5>
             </div>

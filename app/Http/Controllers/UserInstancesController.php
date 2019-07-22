@@ -15,10 +15,12 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Session;
-
+use App\Traits\AWSInstances;
 
 class UserInstancesController extends AwsConnectionController
 {
+    use AWSInstances;
+
     /**
      * Display a listing of the resource.
      *
@@ -59,7 +61,8 @@ class UserInstancesController extends AwsConnectionController
     }
 
 
-    public function changeStatus(Request $request){
+    public function changeStatus(Request $request)
+    {
         try{
             $instanceObj = UserInstances::find($request->id);
             $instanceDetail = UserInstancesDetails::where(['user_instance_id' => $request->id])->latest()->first();
@@ -252,7 +255,8 @@ class UserInstancesController extends AwsConnectionController
 
 
     /* store bot_id in session */
-    public function storeBotIdInSession(Request $request){
+    public function storeBotIdInSession(Request $request)
+    {
             $userInstance = new UserInstances();
             $userInstance->user_id = $request->user_id;
             $userInstance->bot_id = $request->bot_id;
@@ -267,13 +271,15 @@ class UserInstancesController extends AwsConnectionController
     }
 
     /* execute job to store user instance data */
-    public function dispatchLaunchInstance(Request $request){
+    public function dispatchLaunchInstance(Request $request)
+    {
          $result =  dispatch(new StoreUserInstance($request->all()));
          Session::forget('instance_id');
         return response()->json(['type' => 'success'],200);
     }
 
-    public function checkBotIdInQueue(Request $request){
+    public function checkBotIdInQueue(Request $request)
+    {
 
         $bot_ids = array();
         $userInstances = UserInstances::select('bot_id')->where('user_id',Auth::user()->id)->where('is_in_queue','=',1)->get();
@@ -284,4 +290,5 @@ class UserInstancesController extends AwsConnectionController
         $bot_ids = array_unique($bot_ids);
         return response()->json(['type' => 'success','data' => $bot_ids],200);
     }
+
 }

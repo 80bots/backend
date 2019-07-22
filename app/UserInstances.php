@@ -11,6 +11,8 @@ class UserInstances extends BaseModel
     protected $hidden = [
     ];
 
+    protected $guarded = [];
+
     use SoftDeletes;
 
     public static function findByUserId($user_id) {
