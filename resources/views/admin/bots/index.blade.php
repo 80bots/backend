@@ -119,12 +119,28 @@
             });
         }
 
+        $(document).ready(function(){
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            var bot_ids = 0;
+            //checkBotIdInQueue();
+        });
+
+        function launchInstance(botId) {
+            $('#launch-instance').modal('show');
+            console.log(botId)
+            $('[name="bot_id"]').val(botId);
+        }
+
         $(document).on('click', '#launch-inspection-submit-btn', function () {
             $.ajax({
                 url : "/admin/storeSession",
                 type : "POST",
                 beforeSend: function() {
-                  $('#launch-inspection-submit-btn').attr('disabled', true);
+                    $('#launch-inspection-submit-btn').attr('disabled', true);
                 },
                 data : {
                     _token : function () {
@@ -147,7 +163,6 @@
                   $('#launch-inspection-submit-btn').removeAttr('disabled');
                 }
             });
-
         });
 
         function checkBotIdInQueue(){
@@ -158,7 +173,6 @@
                     _token : function () {
                         return '{{csrf_token()}}';
                     }
-
                 },
                 success : function(response){
 
@@ -177,7 +191,6 @@
 
                 }
             });
-
         }
     </script>
 @endsection

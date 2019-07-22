@@ -280,7 +280,6 @@ class UserInstancesController extends AwsConnectionController
 
     public function checkBotIdInQueue(Request $request)
     {
-
         $instance_ids = array();
         $userInstances = UserInstances::select('bot_id', 'id as instance_id', 'user_id')->where('user_id',Auth::user()->id)->where('is_in_queue','=',1)->get();
         foreach ($userInstances as $value) {
