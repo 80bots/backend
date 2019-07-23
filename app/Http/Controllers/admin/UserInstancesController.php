@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Session;
 use function GuzzleHttp\Promise\all;
 use App\Traits\AWSInstances;
 use Auth, Log, App;
+use App\User;
 
 class UserInstancesController extends AwsConnectionController
 {
@@ -239,6 +240,8 @@ class UserInstancesController extends AwsConnectionController
         try {
           \Log::info('Sync started at ' . date('Y-m-d h:i:s'));
           $instancesByStatus = $this->sync();
+
+          \Log::info($instancesByStatus);
           $awsInstancesIn = [];
           foreach ($instancesByStatus as $status => $instances) {
             foreach ($instances as $key => $instance) {
@@ -251,14 +254,20 @@ class UserInstancesController extends AwsConnectionController
               $userInstance = UserInstances::where('aws_instance_id' , $instance['aws_instance_id'])->first();
 
               if(!$userInstance) {
-                $instance['user_id']      = Auth::id();
-                $instance['status']       = $status;
-                if($status == 'running') {
-                  $instance['is_in_queue']  = 0;
+                \Log::info($instance['aws_instance_id'] . ' has not been recorded while launch or manually launched from the aws');
+                $admin = User::where('role_id', 1)->first();
+                if($admin) {
+                  $instance['user_id']      = $admin->id;
+                  $instance['status']       = $status;
+                  if($status == 'running') {
+                    $instance['is_in_queue']  = 0;
+                  }
+                  $userInstance = UserInstances::updateOrCreate([
+                    'aws_instance_id' => $instance['aws_instance_id']
+                  ], $instance);
+                } else {
+                  \Log::info($instance['aws_instance_id'] . ' cannot be synced');
                 }
-                $userInstance = UserInstances::updateOrCreate([
-                  'aws_instance_id' => $instance['aws_instance_id']
-                ], $instance);
               } else {
                 $userInstance->status  = $status;
                 $userInstance->name =  $instance['name'];
@@ -278,7 +287,7 @@ class UserInstancesController extends AwsConnectionController
             })->whereNotIn('status', ['start', 'stop'])
             ->delete();
           }
-          \Log::info('Synced successfully at ' . date('Y-m-d h:i:s'));
+          \Log::info('Synced completed at ' . date('Y-m-d h:i:s'));
         } catch (\Exception $e) {
             \Log::info($e->getMessage());
         }

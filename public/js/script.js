@@ -39,10 +39,3 @@ $(document).mouseup(function (e) {
        $('.sidebar, .sidebar-toggle').addClass('closed');
    }
 });
-
- $('.sync-instances').click(function() {
-    let _targetURL = $(this).attr('data-href');
-    $('#sync-loader').toggleClass('hidden');
-    $('#instance-div').toggleClass('hidden');
-    window.location.href =  _targetURL;
- });
