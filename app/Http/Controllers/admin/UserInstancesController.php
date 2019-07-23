@@ -223,17 +223,18 @@ class UserInstancesController extends AwsConnectionController
 
     public function checkBotIdInQueue(Request $request)
     {
-        $instance_ids = array();
+        $instanceIds = array();
         $user = Auth::user();
-        $userInstances = UserInstances::select('bot_id', 'id as instance_id', 'user_id')->where('user_id', $user->id)->where('is_in_queue', '=', 1)->get();
-        foreach ($userInstances as $value) {
-            array_push($instance_ids, $value->instance_id);
+        $instanceIds = UserInstances::select('id')
+                                ->where('user_id', $user->id)
+                                ->where('is_in_queue', '=', 1)
+                                ->pluck('id')->toArray();
+        $instanceIds = array_unique($instanceIds);
+
+        foreach($instanceIds as $instanceId) {
+            $result = dispatch(new StoreUserInstance($instanceId, $user));
         }
-        $instance_ids = array_unique($instance_ids);
-        foreach($instance_ids as $instance_id) {
-            $result = dispatch(new StoreUserInstance($instance_id, $user));
-        }
-        return response()->json(['type' => 'success', 'data' => $instance_ids], 200);
+        return response()->json(['type' => 'success', 'data' => $instanceIds], 200);
     }
 
     public function syncInstances()
