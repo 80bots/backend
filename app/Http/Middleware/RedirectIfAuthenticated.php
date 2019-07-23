@@ -18,9 +18,28 @@ class RedirectIfAuthenticated
     public function handle($request, Closure $next, $guard = null)
     {
         if (Auth::guard($guard)->check()) {
-            return redirect('/login');
+            return redirect($this->redirectTo());
         }
 
         return $next($request);
+    }
+
+    private function redirectTo()
+    {
+        // User role
+        $role = Auth::user()->role->name;
+
+        // Check user role
+        switch ($role) {
+            case 'Admin':
+                return '/admin/user';
+                break;
+            case 'User':
+                return 'user/bots';
+                break;
+            default:
+                return '/login';
+                break;
+        }
     }
 }
