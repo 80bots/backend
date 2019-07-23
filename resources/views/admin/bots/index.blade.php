@@ -15,7 +15,8 @@
                 <h5 class="mb-0">All Bots</h5>
                 <h5 class="mb-0">
                     <!-- <a href="/admin/bots/sync-instances" class="btn btn-round btn-info">Sync Instances</a> -->
-                    <a href="{{route('admin.bots.create')}}" class="btn btn-round btn-primary"><i class="fas fa-plus-circle"></i></a>
+                    <a href="{{route('admin.bots.create')}}" class="btn btn-round btn-primary"><i
+                                class="fas fa-plus-circle"></i></a>
                 </h5>
             </div>
             <div class="card-body">
@@ -35,51 +36,54 @@
                         </tr>
                         </thead>
                         <tbody>
-                          @forelse($bots as $bot)
-                              <tr>
-                                  <td>{{ $bot->bot_name ?? '' }}</td>
-                                  <td>{{ $bot->aws_ami_image_id ?? '' }}</td>
-                                  <td>{{ $bot->aws_ami_name ?? '' }}</td>
-                                  <td>{{ $bot->aws_instance_type ?? '' }}</td>
-                                  <td>{{ $bot->aws_storage_gb ?? '' }}</td>
-                                  <td>
-                                      @if( $bot->status && $bot->status == 'active')
-                                          <button type="button" class="form-group btn btn-success mb-0"
-                                                  onclick="changeStatus('{{$bot->id}}','inactive')"
-                                                  title="make it inactive">Active
-                                          </button>
-                                      @else
-                                          <button type="button" class="form-group btn btn-danger mb-0"
-                                                  onclick="changeStatus('{{$bot->id}}','active')"
-                                                  title="make it active">Inactive
-                                          </button>
-                                      @endif
-                                  </td>
-                                  <td>
-                                      <form action="{{ route('admin.bots.destroy',$bot->id) }}" method="POST">
-                                          <div class="d-flex align-items-center">
-                                              <a href="{{route('admin.bots.show',$bot->id)}}"
-                                                 class="form-group btn btn-icon btn-primary change-credit-model mb-0 mr-1"
-                                                 title="Edit Bot"><i class="fa fa-eye"></i></a>
+                        @forelse($bots as $bot)
+                            <tr>
+                                <td>{{ $bot->bot_name ?? '' }}</td>
+                                <td>{{ $bot->aws_ami_image_id ?? '' }}</td>
+                                <td>{{ $bot->aws_ami_name ?? '' }}</td>
+                                <td>{{ $bot->aws_instance_type ?? '' }}</td>
+                                <td>{{ $bot->aws_storage_gb ?? '' }}</td>
+                                <td>
+                                    @if( $bot->status && $bot->status == 'active')
+                                        <button type="button" class="form-group btn btn-success mb-0"
+                                                onclick="changeStatus('{{$bot->id}}','inactive')"
+                                                title="make it inactive">Active
+                                        </button>
+                                    @else
+                                        <button type="button" class="form-group btn btn-danger mb-0"
+                                                onclick="changeStatus('{{$bot->id}}','active')"
+                                                title="make it active">Inactive
+                                        </button>
+                                    @endif
+                                </td>
+                                <td>
+                                    <form action="{{ route('admin.bots.destroy',$bot->id) }}" method="POST">
+                                        <div class="d-flex align-items-center">
+                                            <a href="{{route('admin.bots.show',$bot->id)}}"
+                                               class="form-group btn btn-icon btn-primary change-credit-model mb-0 mr-1"
+                                               title="Edit Bot"><i class="fa fa-eye"></i></a>
 
-                                              <a href="{{route('admin.bots.edit',$bot->id)}}"
-                                                 class="form-group btn btn-icon btn-primary change-credit-model mb-0 mr-1"
-                                                 title="Edit Bot"><i class="fa fa-edit"></i></a>
+                                            <a href="{{route('admin.bots.edit',$bot->id)}}"
+                                               class="form-group btn btn-icon btn-primary change-credit-model mb-0 mr-1"
+                                               title="Edit Bot"><i class="fa fa-edit"></i></a>
 
-                                              @csrf
-                                              @method('DELETE')
-                                              <button type="submit" onclick="return confirm('Are you sure?')" class="form-group btn btn-icon btn-danger change-credit-model mb-0"><i class="fa fa-trash"></i></button>
-                                          </div>
-                                      </form>
-                                  </td>
-                                  <td>
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" onclick="return confirm('Are you sure?')"
+                                                    class="form-group btn btn-icon btn-danger change-credit-model mb-0">
+                                                <i class="fa fa-trash"></i></button>
+                                        </div>
+                                    </form>
+                                </td>
+                                <td>
                                     <a href="javascript:void(0)" onclick="launchInstance({{$bot->id}});"
-                                      class="badge badge-primary font-size-16" data-id="{{$bot->id}}">Launch</a>
-                                  </td>
-                              </tr>
-                          @empty
-                              <h3>No bots found!</h3>
-                          @endforelse
+                                       class="btn font-size-16" data-id="{{$bot->id}}">Launch <i class="fa fa-rocket"
+                                                                                                 aria-hidden="true"></i></a>
+                                </td>
+                            </tr>
+                        @empty
+                            <h3>No bots found!</h3>
+                        @endforelse
                         </tbody>
                     </table>
                 </div>
@@ -96,8 +100,8 @@
         });
 
         function launchInstance(botId) {
-          $('#launch-instance').modal('show');
-          $('[name="bot_id"]').val(botId);
+            $('#launch-instance').modal('show');
+            $('[name="bot_id"]').val(botId);
         }
 
         function changeStatus(id, status) {
@@ -119,7 +123,7 @@
             });
         }
 
-        $(document).ready(function(){
+        $(document).ready(function () {
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -137,46 +141,46 @@
 
         $(document).on('click', '#launch-inspection-submit-btn', function () {
             $.ajax({
-                url : "/admin/storeSession",
-                type : "POST",
-                beforeSend: function() {
+                url: "/admin/storeSession",
+                type: "POST",
+                beforeSend: function () {
                     $('#launch-inspection-submit-btn').attr('disabled', true);
                 },
-                data : {
-                    _token : function () {
+                data: {
+                    _token: function () {
                         return '{{csrf_token()}}';
                     },
-                    user_id : '{{ Auth::id() }}',
-                    bot_id : $('[name="bot_id"]').val(),
+                    user_id: '{{ Auth::id() }}',
+                    bot_id: $('[name="bot_id"]').val(),
                 },
-                success : function(response){
+                success: function (response) {
                     $('[name="bot_id"]').val('');
                     $('#launch-instance').modal('hide');
                     $('#launch-inspection-submit-btn').removeAttr('disabled');
-                    if(response.type === 'success'){
-                      window.location = "/admin/instance/running?bots_filter=mybots";
+                    if (response.type === 'success') {
+                        window.location = "/admin/instance/running?bots_filter=mybots";
                     }
                 },
-                error : function(response){
-                  console.log(response);
-                  alert('Something went wrong!');
-                  $('#launch-inspection-submit-btn').removeAttr('disabled');
+                error: function (response) {
+                    console.log(response);
+                    alert('Something went wrong!');
+                    $('#launch-inspection-submit-btn').removeAttr('disabled');
                 }
             });
         });
 
-        function checkBotIdInQueue(){
+        function checkBotIdInQueue() {
             $.ajax({
-                url : "/admin/checkBotIdInQueue",
-                type : "POST",
-                data : {
-                    _token : function () {
+                url: "/admin/checkBotIdInQueue",
+                type: "POST",
+                data: {
+                    _token: function () {
                         return '{{csrf_token()}}';
                     }
                 },
-                success : function(response){
+                success: function (response) {
 
-                    if(response.type === 'success'){
+                    if (response.type === 'success') {
                         // console.log(response);
                         // if(response.data !== undefined && response.data.length) {
                         //     let $botWrapper = $('#dvBotWrapper');
@@ -187,7 +191,7 @@
                     }
 
                 },
-                error : function(response){
+                error: function (response) {
 
                 }
             });
