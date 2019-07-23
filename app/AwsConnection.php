@@ -10,6 +10,7 @@ use Nubs\RandomNameGenerator\All as AllRandomName;
 use Nubs\RandomNameGenerator\Alliteration as AlliterationName;
 use Nubs\RandomNameGenerator\Vgng as VideoGameName;
 use Illuminate\Support\Facades\Log;
+use Storage;
 
 class AwsConnection extends BaseModel
 {
