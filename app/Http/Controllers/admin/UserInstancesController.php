@@ -229,7 +229,7 @@ class UserInstancesController extends AwsConnectionController
         }
         $instance_ids = array_unique($instance_ids);
         foreach($instance_ids as $instance_id) {
-            // $result = dispatch(new StoreUserInstance($instance_id, $user));
+            $result = dispatch(new StoreUserInstance($instance_id, $user));
         }
         return response()->json(['type' => 'success', 'data' => $instance_ids], 200);
     }
