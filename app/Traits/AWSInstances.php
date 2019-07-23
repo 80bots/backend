@@ -32,6 +32,9 @@ trait AWSInstances
                                 }
                             }
                         }
+                        if($name && $name == 'SaaS') {
+                          continue;
+                        }
                         $instancesByStatus[$instance['State']['Name']][] = [
                             'name'                    => $name,
                             'aws_instance_id'         => $instance['InstanceId'],

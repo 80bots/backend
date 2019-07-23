@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Session;
 use function GuzzleHttp\Promise\all;
 use App\Traits\AWSInstances;
-use Auth, Log;
+use Auth, Log, App;
 
 class UserInstancesController extends AwsConnectionController
 {
@@ -229,17 +229,19 @@ class UserInstancesController extends AwsConnectionController
         }
         $instance_ids = array_unique($instance_ids);
         foreach($instance_ids as $instance_id) {
-            $result = dispatch(new StoreUserInstance($instance_id, $user));
+            // $result = dispatch(new StoreUserInstance($instance_id, $user));
         }
         return response()->json(['type' => 'success', 'data' => $instance_ids], 200);
     }
 
-    public function syncInstances(Request $request)
+    public function syncInstances()
     {
-        $instancesByStatus = $this->sync();
-        $awsInstancesIn = [];
-        foreach ($instancesByStatus as $status => $instances) {
-          foreach ($instances as $key => $instance) {
+        try {
+          \Log::info('Sync started at ' . date('Y-m-d h:i:s'));
+          $instancesByStatus = $this->sync();
+          $awsInstancesIn = [];
+          foreach ($instancesByStatus as $status => $instances) {
+            foreach ($instances as $key => $instance) {
               $bot = Bots::where('aws_ami_image_id', $instance['aws_ami_id'])->first();
 
               if($bot) {
@@ -252,7 +254,7 @@ class UserInstancesController extends AwsConnectionController
                 $instance['user_id']      = Auth::id();
                 $instance['status']       = $status;
                 if($status == 'running') {
-                    $instance['is_in_queue']  = 0;
+                  $instance['is_in_queue']  = 0;
                 }
                 $userInstance = UserInstances::updateOrCreate([
                   'aws_instance_id' => $instance['aws_instance_id']
@@ -261,24 +263,30 @@ class UserInstancesController extends AwsConnectionController
                 $userInstance->status  = $status;
                 $userInstance->name =  $instance['name'];
                 if($status == 'running') {
-                    $userInstance->is_in_queue = 0;
+                  $userInstance->is_in_queue = 0;
                 }
                 $userInstance->save();
               }
 
               $awsInstancesIn[] = $instance['aws_instance_id'];
-          }
+            }
 
-          UserInstances::where(function($query) use($awsInstancesIn) {
-                              $query->whereNotIn('aws_instance_id', $awsInstancesIn)
-                                    ->orWhere('aws_instance_id', null)
-                                    ->orWhere('status', 'terminated');
-                          })->whereNotIn('status', ['start', 'stop'])
-                            ->delete();
+            UserInstances::where(function($query) use($awsInstancesIn) {
+              $query->whereNotIn('aws_instance_id', $awsInstancesIn)
+              ->orWhere('aws_instance_id', null)
+              ->orWhere('status', 'terminated');
+            })->whereNotIn('status', ['start', 'stop'])
+            ->delete();
+          }
+          \Log::info('Synced successfully at ' . date('Y-m-d h:i:s'));
+        } catch (\Exception $e) {
+            \Log::info($e->getMessage());
         }
 
-        session()->flash('success', 'Instances updated successfully!');
 
-        return back();
+        if(!App::runningInConsole()) {
+          session()->flash('success', 'Instances updated successfully!');
+          return back();
+        }
     }
 }
