@@ -10,22 +10,20 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','ad
         Route::post('update-credit', 'UserController@updateCredit')->name('update-credit');
 
         Route::group(['prefix' => 'instance', 'as' => 'instance.'], function() {
-            Route::any('list/{id}', 'UserInstancesController@index')->name('list');
-            Route::get('running', 'UserInstancesController@runningInstances')->name('running');
+            Route::get('{status?}/{userId}', 'UserInstancesController@index');
             Route::post('change-status', 'UserInstancesController@changeStatus')->name('change-status');
         });
     });
 
     Route::group(['prefix' => 'instance', 'as' => 'instance.'], function() {
-        Route::get('running', 'UserInstancesController@runningInstances')->name('running');
+        Route::get('sync', 'UserInstancesController@syncInstances')->name('sync');
         Route::post('change-status', 'UserInstancesController@changeStatus')->name('change-status');
+        Route::get('{status?}/{userId?}', 'UserInstancesController@index');
     });
 
     Route::resource('instance','UserInstancesController');
 
-
     Route::group(['prefix' => 'bots'], function() {
-
         Route::get('list', 'BotsController@list')->name('bots.list');
         Route::get('{platformId}/list', 'BotsController@list')->name('bots.all.list');
         Route::get('mine', 'BotsController@mineBots')->name('my-bots');

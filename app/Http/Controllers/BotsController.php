@@ -17,7 +17,7 @@ class BotsController extends Controller
 
         $platforms = new Platforms;
 
-        $platforms = $platforms->hasBots($this->limit, $platformId)->paginate(5);
+        $platforms = $platforms->hasBots($this->limit, $platformId, $status = 'active')->paginate(5);
 
         return view('user.bots.index',compact('platforms'));
     }

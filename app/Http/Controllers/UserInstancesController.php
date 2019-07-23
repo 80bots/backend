@@ -15,10 +15,12 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Session;
-
+use App\Traits\AWSInstances;
 
 class UserInstancesController extends AwsConnectionController
 {
+    use AWSInstances;
+
     /**
      * Display a listing of the resource.
      *
@@ -59,7 +61,8 @@ class UserInstancesController extends AwsConnectionController
     }
 
 
-    public function changeStatus(Request $request){
+    public function changeStatus(Request $request)
+    {
         try{
             $instanceObj = UserInstances::find($request->id);
             $instanceDetail = UserInstancesDetails::where(['user_instance_id' => $request->id])->latest()->first();
@@ -266,23 +269,33 @@ class UserInstancesController extends AwsConnectionController
     }
 
     /* execute job to store user instance data */
-    public function dispatchLaunchInstance(Request $request){
-         $result =  dispatch(new StoreUserInstance($request->all()));
-         Session::forget('instance_id');
+    public function dispatchLaunchInstance(Request $request)
+    {
+        $user = Auth::user();
+        $result =  dispatch(new StoreUserInstance($request->all(), $user));
+        Session::forget('instance_id');
         return response()->json(['type' => 'success'],200);
     }
 
     public function checkBotIdInQueue(Request $request)
     {
-        $instance_ids = array();
-        $userInstances = UserInstances::select('bot_id', 'id as instance_id', 'user_id')->where('user_id',Auth::user()->id)->where('is_in_queue','=',1)->get();
+        $instanceIds = array();
+        $user = Auth::user();
+        $userInstances = UserInstances::select('bot_id', 'id as instance_id', 'user_id')
+                                      ->where('user_id', $user->id)
+                                      ->where('is_in_queue','=',1)
+                                      ->get();
+
         foreach ($userInstances as $value) {
-            array_push($instance_ids, $value->instance_id);
+            array_push($instanceIds, $value->instance_id);
         }
-        $instance_ids = array_unique($instance_ids);
-        foreach($instance_ids as $instance_id) {
-            $result = dispatch(new StoreUserInstance($instance_id));
+
+        $instanceIds = array_unique($instanceIds);
+
+        foreach($instanceIds as $instanceId) {
+            dispatch(new StoreUserInstance($instanceId, $user));
         }
-        return response()->json(['type' => 'success','data' => $instance_ids],200);
+        return response()->json(['type' => 'success','data' => $instanceIds],200);
     }
+
 }

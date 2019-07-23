@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Auth;
 use App\UserInstances;
 use App\UserInstancesDetails;
+use Aws\Ec2\Ec2Client;
 
 class BotsController extends AppController
 {
@@ -23,17 +24,11 @@ class BotsController extends AppController
      */
     public function index()
     {
-        try{
-            $botLists = Bots::all();
-            if(!$botLists->isEmpty()){
-                return view('admin.bots.index',compact('botLists'));
-            }
-            session()->flash('error', 'Bots Not Found');
-            return view('admin.bots.index');
-        } catch (\Exception $exception){
-            session()->flash('error', $exception->getMessage());
-            return view('admin.bots.index');
+        $bots = Bots::all();
+        if(!$bots->count()){
+          session()->flash('error', 'Bots Not Found');
         }
+        return view('admin.bots.index',compact('bots'));
     }
 
     /**
@@ -45,7 +40,7 @@ class BotsController extends AppController
     {
         try{
             $platforms = Platforms::get();
-            return view('admin.bots.create',compact('platforms'));
+            return view('admin.bots.create', compact('platforms'));
         } catch (\Exception $exception){
             session()->flash('error', $exception->getMessage());
             return view('admin.bots.create');

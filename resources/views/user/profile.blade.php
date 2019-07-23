@@ -47,6 +47,39 @@
                 </div>
             </div>
         </div>
+        <br>
+        <div class="card">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <h5 class="mb-0">My Timezone</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12 col-sm-12">
+                        <form action="{{ route('user.update.timezone') }}" method="post">
+                            @csrf
+                            <div class="form-group">
+                                <label for="">Timezone</label>
+                                <select name="timezone" class="form-control">
+                                    @if(!auth()->user()->timezone)
+                                        <option value="">Select Timezone</option>
+                                        @foreach($timezones as $timezone)
+                                            <option value="{{ $timezone->timezone }}" {{ ($timezone->timezone == auth()->user()->timezone)? 'selected' : '' }}>{{ $timezone->timezone }}</option>
+                                        @endforeach
+                                    @else
+                                        @foreach($timezones as $timezone)
+                                            <option value="{{ $timezone->timezone }}" {{ ($timezone->timezone == auth()->user()->timezone)? 'selected' : '' }}>{{ $timezone->timezone }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <button class="btn btn-primary">Update</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 @endsection
 

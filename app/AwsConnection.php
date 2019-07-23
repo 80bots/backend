@@ -2,87 +2,116 @@
 
 namespace App;
 
-use Aws\Ec2\Ec2Client;
-use Illuminate\Database\Eloquent\Model;
-use File;
-use Nubs\RandomNameGenerator\Alliteration as AlliterationName;
 use Auth;
+use Aws\Ec2\Ec2Client;
+use File;
+use Illuminate\Database\Eloquent\Model;
+use Nubs\RandomNameGenerator\All as AllRandomName;
+use Nubs\RandomNameGenerator\Alliteration as AlliterationName;
+use Nubs\RandomNameGenerator\Vgng as VideoGameName;
+use Illuminate\Support\Facades\Log;
 
 class AwsConnection extends BaseModel
 {
-    public static function AwsConnection(){
+    public static function AwsConnection()
+    {
         $ec2Client = new Ec2Client([
             'region' => 'us-east-2',
             'version' => 'latest',
             'credentials' => [
-                'key'    => 'AKIAIO7MFUMEZ33ZDXKA',
+                'key' => 'AKIAIO7MFUMEZ33ZDXKA',
                 'secret' => '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',
             ],
         ]);
         return $ec2Client;
     }
 
-    public static function AwsCreateKeyPair(){
+    public static function AwsCreateKeyPair()
+    {
         $ec2Client = self::AwsConnection();
 
         // Create Aws Pair Key
-        $keyPairName = time().'_psbt';
+        $keyPairName = time() . '_psbt';
         $result = $ec2Client->createKeyPair(array(
             'KeyName' => $keyPairName
         ));
 
-        $path = public_path("uploads/ssh_keys");
-        if(!File::isDirectory($path)){
+        #todo: upload to secure S3 bucket (private, highly-restricted env)
+
+        $path = public_path("keys");
+        if (!File::isDirectory($path)) {
             File::makeDirectory($path, 777, true, true);
         }
 
-        $uploadDirPath = "/uploads/ssh_keys/".time()."_{$keyPairName}.pem";
         // Save the private key
-        $saveKeyLocation = public_path(). $uploadDirPath;
+        $saveKeyLocation = "/home/www/storage/keys/" . time() . "_{$keyPairName}.pem";
         $pemKey = $result->getPath('KeyMaterial');
         file_put_contents($saveKeyLocation, $pemKey);
         // Update the key's permissions so it can be used with SSH
         chmod($saveKeyLocation, 0600);
-        $filePath = config('app.url').$uploadDirPath;
-
-        $return['path'] = $filePath;
+        $return['path'] = $saveKeyLocation;
         $return['keyName'] = $keyPairName;
         return $return;
     }
 
-    public static function AwsCreateTagName() {
-        $generator  = new AlliterationName();
-        $randName   = strtolower(str_replace(' ', '-', $generator->getName()));
+    public static function AwsCreateTagName()
+    {
+        $generator = new AllRandomName([
+            new AlliterationName(),
+            new VideoGameName()
+        ]);
 
-        $name   = $randName;
-        $name   = str_replace(' ', '-', $name);
-        $name   = preg_replace('/[^A-Za-z\-]/', '', $name);
-        $name   = preg_replace('/-+/', '-', $name);
+        $randName = strtolower(str_replace(' ', '-', $generator->getName()));
+
+        $name = $randName;
+        $name = str_replace(' ', '', $name);
+        $name = preg_replace('/[^A-Za-z\-]/', '', $name);
+        $name = preg_replace('/-+/', '', $name);
+
+        $numbers = rand(0, 9) . rand(0, 9);
+
+        $name = $name . $numbers;
 
         return $name;
     }
 
-    public static function AwsSetSecretGroupIngress($securityGroupName){
+    public static function AwsSetSecretGroupIngress($securityGroupName)
+    {
+        $clientIp = \Request::ip();
+        $serverIp = @file_get_contents('http://169.254.169.254/latest/meta-data/public-ipv4');
+        if($serverIp === FALSE) {
+            $serverIp = str_replace('http://', '', env('APP_URL'));
+        }
+
+        //$serverIp = file_get_contents('http://169.254.169.254/latest/meta-data/public-ipv4');
         $ec2Client = self::AwsConnection();
         // Set ingress rules for the security group
         $securityGroupIngress =
             $ec2Client->authorizeSecurityGroupIngress(array(
-                'GroupName'     => $securityGroupName,
+                'GroupName' => $securityGroupName,
                 'IpPermissions' => array(
                     array(
                         'IpProtocol' => 'tcp',
-                        'FromPort'   => 80,
-                        'ToPort'     => 80,
-                        'IpRanges'   => array(
+                        'FromPort' => 6080,
+                        'ToPort' => 6080,
+                        'IpRanges' => array(
                             array('CidrIp' => '0.0.0.0/0')
                         ),
                     ),
                     array(
                         'IpProtocol' => 'tcp',
-                        'FromPort'   => 22,
-                        'ToPort'     => 22,
-                        'IpRanges'   => array(
-                            array('CidrIp' => '0.0.0.0/0')
+                        'FromPort' => 22,
+                        'ToPort' => 22,
+                        'IpRanges' => array(
+                            array('CidrIp' => $serverIp . '/32')
+                        ),
+                    ),
+                    array(
+                        'IpProtocol' => 'tcp',
+                        'FromPort' => 8080,
+                        'ToPort' => 8080,
+                        'IpRanges' => array(
+                            array('CidrIp' => $serverIp . '/32')
                         ),
                     )
                 )
@@ -90,13 +119,14 @@ class AwsConnection extends BaseModel
         return $securityGroupIngress;
     }
 
-    public static function AwsCreateSecretGroup(){
+    public static function AwsCreateSecretGroup()
+    {
         $ec2Client = self::AwsConnection();
 
-        $securityGroupName = time().'_80bots';
+        $securityGroupName = time() . '_80bots';
         // Create the security group
         $result = $ec2Client->createSecurityGroup(array(
-            'GroupName'   => $securityGroupName,
+            'GroupName' => $securityGroupName,
             'Description' => 'Basic web server security'
         ));
 
@@ -109,17 +139,18 @@ class AwsConnection extends BaseModel
         return $return;
     }
 
-    public static function AwsLaunchInstance($keyPairName, $securityGroupName, $bot, $tagName){
-
-        if($bot) {
-            $imageId      = $bot->aws_ami_image_id ??  env('AWS_IMAGEID','ami-0cd3dfa4e37921605');
+    public static function AwsLaunchInstance($keyPairName, $securityGroupName, $bot, $tagName, $user)
+    {
+        if ($bot) {
+            $imageId = $bot->aws_ami_image_id ??  env('AWS_IMAGEID', 'ami-0cd3dfa4e37921605');
             $instanceType = $bot->aws_instance_type ?? env('AWS_INSTANCE_TYPE', 't2.micro');
-            $volumeSize   = $bot->aws_storage_gb ?? env('AWS_Volume_Size', '8');
-            $userData     = $bot->aws_startup_script ?? '';
-            $botScript   = $bot->aws_custom_script ?? '';
-            $_shebang     = '#!/bin/bash';
-            $userData     = "{$_shebang}\n {$userData}\n";
+            $volumeSize = $bot->aws_storage_gb ?? env('AWS_Volume_Size', '8');
+            $userData = $bot->aws_startup_script ?? '';
+            $botScript = $bot->aws_custom_script ?? '';
+            $_shebang = '#!/bin/bash';
+            $userData = "{$_shebang}\n {$userData}\n";
             $consoleOverrides = <<<HERECONSOLE
+/*
 const eighty_bots_fs = require('fs')
 const eighty_bots_logStdOut = process.stdout
 const eighty_bots_logStdErr = process.stderr
@@ -150,12 +181,15 @@ console.info = (d) => {
     eighty_bots_infos.write(message)
     eighty_bots_logStdOut.write(message)
 };
+*/
 HERECONSOLE;
             $botScript = "{$consoleOverrides}\n {$botScript}";
 
-            if( !is_null($botScript) || !empty($botScript) ) {
-                $staticBotScript =<<<HERESHELL
+            if (!is_null($botScript) || !empty($botScript)) {
+                $staticBotScript = <<<HERESHELL
 file="script.js"
+username="kabas"
+cd /home/\$username/
 if [ -f \$file ]
     then
     rm -rf \$file
@@ -165,11 +199,13 @@ fi
 cat > \$file <<EOF
 {$botScript}
 EOF
-
+apt-get install dos2unix -y
+dos2unix \$file
+chown \$username:\$username \$file
 chmod +x \$file
-su - kabas -c "DISPLAY=:1 node \$file"
+su - \$username -c "DISPLAY=:1 node \$file"
 changedir() {
-    cd ~
+    cd /home/\$username
     frontail -p 9001 node.access.log
     frontail -p 9002 node.infos.log
     frontail -p 9003 node.errors.log
@@ -183,44 +219,51 @@ HERESHELL;
             $userData = base64_encode($userData);
 
         } else {
-            $imageId = env('AWS_IMAGEID','ami-0cd3dfa4e37921605');
-            $instanceType = env('AWS_INSTANCE_TYPE', 't2.micro');
-            $volumeSize = env('AWS_Volume_Size', '8');
+            $imageId = env('AWS_IMAGEID', 'ami-0de51bde84cbc7049');
+            $instanceType = env('AWS_INSTANCE_TYPE', 't3a.small');
+            $volumeSize = env('AWS_Volume_Size', '16');
         }
 
         $ec2Client = self::AwsConnection();
-        $user = Auth::user();
+        $tags = [
+            [
+                'Key' => 'Name',
+                'Value' => $tagName,
+            ],
+        ];
+
+        if($user) {
+            array_push($tags, [
+                'Key' => 'User Email',
+                'Value' => $user->email,
+            ]);
+        }
 
         $instanceLaunchRequest = array(
-            'ImageId'        => $imageId,
-            'MinCount'       => 1,
-            'MaxCount'       => 1,
-            'BlockDeviceMappings'     => array(
+            'ImageId' => $imageId,
+            'MinCount' => 1,
+            'MaxCount' => 1,
+            'BlockDeviceMappings' => array(
                 array(
                     'DeviceName' => 'sdh',
                     'Ebs' => array(
-                        'VolumeSize' => (int) $volumeSize
+                        'VolumeSize' => (int)$volumeSize
                     ),
                 ),
             ),
-            'InstanceType'   => $instanceType,
-            'KeyName'        => $keyPairName,
+            'InstanceType' => $instanceType,
+            'KeyName' => $keyPairName,
             'TagSpecifications' => [
                 [
                     'ResourceType' => 'instance',
-                    'Tags' => [
-                        [
-                            'Key' => 'Name',
-                            'Value' => $tagName,
-                        ],
-                    ],
+                    'Tags' => $tags,
                 ],
             ],
             'SecurityGroups' => array($securityGroupName)
         );
 
-        if(isset($userData) && !empty($userData)){
-            $instanceLaunchRequest = array_add($instanceLaunchRequest,'UserData', $userData);
+        if (isset($userData) && !empty($userData)) {
+            $instanceLaunchRequest = array_add($instanceLaunchRequest, 'UserData', $userData);
         }
 
         $result = $ec2Client->runInstances($instanceLaunchRequest);
@@ -228,14 +271,16 @@ HERESHELL;
         return $result;
     }
 
-    public static function waitUntil($instanceId){
+    public static function waitUntil($instanceId)
+    {
         $ec2Client = self::AwsConnection();
 
         $waitResponse = $ec2Client->waitUntil('InstanceRunning', ['InstanceIds' => $instanceId]);
         return $waitResponse;
     }
 
-    public static function DescribeInstances($instanceIds){
+    public static function DescribeInstances($instanceIds)
+    {
         $ec2Client = self::AwsConnection();
 
         // Describe the now-running instance to get the public URL
@@ -246,7 +291,8 @@ HERESHELL;
         return $resultDescribe;
     }
 
-    public static function StartInstance($instanceIds){
+    public static function StartInstance($instanceIds)
+    {
         $ec2Client = self::AwsConnection();
 
         $result = $ec2Client->startInstances(array(
@@ -256,7 +302,8 @@ HERESHELL;
         return $result;
     }
 
-    public static function StopInstance($instanceIds){
+    public static function StopInstance($instanceIds)
+    {
         $ec2Client = self::AwsConnection();
 
         $result = $ec2Client->stopInstances(array(
@@ -279,7 +326,8 @@ HERESHELL;
         return $result;
     }
 
-    public static function AllocateAddresses($instanceId){
+    public static function AllocateAddresses($instanceId)
+    {
 
         $ec2Client = self::AwsConnection();
         $allocation = $ec2Client->allocateAddress(array(
@@ -294,7 +342,8 @@ HERESHELL;
         return $result;
     }
 
-    public static function InstanceMonitoring($instanceIds){
+    public static function InstanceMonitoring($instanceIds)
+    {
         $ec2Client = self::AwsConnection();
         $monitorInstance = 'ON';
         if ($monitorInstance == 'ON') {
@@ -319,7 +368,7 @@ HERESHELL;
         exec('mkdir -p Shell');
         chdir('Shell');
         $returnArr['status'] = [];
-        foreach ($StartUpScript as $script){
+        foreach ($StartUpScript as $script) {
             exec($script, $output, $return);
             if (!$return) {
                 array_push($returnArr['status'], 'Success');

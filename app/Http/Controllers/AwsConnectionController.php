@@ -23,8 +23,8 @@ class AwsConnectionController extends AppController
         return $groupId;
     }
 
-    public static function LaunchInstance($keyPair,$group_id, $bots = null, $tagName = 'aws-instance'){
-        $instanceResponse = AwsConnection::AwsLaunchInstance($keyPair,$group_id, $bots, $tagName);
+    public static function LaunchInstance($keyPair,$group_id, $bots = null, $tagName = 'aws-instance', $user = null){
+        $instanceResponse = AwsConnection::AwsLaunchInstance($keyPair,$group_id, $bots, $tagName, $user);
         return $instanceResponse;
     }
 

@@ -2,15 +2,7 @@
 /vendor
 .env
 
-!/storage/framework/cache
-!/storage/framework/sessions
-!/storage/framework/views
-!/storage/logs
-/storage/logs/
 
-/storage/framework/cache/*
-/storage/framework/sessions/*
-/storage/framework/views/*
 /tests/*
 *img/
 
@@ -19,4 +11,9 @@
 public/html
 /public/Shell/
 public/vendor/*
-node_modules
+
+storage/framework/sessions/*
+storage/framework/views/*
+storage/logs/*
+storage/framework/cache/*
+/node_modules

@@ -11,12 +11,13 @@ class UserInstances extends BaseModel
     protected $hidden = [
     ];
 
-    protected $fillable = ['name'];
+    protected $guarded = [];
 
     use SoftDeletes;
 
-    public static function findByUserId($user_id) {
-        return self::where('user_id' , $user_id);
+    public function scopeFindByUserId($query, $userId)
+    {
+        return $query->where('user_id', $userId);
     }
 
     public static function findByInstanceId($instanceId)

@@ -55,7 +55,7 @@
                                             <button class="form-group btn btn-icon btn-primary change-credit-model mb-0 mr-1"  data-val="{{$user->remaining_credits}}"
                                                     value="{{$user->id}}" title="update credits"><i
                                                         class="fa fa-edit"></i></button>
-                                            <a href="{{route('admin.user.instance.list',['id' => $user->id])}}"
+                                            <a href="{{ url('admin/instance/all/' . $user->id) }}"
                                                class="form-group btn btn-icon btn-secondary mb-0"
                                                title="List Of All Instances"><i class="fa fa-eye"></i></a>
                                         </div>

@@ -27,7 +27,7 @@
                     </div>
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label for="">AMI Image Id*</label>
+                            <label for="">AMI Image ID*</label>
                             <input type="text" name="aws_ami_image_id"
                                    value="{{isset($bots->aws_ami_image_id) ? $bots->aws_ami_image_id : ''}}"
                                    class="form-control" readonly/>
@@ -51,7 +51,7 @@
                     </div>
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label for="">Startup Script*</label>
+                            <label for="aws_startup_script">Startup Script</label>
                             <textarea name="aws_startup_script" class="form-control"
                                       readonly>{{isset($bots->aws_startup_script)?$bots->aws_startup_script:''}}</textarea>
                         </div>

@@ -3,7 +3,6 @@ Route::group(['prefix' => 'user', 'as' => 'user.', 'middleware' => ['auth', 'use
     Route::post('/checkBotIdInQueue','UserInstancesController@checkBotIdInQueue');
     Route::post('/dispatch/launch-instance','UserInstancesController@dispatchLaunchInstance')->name('dispatch.launch_instance');
     Route::get('dashboard', 'UserController@index')->name('dashboard');
-    Route::get('profile/{id}', 'UserController@show')->name('profile');
     Route::get('cal-used-credit', 'AppController@CalUsedCredit')->name('cal-used-credit');
     Route::get('cal-up-time', 'AppController@CalInstancesUpTime')->name('cal-up-time');
 
