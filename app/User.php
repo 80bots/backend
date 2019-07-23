@@ -87,7 +87,7 @@ class User extends Authenticatable
         return $this->hasMany('App\UserSubscriptionPlan','user_id');
     }
 
-    public function UserCreditSendEmail($user){
+    public static function UserCreditSendEmail($user){
         try {
             Mail::send('mail.user_credit', ['user' => $user], function($mail) use ($user) {
                 $mail->to($user->email, $user->name);
