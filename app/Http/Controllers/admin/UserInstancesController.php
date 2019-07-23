@@ -26,6 +26,7 @@ class UserInstancesController extends AwsConnectionController
      */
     public function index(Request $request, $status = 'all', $userId = null)
     {
+        Session::forget('error');
         $userInstances = UserInstances::with('user');
 
         if($status = 'running') {

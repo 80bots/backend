@@ -25,6 +25,7 @@ class BotsController extends AppController
     public function index()
     {
         $bots = Bots::all();
+        $bots = collect([]);
         if(!$bots->count()){
           session()->flash('error', 'Bots Not Found');
         }
