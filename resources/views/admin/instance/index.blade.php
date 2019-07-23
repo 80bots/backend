@@ -69,7 +69,7 @@ Running Bots
                                             </select>
                                         @endif
                                     </td>
-                                    <td>{{!empty($userInstance->created_at) ? $userInstance->created_at : ''}}</td>
+                                    <td>{{!empty($userInstance->created_at) ? \App\Helper\CommonHelper::convertTimeZone($userInstance->created_at, auth()->user()->timezone) : ''}}</td>
                                     <td><a href="{{!empty($userInstance->aws_pem_file_path) ? $userInstance->aws_pem_file_path : 'javascript:void(0)'}}" title="Download pem file" download>
                                             <i class="fa fa-download"></i>
                                         </a></td>
