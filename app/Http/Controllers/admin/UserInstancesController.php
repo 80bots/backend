@@ -201,6 +201,7 @@ class UserInstancesController extends AwsConnectionController
         $userInstance = new UserInstances();
         $userInstance->user_id = $request->user_id;
         $userInstance->bot_id = $request->bot_id;
+        $userInstance->is_in_queue = 1;
         if ($userInstance->save()) {
             Log::debug('IN-queued Instance : '.json_encode($userInstance));
             Session::put('instance_id',$userInstance->id);
