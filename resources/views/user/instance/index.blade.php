@@ -100,8 +100,6 @@
         });
 
         function checkBotIdInQueue(){
-            console.log("Rolling Wheels")
-            return false;
             $.ajax({
                 url : "/user/checkBotIdInQueue",
                 type : "POST",
