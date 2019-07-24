@@ -6,10 +6,10 @@ use Auth;
 use Aws\Ec2\Ec2Client;
 use File;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 use Nubs\RandomNameGenerator\All as AllRandomName;
 use Nubs\RandomNameGenerator\Alliteration as AlliterationName;
 use Nubs\RandomNameGenerator\Vgng as VideoGameName;
-use Illuminate\Support\Facades\Log;
 use Storage;
 
 class AwsConnection extends BaseModel
@@ -46,7 +46,7 @@ class AwsConnection extends BaseModel
 
         // Save the private key
 //        $saveKeyLocation = "/home/www/storage/keys/" . time() . "_{$keyPairName}.pem";
-        $saveKeyLocation = 'keys/'. time() . "_{$keyPairName}.pem";
+        $saveKeyLocation = 'keys/' . time() . "_{$keyPairName}.pem";
         $pemKey = $result->getPath('KeyMaterial');
         Storage::disk('s3')->put($saveKeyLocation, $pemKey);
 
@@ -83,7 +83,7 @@ class AwsConnection extends BaseModel
     {
         $clientIp = \Request::ip();
         $serverIp = @file_get_contents('http://169.254.169.254/latest/meta-data/public-ipv4');
-        if($serverIp === FALSE) {
+        if ($serverIp === FALSE) {
             $serverIp = str_replace('http://', '', env('APP_URL'));
         }
 
@@ -236,7 +236,7 @@ HERESHELL;
             ],
         ];
 
-        if($user) {
+        if ($user) {
             array_push($tags, [
                 'Key' => 'User Email',
                 'Value' => $user->email,
