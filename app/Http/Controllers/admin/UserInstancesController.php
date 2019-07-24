@@ -15,6 +15,7 @@ use function GuzzleHttp\Promise\all;
 use App\Traits\AWSInstances;
 use Auth, Log, App;
 use App\User;
+use Carbon\Carbon;
 
 class UserInstancesController extends AwsConnectionController
 {
@@ -281,19 +282,25 @@ class UserInstancesController extends AwsConnectionController
 
               $awsInstancesIn[] = $instance['aws_instance_id'];
             }
-
-            UserInstances::where(function($query) use($awsInstancesIn) {
-              $query->whereNotIn('aws_instance_id', $awsInstancesIn)
-              ->orWhere('aws_instance_id', null)
-              ->orWhere('status', 'terminated');
-            })->whereNotIn('status', ['start', 'stop'])
-            ->delete();
           }
+
+          UserInstances::where(function($query) use($awsInstancesIn) {
+                          $query->whereNotIn('aws_instance_id', $awsInstancesIn)
+                          ->orWhere('aws_instance_id', null)
+                          ->orWhere('status', 'terminated');
+                        })->whereNotIn('status', ['start', 'stop'])
+                        ->delete();
+
+          UserInstances::where(function($query) {
+                          $query->where('is_in_queue', 1)
+                          ->orWhereIn('status', ['start', 'stop']);
+                        })->where('updated_at', '<' , Carbon::now()->subMinutes(10)->toDateTimeString())
+                        ->delete();
+
           \Log::info('Synced completed at ' . date('Y-m-d h:i:s'));
         } catch (\Exception $e) {
             \Log::info($e->getMessage());
         }
-
 
         if(!App::runningInConsole()) {
           session()->flash('success', 'Instances updated successfully!');
