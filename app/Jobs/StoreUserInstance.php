@@ -43,6 +43,7 @@ class StoreUserInstance implements ShouldQueue
      */
     public function handle()
     {
+        \Log::info('Starting instance for ' . $this->id);
         try {
             ini_set('memory_limit', '-1');
 
@@ -55,8 +56,13 @@ class StoreUserInstance implements ShouldQueue
             }
 
             $keyPair       = AwsConnectionController::CreateKeyPair();
+            \Log::info('Created Key pair');
+
             $tagName       = AwsConnectionController::CreateTagName();
+            \Log::info('Created tag name');
+
             $securityGroup = AwsConnectionController::CreateSecurityGroupId();
+            \Log::info('Created SecurityGroups');
 
             $keyPairName = $keyPair['keyName'];
             $keyPairPath = $keyPair['path'];
@@ -71,12 +77,12 @@ class StoreUserInstance implements ShouldQueue
 
             $instanceId = $newInstanceResponse->getPath('Instances')[0]['InstanceId'];
 
+            \Log::info('Lauched instance ' . $instanceId);
+
             array_push($instanceIds, $instanceId);
             $waitUntilResponse = AwsConnectionController::waitUntil($instanceIds);
 
             $describeInstancesResponse = AwsConnectionController::DescribeInstances($instanceIds);
-
-
 
             $instanceArray = $describeInstancesResponse->getPath('Reservations')[0]['Instances'][0];
 
@@ -112,7 +118,7 @@ class StoreUserInstance implements ShouldQueue
                 session()->flash('success', 'Instance Created successfully');
                 broadcast(new dispatchedInstanceEvent($userInstance));
             }
-            
+
             return response()->json(['message' => 'Instance Created successfully'], 200);
 
         } catch (Exception $e) {
