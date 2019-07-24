@@ -45,12 +45,12 @@ class AwsConnection extends BaseModel
         }
 
         // Save the private key
-//        $saveKeyLocation = "/home/www/storage/keys/" . time() . "_{$keyPairName}.pem";
-        $saveKeyLocation = 'keys/' . time() . "_{$keyPairName}.pem";
+        $saveKeyLocation = "/home/www/storage/keys/" . time() . "_{$keyPairName}.pem";
+        //$saveKeyLocation = 'keys/' . time() . "_{$keyPairName}.pem";
         $pemKey = $result->getPath('KeyMaterial');
-        Storage::disk('s3')->put($saveKeyLocation, $pemKey);
+        //Storage::disk('s3')->put($saveKeyLocation, $pemKey);
 
-//        file_put_contents($saveKeyLocation, $pemKey);
+        file_put_contents($saveKeyLocation, $pemKey);
         // Update the key's permissions so it can be used with SSH
         chmod($saveKeyLocation, 0600);
         $return['path'] = $saveKeyLocation;
