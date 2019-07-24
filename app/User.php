@@ -49,7 +49,7 @@ class User extends Authenticatable
     {
         return self::with(['UserSubscriptionPlan'=>function($query){
             return $query->orderBy('id','Desc')->first();
-        }])->whereHas('userInstances')->get();
+        }])->with('userInstances')->whereHas('userInstances')->get();
     }
 
     public function userInstances(){
@@ -82,7 +82,7 @@ class User extends Authenticatable
         return $this->belongsTo('App\Roles');
     }
 
-    public function UserSubscriptionPlan()
+    public function userSubscriptionPlan()
     {
         return $this->hasMany('App\UserSubscriptionPlan','user_id');
     }
@@ -119,5 +119,10 @@ class User extends Authenticatable
     }
     public function DiscussionDislikes() {
         return $this->hasMany('App\DiscussionDislikes','user_id');
+    }
+
+    public function hasSubscriptionPlan()
+    {
+        return $this->userSubscriptionPlan->count() ? true : false;
     }
 }
