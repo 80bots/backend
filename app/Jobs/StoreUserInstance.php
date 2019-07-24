@@ -44,7 +44,7 @@ class StoreUserInstance implements ShouldQueue
     public function handle()
     {
         \Log::info('Starting instance for ' . $this->id);
-        try {
+//        try {
             ini_set('memory_limit', '-1');
 
             $userInstance = UserInstances::findOrFail($this->id);
@@ -69,6 +69,8 @@ class StoreUserInstance implements ShouldQueue
 
             $groupId = $securityGroup['securityGroupId'];
             $groupName = $securityGroup['securityGroupName'];
+
+        Log::info('security');
 
             $instanceIds = [];
 
@@ -119,12 +121,13 @@ class StoreUserInstance implements ShouldQueue
                 broadcast(new dispatchedInstanceEvent($userInstance));
             }
 
+            Log::info('done');
             return response()->json(['message' => 'Instance Created successfully'], 200);
 
-        } catch (Exception $e) {
-            Log::debug('Error on catch : '.$e->getMessage());
-            return false;
-        }
+//        } catch (Exception $e) {
+//            Log::debug('Error on catch : '.$e->getMessage());
+//            return false;
+//        }
     }
 
 }

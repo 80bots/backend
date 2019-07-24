@@ -52,7 +52,7 @@ class AwsConnection extends BaseModel
 
 //        file_put_contents($saveKeyLocation, $pemKey);
         // Update the key's permissions so it can be used with SSH
-        chmod($saveKeyLocation, 0600);
+//        chmod($saveKeyLocation, 0600);
         $return['path'] = $saveKeyLocation;
         $return['keyName'] = $keyPairName;
         return $return;
@@ -83,6 +83,7 @@ class AwsConnection extends BaseModel
     {
         $clientIp = \Request::ip();
         $serverIp = @file_get_contents('http://169.254.169.254/latest/meta-data/public-ipv4');
+        dd($serverIp);
         if ($serverIp === FALSE) {
             $serverIp = str_replace('http://', '', env('APP_URL'));
         }
