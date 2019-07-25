@@ -272,8 +272,9 @@ class UserInstancesController extends AwsConnectionController
                   \Log::info($instance['aws_instance_id'] . ' cannot be synced');
                 }
               } else {
-                $userInstance->status  = $status;
-                $userInstance->name =  $instance['name'];
+                $userInstance->status         = $status;
+                $userInstance->tag_name       =  $instance['tag_name'];
+                $userInstance->tag_user_email =  $instance['tag_user_email'];
                 if($status == 'running') {
                   $userInstance->is_in_queue = 0;
                 }

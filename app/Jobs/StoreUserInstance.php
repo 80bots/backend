@@ -95,7 +95,7 @@ class StoreUserInstance implements ShouldQueue
 
             // store instance details in database
 
-            $userInstance->name                     = $tagName;
+            $userInstance->tag_name                 = $tagName;
             $userInstance->aws_ami_name             = $bot->aws_ami_name;
             $userInstance->aws_instance_id          = $instanceId;
             $userInstance->aws_ami_id               = $awsAmiId;
@@ -107,6 +107,8 @@ class StoreUserInstance implements ShouldQueue
             $userInstance->aws_pem_file_path        = $keyPairPath;
             $userInstance->created_at               = $created_at;
             $userInstance->is_in_queue              = 0;
+            $userInstance->tag_user_email           = $this->user ? $this->user->email : null;
+
 
             if($userInstance->save()){
                 Log::debug('Updated Instance : '.json_encode($userInstance));

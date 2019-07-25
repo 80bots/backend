@@ -24,12 +24,15 @@ trait AWSInstances
             if ($instances) {
                 foreach ($instances as $instance) {
                     try {
-                        $name = false;
+                        $name  = null;
+                        $email = null;
                         if( isset($instance['Tags']) && count($instance['Tags'])) {
                             foreach ($instance['Tags'] as $key => $tag) {
                                 if(isset($tag['Key']) && $tag['Key'] == 'Name') {
                                     $name = $tag['Value'];
-                                    break;
+                                }
+                                if(isset($tag['Key']) && $tag['Key'] == 'User Email') {
+                                    $email = $tag['Value'];
                                 }
                             }
                         }
@@ -37,7 +40,8 @@ trait AWSInstances
                           continue;
                         }
                         $instancesByStatus[$instance['State']['Name']][] = [
-                            'name'                    => $name,
+                            'tag_name'                => $name,
+                            'tag_user_email'          => $email,
                             'aws_instance_id'         => $instance['InstanceId'],
                             'aws_ami_id'              => $instance['ImageId'],
                             'aws_security_group_id'   => isset($instance['SecurityGroups']) && count($instance['SecurityGroups']) ? $instance['SecurityGroups'][0]['GroupId'] : null,
