@@ -59503,6 +59503,26 @@ toastr__WEBPACK_IMPORTED_MODULE_1___default.a.options = {
 };
 
 if (typeof io !== 'undefined') {
+  var addInstanceToList = function addInstanceToList(response) {
+    if (response.hasOwnProperty('instance') && Object.keys(response.instance).length) {
+      var _id = response.instance.id;
+      var _aws_public_ip = response.instance.aws_public_ip;
+      var _name = response.instance.name;
+      var _up_time = response.instance.up_time;
+      var _email = response.user.email;
+      var _aws_instance_id = response.instance.aws_instance_id;
+      var _updated_at = response.instance.updated_at;
+      var _aws_pem_file_path = response.instance.aws_pem_file_path;
+
+      if (table !== 'undefined' || table !== null) {
+        var statusHtml = "<select name=\"instStatus\" class=\"form-control instStatus\" data-id=\"".concat(_id, "\">\n                            <option value=\"running\">Running</option>\n                            <option value=\"stop\">Stop</option>\n                            <option value=\"terminated\">Terminate</option>\n                        </select>");
+        var totalHtml = "<tr class=\"instance-".concat(_id, "\" role=\"row\">\n                    <td class=\"sorting_1\">").concat(_email, "</td>\n                    <td class=\"name\">").concat(_name, "</td>\n                    <td class=\"instanceId\">").concat(_aws_instance_id, "</td>\n                    <td class=\"uptime\">").concat(_up_time, "</td>\n                    <td class=\"publicIp\">").concat(_aws_public_ip, "</td>\n                    <td class=\"statusSelect\">\n                        ").concat(statusHtml, "\n                    </td>\n                    <td>").concat(_updated_at, "</td>\n                    <td>\n                        <a href=\"").concat(_aws_pem_file_path, "\" title=\"Download pem file\" download=\"\">\n                            <i class=\"fa fa-download\"></i>\n                        </a>\n                    </td>\n                </tr>");
+        var jRow = $(totalHtml);
+        table.row.add(jRow).draw();
+      }
+    }
+  };
+
   var echo = window.Echo = new laravel_echo__WEBPACK_IMPORTED_MODULE_0__["default"]({
     broadcaster: 'socket.io',
     host: window.location.hostname + ':6001'
@@ -59524,6 +59544,14 @@ if (typeof io !== 'undefined') {
     toastr__WEBPACK_IMPORTED_MODULE_1___default.a.info('The instance is live now.');
     echo.leave('dispatched-instances.' + window.Laravel.user);
   });
+
+  if (window.Laravel.type === 'Admin') {
+    var livechannel = echo.channel('instance-live');
+    livechannel.on('App\\Events\\InstanceCreation', function (response) {
+      console.log(response);
+      addInstanceToList(response);
+    });
+  }
 } // window.Pusher = require('pusher-js');
 // window.Echo = new Echo({
 //     broadcaster: 'pusher',

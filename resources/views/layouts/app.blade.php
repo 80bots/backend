@@ -50,7 +50,8 @@ $user = Auth::user();
 <script>
     window.Laravel = {
         'csrfToken': '{{ csrf_token() }}',
-        'user': '{{Auth::user()->id}}'
+        'user': '{{Auth::user()->id}}',
+        'type': '{{ Auth::user()->role->name }}'
     };
 </script>
 <script type="text/javascript" src="{{asset('js/jquery-3.3.1.min.js')}}"></script>

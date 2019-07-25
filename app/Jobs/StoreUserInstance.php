@@ -15,6 +15,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use App\Events\dispatchedInstanceEvent;
+use App\Events\InstanceCreation;
 
 class StoreUserInstance implements ShouldQueue
 {
@@ -119,6 +120,7 @@ class StoreUserInstance implements ShouldQueue
                 $userInstanceDetail->save();
                 session()->flash('success', 'Instance Created successfully');
                 broadcast(new dispatchedInstanceEvent($userInstance));
+                broadcast(new InstanceCreation($this->user, $userInstance));
             }
 
             return response()->json(['message' => 'Instance Created successfully'], 200);

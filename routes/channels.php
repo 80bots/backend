@@ -17,3 +17,7 @@ Broadcast::channel('App.User.{id}', function ($user, $id) {
 Broadcast::channel('dispatched-instances.{user_id}', function ($user, $user_id) {
     return true;
 });
+
+Broadcast::channel('instance-live', function ($user) {
+    return $user->role->name === 'Admin';
+});
