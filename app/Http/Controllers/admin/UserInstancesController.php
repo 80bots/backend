@@ -256,6 +256,10 @@ class UserInstancesController extends AwsConnectionController
 
               $userInstance = UserInstances::where('aws_instance_id' , $instance['aws_instance_id'])->first();
 
+              if($status == 'stopped') {
+                  $status = 'stop';
+              }
+
               if(!$userInstance) {
                 \Log::info($instance['aws_instance_id'] . ' has not been recorded while launch or manually launched from the aws');
                 $admin = User::where('role_id', 1)->first();
@@ -273,12 +277,13 @@ class UserInstancesController extends AwsConnectionController
                 }
               } else {
                 $userInstance->status         = $status;
-                $userInstance->tag_name       =  $instance['tag_name'];
-                $userInstance->tag_user_email =  $instance['tag_user_email'];
+                $userInstance->tag_name       = $instance['tag_name'];
+                $userInstance->tag_user_email = $instance['tag_user_email'];
                 if($status == 'running') {
                   $userInstance->is_in_queue = 0;
                 }
                 $userInstance->save();
+
               }
 
               $awsInstancesIn[] = $instance['aws_instance_id'];
