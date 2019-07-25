@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title')
-Scheduling instances edit
+    {{ __('keywords.scheduling.title') . ' ' . __('keywords.edit') }}
 @endsection
 
 @section('css')
@@ -16,13 +16,13 @@ Scheduling instances edit
         @method('PATCH')
             @csrf
         <div class="card-header d-flex align-items-center justify-content-between">
-            <h5 class="mb-0">Add Scheduling</h5>
+            <h5 class="mb-0">{{ __('keywords.scheduling.title') }}</h5>
         </div>
         <div class="card-body">
             <div class="row">
                 <div class="col-md-6 col-sm-12">
                     <div class="form-group">
-                        <label for="">Select Instance*</label>
+                        <label for="">{{ __('keywords.scheduling.select_instance') }}*</label>
                         <p> {{isset($scheduling->userInstances['aws_instance_id']) ? $scheduling->userInstances['aws_instance_id'] : ''}}</p>
 
                         <input type="hidden" name="user_instances_id" value="{{ $scheduling->user_instances_id }}">
@@ -36,17 +36,21 @@ Scheduling instances edit
                 </div>
                 <div class="col-md-6 col-sm-12">
                     <div class="form-group">
-                        <label for="">Status*</label>
+                        <label for="">{{ __('keywords.status') }}*</label>
                         <select name="status" id="status" class="form-control">
-                            <option value="">Select Status </option>
-                            <option {{ $scheduling->status == 'active' ? 'selected="selected"' : '' }} value="active">Active</option>
-                            <option {{ $scheduling->status == 'inactive' ? 'selected="selected"' : '' }}  value="inactive">Inactive</option>
+                            <option value="">{{ __('keywords.scheduling.select_status') }}</option>
+                            <option {{ $scheduling->status == 'active' ? 'selected="selected"' : '' }} value="active">
+                                {{ __('keywords.scheduling.statuses.active') }}
+                            </option>
+                            <option {{ $scheduling->status == 'inactive' ? 'selected="selected"' : '' }} value="inactive">
+                                {{ __('keywords.scheduling.statuses.inactive') }}
+                            </option>
                         </select>
                     </div>
                 </div>
                 <div class="col-md-6 col-sm-12">
                     <div class="form-group">
-                        <label for="">Start time*</label>
+                        <label for="">{{ __('keywords.scheduling.start_time') }}*</label>
                           <div class="input-group date time-picker" id="startTimePicker" data-target-input="nearest">
                                 <input id="start_time" type="text" class="form-control datetimepicker-input" data-target="#startTimePicker" value="{{isset($scheduling->start_time) ? $scheduling->start_time : ''}}" name="start_time" data-toggle="datetimepicker"/>
                                 <div class="input-group-append" data-target="#startTimePicker" data-toggle="datetimepicker">
@@ -58,7 +62,7 @@ Scheduling instances edit
                 </div>
                 <div class="col-md-6 col-sm-12">
                     <div class="form-group">
-                        <label for="">End time*</label>
+                        <label for="">{{ __('keywords.scheduling.end_time') }}*</label>
                         <div class="input-group date time-picker" id="endTimePicker" data-target-input="nearest">
                                 <input id="end_time" type="text" class="form-control datetimepicker-input" value="{{isset($scheduling->end_time) ? $scheduling->end_time : ''}}" data-target="#endTimePicker" data-toggle="datetimepicker" name="end_time"/>
                                 <div class="input-group-append" data-target="#endTimePicker" data-toggle="datetimepicker">
@@ -75,7 +79,7 @@ Scheduling instances edit
             </div>
         </div>
         <div class="card-footer text-right">
-            <button type="submit" class="btn btn-primary btn-round">Update</button>
+            <button type="submit" class="btn btn-primary btn-round">{{ __('keywords.update') }}</button>
         </div>
     </form>
 </div>

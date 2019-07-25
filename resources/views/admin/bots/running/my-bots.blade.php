@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title')
-    My Bots
+    {{ __('keywords.bots.running.my_bots') }}
 @endsection
 
 @section('css')
@@ -14,13 +14,13 @@
         <!-- where is this instance_id -->
         @include('layouts.imports.messages')
         <div class="my-3 p-3 bg-white rounded shadow-sm">
-            <h6 class="border-bottom  pb-2 mb-0">Running Bots</h6>
+            <h6 class="border-bottom  pb-2 mb-0">{{ __('admin.bots.running.title') }}</h6>
             @foreach($userInstances as $instance)
                 <div class="media text-muted pt-3 d-flex align-items-start">
                     <svg class="bd-placeholder-img mr-2 rounded flex-shrink-0" width="32" height="32"
                          xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"
                          focusable="false" role="img" aria-label="Placeholder: 32x32"><title>
-                            Placeholder</title>
+                            {{ __('keywords.placeholder') }}</title>
                         <rect width="100%" height="100%" fill="#007bff"></rect>
                         <text x="50%" y="50%" fill="#007bff" dy=".3em">32x32</text>
                     </svg>
@@ -37,18 +37,23 @@
                         <div class="col-md-2 col-sm-2">
                             @if($instance->is_in_queue == 1)
                                 <a href="javascript:void(0)" data-toggle="modal" data-target="#launch-instance"
-                                   class="badge badge-primary ml-2 font-size-16" title="Process In Queue">IN-Queue</a>
+                                   class="badge badge-primary ml-2 font-size-16"
+                                   title="{{ __('keywords.bots.running.process_in_queue') }}">
+                                    {{ __('keywords.bots.statuses.in_queue') }}
+                                </a>
                             @else
                                 <select name="instStatus" class="form-control instStatus" data-id="{{$instance->id}}">
                                     @if($instance->status)
                                       @if($instance->status == 'running')
-                                          <option value="running" selected>Running</option>
+                                          <option value="running" selected>
+                                              {{ __('keywords.bots.statuses.running') }}
+                                          </option>
                                       @elseif($instance->status == 'stop')
-                                          <option value="start" selected>Start</option>
+                                          <option value="start" selected>{{ __('keywords.start') }}</option>
                                       @endif
                                     @endif
-                                    <option value="stop" {{$instance->status && $instance->status == 'stop' ? 'selected' : ''}}>Stop</option>
-                                    <option value="terminated" {{$instance->status && $instance->status == 'terminated' ? 'selected' : ''}}>Terminated</option>
+                                    <option value="stop" {{$instance->status && $instance->status == 'stop' ? 'selected' : ''}}>{{ __('keywords.stop') }}</option>
+                                    <option value="terminated" {{$instance->status && $instance->status == 'terminated' ? 'selected' : ''}}>{{ __('keywords.bots.statuses.terminated') }}</option>
                                 </select>
                             @endif
                         </div>
@@ -62,7 +67,7 @@
                                onclick="SetBotName('{{$botName}}','{{$instance->id}}')" class="badge badge-primary font-size-16"><i class="fa fa-pencil-alt"></i></a>
                             @if($instance->is_in_queue == 1)
                                 <a href="javascript:void(0)" data-toggle="modal" data-target="#launch-instance"
-                                   class="badge badge-primary ml-2 font-size-16 refresh" title="Process In Queue"><i class="fa fa-sync-alt"></i></a>
+                                   class="badge badge-primary ml-2 font-size-16 refresh" title="{{ __('keywords.bots.running.process_in_queue') }}"><i class="fa fa-sync-alt"></i></a>
                             @endif
                         </div>
                     </div>

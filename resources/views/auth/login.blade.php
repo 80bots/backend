@@ -5,7 +5,7 @@
 @endsection
 
 @section('title')
-    <title>Login | 80bots</title>
+    <title>{{ __('auth.login.title') . ' | ' . __('keywords.brand') }}</title>
 @endsection
 
 @section('content')
@@ -19,9 +19,9 @@
                 @csrf
                 <a href="/" class="sidebar-brand text-decoration-none"><img
                             src="{{ asset('assets/images/80bots.svg') }}" alt=""></a>
-                <h4 class="text-center">Sign In</h4>
+                <h4 class="text-center">{{ __('auth.sign_in') }}</h4>
                 <div class="form-group">
-                    <label for="email">Email</label>
+                    <label for="email">{{ __('auth.email') }}</label>
                     <input id="email" type="email" class="form-control{{ $errors->has('email') ? ' is-invalid' : '' }}"
                            name="email" value="{{ old('email') }}" required autofocus>
                     @if ($errors->has('email'))
@@ -32,7 +32,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="password">Password</label>
+                    <label for="password">{{ __('auth.password') }}</label>
                     <input id="password" type="password"
                            class="form-control{{ $errors->has('password') ? ' is-invalid' : '' }}" name="password"
                            value="{{ old('password') }}" required autofocus>
@@ -43,10 +43,13 @@
                     @endif
                 </div>
 
-                <button type="submit" class="btn btn-primary btn-block text-uppercase mb-3">Sign in</button>
+                <button type="submit" class="btn btn-primary btn-block text-uppercase mb-3">
+                    {{ __('auth.sign_in') }}
+                </button>
                 <div class="text-right">
-                    <a href="#frmForgotPwd" data-toggle="form" data-slide="left" class="text-dark text-decoration-none">Forgot
-                        Password?</a>
+                    <a href="#frmForgotPwd" data-toggle="form" data-slide="left" class="text-dark text-decoration-none">
+                        {{ __('auth.login.forgot_password') }}
+                    </a>
                 </div>
             </form>
             <form id="frmForgotPwd" class="flex-grow-1" action="{{route('password.email')}}" method="post"
@@ -54,21 +57,27 @@
                 @csrf
                 <a href="/" class="sidebar-brand text-decoration-none"><img
                             src="{{ asset('assets/images/80bots.svg') }}" alt=""></a>
-                <h4 class="text-primary text-center">Forgot password?</h4>
-                <p class="text-center">Reset password link will be sent on email id</p>
+                <h4 class="text-primary text-center">{{ __('auth.login.forgot_password') }}</h4>
+                <p class="text-center">{{ __('auth.login.reset_password_link') }}</p>
                 <div class="form-group">
-                    <label for="">Email</label>
+                    <label for="">{{ __('auth.email') }}</label>
                     <input type="email" name="email" class="form-control"/>
                 </div>
-                <button type="submit" class="btn btn-primary btn-block text-uppercase mb-3">Send reset link</button>
+                <button type="submit" class="btn btn-primary btn-block text-uppercase mb-3">
+                    {{ __('auth.login.send_reset_link') }}
+                </button>
                 <div>
-                    <a href="#frmSignin" data-toggle="form" data-slide="right" class="text-dark text-decoration-none">Back
-                        to Sign In</a>
+                    <a href="#frmSignin" data-toggle="form" data-slide="right" class="text-dark text-decoration-none">
+                        {{ __('auth.login.back_to_sign_in') }}
+                    </a>
                 </div>
             </form>
         </div>
-        <h5 class="text-white mb-0">Not registered? <a href="{{route('register')}}" class="text-white font-weight-bold">Sign
-                up</a>
+        <h5 class="text-white mb-0">
+            {{ __('auth.login.not_registered') }}
+            <a href="{{route('register')}}" class="text-white font-weight-bold">
+                {{ __('auth.sign_up') }}
+            </a>
         </h5>
     </div>
 

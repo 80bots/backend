@@ -21,13 +21,11 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth','ad
         Route::get('{status?}/{userId?}', 'UserInstancesController@index');
     });
 
-    Route::resource('instance','UserInstancesController');
-
-
     Route::group(['prefix' => 'bots'], function() {
         Route::get('list', 'BotsController@list')->name('bots.list');
         Route::get('{platformId}/list', 'BotsController@list')->name('bots.all.list');
         Route::get('mine', 'BotsController@mineBots')->name('my-bots');
+        Route::resource('running','UserInstancesController');
 
         Route::group(['as' => 'bots.'], function() {
           Route::post('change-status', 'BotsController@changeStatus')->name('change-status');

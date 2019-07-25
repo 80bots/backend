@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title')
-    Bots Listing
+    {{ __('admin.bots.bots_list') }}
 @endsection
 
 @section('css')
@@ -18,7 +18,7 @@
                         <svg class="bd-placeholder-img mr-2 rounded flex-shrink-0" width="32" height="32"
                              xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"
                              focusable="false" role="img" aria-label="Placeholder: 32x32"><title>
-                                Placeholder</title>
+                                {{ __('admin.bots.placeholder') }}</title>
                             <rect width="100%" height="100%" fill="#007bff"></rect>
                             <text x="50%" y="50%" fill="#007bff" dy=".3em">32x32</text>
                         </svg>
@@ -40,19 +40,21 @@
                             </div>
                             <div class="col-md-2 col-sm-12 text-right">
                               <a href="javascript:void(0)" onclick="launchInstance({{$bot->id}});"
-                                class="badge badge-primary font-size-16" data-id="{{$bot->id}}">Launch</a>
+                                class="badge badge-primary font-size-16" data-id="{{$bot->id}}">
+                                  {{ __('keywords.launch') }}
+                              </a>
                             </div>
                         </div>
                     </div>
                 @empty
-                  <h3>No bots found!</h3>
+                  <h3>{{ __('keywords.bots.not_found') }}</h3>
                 @endforelse
                 <small class="d-block text-right mt-3">
-                    <a href="{{route('admin.bots.all.list',['id' => $platform->id])}}">All Bots</a>
+                    <a href="{{route('admin.bots.all.list',['id' => $platform->id])}}">{{ __('admin.bots.title') }}</a>
                 </small>
             </div>
         @empty
-            <h3>No bots found!</h3>
+            <h3>{{ __('keywords.bots.not_found') }}</h3>
         @endforelse
     </div>
     @include('includes.launch-instance')

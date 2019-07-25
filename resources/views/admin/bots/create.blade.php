@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title')
-    Bots Create
+    {{ __('admin.bots.create_title') }}
 @endsection
 
 @section('css')
@@ -10,79 +10,79 @@
 
 @section('content')
     <div class="wrapper">
-        <form class="card" id="bot-create" action="{{route('admin.bots.store')}}" method="post">
+        <form class="card" id="bot-create" action="{{route('admin.bots.create.create.store')}}" method="post">
             @csrf
             <div class="card-header d-flex align-items-center justify-content-between">
-                <h5 class="mb-0">Add Bot</h5>
+                <h5 class="mb-0">{{ __('admin.bots.create.create.add_bot') }}</h5>
             </div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label for="">Platform*</label>
+                            <label for="">{{ __('admin.bots.platform') }}*</label>
                             <input type="text" name="Platform" class="form-control">
                         </div>
                     </div>
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label for="">Bot Name*</label>
+                            <label for="">{{ __('keywords.bots.bot_name') }}*</label>
                             <input type="text" name="bot_name" class="form-control"/>
                         </div>
                     </div>
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label for="">AMI Image ID*</label>
+                            <label for="">{{ __('keywords.bots.ami_id') }}*</label>
                             <input type="text" name="aws_ami_image_id" class="form-control"/>
                         </div>
                     </div>
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label for="">AMI Name</label>
+                            <label for="">{{ __('keywords.bots.ami_name') }}</label>
                             <input type="text" name="aws_ami_name" class="form-control"/>
                         </div>
                     </div>
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label for="">Instance Type*</label>
+                            <label for="">{{ __('keywords.bots.instance_type') }}*</label>
                             <input type="text" name="aws_instance_type" class="form-control"/>
                         </div>
                     </div>
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label for="">Storage GB*</label>
+                            <label for="">{{ __('keywords.bots.storage') }}*</label>
                             <input type="text" name="aws_storage_gb" class="form-control"/>
                         </div>
                     </div>
                     <div class="col-md-12 col-sm-12">
                         <div class="form-group">
-                            <label for="aws_startup_script">Startup Script</label>
+                            <label for="aws_startup_script">{{ __('keywords.bots.startup_script') }}</label>
                             <textarea name="aws_startup_script" class="form-control" rows="23"></textarea>
                         </div>
                     </div>
                     <div class="col-md-12 col-sm-12">
                         <div class="form-group">
-                            <label for="aws_custom_script">Bot Script</label>
+                            <label for="aws_custom_script">{{ __('keywords.bots.bot_script') }}</label>
                             <textarea id="aws_custom_script" name="aws_custom_script" class="form-control"
                                       rows="23"></textarea>
                         </div>
                     </div>
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label for="">Bot Description*</label>
+                            <label for="">{{ __('keywords.bots.bot_desc') }}*</label>
                             <textarea name="description" class="form-control"></textarea>
                         </div>
                     </div>
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label for="">Tags</label>
+                            <label for="">{{ __('keywords.bots.tags') }}</label>
                             <textarea name="tags" class="form-control"
-                                      placeholder="Comma(,) consider as new Tags"></textarea>
+                                      placeholder="{{ __('keywords.bots.tags_placeholder') }}"></textarea>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="card-footer text-right">
-                <button type="submit" class="btn btn-primary btn-round">Add</button>
+                <button type="submit" class="btn btn-primary btn-round">{{ __('keywords.add') }}</button>
             </div>
         </form>
     </div>

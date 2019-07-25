@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title')
-    Low Credit Notification List
+    {{ __('admin.percent.low_credit_notification') . ' '. __('keywords.list') }}
 @endsection
 
 @section('css')
@@ -12,7 +12,7 @@
     <div class="wrapper">
         <div class="card">
             <div class="card-header d-flex align-items-center justify-content-between">
-                <h5 class="mb-0">Low Credit Notification List</h5>
+                <h5 class="mb-0">{{ __('admin.percent.low_credit_notification') . ' '. __('keywords.list') }}</h5>
                 <h5 class="mb-0"><a href="{{ route('admin.percent.create') }}" class="btn btn-round btn-primary"><i class="fas fa-plus-circle"></i></a></h5>
             </div>
             <div class="card-body">
@@ -21,9 +21,9 @@
                     <table id="percentage-list" class="table thead-default vertical-middle mb-0">
                         <thead>
                         <tr>
-                            <th>Id</th>
-                            <th>Percentage</th>
-                            <th>Action</th>
+                            <th>{{ __('admin.percent.id') }}</th>
+                            <th>{{ __('admin.percent.percentage') }}</th>
+                            <th>{{ __('admin.percent.action') }}</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -42,11 +42,11 @@
 
                                                 <a href="{{route('admin.percent.edit',$percentage->id)}}"
                                                    class="form-group btn btn-icon btn-primary change-credit-model mb-0 mr-1"
-                                                   title="Edit Plan"><i class="fa fa-edit"></i></a>
+                                                   title="{{ __('admin.percent.edit_plan') }}"><i class="fa fa-edit"></i></a>
 
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" onclick="return confirm('Are you sure?')" class="form-group btn btn-icon btn-danger change-credit-model mb-0"><i class="fa fa-trash"></i></button>
+                                                <button type="submit" onclick="return confirm(__('keywords.are_you_sure'))" class="form-group btn btn-icon btn-danger change-credit-model mb-0"><i class="fa fa-trash"></i></button>
                                             </div>
                                         </form>
                                     </td>

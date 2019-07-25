@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title')
-    Subscription Plans
+    {{ __('user.subscription.title') }}
 @endsection
 
 @section('css')
@@ -13,7 +13,7 @@
         @if(isset($plans) && !empty($plans))
         <div class="card border-bottom-0 rounded-0 rounded-top">
             <div class="card-header d-flex align-items-center justify-content-between">
-                <h5 class="mb-0">{{ __('keywords.prcing_plans') }}</h5>                
+                <h5 class="mb-0">{{ __('user.subscription.title') }}</h5>
             </div>
             <div class="card-body d-flex justify-content-center">
                 <div class="row w-75 p-3"> 
@@ -26,15 +26,16 @@
                                 </h5>
                                 <h5 class="card-subtitle subscription text-blue price mb-2 font-weight-bold mt-4">
                                     {{!empty($plan->price) ? config('app.currency_symbol') . $plan->price : ''}}
+                                </h5>
                                 </h6>
                                 <h6 class="subscription mb-2 text-muted mt-3">
                                     {{!empty($plan->credit) ? $plan->credit : ''}}
-                                    {{ __('keywords.credits.plural') }}
+                                    {{ __('user.subscription.credits.plural') }}
                                 </h6>
                             </div>
                             <div class="card-footer">
                                 <button {{ isset($activeplan) && $activeplan->id == $plan->id ? 'disabled' : '' }} class="mb-2 plan-btn mt-1 btn btn-primary btn-round text-uppercase" data-plan_id="{{!empty($plan->stripe_plan) ? $plan->stripe_plan : ''}}">
-                                    {{ __('keywords.subscribe-btn-text') }}
+                                    {{ __('user.subscription.button') }}
                                 </button>
                             </div>
                         </div>
@@ -55,31 +56,31 @@
                             @csrf
                             <div class="offset-3 col-md-6 col-sm-12">
                                 <div class="form-group">
-                                    <label for="customer_name">Name*</label>
+                                    <label for="customer_name">{{ __('user.subscription.card.name') }}*</label>
                                     <input type="text" value="{{ old('customer_name') }}" id="customer_name" name="customer_name" class="form-control">
                                 </div>
                             </div>
                             <div class="offset-3 col-md-6 col-sm-12">
                                 <div class="form-group">
-                                    <label for="card_number">Credit Card Number*</label>
+                                    <label for="card_number">{{ __('user.subscription.card.number') }}*</label>
                                     <input type="text" value="{{ old('number') }}" id="card_number" name="number" maxlength="16" class="form-control"/>
                                 </div>
                             </div>
                             <div class="offset-3 col-md-6 col-sm-12">
                                 <div class="form-group">
-                                    <label for="card_month">Expiry Month*</label>
+                                    <label for="card_month">{{ __('user.subscription.card.expiry_month') }}*</label>
                                     <input type="text" value="{{ old('month') }}" id="card_month" name="month" class="form-control"/>
                                 </div>
                             </div>
                             <div class="offset-3 col-md-6 col-sm-12">
                                 <div class="form-group">
-                                    <label for="card_year">Expiry Year*</label>
+                                    <label for="card_year">{{ __('user.subscription.card.expiry_year') }}*</label>
                                     <input type="text" value="{{ old('year') }}" id="card_year" name="year" class="form-control"/>
                                 </div>
                             </div>
                             <div class="offset-3 col-md-6 col-sm-12">
                                 <div class="form-group">
-                                    <label for="card_cvv">CVV*</label>
+                                    <label for="card_cvv">{{ __('user.subscription.card.cvv') }}*</label>
                                     <input type="text" value="{{ old('cvv') }}" id="card_cvv" name="cvv" class="form-control"/>
                                 </div>
                             </div>

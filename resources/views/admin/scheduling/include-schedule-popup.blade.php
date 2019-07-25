@@ -1,4 +1,3 @@
-
 <div class="modal fade" id="create-scheduler" role="dialog">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -19,13 +18,13 @@
                     </div>
                     <div class="row">
                         <div class="col-sm-3 border-right">
-                            Type
+                            {{ __('keywords.scheduling.type') }}
                         </div>
                         <div class="col-sm-3 border-right">
-                            Days
+                            {{ __('keywords.scheduling.days') }}
                         </div>
                         <div class="col-sm-5 border-right">
-                            Scheduled Time
+                            {{ __('keywords.scheduling.time') }}
                         </div>
                         <div class="col-sm-1 align-items-center"></div>
                     </div>
@@ -34,7 +33,9 @@
                 </div>
                 <div class="modal-footer">
                     <input type="submit" id="launch-inspection-submit-btn" class="btn btn-success" value="Save">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                        {{ __('keywords.close') }}
+                    </button>
                 </div>
             </form>
         </div>

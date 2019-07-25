@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title')
-Bot Sessions
+    {{ __('user.bots.sessions.title') }}
 @endsection
 
 @section('css')
@@ -13,23 +13,23 @@ Bot Sessions
         <div class="align-items-center bg-purple d-flex p-3 rounded shadow-sm text-white-50 mb-3">
             <h4 class="border mb-0 mr-2 pb-2 pl-3 pr-3 pt-2 rounded text-white">8</h4>
             <div class="lh-100">
-                <h6 class="mb-0 text-white lh-100">80bots</h6>
-                <small>Since 2019</small>
+                <h6 class="mb-0 text-white lh-100">{{ __('keywords.brand') }}</h6>
+                <small>{{ __('keywords.since_year') }}</small>
             </div>
         </div>
         @if(isset($sessions) && !empty($sessions))
             <div class="my-3 p-3 bg-white rounded shadow-sm">
-                <h6 class="border-bottom pb-6">Bot Sessions</h6>
+                <h6 class="border-bottom pb-6">{{ __('user.bots.sessions.title') }}</h6>
                 <table id="instances_sessions" class="table thead-default vertical-middle mb-0">
                     <thead>
                         <tr>
                             <th width="3%"></th>
                             @if($admin)
-                            <th width="15%">User</th>
+                            <th width="15%">{{ __('user.bots.sessions.user') }}</th>
                             @endif
-                            <th width="29%">Instance Id</th>
-                            <th width="15%">Type</th>
-                            <th width="30%">Date & Time</th>
+                            <th width="29%">{{ __('user.bots.sessions.instance_id') }}</th>
+                            <th width="15%">{{ __('user.bots.sessions.type') }}</th>
+                            <th width="30%">{{ __('user.bots.sessions.date_time') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -39,7 +39,7 @@ Bot Sessions
                                     <svg class="bd-placeholder-img mr-2 rounded flex-shrink-0" width="32" height="32"
                                         xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"
                                         focusable="false" role="img" aria-label="Placeholder: 32x32"><title>
-                                            Placeholder</title>
+                                            {{ __('keywords.placeholder') }}</title>
                                         <rect width="100%" height="100%" fill="#007bff"></rect>
                                         <text x="50%" y="50%" fill="#007bff" dy=".3em">32x32</text>
                                     </svg>

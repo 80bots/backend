@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title')
-    Subscription Plan List
+    {{ __('admin.subscription.title') . ' ' . __('admin.subscription.list') }}
 @endsection
 
 @section('css')
@@ -12,7 +12,7 @@
     <div class="wrapper">
         <div class="card">
             <div class="card-header d-flex align-items-center justify-content-between">
-                <h5 class="mb-0">Subscription Plan List</h5>
+                <h5 class="mb-0">{{ __('admin.subscription.title') . ' ' . __('admin.subscription.list') }}</h5>
                 {{--<a href="{{route('user.instance.create')}}" class="btn btn-round btn-primary"><i class="fas fa-plus"></i> Add Instance</a>--}}
             </div>
             <div class="card-body">
@@ -21,11 +21,11 @@
                     <table id="plan-list" class="table thead-default vertical-middle mb-0">
                         <thead>
                         <tr>
-                            <th>Plan Name</th>
-                            <th>Price</th>
-                            <th>Credits</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>{{ __('admin.subscription.name') }}</th>
+                            <th>{{ __('admin.subscription.price') }}</th>
+                            <th>{{ __('admin.subscription.credits') }}</th>
+                            <th>{{ __('admin.subscription.status') }}</th>
+                            <th>{{ __('admin.subscription.action') }}</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -57,11 +57,17 @@
 
                                                 <a href="{{route('admin.plan.edit',$plan->id)}}"
                                                    class="form-group btn btn-icon btn-primary change-credit-model mb-0 mr-1"
-                                                   title="Edit Plan"><i class="fa fa-edit"></i></a>
+                                                   title="{{ __('admin.subscription.edit_plan') }}">
+                                                    <i class="fa fa-edit"></i>
+                                                </a>
 
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" onclick="return confirm('Are you sure?')" class="form-group btn btn-icon btn-danger change-credit-model mb-0"><i class="fa fa-trash"></i></button>
+                                                <button type="submit"
+                                                        onclick="return confirm({{ __('keywords.are_you_sure') }})"
+                                                        class="form-group btn btn-icon btn-danger change-credit-model mb-0">
+                                                    <i class="fa fa-trash"></i>
+                                                </button>
                                             </div>
                                         </form>
                                     </td>

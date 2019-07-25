@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
 @section('title')
-    Dashboard
+    {{ __('user.dashboard.title') }}
 @endsection
 
 @section('content')
     <div class="wrapper">
         @include('layouts.imports.messages')
-        <h1>Welcome User</h1>
+        <h1>{{ __('user.dashboard.welcome') }}</h1>
     </div>
 @endsection
 

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title')
-    Bots Edit
+    {{ __('admin.subscription.edit_plan') }}
 @endsection
 
 @section('css')
@@ -14,33 +14,33 @@
             @method('PATCH')
             @csrf
             <div class="card-header d-flex align-items-center justify-content-between">
-                <h5 class="mb-0">Update Plan</h5>
+                <h5 class="mb-0">{{ __('admin.subscription.update_plan') }}</h5>
             </div>
             <div class="card-body">
                 @include('layouts.imports.messages')
                 <div class="row">
                     <div class="offset-3 col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label for="">Plan Name*</label>
+                            <label for="">{{ __('admin.subscription.name') }}*</label>
                             <input type="text" name="plan_name" value="{{isset($plan->name) ? $plan->name : ''}}" class="form-control">
                         </div>
                     </div>
                     <div class="offset-3 col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label for="">Price*</label>
+                            <label for="">{{ __('admin.subscription.price') }}*</label>
                             <input type="text" name="price" value="{{isset($plan->price) ? $plan->price : ''}}" class="form-control"/>
                         </div>
                     </div>
                     <div class="offset-3 col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label for="">Credit*</label>
+                            <label for="">{{ __('admin.subscription.credit') }}*</label>
                             <input type="text" name="credit" value="{{isset($plan->credit) ? $plan->credit : ''}}" class="form-control"/>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="card-footer text-right">
-                <button type="submit" class="btn btn-primary btn-round">Save</button>
+                <button type="submit" class="btn btn-primary btn-round">{{ __('admin.bots.save') }}</button>
             </div>
         </form>
     </div>

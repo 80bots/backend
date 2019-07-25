@@ -11,8 +11,13 @@ Route::group(['prefix' => 'user', 'as' => 'user.', 'middleware' => ['auth', 'use
 
     Route::get('cron-scheduling','AppController@Scheduling')->name('cron-scheduling');
 
-    Route::get('bots', 'BotsController@index')->name('bots.list');
-    Route::get('bots/{platformId}/all', 'BotsController@index')->name('bots.all.list');
+    Route::group(['prefix' => 'bots', 'as' => 'bots.'], function() {
+        Route::get('/', 'BotsController@index')->name('list');
+        Route::get('bots/{platformId}/all', 'BotsController@index')->name('all.list');
+        Route::group(['middleware' => ['web']], function () {
+            Route::resource('running', 'UserInstancesController');
+        });
+    });
 
     Route::resource('scheduling', 'SchedulingInstancesController');
     Route::group(['prefix' => 'scheduling', 'as' => 'scheduling.'], function() {
@@ -24,9 +29,7 @@ Route::group(['prefix' => 'user', 'as' => 'user.', 'middleware' => ['auth', 'use
 
 
     /* added at 09/07/2019 by sandip START*/
-    Route::group(['middleware' => ['web']], function () {
-        Route::resource('instance','UserInstancesController');
-    });
+
     Route::any('storeSession','UserInstancesController@storeBotIdInSession')->name('storeSession');
     /* END */
 

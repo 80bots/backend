@@ -5,7 +5,7 @@
 @endsection
 
 @section('title')
-    <title>Sign Up | 80bots</title>
+    <title>{{ __('auth.register.title') . ' | ' . __('keywords.brand') }}</title>
 @endsection
 
 @section('content')
@@ -18,7 +18,7 @@
                 @csrf
                 <a href="/" class="sidebar-brand text-decoration-none"><img src="{{ asset('assets/images/80bots.svg') }}" alt=""></a>
                 <input type="hidden" id="timezone" name="timezone">
-                <h4 class="text-center">Sign Up</h4>
+                <h4 class="text-center">{{ __('auth.sign_up') }}</h4>
                 {{--<div class="form-group">
                     <label for="name">Username</label>
                     <input id="name" type="text" class="form-control{{ $errors->has('name') ? ' is-invalid' : '' }}"
@@ -30,7 +30,7 @@
                     @endif
                 </div>--}}
                 <div class="form-group">
-                    <label for="">Email</label>
+                    <label for="">{{ __('auth.email') }}</label>
                     <input id="email" type="email" class="form-control{{ $errors->has('email') ? ' is-invalid' : '' }}"
                            name="email" value="{{ old('email') }}" required>
                     @if ($errors->has('email'))
@@ -40,7 +40,7 @@
                     @endif
                 </div>
                 <div class="form-group">
-                    <label for="">Password</label>
+                    <label for="">{{ __('auth.password') }}</label>
                     <input id="password" type="password"
                            class="form-control{{ $errors->has('password') ? ' is-invalid' : '' }}" name="password"
                            required>
@@ -51,7 +51,7 @@
                     @endif
                 </div>
                 <div class="form-group">
-                    <label for="">Confirm Password</label>
+                    <label for="">{{ __('auth.register.confirm_password') }}</label>
                     <input id="password-confirm" type="password" class="form-control" name="password_confirmation"
                            required>
                     @if ($errors->has('password'))
@@ -60,11 +60,13 @@
                         </span>
                     @endif
                 </div>
-                <button type="submit" class="btn btn-primary btn-block text-uppercase mb-3">Sign Up</button>
+                <button type="submit" class="btn btn-primary btn-block text-uppercase mb-3">
+                    {{ __('auth.sign_up') }}
+                </button>
             </form>
         </div>
-        <h5 class="text-white mb-0">Already a member?
-            <a href="{{route('login')}}" class="text-white font-weight-bold">Sign in</a>
+        <h5 class="text-white mb-0">{{ __('auth.register.already_member') }}
+            <a href="{{route('login')}}" class="text-white font-weight-bold">{{ __('auth.sign_in') }}</a>
         </h5>
     </div>
 @endsection

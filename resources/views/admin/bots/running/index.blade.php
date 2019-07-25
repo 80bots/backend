@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title')
-Running Bots
+    {{ __('keywords.bots.running.title') }}
 @endsection
 
 @section('css')
@@ -12,13 +12,21 @@ Running Bots
     <div class="wrapper">
         <div class="card">
             <div class="card-header d-flex align-items-center justify-content-between">
-                <h5 class="mb-0">Running Bots</h5>
+                <h5 class="mb-0">{{ __('keywords.bots.running.title') }}</h5>
                 <h5 class="mb-0">
                     <div class="form-check flex">
                         <form action="{{ url('admin/instance/running') }}" method="get" id="filter-my-bot">
                             <select name="list" id="bot-filter-dropdown" class="form-control">
-                                <option value="all" {{ isset($filters['list']) && $filters['list'] == 'all' ? 'selected' : '' }}>All</option>
-                                <option value="my_bots" {{ isset($filters['list']) && $filters['list'] == 'my_bots'? 'selected' : '' }}>My Bots</option>
+                                <option value="all"
+                                    {{ isset($filters['list']) && $filters['list'] == 'all' ? 'selected' : '' }}
+                                >
+                                    {{ __('keywords.bots.running.all') }}
+                                </option>
+                                <option value="my_bots"
+                                    {{ isset($filters['list']) && $filters['list'] == 'my_bots'? 'selected' : '' }}
+                                >
+                                    {{ __('keywords.bots.running.my_bots') }}
+                                </option>
                             </select>
                         </form>
                         <a href="javascript::void(0);" data-href="{{route('admin.instance.sync')}}" class="sync-instances">
@@ -37,13 +45,13 @@ Running Bots
                     <table id="instance-list" class="table thead-default vertical-middle mb-0">
                         <thead>
                         <tr>
-                            <th>Launched by</th>
-                            <th>Name</th>
-                            <th>Instance ID</th>
-                            <th>Uptime</th>
-                            <th>AWS Public IP</th>
-                            <th>Status</th>
-                            <th>Launch Time</th>
+                            <th>{{ __('keywords.bots.running.launched_by') }}</th>
+                            <th>{{ __('keywords.bots.running.name') }}</th>
+                            <th>{{ __('keywords.bots.running.instance_id') }}</th>
+                            <th>{{ __('keywords.bots.running.uptime') }}</th>
+                            <th>{{ __('keywords.bots.running.ip') }}</th>
+                            <th>{{ __('keywords.bots.running.status') }}</th>
+                            <th>{{ __('keywords.bots.running.launched_at') }}</th>
                             <th></th>
                         </tr>
                         </thead>
@@ -58,27 +66,34 @@ Running Bots
                                     <td>
                                         @if($userInstance->is_in_queue == 1)
                                             <a href="javascript:void(0)" data-toggle="modal" data-target="#launch-instance"
-                                            class="badge badge-primary ml-2 font-size-16" title="Process In Queue">IN-Queue</a>
+                                            class="badge badge-primary ml-2 font-size-16"
+                                               title="{{ __('keywords.bots.running.process_in_queue') }}"
+                                            >
+                                                {{ __('keywords.bots.statuses.in_queue') }}
+                                            </a>
                                         @else
                                             <select name="instStatus" class="form-control instStatus" data-id="{{$userInstance->id}}">
                                                 @if(!empty($userInstance->status) && $userInstance->status == 'running')
-                                                    <option value="running">Running</option>
-                                                    <option value="stop">Stop</option>
-                                                    <option value="terminated">Terminate</option>
+                                                    <option value="running">{{ __('keywords.bots.statuses.running') }}</option>
+                                                    <option value="stop">{{ __('keywords.stop') }}</option>
+                                                    <option value="terminated">{{ __('keywords.bots.running.terminate') }}</option>
                                                 @elseif(!empty($userInstance->status) && $userInstance->status == 'stop')
-                                                    <option value="stop">Stop</option>
-                                                    <option value="start">Start</option>
-                                                    <option value="terminated">Terminate</option>
+                                                    <option value="stop">{{ __('keywords.stop') }}</option>
+                                                    <option value="start">{{ __('keywords.start') }}</option>
+                                                    <option value="terminated">{{ __('keywords.bots.running.terminate') }}</option>
                                                 @else
-                                                    <option value="terminated">Terminate</option>
+                                                    <option value="terminated">{{ __('keywords.bots.running.terminate') }}</option>
                                                 @endif
                                             </select>
                                         @endif
                                     </td>
                                     <td>{{!empty($userInstance->created_at) ? $userInstance->created_at : ''}}</td>
-                                    <td><a href="{{!empty($userInstance->aws_pem_file_path) ? $userInstance->aws_pem_file_path : 'javascript:void(0)'}}" title="Download pem file" download>
+                                    <td>
+                                        <a href="{{!empty($userInstance->aws_pem_file_path) ? $userInstance->aws_pem_file_path : 'javascript:void(0)'}}"
+                                           title="{{ __('keywords.bots.running.download_pem') }}" download>
                                             <i class="fa fa-download"></i>
-                                        </a></td>
+                                        </a>
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>

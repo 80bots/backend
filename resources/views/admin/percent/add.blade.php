@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title')
-    Add Low Credit Notification
+    {{ __('keywords.add') . ' ' .__('admin.percent.low_credit_notification') }}
 @endsection
 
 @section('css')
@@ -13,15 +13,15 @@
     <form class="card" id="percentage-create" action="{{route('admin.percent.store')}}" method="post">
         @csrf
         <div class="card-header d-flex align-items-center justify-content-between">
-            <h5 class="mb-0">Add Low Credit Notification</h5>
+            <h5 class="mb-0">{{ __('keywords.add') . ' ' .__('admin.percent.low_credit_notification') }}</h5>
         </div>
         <div class="card-body">
             <div class="row">
                 <div class="offset-3 col-md-6 col-sm-12">
                     <div class="form-group">
-                        <label for="">Select Percentage*</label>
+                        <label for="">{{ __('admin.percent.select_percentage') }}*</label>
                         <select  name="percentage" class="form-control">
-                            <option value="">-- Select Percentage -- </option>
+                            <option value="">-- {{ __('admin.percent.select_percentage') }} -- </option>
                             <?php $i = 1; ?>
                                 @for($i ; $i <= 100 ; $i++) 
                                     <option value="{{$i}}">{{$i}} %</option>
@@ -38,7 +38,7 @@
             </div>
         </div>
         <div class="card-footer text-right">
-            <button type="submit" class="btn btn-primary btn-round">Save</button>
+            <button type="submit" class="btn btn-primary btn-round">{{ __('keywords.save') }}</button>
         </div>
     </form>
 </div>

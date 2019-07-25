@@ -36,13 +36,13 @@ class UserInstancesController extends AwsConnectionController
                 $instancesId = [];
                 array_push($instancesId,$UserInstance[0]->aws_instance_id);
                 //$this->InstanceMonitoring($instancesId);
-                return view('user.instance.index',compact('UserInstance','botsArr'));
+                return view('user.bots.running.index',compact('UserInstance','botsArr'));
             }
             session()->flash('error', 'Instance Not Found');
-            return view('user.instance.index');
+            return view('user.bots.running.index');
         } catch (\Exception $e) {
             session()->flash('error', $e->getMessage());
-            return view('user.instance.index');
+            return view('user.bots.running.index');
         }
     }
 

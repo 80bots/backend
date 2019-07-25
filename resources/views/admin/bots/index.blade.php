@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title')
-    All Bots
+    {{ __('admin.bots.title') }}
 @endsection
 
 @section('css')
@@ -12,10 +12,12 @@
     <div class="wrapper">
         <div class="card">
             <div class="card-header d-flex align-items-center justify-content-between">
-                <h5 class="mb-0">All Bots</h5>
+                <h5 class="mb-0">{{ __('admin.bots.title') }}</h5>
                 <h5 class="mb-0">
                     <!-- <a href="/admin/bots/sync-instances" class="btn btn-round btn-info">Sync Instances</a> -->
-                    <a href="{{route('admin.bots.create')}}" class="btn btn-round btn-primary"><i class="fas fa-plus-circle"></i></a>
+                    <a href="{{route('admin.bots.create')}}" class="btn btn-round btn-primary">
+                        <i class="fas fa-plus-circle"></i>
+                    </a>
                 </h5>
             </div>
             <div class="card-body">
@@ -24,13 +26,13 @@
                     <table id="bot-list" class="table thead-default vertical-middle mb-0">
                         <thead>
                         <tr>
-                            <th>Bot Name</th>
-                            <th>AMI Image Id</th>
-                            <th>AMI Name</th>
-                            <th>Instance Type</th>
-                            <th>Storage GB</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>{{ __('keywords.bots.bot_name') }}</th>
+                            <th>{{ __('keywords.bots.ami_id') }}</th>
+                            <th>{{ __('keywords.bots.ami_name') }}</th>
+                            <th>{{ __('keywords.bots.instance_type') }}</th>
+                            <th>{{ __('keywords.bots.storage') }}</th>
+                            <th>{{ __('keywords.status') }}</th>
+                            <th>{{ __('keywords.action') }}</th>
                             <th></th>
                         </tr>
                         </thead>
@@ -46,12 +48,12 @@
                                       @if( $bot->status && $bot->status == 'active')
                                           <button type="button" class="form-group btn btn-success mb-0"
                                                   onclick="changeStatus('{{$bot->id}}','inactive')"
-                                                  title="make it inactive">Active
+                                                  title="make it inactive">{{ __('keywords.bots.statuses.active') }}
                                           </button>
                                       @else
                                           <button type="button" class="form-group btn btn-danger mb-0"
                                                   onclick="changeStatus('{{$bot->id}}','active')"
-                                                  title="make it active">Inactive
+                                                  title="make it active">{{ __('keywords.bots.statuses.inactive') }}
                                           </button>
                                       @endif
                                   </td>
@@ -60,25 +62,31 @@
                                           <div class="d-flex align-items-center">
                                               <a href="{{route('admin.bots.show',$bot->id)}}"
                                                  class="form-group btn btn-icon btn-primary change-credit-model mb-0 mr-1"
-                                                 title="Edit Bot"><i class="fa fa-eye"></i></a>
+                                                 title="{{ __('admin.bots.edit_title') }}"><i class="fa fa-eye"></i></a>
 
                                               <a href="{{route('admin.bots.edit',$bot->id)}}"
                                                  class="form-group btn btn-icon btn-primary change-credit-model mb-0 mr-1"
-                                                 title="Edit Bot"><i class="fa fa-edit"></i></a>
+                                                 title="{{ __('admin.bots.edit_title') }}"><i class="fa fa-edit"></i></a>
 
                                               @csrf
                                               @method('DELETE')
-                                              <button type="submit" onclick="return confirm('Are you sure?')" class="form-group btn btn-icon btn-danger change-credit-model mb-0"><i class="fa fa-trash"></i></button>
+                                              <button type="submit"
+                                                      onclick="return confirm({{ __('keywords.are_you_sure') }})"
+                                                      class="form-group btn btn-icon btn-danger change-credit-model mb-0">
+                                                  <i class="fa fa-trash"></i>
+                                              </button>
                                           </div>
                                       </form>
                                   </td>
                                   <td>
                                     <a href="javascript:void(0)" onclick="launchInstance({{$bot->id}});"
-                                      class="badge badge-primary font-size-16" data-id="{{$bot->id}}">Launch</a>
+                                      class="badge badge-primary font-size-16" data-id="{{$bot->id}}">
+                                        {{ __('keywords.launch') }}
+                                    </a>
                                   </td>
                               </tr>
                           @empty
-                              <h3>No bots found!</h3>
+                              <h3>{{ __('keywords.bots.not_found') }}</h3>
                           @endforelse
                         </tbody>
                     </table>

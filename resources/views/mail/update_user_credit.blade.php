@@ -1,8 +1,8 @@
-<p>Hello, <strong>{{$user->name}}</strong></p>
+<p>{{ __('mail.hello') }}, <strong>{{$user->name}}</strong></p>
 
-<p>Your account credit is update by admin.</p>
-<p>Your current credit is :- <b> {{$user->remaining_credits}}</b>.</p>
-<p>Thanks,</p>
+<p>{{ __('mail.credit.updated') }}</p>
+<p>{{ __('mail.credit.balance') }} :- <b> {{$user->remaining_credits}}</b>.</p>
+<p>{{ __('mail.thanks') }},</p>
 
 <br>
 {{ config('app.name') }}

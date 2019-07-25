@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title')
-Scheduling instances
+    {{ __('keywords.scheduling.title') }}
 @endsection
 
 @section('css')
@@ -16,8 +16,8 @@ Scheduling instances
         <div class="align-items-center bg-purple d-flex p-3 rounded shadow-sm text-white-50 mb-3">
             <h4 class="border mb-0 mr-2 pb-2 pl-3 pr-3 pt-2 rounded text-white">8</h4>
             <div class="lh-100">
-                <h6 class="mb-0 text-white lh-100">80bots</h6>
-                <small>Since 2019</small>
+                <h6 class="mb-0 text-white lh-100">{{ __('keywords.brand') }}</h6>
+                <small>{{ __('keywords.since_year') }}</small>
             </div>
         </div>
         @include('layouts.imports.messages')
@@ -25,15 +25,15 @@ Scheduling instances
     <form class="card" id="scheduling_create" action="{{route('user.scheduling.store')}}" method="post">
         @csrf
         <div class="card-header d-flex align-items-center justify-content-between">
-            <h5 class="mb-0">Add Scheduling</h5>
+            <h5 class="mb-0">{{ __('keywords.scheduling.add') }}</h5>
         </div>
         <div class="card-body">
             <div class="row">
                 <div class="col-md-6 col-sm-12">
                     <div class="form-group">
-                        <label for="">Select Instance*</label>
+                        <label for="">{{ __('keywords.scheduling.select_instance') }}*</label>
                         <select name="user_instances_id" id="user_instances_id" class="form-control">
-                            <option value="">Select Instance </option>
+                            <option value="">{{ __('keywords.scheduling.select_instance') }}</option>
                             @foreach($instances as $row)
                             <option value="{{$row->id}}"> {{$row->aws_instance_id}}</option>
                             @endforeach
@@ -42,17 +42,17 @@ Scheduling instances
                 </div>
                 <div class="col-md-6 col-sm-12">
                     <div class="form-group">
-                        <label for="">Status*</label>
+                        <label for="">{{ __('keywords.scheduling.status') }}*</label>
                         <select name="status" id="status" class="form-control">
-                            <option value="">Select Status </option>
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
+                            <option value="">{{ __('keywords.scheduling.select_status') }}</option>
+                            <option value="active">{{ __('keywords.bots.statuses.active') }}</option>
+                            <option value="inactive">{{ __('keywords.bots.statuses.inactive') }}</option>
                         </select>
                     </div>
                 </div>
                 <div class="col-md-6 col-sm-12">
                     <div class="form-group">
-                        <label for="">Start time*</label>
+                        <label for="">{{ __('keywords.scheduling.start_time') }}*</label>
                           <div class="input-group date time-picker" id="startTimePicker" data-target-input="nearest">
                                 <input type="text" class="form-control datetimepicker-input" id="start_time" data-target="#startTimePicker" name="start_time" data-toggle="datetimepicker"/>
                                 <div class="input-group-append" data-target="#startTimePicker" data-toggle="datetimepicker">
@@ -64,7 +64,7 @@ Scheduling instances
                 </div>
                 <div class="col-md-6 col-sm-12">
                     <div class="form-group">
-                        <label for="">End time*</label>
+                        <label for="">{{ __('keywords.scheduling.end_time') }}*</label>
                         <div class="input-group date time-picker" id="endTimePicker" data-target-input="nearest">
                                 <input id="end_time" type="text" class="form-control datetimepicker-input" data-target="#endTimePicker" data-toggle="datetimepicker" name="end_time"/>
                                 <div class="input-group-append" data-target="#endTimePicker" data-toggle="datetimepicker">
@@ -80,7 +80,7 @@ Scheduling instances
             </div>
         </div>
         <div class="card-footer text-right">
-            <button type="submit" class="btn btn-primary btn-round">Add</button>
+            <button type="submit" class="btn btn-primary btn-round">{{ __('keywords.add') }}</button>
         </div>
     </form>
 

@@ -46,7 +46,7 @@ class UserInstancesController extends AwsConnectionController
         $userInstances = $userInstances->get();
 
         $filters = $request->all();
-        return view('admin.instance.index', compact('userInstances', 'filters'));
+        return view('admin.bots.running.index', compact('userInstances', 'filters'));
     }
 
     /**

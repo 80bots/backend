@@ -23,13 +23,13 @@ class InstanceSessionsHistoryController extends AppController
     {
         $user = Auth::user();
         if($user->role->name === 'User'){
-            return view('user.instance.sessionhistory', [
+            return view('user.bots.running.sessionhistory', [
                 'sessions' => InstanceSessionsHistory::where('user_id', $user->id)->with('schedulingInstance.userInstances')->paginate(5),
                 'admin' => false
             ]);
         }
 
-        return view('user.instance.sessionhistory', [
+        return view('user.bots.running.sessionhistory', [
             'sessions' => InstanceSessionsHistory::with('schedulingInstance.userInstances')->paginate(5),
             'admin' => true
         ]);
