@@ -44,8 +44,8 @@ Running Bots
                         <tbody>
                             @foreach($userInstances as $userInstance)
                                 <tr>
-                                    <td>{{ $userInstance->user ? $userInstance->user->email : '' }}</td>
-                                    <td>{{!empty($userInstance->name) ? $userInstance->name : ''}}</td>
+                                    <td>{{ $userInstance->tag_user_email ??  '' }}</td>
+                                    <td>{{ $userInstance->tag_name ?? ''}}</td>
                                     <td>{{!empty($userInstance->aws_instance_id) ? $userInstance->aws_instance_id : ''}}</td>
                                     <td>{{!empty($userInstance->up_time) ? $userInstance->up_time : 0}}</td>
                                     <td>{{!empty($userInstance->aws_public_ip) ? $userInstance->aws_public_ip : ''}}</td>
