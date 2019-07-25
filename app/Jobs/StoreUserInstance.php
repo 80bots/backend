@@ -120,7 +120,10 @@ class StoreUserInstance implements ShouldQueue
                 $userInstanceDetail->save();
                 session()->flash('success', 'Instance Created successfully');
                 broadcast(new dispatchedInstanceEvent($userInstance));
-                broadcast(new InstanceCreation($this->user, $userInstance));
+
+                if($this->user->role->name !== 'Admin') {
+                    broadcast(new InstanceCreation($this->user, $userInstance));
+                }
             }
 
             return response()->json(['message' => 'Instance Created successfully'], 200);
