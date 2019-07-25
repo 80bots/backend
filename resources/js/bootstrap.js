@@ -70,7 +70,6 @@ if (typeof io !== 'undefined') {
                             <option value="stop">Stop</option>
                             <option value="terminated">Terminate</option>
                         </select>`
-            console.log($('.instance-' + _id + ' .name'))
             $('.instance-' + _id + ' .name').text(response.userInstance.name)
             $('.instance-' + _id + ' .instanceId').text(response.userInstance.aws_instance_id)
             $('.instance-' + _id + ' .publicIp').text(response.userInstance.aws_public_ip)
@@ -79,6 +78,54 @@ if (typeof io !== 'undefined') {
         toastr.info('The instance is live now.')
         echo.leave('dispatched-instances.' + window.Laravel.user);
     });
+
+    if (window.Laravel.type === 'Admin') {
+        var livechannel = echo.channel('instance-live');
+        livechannel.on('App\\Events\\InstanceCreation', function (response) {
+            addInstanceToList(response)
+        });
+    }
+
+    function addInstanceToList(response) {
+        if (response.hasOwnProperty('instance') && Object.keys(response.instance).length) {
+            var _id = response.instance.id;
+            var _aws_public_ip = response.instance.aws_public_ip;
+            var _name = response.instance.name;
+            var _up_time = response.instance.up_time;
+            var _email = response.user.email;
+            var _aws_instance_id = response.instance.aws_instance_id;
+            var _updated_at = response.instance.updated_at;
+            var _aws_pem_file_path = response.instance.aws_pem_file_path
+
+            if (table !== 'undefined' || table !== null) {
+                var statusHtml = `<select name="instStatus" class="form-control instStatus" data-id="${_id}">
+                            <option value="running">Running</option>
+                            <option value="stop">Stop</option>
+                            <option value="terminated">Terminate</option>
+                        </select>`
+
+                var totalHtml = `<tr class="instance-${_id}" role="row">
+                    <td class="sorting_1">${_email}</td>
+                    <td class="name">${_name}</td>
+                    <td class="instanceId">${_aws_instance_id}</td>
+                    <td class="uptime">${_up_time}</td>
+                    <td class="publicIp">${_aws_public_ip}</td>
+                    <td class="statusSelect">
+                        ${statusHtml}
+                    </td>
+                    <td>${_updated_at}</td>
+                    <td>
+                        <a href="${_aws_pem_file_path}" title="Download pem file" download="">
+                            <i class="fa fa-download"></i>
+                        </a>
+                    </td>
+                </tr>`
+
+                var jRow = $(totalHtml)
+                table.row.add(jRow).draw();
+            }
+        }
+    }
 }
 
 

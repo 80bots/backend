@@ -89,9 +89,9 @@ Running Bots
     <script>
         var current_time_zone =  moment().format('Z');
         $('#user-time-zone').val(current_time_zone);
-
+        var table;
         $(document).ready(function() {
-            $('#instance-list').DataTable();
+            table = $('#instance-list').DataTable();
 
             $('#bot-filter-dropdown').on('change',function(){
                 $('#filter-my-bot').submit();
