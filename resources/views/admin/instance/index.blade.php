@@ -43,13 +43,13 @@ Running Bots
                         </thead>
                         <tbody>
                             @foreach($userInstances as $userInstance)
-                                <tr>
+                                <tr class="instance-{{ $userInstance->id }}">
                                     <td>{{ $userInstance->tag_user_email ??  '' }}</td>
-                                    <td>{{ $userInstance->tag_name ?? ''}}</td>
-                                    <td>{{!empty($userInstance->aws_instance_id) ? $userInstance->aws_instance_id : ''}}</td>
-                                    <td>{{!empty($userInstance->up_time) ? $userInstance->up_time : 0}}</td>
-                                    <td>{{!empty($userInstance->aws_public_ip) ? $userInstance->aws_public_ip : ''}}</td>
-                                    <td>
+                                    <td class="name">{{ $userInstance->tag_name ?? ''}}</td>
+                                    <td class="instanceId">{{!empty($userInstance->aws_instance_id) ? $userInstance->aws_instance_id : ''}}</td>
+                                    <td class="uptime">{{!empty($userInstance->up_time) ? $userInstance->up_time : 0}}</td>
+                                    <td class="publicIp">{{!empty($userInstance->aws_public_ip) ? $userInstance->aws_public_ip : ''}}</td>
+                                    <td class="statusSelect">
                                         @if($userInstance->is_in_queue == 1)
                                             <a href="javascript:void(0)" data-toggle="modal" data-target="#launch-instance"
                                             class="badge badge-primary ml-2 font-size-16" title="Process In Queue">IN-Queue</a>
@@ -113,7 +113,13 @@ Running Bots
               },
               success : function(response){
                   if(response.type === 'success'){
-                       console.log(response);
+
+                       if(response.data !== undefined && response.data.length) {
+                           response.data.forEach((val, i)=> {
+                                $('.instance-' + val + ' .name').html(`<div class="loading-spinner"></div>`)
+                           })
+                        let $botWrapper = $('#dvBotWrapper');
+                       }
                       // if(response.data !== undefined && response.data.length) {
                       //     let $botWrapper = $('#dvBotWrapper');
                       //     for(let eachData of response.data) {

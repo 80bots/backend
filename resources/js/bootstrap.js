@@ -52,9 +52,6 @@ toastr.options = {
     "timeOut": "5000",
     "extendedTimeOut": "5000",
 }
-toastr.options.onHidden = function () {
-    window.location.reload();
-}
 
 if (typeof io !== 'undefined') {
     var echo = window.Echo = new Echo({
@@ -66,6 +63,19 @@ if (typeof io !== 'undefined') {
 
     channel.on('App\\Events\\dispatchedInstanceEvent', function (response) {
         console.log('data > ', response);
+        if (response.hasOwnProperty('userInstance') && Object.keys(response.userInstance).length) {
+            var _id = response.userInstance.id;
+            var statusHtml = `<select name="instStatus" class="form-control instStatus" data-id="${_id}">
+                            <option value="running">Running</option>
+                            <option value="stop">Stop</option>
+                            <option value="terminated">Terminate</option>
+                        </select>`
+            console.log($('.instance-' + _id + ' .name'))
+            $('.instance-' + _id + ' .name').text(response.userInstance.name)
+            $('.instance-' + _id + ' .instanceId').text(response.userInstance.aws_instance_id)
+            $('.instance-' + _id + ' .publicIp').text(response.userInstance.aws_public_ip)
+            $('.instance-' + _id + ' .statusSelect').html(statusHtml)
+        }
         toastr.info('The instance is live now.')
         echo.leave('dispatched-instances.' + window.Laravel.user);
     });

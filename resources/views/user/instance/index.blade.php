@@ -24,7 +24,7 @@
             <div class="my-3 p-3 bg-white rounded shadow-sm">
                 <h6 class="border-bottom  pb-2 mb-0">My Bots</h6>
                 @foreach($UserInstance as $instance)
-                    <div class="media text-muted pt-3 d-flex align-items-start">
+                    <div class="media text-muted pt-3 d-flex align-items-start instance-{{ $instance->id }}">
                         <svg class="bd-placeholder-img mr-2 rounded flex-shrink-0" width="32" height="32"
                              xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"
                              focusable="false" role="img" aria-label="Placeholder: 32x32"><title>
@@ -34,17 +34,17 @@
                         </svg>
                         <div class="row flex-grow-1 ml-0 mr-0 border-bottom pb-3">
                             <div class="col-md-2 col-sm-2">
-                                <strong data-toggle="tooltip" title="{{isset($instance->aws_instance_id)?$instance->aws_instance_id:''}}" class="d-block text-gray-dark">
-                                    {{isset($instance->bots->bot_name)?$instance->bots->bot_name:' - '}}
+                                <strong data-toggle="tooltip" title="{{isset($instance->aws_instance_id)?$instance->aws_instance_id:''}}" class="name d-block text-gray-dark">
+                                    {{isset($instance->name)?$instance->name: ' - '}}
                                 </strong>
                             </div>
-                            <div class="col-md-2 col-sm-2">
+                            <div class="uptime col-md-2 col-sm-2">
                                 {{!empty($instance->up_time) ? $instance->up_time : 0}}
                             </div>
-                            <div class="col-md-2 col-sm-2">
+                            <div class="publicIp col-md-2 col-sm-2">
                                 {{!empty($instance->aws_public_ip) ? $instance->aws_public_ip : ''}}
                             </div>
-                            <div class="col-md-2 col-sm-2">
+                            <div class="statusSelect col-md-2 col-sm-2">
                                 @if($instance->is_in_queue == 1)
                                     <a href="javascript:void(0)" data-toggle="modal" data-target="#launch-instance"
                                        class="badge badge-primary ml-2 font-size-16" title="Process In Queue">IN-Queue</a>
