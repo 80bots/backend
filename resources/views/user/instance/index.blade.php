@@ -34,8 +34,9 @@
                         </svg>
                         <div class="row flex-grow-1 ml-0 mr-0 border-bottom pb-3">
                             <div class="col-md-2 col-sm-2">
-                                <strong data-toggle="tooltip" title="{{isset($instance->aws_instance_id)?$instance->aws_instance_id:''}}" class="name d-block text-gray-dark">
-                                    {{isset($instance->name)?$instance->name: ' - '}}
+                                @include('layouts.imports.loader')
+                                <strong data-toggle="tooltip" title="{{isset($instance->aws_instance_id)?$instance->aws_instance_id:''}}" class="tag_name d-block text-gray-dark">
+                                    {{isset($instance->tag_name)?$instance->tag_name : ''}}
                                 </strong>
                             </div>
                             <div class="uptime col-md-2 col-sm-2">
@@ -111,6 +112,11 @@
                 success : function(response){
                     if(response.type === 'success'){
                         console.log(response);
+                        if(response.data !== undefined && response.data.length) {
+                           response.data.forEach((val, i)=> {
+                                $('.instance-' + val + ' .loader').removeClass('d-none').addClass('d-block')
+                           })
+                        }
                         // if(response.data !== undefined && response.data.length) {
                         //     let $botWrapper = $('#dvBotWrapper');
                         //     for(let eachData of response.data) {

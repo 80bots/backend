@@ -10877,56 +10877,64 @@ button.toast-close-button {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
 }
 
-.loading-spinner {
-  -webkit-animation-play-state: running;
-          animation-play-state: running;
-  opacity: 1;
-  position: relative;
-}
+/* Loader Wave Animation */
 
-@-webkit-keyframes spinner {
-  0% {
-    transform: translate3d(-50%, -50%, 0) rotate(0deg);
+@-webkit-keyframes wave {
+  0%, 100% {
+    transform: scaleY(1);
   }
 
+  50% {
+    transform: scaleY(2);
+  }
+}
+
+@keyframes wave {
+  0%, 100% {
+    transform: scaleY(1);
+  }
+
+  50% {
+    transform: scaleY(2);
+  }
+}
+
+@-webkit-keyframes rotate {
   100% {
-    transform: translate3d(-50%, -50%, 0) rotate(360deg);
+    transform: rotate(360deg);
   }
 }
 
-@keyframes spinner {
-  0% {
-    transform: translate3d(-50%, -50%, 0) rotate(0deg);
-  }
-
+@keyframes rotate {
   100% {
-    transform: translate3d(-50%, -50%, 0) rotate(360deg);
+    transform: rotate(360deg);
   }
 }
 
-.loading-spinner.-paused {
-  -webkit-animation-play-state: paused;
-          animation-play-state: paused;
-  opacity: 0.2;
-  transition: opacity linear 0.1s;
+.wave-spread .loader {
+  width: 35px;
+  height: 35px;
 }
 
-.loading-spinner::before {
-  -webkit-animation: 1.5s linear infinite spinner;
-          animation: 1.5s linear infinite spinner;
-  -webkit-animation-play-state: inherit;
-          animation-play-state: inherit;
-  border: solid 3px #dedede;
-  border-bottom-color: #EF6565;
-  border-radius: 50%;
-  content: "";
-  height: 40px;
-  left: 50%;
-  opacity: inherit;
-  position: absolute;
-  top: 50%;
-  transform: translate3d(-50%, -50%, 0);
-  width: 40px;
-  will-change: transform;
+.wave-spread .loader > div {
+  float: left;
+  margin: 10px 3px 1px 1px;
+  width: 0.2em;
+  height: 20%;
+  background-color: #3490dc;
+  -webkit-animation: wave 1s cubic-bezier(0.85, 0.25, 0.37, 0.85) infinite;
+          animation: wave 1s cubic-bezier(0.85, 0.25, 0.37, 0.85) infinite;
+}
+
+.wave-spread .loader .line-1,
+.wave-spread .loader .line-5 {
+  -webkit-animation-delay: 0.4s;
+          animation-delay: 0.4s;
+}
+
+.wave-spread .loader .line-2,
+.wave-spread .loader .line-4 {
+  -webkit-animation-delay: 0.2s;
+          animation-delay: 0.2s;
 }
 

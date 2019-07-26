@@ -75,6 +75,7 @@ if (typeof io !== 'undefined') {
             $('.instance-' + _id + ' .instanceId').text(response.userInstance.aws_instance_id)
             $('.instance-' + _id + ' .publicIp').text(response.userInstance.aws_public_ip)
             $('.instance-' + _id + ' .statusSelect').html(statusHtml)
+            $('.instance-' + _id + ' .loader').removeClass('d-block').addClass('d-none')
         }
         toastr.info('The instance is live now.')
         echo.leave('dispatched-instances.' + window.Laravel.user);

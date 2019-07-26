@@ -15,47 +15,26 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
 }
 
-
-@mixin loading-spinner($activeColor: #EF6565, $selector: "&::before", $time: 1.5s) {
-  @keyframes spinner {
-      0% {
-          transform: translate3d(-50%, -50%, 0) rotate(0deg);
-      }
-
-      100% {
-          transform: translate3d(-50%, -50%, 0) rotate(360deg);
-      }
-  }
-  
-  animation-play-state: running;
-  opacity: 1;
-  position: relative;
-  
-  &.-paused { 
-      animation-play-state: paused; 
-      opacity: 0.2;
-      transition: opacity linear 0.1s;
-  }
-
-  #{$selector} {
-      animation: $time linear infinite spinner;
-      animation-play-state: inherit;
-      border: solid 3px #dedede;
-      border-bottom-color: #{$activeColor};
-      border-radius: 50%;
-      content: "";
-      height: 40px;
-      left: 50%;
-      opacity: inherit;
-      position: absolute;
-      top: 50%; 
-      transform: translate3d(-50%, -50%, 0);
-      width: 40px;
-      will-change: transform;
-  }
-}
-
-
-.loading-spinner {
-  @include loading-spinner;
-}
+/* Loader Wave Animation */
+@keyframes wave {
+  0%,100% {
+    transform: scaleY(1); }
+  50% {
+    transform: scaleY(2); } }
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg); } }
+.wave-spread .loader {
+  width: 35px;
+  height: 35px; }
+  .wave-spread .loader > div {
+    float: left;
+    margin: 10px 3px 1px 1px;
+    width: 0.2em;
+    height: 20%;
+    background-color:#3490dc;
+    animation: wave 1s cubic-bezier(0.85, 0.25, 0.37, 0.85) infinite; }
+  .wave-spread .loader .line-1, .wave-spread .loader .line-5 {
+    animation-delay: .4s; }
+  .wave-spread .loader .line-2, .wave-spread .loader .line-4 {
+    animation-delay: .2s; }

@@ -44,7 +44,10 @@ Running Bots
                         <tbody>
                             @foreach($userInstances as $userInstance)
                                 <tr class="instance-{{ $userInstance->id }}">
-                                    <td class="tag_user_email">{{ $userInstance->tag_user_email ??  '' }}</td>
+                                    <td class="tag_user_email">
+                                        @include('layouts.imports.loader')
+                                        <span>{{ $userInstance->tag_user_email ??  '' }}</span>
+                                    </td>
                                     <td class="tag_name">{{ $userInstance->tag_name ?? ''}}</td>
                                     <td class="instanceId">{{!empty($userInstance->aws_instance_id) ? $userInstance->aws_instance_id : ''}}</td>
                                     <td class="uptime">{{!empty($userInstance->up_time) ? $userInstance->up_time : 0}}</td>
@@ -116,7 +119,7 @@ Running Bots
 
                        if(response.data !== undefined && response.data.length) {
                            response.data.forEach((val, i)=> {
-                                $('.instance-' + val + ' .name').html(`<div class="loading-spinner"></div>`)
+                                $('.instance-' + val + ' .loader').removeClass('d-none').addClass('d-block')
                            })
                         let $botWrapper = $('#dvBotWrapper');
                        }
