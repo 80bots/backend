@@ -60,18 +60,13 @@ class AwsConnection extends BaseModel
             new AlliterationName(),
             new VideoGameName()
         ]);
-
         $randName = strtolower(str_replace(' ', '-', $generator->getName()));
-
         $name = $randName;
         $name = str_replace(' ', '', $name);
         $name = preg_replace('/[^A-Za-z\-]/', '', $name);
         $name = preg_replace('/-+/', '', $name);
-
         $numbers = rand(0, 9) . rand(0, 9);
-
         $name = $name . $numbers;
-
         return $name;
     }
 
@@ -83,8 +78,8 @@ class AwsConnection extends BaseModel
             $serverIp = str_replace('http://', '', env('APP_URL'));
         }
 
-        //$serverIp = file_get_contents('http://169.254.169.254/latest/meta-data/public-ipv4');
         $ec2Client = self::AwsConnection();
+        
         // Set ingress rules for the security group
         $securityGroupIngress =
             $ec2Client->authorizeSecurityGroupIngress(array(
@@ -380,5 +375,3 @@ HERESHELL;
         return $returnArr;
     }
 }
-//"PublicDnsName" => "ec2-18-222-190-135.us-east-2.compute.amazonaws.com"
-//            "PublicIpAddress" => "18.222.190.135"
