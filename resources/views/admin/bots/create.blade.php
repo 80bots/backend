@@ -56,13 +56,13 @@
                     <div class="col-md-12 col-sm-12">
                         <div class="form-group">
                             <label for="aws_startup_script">Startup Script</label>
-                            <textarea name="aws_startup_script" class="form-control" rows="23"></textarea>
+                            <textarea name="aws_startup_script" class="form-control" spellcheck="false" rows="23"></textarea>
                         </div>
                     </div>
                     <div class="col-md-12 col-sm-12">
                         <div class="form-group">
                             <label for="aws_custom_script">Bot Script</label>
-                            <textarea id="aws_custom_script" name="aws_custom_script" class="form-control"
+                            <textarea id="aws_custom_script" name="aws_custom_script" spellcheck="false" class="form-control"
                                       rows="23"></textarea>
                         </div>
                     </div>
