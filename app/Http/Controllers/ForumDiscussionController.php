@@ -110,13 +110,6 @@ class ForumDiscussionController extends ChatterDiscussionController
             ]);
         }
         
-        /* $discussion = Models::discussion()->find($discussion_id);
-        if($discussion->popularity >= 10) {
-            $discussion->popularity = $discussion->popularity - 10;
-        } else {
-            $discussion->popularity = 0;
-        }
-        $discussion->save(); */
         $dislike = DiscussionDislikes::create([
             'discussion_id' => $discussion_id,
             'user_id' => $user_id

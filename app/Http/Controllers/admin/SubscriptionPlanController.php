@@ -20,7 +20,6 @@ class SubscriptionPlanController extends AppController
             if(!$planListObj->isEmpty()){
                 return view('admin.subscription.index',compact('planListObj'));
             }
-//            session()->flash('error', 'Subscription Plan Not Found');
             return view('admin.subscription.index');
         } catch (\Exception $exception){
             session()->flash('error', $exception->getMessage());
@@ -35,7 +34,8 @@ class SubscriptionPlanController extends AppController
      */
     public function create()
     {
-        return view('admin.subscription.create');
+        return redirect('admin/plan');
+        //return view('admin.subscription.create');
     }
 
     /**
@@ -148,7 +148,8 @@ class SubscriptionPlanController extends AppController
         }
     }
 
-    public function ChangeStatus(Request $request){
+    public function ChangeStatus(Request $request)
+    {
         try{
             $planObj = SubscriptionPlan::find($request->id);
             $planObj->status = $request->status;
