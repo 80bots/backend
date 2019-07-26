@@ -59529,9 +59529,8 @@ if (typeof io !== 'undefined') {
   });
   var channel = echo.channel('dispatched-instances.' + window.Laravel.user);
   channel.on('App\\Events\\dispatchedInstanceEvent', function (response) {
-    console.log('data > ', response);
-
     if (response.hasOwnProperty('userInstance') && Object.keys(response.userInstance).length) {
+      console.log('data > ', response.userInstance);
       var _id = response.userInstance.id;
       var statusHtml = "<select name=\"instStatus\" class=\"form-control instStatus\" data-id=\"".concat(_id, "\">\n                            <option value=\"running\">Running</option>\n                            <option value=\"stop\">Stop</option>\n                            <option value=\"terminated\">Terminate</option>\n                        </select>");
       $('.instance-' + _id + ' .tag_user_email').text(response.userInstance.tag_user_email);

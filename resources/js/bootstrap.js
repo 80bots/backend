@@ -62,8 +62,8 @@ if (typeof io !== 'undefined') {
     var channel = echo.channel('dispatched-instances.' + window.Laravel.user);
 
     channel.on('App\\Events\\dispatchedInstanceEvent', function (response) {
-        console.log('data > ', response);
         if (response.hasOwnProperty('userInstance') && Object.keys(response.userInstance).length) {
+            console.log('data > ', response.userInstance);
             var _id = response.userInstance.id;
             var statusHtml = `<select name="instStatus" class="form-control instStatus" data-id="${_id}">
                             <option value="running">Running</option>
