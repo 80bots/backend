@@ -17,11 +17,11 @@ class AwsConnection extends BaseModel
     public static function AwsConnection()
     {
         $ec2Client = new Ec2Client([
-            'region' => 'us-east-2',
-            'version' => 'latest',
+            'region' => config('aws.region', 'us-east-2'),
+            'version' => config('aws.version', 'latest'),
             'credentials' => [
-                'key' => 'AKIAIO7MFUMEZ33ZDXKA',
-                'secret' => '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',
+                'key' => config('aws.credentials.key', 'AKIAIO7MFUMEZ33ZDXKA'),
+                'secret' => config('aws.credentials.secret', '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'),
             ],
         ]);
         return $ec2Client;
