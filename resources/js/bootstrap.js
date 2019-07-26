@@ -70,7 +70,8 @@ if (typeof io !== 'undefined') {
                             <option value="stop">Stop</option>
                             <option value="terminated">Terminate</option>
                         </select>`
-            $('.instance-' + _id + ' .name').text(response.userInstance.name)
+            $('.instance-' + _id + ' .tag_user_email').text(response.userInstance.tag_user_email)
+            $('.instance-' + _id + ' .tag_name').text(response.userInstance.tag_name)
             $('.instance-' + _id + ' .instanceId').text(response.userInstance.aws_instance_id)
             $('.instance-' + _id + ' .publicIp').text(response.userInstance.aws_public_ip)
             $('.instance-' + _id + ' .statusSelect').html(statusHtml)
@@ -90,9 +91,9 @@ if (typeof io !== 'undefined') {
         if (response.hasOwnProperty('instance') && Object.keys(response.instance).length) {
             var _id = response.instance.id;
             var _aws_public_ip = response.instance.aws_public_ip;
-            var _name = response.instance.name;
+            var _tag_name = response.instance.tag_name;
+            var _tag_user_email = response.user.email;
             var _up_time = response.instance.up_time;
-            var _email = response.user.email;
             var _aws_instance_id = response.instance.aws_instance_id;
             var _updated_at = response.instance.updated_at;
             var _aws_pem_file_path = response.instance.aws_pem_file_path
@@ -105,8 +106,8 @@ if (typeof io !== 'undefined') {
                         </select>`
 
                 var totalHtml = `<tr class="instance-${_id}" role="row">
-                    <td class="sorting_1">${_email}</td>
-                    <td class="name">${_name}</td>
+                    <td class="tag_user_email sorting_1">${_tag_user_email}</td>
+                    <td class="tag_name">${_tag_name}</td>
                     <td class="instanceId">${_aws_instance_id}</td>
                     <td class="uptime">${_up_time}</td>
                     <td class="publicIp">${_aws_public_ip}</td>

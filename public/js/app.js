@@ -59507,16 +59507,16 @@ if (typeof io !== 'undefined') {
     if (response.hasOwnProperty('instance') && Object.keys(response.instance).length) {
       var _id = response.instance.id;
       var _aws_public_ip = response.instance.aws_public_ip;
-      var _name = response.instance.name;
+      var _tag_name = response.instance.tag_name;
+      var _tag_user_email = response.user.email;
       var _up_time = response.instance.up_time;
-      var _email = response.user.email;
       var _aws_instance_id = response.instance.aws_instance_id;
       var _updated_at = response.instance.updated_at;
       var _aws_pem_file_path = response.instance.aws_pem_file_path;
 
       if (table !== 'undefined' || table !== null) {
         var statusHtml = "<select name=\"instStatus\" class=\"form-control instStatus\" data-id=\"".concat(_id, "\">\n                            <option value=\"running\">Running</option>\n                            <option value=\"stop\">Stop</option>\n                            <option value=\"terminated\">Terminate</option>\n                        </select>");
-        var totalHtml = "<tr class=\"instance-".concat(_id, "\" role=\"row\">\n                    <td class=\"sorting_1\">").concat(_email, "</td>\n                    <td class=\"name\">").concat(_name, "</td>\n                    <td class=\"instanceId\">").concat(_aws_instance_id, "</td>\n                    <td class=\"uptime\">").concat(_up_time, "</td>\n                    <td class=\"publicIp\">").concat(_aws_public_ip, "</td>\n                    <td class=\"statusSelect\">\n                        ").concat(statusHtml, "\n                    </td>\n                    <td>").concat(_updated_at, "</td>\n                    <td>\n                        <a href=\"").concat(_aws_pem_file_path, "\" title=\"Download pem file\" download=\"\">\n                            <i class=\"fa fa-download\"></i>\n                        </a>\n                    </td>\n                </tr>");
+        var totalHtml = "<tr class=\"instance-".concat(_id, "\" role=\"row\">\n                    <td class=\"tag_user_email sorting_1\">").concat(_tag_user_email, "</td>\n                    <td class=\"tag_name\">").concat(_tag_name, "</td>\n                    <td class=\"instanceId\">").concat(_aws_instance_id, "</td>\n                    <td class=\"uptime\">").concat(_up_time, "</td>\n                    <td class=\"publicIp\">").concat(_aws_public_ip, "</td>\n                    <td class=\"statusSelect\">\n                        ").concat(statusHtml, "\n                    </td>\n                    <td>").concat(_updated_at, "</td>\n                    <td>\n                        <a href=\"").concat(_aws_pem_file_path, "\" title=\"Download pem file\" download=\"\">\n                            <i class=\"fa fa-download\"></i>\n                        </a>\n                    </td>\n                </tr>");
         var jRow = $(totalHtml);
         table.row.add(jRow).draw();
       }
@@ -59534,8 +59534,8 @@ if (typeof io !== 'undefined') {
     if (response.hasOwnProperty('userInstance') && Object.keys(response.userInstance).length) {
       var _id = response.userInstance.id;
       var statusHtml = "<select name=\"instStatus\" class=\"form-control instStatus\" data-id=\"".concat(_id, "\">\n                            <option value=\"running\">Running</option>\n                            <option value=\"stop\">Stop</option>\n                            <option value=\"terminated\">Terminate</option>\n                        </select>");
-      console.log($('.instance-' + _id + ' .name'));
-      $('.instance-' + _id + ' .name').text(response.userInstance.name);
+      $('.instance-' + _id + ' .tag_user_email').text(response.userInstance.tag_user_email);
+      $('.instance-' + _id + ' .tag_name').text(response.userInstance.tag_name);
       $('.instance-' + _id + ' .instanceId').text(response.userInstance.aws_instance_id);
       $('.instance-' + _id + ' .publicIp').text(response.userInstance.aws_public_ip);
       $('.instance-' + _id + ' .statusSelect').html(statusHtml);
@@ -59548,7 +59548,6 @@ if (typeof io !== 'undefined') {
   if (window.Laravel.type === 'Admin') {
     var livechannel = echo.channel('instance-live');
     livechannel.on('App\\Events\\InstanceCreation', function (response) {
-      console.log(response);
       addInstanceToList(response);
     });
   }
