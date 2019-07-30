@@ -27,7 +27,4 @@ class BaseModel extends Model
         return $credit;
     }
 
-    public static function CalUsedCredit(){
-
-    }
 }

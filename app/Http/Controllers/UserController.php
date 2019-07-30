@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\SubscriptionPlan;
 use App\Timezone;
 use App\User;
-use App\SubscriptionPlan;
 use Illuminate\Http\Request;
 
 class UserController extends AppController
@@ -51,7 +51,7 @@ class UserController extends AppController
         $user = User::find($id);
         $used_credit = $user->userInstances->sum('used_credit');
         $plan = null;
-        if($user->subscribed(config('services.stripe.product'))) { 
+        if($user->subscribed(config('services.stripe.product'))) {
             $subscription = $user->subscription(config('services.stripe.product'));
             $plan = SubscriptionPlan::where('stripe_plan',$subscription->stripe_plan)->first();
         }

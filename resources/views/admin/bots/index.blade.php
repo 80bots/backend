@@ -99,10 +99,7 @@
             $('#bot-list').DataTable();
         });
 
-        function launchInstance(botId) {
-            $('#launch-instance').modal('show');
-            $('[name="bot_id"]').val(botId);
-        }
+
 
         function changeStatus(id, status) {
             var URL = '{{route('admin.bots.change-status')}}';
@@ -135,7 +132,6 @@
 
         function launchInstance(botId) {
             $('#launch-instance').modal('show');
-            console.log(botId)
             $('[name="bot_id"]').val(botId);
         }
 

@@ -18,7 +18,8 @@
         "lavary/crunz": "^2.0",
         "league/flysystem-aws-s3-v3": "^1.0",
         "nubs/random-name-generator": "^2.1",
-        "predis/predis": "^1.1"
+        "predis/predis": "^1.1",
+        "ext-json": "*"
     },
     "repositories": [
         {
@@ -48,6 +49,9 @@
         }
     },
     "autoload": {
+        "files": [
+            "app/Helpers/CommonHelper.php"
+        ],
         "psr-4": {
             "App\\": "app/"
         },
