@@ -55,43 +55,50 @@ class BotsController extends AppController
      */
     public function store(Request $request)
     {
+        dd($request->all());
+
         try{
-            $botObj = new Bots();
-            $botObj->bot_name = isset($request->bot_name) ? $request->bot_name : '';
-            $botObj->description = isset($request->description) ? $request->description : '';
-            $botObj->aws_ami_image_id = isset($request->aws_ami_image_id) ? $request->aws_ami_image_id : '';
-            $botObj->aws_ami_name = isset($request->aws_ami_name) ? $request->aws_ami_name : '';
-            $botObj->aws_instance_type = isset($request->aws_instance_type) ? $request->aws_instance_type : '';
-            $botObj->aws_startup_script = isset($request->aws_startup_script) ? $request->aws_startup_script : '';
-            $botObj->aws_custom_script = isset($request->aws_custom_script) ? $request->aws_custom_script : '';
-            $botObj->aws_storage_gb = isset($request->aws_storage_gb) ? $request->aws_storage_gb : '';
 
-            $platform_name = isset($request->Platform) ? $request->Platform : '';
-            $platformObj = Platforms::findByName($platform_name);
+            $platformObj = Platforms::findByName($request->input('platform'));
             if(empty($platformObj)){
-                $platformObj = new Platforms();
-                $platformObj->name = $platform_name;
-                $platformObj->save();
+                $platformObj = Platforms::create([
+                    'name' => $request->input('platform')
+                ]);
             }
-            $botObj->platform_id = $platformObj->id;
 
-            if($botObj->save()){
-                if(!empty($request->tags) && isset($request->tags)){
-                    $tagString = rtrim($request->tags,',');
-                    $tags = explode(',', $tagString);
-                    foreach ($tags as $tag){
-                        $tagObj = Tags::findByName($tag);
-                        if(!isset($tagObj) && empty($tagObj)){
-                            $tagObj = new Tags();
-                            $tagObj->name = $tag;
-                            $tagObj->save();
-                        }
-                        $botTagsObj = New BotTags();
-                        $botTagsObj->bots_id = $botObj->id;
-                        $botTagsObj->tags_id = $tagObj->id;
-                        $botTagsObj->save();
+            $botObj = Bots::create([
+                'bot_name' => $request->input('bot_name'),
+                'description' => $request->input('description'),
+                'aws_ami_image_id' => $request->input('aws_ami_image_id'),
+                'aws_ami_name' => $request->input('aws_ami_name'),
+                'aws_instance_type' => $request->input('aws_instance_type'),
+                'aws_startup_script' => $request->input('aws_startup_script'),
+                'aws_custom_script' => $request->input('aws_custom_script'),
+                'aws_storage_gb' => $request->input('aws_storage_gb'),
+                'platform_id' => $platformObj->id
+            ]);
+
+            if(! empty($botObj) && ! empty($request->input('tags'))){
+
+                $tagString = rtrim($request->tags,',');
+
+                $tags = explode(',', $tagString);
+
+                foreach ($tags as $tag){
+
+                    $tagObj = Tags::findByName($tag);
+
+                    if(!isset($tagObj) && empty($tagObj)){
+                        $tagObj = new Tags();
+                        $tagObj->name = $tag;
+                        $tagObj->save();
                     }
+                    $botTagsObj = new BotTags();
+                    $botTagsObj->bots_id = $botObj->id;
+                    $botTagsObj->tags_id = $tagObj->id;
+                    $botTagsObj->save();
                 }
+
                 return redirect(route('admin.bots.index'))->with('success', 'Bot Added Successfully');
             }
             session()->flash('error', 'Bot Can not Added Successfully');

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\SubscriptionPlan;
 use App\Timezone;
 use App\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class UserController extends AppController

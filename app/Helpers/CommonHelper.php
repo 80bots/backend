@@ -17,9 +17,7 @@ class CommonHelper
      */
     public static function calculateCredit()
     {
-        $upTime = config('app.up_time');
-        $remaining_credits = config('app.credit');
-        return round(($remaining_credits * 10) / $upTime,2);
+        return round((config('app.credit') * 10) / config('app.up_time'),2);
     }
 
     /**
@@ -29,7 +27,7 @@ class CommonHelper
      * @param $endTime
      * @return int
      */
-    public static function diffTime($startTime, $endTime)
+    public static function diffTimeInMinutes($startTime, $endTime)
     {
         $start  = Carbon::parse($startTime);
         $end    = Carbon::parse($endTime);

@@ -3,15 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\InstanceSessionsHistory;
-use Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class InstanceSessionsHistoryController extends Controller
 {
-    public function __construct()
-    {
-        //
-    }
     /**
      * Handle the incoming request.
      *
@@ -20,11 +16,9 @@ class InstanceSessionsHistoryController extends Controller
      */
     public function index(Request $request)
     {
-        $user = Auth::user();
-       // dd(InstanceSessionsHistory::where('user_id', $user->id)->with('schedulingInstance.userInstances')->get());
-        if($user->role->name === 'User'){
+        if(Auth::user()->hasRole('User')){
             return view('user.instance.sessionhistory', [
-                'sessions' => InstanceSessionsHistory::where('user_id', $user->id)->with('schedulingInstance.userInstances')->paginate(5),
+                'sessions' => InstanceSessionsHistory::where('user_id', Auth::id())->with('schedulingInstance.userInstances')->paginate(5),
                 'admin' => false
             ]);
         }

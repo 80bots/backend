@@ -20,7 +20,7 @@
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
                             <label for="">Platform*</label>
-                            <input type="text" name="Platform" class="form-control">
+                            <input type="text" name="platform" class="form-control">
                         </div>
                     </div>
                     <div class="col-md-6 col-sm-12">

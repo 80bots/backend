@@ -3,25 +3,33 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-use phpDocumentor\Reflection\Types\Self_;
 
 class SchedulingInstance extends Model
 {
-    // protected $tabel = 'scheduling_instances';
+    protected $table = 'scheduling_instances';
 
-   	public static function findByUserId($user_id) {
+    protected $fillable = [
+        'user_id',
+        'user_instances_id',
+        'status',
+    ];
+
+   	public static function findByUserId($user_id)
+    {
         return self::with('userInstances.bots')->where('user_id' , $user_id);
     }
 
-    public static function findByUserInstanceId($id, $user_id){
-   	    return self::where('user_instances_id', $id)->where('user_id', $user_id)->with('schedulingInstanceDetails');
+    public static function findByUserInstanceId($id, $user_id)
+    {
+   	    return self::where('user_instances_id', $id)->where('user_id', $user_id)->with('details');
     }
 
-    public static function findScheduling($type)
+    public function scopeScheduling($query, $type)
     {
-        return self::where('status', '=', 'active')->with(['schedulingInstanceDetails' => function ($query) use ($type) {
-            $query->where('schedule_type', '=', $type);
-        }, 'userInstances']);
+        return $query->where('status', '=', 'active')
+            ->with(['details' => function ($query) use ($type) {
+                $query->where('schedule_type', '=', $type);
+            }, 'userInstances']);
     }
 
     public function userInstances()
@@ -29,11 +37,13 @@ class SchedulingInstance extends Model
         return $this->belongsTo('App\UserInstances','user_instances_id');
     }
 
-    public function schedulingInstanceDetails(){
+    public function details()
+    {
    	    return $this->hasMany('App\SchedulingInstancesDetails','scheduling_instances_id','id');
     }
 
-    public function schedulingInstanceHistory(){
+    public function history()
+    {
         return $this->hasMany('App\InstanceSessionsHistory','scheduling_instances_id');
     }
 }
