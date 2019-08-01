@@ -31,13 +31,15 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('instance:start')->everyMinute();
-        $schedule->command('instance:stop')->everyMinute();
+//        $schedule->command('instance:start')->everyMinute();
+//        $schedule->command('instance:stop')->everyMinute();
 
-        $schedule->command('instance:calculate-up-time')->everyTenMinutes();
-        $schedule->command('instance:calculate-user-credit-score')->everyTenMinutes();
+        $schedule->command('instance:calculate-user-credit-score')->everyMinute();
 
-        $schedule->call('App\Http\Controllers\admin\UserInstancesController@syncInstances')->everyFiveMinutes();
+//        $schedule->command('instance:calculate-up-time')->everyTenMinutes();
+//        $schedule->command('instance:calculate-user-credit-score')->everyTenMinutes();
+//
+//        $schedule->call('App\Http\Controllers\admin\UserInstancesController@syncInstances')->everyFiveMinutes();
     }
 
     /**

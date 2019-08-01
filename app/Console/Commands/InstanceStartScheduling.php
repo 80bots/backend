@@ -3,13 +3,11 @@
 namespace App\Console\Commands;
 
 use App\Helpers\InstanceHelper;
-use App\InstanceSessionsHistory;
 use App\SchedulingInstance;
 use App\Services\Aws;
 use App\UserInstances;
 use App\UserInstancesDetails;
 use Carbon\Carbon;
-use Carbon\CarbonTimeZone;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -31,14 +29,9 @@ class InstanceStartScheduling extends Command
     protected $description = 'Command description';
 
     /**
-     * @var string
+     * @var Carbon
      */
-    private $currentDate;
-
-    /**
-     * @var int
-     */
-    private $currentTime;
+    private $now;
 
     /**
      * Create a new command instance.
@@ -48,11 +41,6 @@ class InstanceStartScheduling extends Command
     public function __construct()
     {
         parent::__construct();
-
-        $now = Carbon::now();
-
-        $this->currentDate = $now->toDateTimeString();
-        $this->currentTime = Carbon::parse($now->format('D h:i A'))->getTimestamp();
     }
 
     /**
@@ -62,48 +50,21 @@ class InstanceStartScheduling extends Command
      */
     public function handle()
     {
-        Log::info('cron call start scheduling');
+        $this->now = Carbon::now();
+
+        Log::info("InstanceStartScheduling => cron call start scheduling => {$this->now->toDateTimeString()}");
 
         try {
 
-            $instancesIds = [];
-            $startSchedule = SchedulingInstance::scheduling('start')->get();
-
-            foreach ($startSchedule as $scheduler) {
-
-                $userInstance = $scheduler->userInstances ?? null;
-
-                if (! empty($scheduler->details) && !empty($userInstance)) {
-
-                    foreach ($scheduler->details as $detail) {
-
-                        if (InstanceHelper::isScheduleInstance($detail, $this->currentTime)) {
-
-                            $tz = CarbonTimeZone::create($detail->time_zone);
-
-                            Log::info($detail->scheduling_instances_id);
-
-                            //Save the session history
-                            InstanceSessionsHistory::create([
-                                'scheduling_instances_id' => $scheduler->id,
-                                'user_id' => $scheduler->user_id,
-                                'schedule_type' => $scheduler->schedule_type,
-                                'cron_data' => $scheduler->cron_data,
-                                'current_time_zone' => $tz->toRegionName(),
-                                'selected_time' => $detail->selected_time,
-                            ]);
-
-                            array_push($instancesIds, $userInstance->aws_instance_id);
-                        }
-
-                    }
-                }
-            }
+            $instancesIds = InstanceHelper::getScheduleInstancesIds(
+                SchedulingInstance::scheduling('start')->get(),
+                $this->now
+            );
 
             $this->startInstances($instancesIds);
 
         } catch (Throwable $throwable) {
-            Log::info('Catch Error Message ' . $throwable->getMessage());
+            Log::info('InstanceStartScheduling Catch Error Message ' . $throwable->getMessage());
         }
     }
 
@@ -129,11 +90,19 @@ class InstanceStartScheduling extends Command
                         $userInstance->status = 'running';
 
                         if ($userInstance->save()) {
-                            $instanceDetail = UserInstancesDetails::where(['user_instance_id' => $userInstance->id, 'end_time' => null])->latest()->first();
+
+                            $instanceDetail = UserInstancesDetails::where(
+                                [
+                                    'user_instance_id'  => $userInstance->id,
+                                    'end_time'          => null
+                                ])
+                                ->latest()
+                                ->first();
+
                             if (empty($instanceDetail)) {
                                 UserInstancesDetails::create([
-                                    'user_instance_id' => $userInstance->id,
-                                    'start_time' => $this->currentDate
+                                    'user_instance_id'  => $userInstance->id,
+                                    'start_time'        => $this->now->toDateTimeString()
                                 ]);
                             }
                             Log::info('Instance Id ' . $instanceId . ' Started');

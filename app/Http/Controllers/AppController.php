@@ -161,7 +161,6 @@ class AppController extends Controller
                             $instanceObj->temp_up_time = $upTime;
                             $instanceObj->up_time = $upTime;
                             $instanceObj->used_credit = CommonHelper::calculateUsedCredit($upTime);
-
                         }
                     }
 

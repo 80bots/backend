@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use App\Helpers\CommonHelper;
 use App\Helpers\InstanceHelper;
-use App\InstanceSessionsHistory;
 use App\SchedulingInstance;
 use App\Services\Aws;
 use App\UserInstances;
@@ -31,14 +30,9 @@ class InstanceStopScheduling extends Command
     protected $description = 'Command description';
 
     /**
-     * @var string
+     * @var Carbon
      */
-    private $currentDate;
-
-    /**
-     * @var int
-     */
-    private $currentTime;
+    private $now;
 
     /**
      * Create a new command instance.
@@ -48,11 +42,6 @@ class InstanceStopScheduling extends Command
     public function __construct()
     {
         parent::__construct();
-
-        $now = Carbon::now();
-
-        $this->currentDate = $now->toDateTimeString();
-        $this->currentTime = Carbon::parse($now->format('D h:i A'))->getTimestamp();
     }
 
     /**
@@ -62,36 +51,16 @@ class InstanceStopScheduling extends Command
      */
     public function handle()
     {
-        Log::info('cron call stop scheduling');
+        $this->now = Carbon::now();
+
+        Log::info("InstanceStopScheduling => cron call stop scheduling => {$this->now->toDateTimeString()}");
 
         try {
 
-            $instancesIds = [];
-            $startSchedule = SchedulingInstance::scheduling('stop')->get();
-
-            foreach ($startSchedule as $scheduler) {
-
-                $userInstance = $scheduler->userInstances ?? null;
-
-                if (! empty($scheduler->details) && $userInstance) {
-
-                    foreach ($scheduler->details as $detail) {
-
-                        if (InstanceHelper::isScheduleInstance($detail, $this->currentTime)) {
-
-                            //Save the session history
-                            InstanceSessionsHistory::create([
-                                'scheduling_instances_id'   => $scheduler->id,
-                                'user_id'                   => $scheduler->user_id,
-                                'schedule_type'             => $scheduler->schedule_type,
-                                'selected_time'             => $scheduler->selected_time,
-                            ]);
-
-                            array_push($instancesIds, $userInstance->aws_instance_id);
-                        }
-                    }
-                }
-            }
+            $instancesIds = InstanceHelper::getScheduleInstancesIds(
+                SchedulingInstance::scheduling('stop')->get(),
+                $this->now
+            );
 
             $this->stopInstances($instancesIds);
 
@@ -123,11 +92,14 @@ class InstanceStopScheduling extends Command
                         $userInstance = UserInstances::findByInstanceId($instanceId)->first();
                         $userInstance->status = 'stop';
 
-                        $instanceDetail = UserInstancesDetails::where(['user_instance_id' => $userInstance->id, 'end_time' => null])->latest()->first();
+                        $instanceDetail = UserInstancesDetails::where([
+                            'user_instance_id' => $userInstance->id,
+                            'end_time' => null
+                        ])->latest()->first();
 
                         if (!empty($instanceDetail)) {
 
-                            $instanceDetail->end_time = $this->currentDate;
+                            $instanceDetail->end_time = $this->now->toDateTimeString();
 
                             $diffTime = CommonHelper::diffTimeInMinutes($instanceDetail->start_time, $instanceDetail->end_date);
                             $instanceDetail->total_time = $diffTime;

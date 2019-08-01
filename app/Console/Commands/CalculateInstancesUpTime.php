@@ -27,9 +27,9 @@ class CalculateInstancesUpTime extends Command
     protected $description = 'Command description';
 
     /**
-     * @var string
+     * @var Carbon
      */
-    private $currentDate;
+    private $now;
 
     /**
      * Create a new command instance.
@@ -39,10 +39,6 @@ class CalculateInstancesUpTime extends Command
     public function __construct()
     {
         parent::__construct();
-
-        $now = Carbon::now();
-
-        $this->currentDate = $now->toDateTimeString();
     }
 
     /**
@@ -52,8 +48,9 @@ class CalculateInstancesUpTime extends Command
      */
     public function handle()
     {
-        $aws    = new Aws;
-        $users  = User::findUserInstances();
+        $this->now  = Carbon::now();
+        $aws        = new Aws;
+        $users      = User::findUserInstances();
 
         foreach ($users as $user) {
 
@@ -71,7 +68,7 @@ class CalculateInstancesUpTime extends Command
 
                                 $instanceResponse = $describeInstance->get('Reservations')[0]['Instances'][0];
 
-                                $cronUpTime = CommonHelper::diffTimeInMinutes($instanceResponse['LaunchTime']->format('Y-m-d H:i:s'), $this->currentDate);
+                                $cronUpTime = CommonHelper::diffTimeInMinutes($instanceResponse['LaunchTime']->format('Y-m-d H:i:s'), $this->now->toDateTimeString());
 
                                 $instance->cron_up_time = $cronUpTime;
 

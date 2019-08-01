@@ -47,7 +47,7 @@ class User extends Authenticatable
 
     public static function findUserInstances()
     {
-        return self::with(['UserSubscriptionPlan'=>function($query){
+        return self::with(['UserSubscriptionPlan' => function($query){
             return $query->orderBy('id','Desc')->first();
         }])->whereHas('userInstances')->get();
     }
