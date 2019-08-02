@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Support\Facades\Auth;
 use App\User;
-use App\Helper\UserHelper;
+use App\Helpers\UserHelper;
 
 class LoginController extends Controller
 {

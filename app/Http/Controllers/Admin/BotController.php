@@ -55,10 +55,7 @@ class BotController extends AppController
      */
     public function store(Request $request)
     {
-        dd($request->all());
-
         try{
-
             $platformObj = Platforms::findByName($request->input('platform'));
             if(empty($platformObj)){
                 $platformObj = Platforms::create([

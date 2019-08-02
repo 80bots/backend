@@ -12,7 +12,7 @@ Scheduling instances edit
     <link rel="stylesheet" type="text/css" media="screen"
      href="{{ asset('css/tempusdominus-bootstrap-4.min.css')}}">
    <div class="wrapper">
-    <form class="card" id="scheduling_update" action="{{route('user.scheduling.update',$id)}}" method="post">
+    <form class="card" id="scheduling_update" action="{{route('scheduling.update',$id)}}" method="post">
         @method('PATCH')
             @csrf
         <div class="card-header d-flex align-items-center justify-content-between">

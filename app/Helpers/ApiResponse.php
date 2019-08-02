@@ -1,7 +1,7 @@
 <?php
 
 
-namespace App\Helper;
+namespace App\Helpers;
 
 // standard api response
 class ApiResponse

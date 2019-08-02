@@ -22,7 +22,7 @@ Scheduling instances
         </div>
         @include('layouts.imports.messages')
 
-    <form class="card" id="scheduling_create" action="{{route('user.scheduling.store')}}" method="post">
+    <form class="card" id="scheduling_create" action="{{route('scheduling.store')}}" method="post">
         @csrf
         <div class="card-header d-flex align-items-center justify-content-between">
             <h5 class="mb-0">Add Scheduling</h5>

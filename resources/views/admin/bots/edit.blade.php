@@ -22,7 +22,7 @@
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
                             <label for="">{{ __('admin.bots.platform') }}*</label>
-                            <input type="text" name="Platform"
+                            <input type="text" name="platform"
                                    value="{{isset($bots->platform->name) ? $bots->platform->name : ''}}"
                                    class="form-control">
                         </div>

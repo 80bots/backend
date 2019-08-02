@@ -81,9 +81,10 @@
         $(document).on('change', '.schedulingStatus', function () {
             let status = $(this).val();
             let schedulingId = $(this).data('id');
+            console.log(`{{route('scheduling.update.status')}}`);
             $.ajax({
-                type: 'put',
-                url: `{{route('scheduling.update.status')}}`,
+                type: 'PUT',
+                url: ` {{route('scheduling.update.status')}} `,
                 cache: false,
                 data: {
                     id: schedulingId,

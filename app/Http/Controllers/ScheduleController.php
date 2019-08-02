@@ -15,14 +15,15 @@ use Throwable;
 
 class ScheduleController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $results = SchedulingInstance::findByUserId(Auth::id())->get();
+            $results = SchedulingInstance::findByUserId($request->user()->id)->get();
             return view('user.scheduling.index', compact('results'));
         } catch (Throwable $throwable) {
             session()->flash('error', $throwable->getMessage());
-            return redirect(route('user.scheduling.index'));
+            dd($throwable->getMessage());
+            return redirect(route('scheduling.index'));
         }
     }
 
@@ -33,7 +34,7 @@ class ScheduleController extends Controller
             return view('user.scheduling.create', compact('instances'));
         } catch (Throwable $throwable) {
             session()->flash('error', $throwable->getMessage());
-            return redirect(route('user.scheduling.index'));
+            return redirect(route('scheduling.index'));
         }
     }
 
@@ -179,14 +180,14 @@ class ScheduleController extends Controller
                     $schedulingInstanceDetail->save();
                 }
                 session()->flash('success', 'Scheduling Create successfully');
-                return redirect(route('user.scheduling.index'));
+                return redirect(route('scheduling.index'));
             } else {
                 session()->flash('error', 'Please Try again later');
-                return redirect(route('user.scheduling.index'));
+                return redirect(route('scheduling.index'));
             }
         } catch (Throwable $throwable) {
             session()->flash('error', $throwable->getMessage());
-            return redirect(route('user.scheduling.index'));
+            return redirect(route('scheduling.index'));
         }
     }
 
@@ -244,7 +245,7 @@ class ScheduleController extends Controller
                 ]);
 
                 if ($schedulingInstance->save()) {
-                    return redirect(route('user.scheduling.index'))->with('success', 'Scheduling Update Successfully');
+                    return redirect(route('scheduling.index'))->with('success', 'Scheduling Update Successfully');
                 } else {
                     session()->flash('error', 'Bot Can not Updated Successfully');
                     return redirect()->back();
@@ -271,7 +272,7 @@ class ScheduleController extends Controller
         try{
             $schedulingInstance = SchedulingInstance::find($id);
             if ($schedulingInstance->delete()) {
-                return redirect(route('user.scheduling.index'))->with('success', 'Scheduling Delete Successfully');
+                return redirect(route('scheduling.index'))->with('success', 'Scheduling Delete Successfully');
             }
             session()->flash('error', 'Scheduling Can not Deleted Successfully');
             return redirect()->back();

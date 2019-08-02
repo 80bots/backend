@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Throwable;
+use App\Jobs\StoreUserInstance;
 
 class BotInstanceController extends AppController
 {

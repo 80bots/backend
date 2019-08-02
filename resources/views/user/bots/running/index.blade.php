@@ -77,7 +77,7 @@
                                 @endif
                             </div>
                             <div class="col-md-2 col-sm-2">
-                                {{ !empty($instance->created_at) ? \App\Helper\CommonHelper::convertTimeZone($instance->created_at, auth()->user()->timezone) : ''}}
+                                {{ !empty($instance->created_at) ? \App\Helpers\CommonHelper::convertTimeZone($instance->created_at, auth()->user()->timezone) : ''}}
                             </div>
                             <div class="col-md-2 col-sm-2 d-flex align-items-center">
                                 <a href="{{!empty($instance->aws_public_ip) ? 'http://'.$instance->aws_public_ip : ''}}"

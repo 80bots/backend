@@ -11,8 +11,6 @@ Route::get('/profile', 'UserController@show')->name('profile');
 
 // User routes
 Route::group(['middleware' => ['auth', 'user']], function () {
-    Route::resource('subscription', 'SubscriptionController');
-
     Route::group(['prefix' => 'bots', 'as' => 'bots.'], function () {
         Route::get('/', 'BotController@index')->name('index');
         Route::get('/all', 'BotController@getAll')->name('all');
@@ -29,17 +27,18 @@ Route::group(['middleware' => ['auth', 'user']], function () {
         Route::put('/{id}/timezone', 'UserController@updateTimezone')->name('update.timezone');
     });
 
-    Route::group(['prefix' => 'scheduling', 'as' => 'scheduling'], function () {
-        Route::get('/', 'ScheduleController@index')->name('.index');
-        Route::post('/store', 'ScheduleController@store')->name('.store');
-        Route::delete('/details', 'ScheduleController@deleteSchedulerDetails')->name('.delete.details');
-        Route::put('/status', 'ScheduleController@changeStatus')->name('.update.status');
+    Route::group(['prefix' => 'scheduling', 'as' => 'scheduling.'], function () {
+        Route::delete('/details', 'ScheduleController@deleteSchedulerDetails')->name('delete.details');
+        Route::put('/status', 'ScheduleController@changeStatus')->name('update.status');
     });
 
     Route::group(['prefix' => 'session', 'as' => 'session.'], function () {
         Route::get('/', 'InstanceSessionHistoryController@index')->name('index');
         Route::post('/', 'BotInstanceController@storeBotIdInSession')->name('create');
     });
+
+    Route::resource('subscription', 'SubscriptionController');
+    Route::resource('scheduling', 'ScheduleController');
 });
 
 // Admin routes

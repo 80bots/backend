@@ -69,7 +69,7 @@ class RegisterController extends Controller
         $user->remaining_credits = 8;
         $user->temp_remaining_credits = 8;
         if($user->save()){
-           $sendMail = $user->sendMail($user);
+           $sendMail = $user->welcomeEmail($user);
         }
         return $user;
     }
@@ -78,7 +78,7 @@ class RegisterController extends Controller
     {
         $this->validator($request->all())->validate();
         event(new Registered($user = $this->create($request->all())));
-        if($request->wantsJson()) {
+        if(!$request->wantsJson()) {
             return redirect($this->redirectPath())->with('success', 'Please check your Mail for activate your account');
         } else {
             return $this->success(null, __('auth.registered'));

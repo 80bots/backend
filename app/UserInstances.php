@@ -10,7 +10,7 @@ class UserInstances extends BaseModel
 {
     use SoftDeletes;
 
-    protected $table = "bots";
+    protected $table = "user_instances";
 
     protected $fillable = [
         'tag_name',
