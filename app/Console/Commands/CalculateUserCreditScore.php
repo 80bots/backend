@@ -68,6 +68,10 @@ class CalculateUserCreditScore extends Command
                 $creditScore = (float)$userObj->temp_remaining_credits - (float)array_sum($usedCreditArray);
                 $userObj->remaining_credits = $creditScore;
 
+                if (empty($userObj->temp_remaining_credits) || $userObj->temp_remaining_credits == 0) {
+                    $userObj->temp_remaining_credits = $userObj->remaining_credits;
+                }
+
                 // User relation to get packages amount what package buy.
                 if($userObj->UserSubscriptionPlan->count()){
 
@@ -112,47 +116,56 @@ class CalculateUserCreditScore extends Command
 
         $describeInstance = $aws->describeInstances($instancesIds);
 
-        if (! empty($describeInstance['Reservations']) && is_array($describeInstance['Reservations'])) {
+        if ($describeInstance->hasKey('Reservations')) {
+
+            $instancesIds = collect($describeInstance->get('Reservations'))->map(function ($item, $key) {
+                return $item['Instances'][0]['InstanceId'];
+            })->toArray();
 
             $result = $aws->stopInstance($instancesIds);
 
-            $stopInstances = $result->get('StoppingInstances');
+            if ($result->hasKey('StoppingInstances')) {
 
-            // Update instance  on user instance table
-            foreach ($stopInstances as $instanceDetail) {
+                $stopInstances = $result->get('StoppingInstances');
 
-                $CurrentState = $instanceDetail['CurrentState'];
-                $instanceId = $instanceDetail['InstanceId'];
+                // Update instance  on user instance table
+                foreach ($stopInstances as $instanceDetail) {
 
-                if ($CurrentState['Name'] == 'stopped' || $CurrentState['Name'] == 'stopping') {
+                    $CurrentState   = $instanceDetail['CurrentState'];
+                    $instanceId     = $instanceDetail['InstanceId'];
 
-                    $UserInstance = UserInstances::findByInstanceId($instanceId)->first();
-                    $UserInstance->status = 'stop';
-                    $instanceDetail = UserInstancesDetails::where(['user_instance_id' => $UserInstance->id, 'end_time' => null])->latest()->first();
+                    if ($CurrentState['Name'] == 'stopped' || $CurrentState['Name'] == 'stopping') {
 
-                    if (! empty($instanceDetail)) {
+                        $UserInstance = UserInstances::findByInstanceId($instanceId)->first();
+                        $UserInstance->status = 'stop';
 
-                        $instanceDetail->end_time = $this->now->toDateTimeString();
-                        $diffTime = CommonHelper::diffTimeInMinutes($instanceDetail->start_time, $instanceDetail->end_date);
-                        $instanceDetail->total_time = $diffTime;
+                        $instanceDetail = UserInstancesDetails::where(['user_instance_id' => $UserInstance->id, 'end_time' => null])->latest()->first();
 
-                        if ($instanceDetail->save() && $diffTime > $UserInstance->cron_up_time) {
+                        if (! empty($instanceDetail)) {
 
-                            $tempUpTime = $UserInstance->temp_up_time ?? 0;
-                            $upTime = $diffTime + $tempUpTime;
-                            $UserInstance->temp_up_time = $upTime;
-                            $UserInstance->up_time = $upTime;
-                            $UserInstance->cron_up_time = 0;
+                            $instanceDetail->end_time = $this->now->toDateTimeString();
+                            $diffTime = CommonHelper::diffTimeInMinutes($instanceDetail->start_time, $instanceDetail->end_date);
+                            $instanceDetail->total_time = $diffTime;
+
+                            if ($instanceDetail->save() && $diffTime > $UserInstance->cron_up_time) {
+
+                                $tempUpTime = $UserInstance->temp_up_time ?? 0;
+                                $upTime = $diffTime + $tempUpTime;
+                                $UserInstance->temp_up_time = $upTime;
+                                $UserInstance->up_time = $upTime;
+                                $UserInstance->cron_up_time = 0;
+                            }
                         }
+
+                        if ($UserInstance->save()) {
+                            Log::info('Instance Id ' . $instanceId . ' Stopped');
+                        }
+
+                    } else {
+                        Log::info('Instance Id ' . $instanceId . ' Not Stopped Successfully');
                     }
-                    if ($UserInstance->save()) {
-                        Log::info('Instance Id ' . $instanceId . ' Stopped');
-                    }
-                } else {
-                    Log::info('Instance Id ' . $instanceId . ' Not Stopped Successfully');
                 }
             }
         }
     }
-
 }

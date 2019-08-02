@@ -6,6 +6,7 @@ use App\Bots;
 use App\UserInstances;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Throwable;
 
 class UserInstancesController extends AppController
 {
@@ -17,18 +18,19 @@ class UserInstancesController extends AppController
     public function index()
     {
         try{
+
             $UserInstance = UserInstances::findByUserId(Auth::id())->get();
             $botsArr = Bots::all();
-            if(!$UserInstance->isEmpty()){
-                $instancesId = [];
-                array_push($instancesId,$UserInstance[0]->aws_instance_id);
-                //$this->InstanceMonitoring($instancesId);
-                return view('user.instance.index',compact('UserInstance','botsArr'));
+
+            if ($UserInstance->isEmpty()) {
+                session()->flash('error', 'Instance Not Found');
+                return view('user.instance.index');
             }
-            session()->flash('error', 'Instance Not Found');
-            return view('user.instance.index');
-        } catch (\Exception $e) {
-            session()->flash('error', $e->getMessage());
+
+            return view('user.instance.index', compact('UserInstance','botsArr'));
+
+        } catch (Throwable $throwable) {
+            session()->flash('error', $throwable->getMessage());
             return view('user.instance.index');
         }
     }

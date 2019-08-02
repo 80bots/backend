@@ -19,8 +19,9 @@
         </div>
 
         <input type="hidden" name="instance_id" value="{{ Session::get('instance_id') }}" id="instance_id">
+
         @include('layouts.imports.messages')
-        @if(!empty($UserInstance) && isset($UserInstance))
+        @if(! empty($UserInstance))
             <div class="my-3 p-3 bg-white rounded shadow-sm">
                 <h6 class="border-bottom  pb-2 mb-0">My Bots</h6>
                 @foreach($UserInstance as $instance)
@@ -35,15 +36,15 @@
                         <div class="row flex-grow-1 ml-0 mr-0 border-bottom pb-3">
                             <div class="col-md-2 col-sm-2">
                                 @include('layouts.imports.loader')
-                                <strong data-toggle="tooltip" title="{{isset($instance->aws_instance_id)?$instance->aws_instance_id:''}}" class="tag_name d-block text-gray-dark">
-                                    {{isset($instance->tag_name)?$instance->tag_name : ''}}
+                                <strong data-toggle="tooltip" title="{{ $instance->aws_instance_id ?? '' }}" class="tag_name d-block text-gray-dark">
+                                    {{ $instance->tag_name ?? '' }}
                                 </strong>
                             </div>
                             <div class="uptime col-md-2 col-sm-2">
-                                {{!empty($instance->up_time) ? $instance->up_time : 0}}
+                                {{ $instance->up_time ?? 0 }}
                             </div>
                             <div class="publicIp col-md-2 col-sm-2">
-                                {{!empty($instance->aws_public_ip) ? $instance->aws_public_ip : ''}}
+                                {{ $instance->aws_public_ip ?? '' }}
                             </div>
                             <div class="statusSelect col-md-2 col-sm-2">
                                 @if($instance->is_in_queue == 1)
@@ -71,7 +72,7 @@
                             <div class="col-md-2 col-sm-2 d-flex align-items-center">
                                 <a href="{{!empty($instance->aws_public_ip) ? 'http://'.$instance->aws_public_ip : ''}}" class="badge badge-primary mr-2 font-size-16" target="_blank"><i class="fa fa-eye"></i></a>
 
-                                @php $bot_name=isset($instance->bots->bot_name)?$instance->bots->bot_name:''@endphp
+                                @php $bot_name = $instance->bots->bot_name ?? '' @endphp
                                 <a href="javascript:void(0)" data-toggle="modal" data-target="#create-scheduler"
                                    onclick="SetBotName('{{$bot_name}}','{{$instance->id}}')" class="badge badge-primary font-size-16"><i class="fa fa-pencil-alt"></i></a>
                                 @if($instance->is_in_queue == 1)
@@ -163,7 +164,7 @@
                     location.reload();
                 }
             });
-        })
+        });
 
         function  dispatchLaunchInstance(instance_id){
             var URL = '{{route('user.dispatch.launch_instance')}}';
@@ -187,7 +188,8 @@
 
         $(document).on('click', '.refresh', function () {
             location.reload();
-        })
+        });
+
     </script>
     @include('user.scheduling.schedulerscripts')
 @endsection

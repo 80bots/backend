@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Bots extends Model
 {
+    protected $table = "bots";
+
     protected $fillable = [
         'bot_name',
         'description',

@@ -263,19 +263,37 @@ class Aws
     }
 
     /**
+     * @param int $limit This value can be between 5 and 1000.
+     * @param string $token
      * @return array|null
      */
-    public function sync(): array
+    public function sync(int $limit = 5, string $token = ''): array
     {
         if (empty($this->ec2)) {
             $this->ec2Connection();
         }
 
-        $result = $this->ec2->describeInstances();
+        if (! empty($token)) {
+            $params = ['NextToken' => $token];
+        } else {
+            $params = ['MaxResults' => $limit];
+        }
+
+        $nextToken = null;
+
+        // Describes all of AWS account's instances.
+        $result = $this->ec2->describeInstances($params);
+
+        if ($result->hasKey('NextToken')) {
+            $nextToken = $result->get('NextToken');
+        }
 
         if ($result->hasKey('Reservations')) {
 
-            $instancesByStatus = [];
+            $instancesByStatus = [
+                'data'      => [],
+                'nextToken' => $nextToken
+            ];
 
             foreach ($result->get('Reservations') as $reservation) {
 
@@ -305,7 +323,7 @@ class Aws
                                 continue;
                             }
 
-                            $instancesByStatus[$instance['State']['Name']][] = [
+                            $instancesByStatus['data'][$instance['State']['Name']][] = [
                                 'tag_name'                => $name,
                                 'tag_user_email'          => $email,
                                 'aws_instance_id'         => $instance['InstanceId'],

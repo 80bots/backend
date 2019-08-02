@@ -6,6 +6,7 @@ use App\Console\Commands\CalculateInstancesUpTime;
 use App\Console\Commands\CalculateUserCreditScore;
 use App\Console\Commands\InstanceStartScheduling;
 use App\Console\Commands\InstanceStopScheduling;
+use App\Console\Commands\InstanceSyncScheduling;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -19,6 +20,7 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         InstanceStartScheduling::class,
         InstanceStopScheduling::class,
+        InstanceSyncScheduling::class,
         CalculateInstancesUpTime::class,
         CalculateUserCreditScore::class
     ];
@@ -31,6 +33,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+//        $schedule->command('instance:sync')->everyFiveMinutes();
+
 //        $schedule->command('instance:start')->everyMinute();
 //        $schedule->command('instance:stop')->everyMinute();
 
