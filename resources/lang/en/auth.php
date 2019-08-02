@@ -1,19 +1,15 @@
 <?php
 
 return [
-
-    /*
-    |--------------------------------------------------------------------------
-    | Authentication Language Lines
-    |--------------------------------------------------------------------------
-    |
-    | The following language lines are used during authentication for various
-    | messages that we need to display to the user. You are free to modify
-    | these language lines according to your application's requirements.
-    |
-    */
-
     'failed' => 'These credentials do not match our records.',
     'throttle' => 'Too many login attempts. Please try again in :seconds seconds.',
-
+    'not_found' => 'User not found',
+    'forbidden' => 'Access forbidden',
+    'inactive' => 'User was deactivated',
+    'deleted' => 'User was deleted',
+    'link_sent' => 'Reset link was sent',
+    'bad_request' => 'Bad request',
+    'password_changed' => 'Password was successfully changed',
+    'wrong_credentials' => 'Wrong email provided',
+    'registered' => 'User was successfully registered'
 ];

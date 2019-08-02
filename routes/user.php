@@ -22,13 +22,10 @@ Route::group(['prefix' => 'user', 'as' => 'user.', 'middleware' => ['auth', 'use
         Route::post('delete-scheduler-details', 'SchedulingInstancesController@deleteSchedulerDetails')->name('delete-scheduler-details');
     });
 
-
-    /* added at 09/07/2019 by sandip START*/
     Route::group(['middleware' => ['web']], function () {
         Route::resource('instance','UserInstancesController');
     });
     Route::any('storeSession','UserInstancesController@storeBotIdInSession')->name('storeSession');
-    /* END */
 
     Route::group(['prefix' => 'instance', 'as' => 'instance.'], function() {
         Route::post('change-status', 'UserInstancesController@changeStatus')->name('change-status');

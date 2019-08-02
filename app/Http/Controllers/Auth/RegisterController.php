@@ -15,17 +15,6 @@ use Illuminate\Foundation\Auth\RegistersUsers;
 
 class RegisterController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Register Controller
-    |--------------------------------------------------------------------------
-    |
-    | This controller handles the registration of new users as well as their
-    | validation and creation. By default this controller uses a trait to
-    | provide this functionality without requiring any additional code.
-    |
-    */
-
     use RegistersUsers;
 
     /**
@@ -33,7 +22,7 @@ class RegisterController extends Controller
      *
      * @var string
      */
-//    protected $redirectTo = '/user/dashboard';
+
     protected function redirectTo(){
         return '/login';
     }
@@ -89,6 +78,11 @@ class RegisterController extends Controller
     {
         $this->validator($request->all())->validate();
         event(new Registered($user = $this->create($request->all())));
-        return redirect($this->redirectPath())->with('success', 'Please check your Mail for activate your account');
+        if($request->wantsJson()) {
+            return redirect($this->redirectPath())->with('success', 'Please check your Mail for activate your account');
+        } else {
+            return $this->success(null, __('auth.registered'));
+        }
+
     }
 }

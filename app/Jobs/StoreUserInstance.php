@@ -4,7 +4,7 @@ namespace App\Jobs;
 
 use App\Bots;
 use App\Http\Controllers\AwsConnectionController;
-use App\Http\Controllers\UserInstancesController;
+use App\Http\Controllers\BotInstanceController;
 use App\UserInstances;
 use App\UserInstancesDetails;
 use Illuminate\Bus\Queueable;

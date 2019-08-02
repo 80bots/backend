@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title')
-    Subscription Plan List
+    {{ __('admin.subscription.list') }}
 @endsection
 
 @section('css')
@@ -12,8 +12,7 @@
     <div class="wrapper">
         <div class="card">
             <div class="card-header d-flex align-items-center justify-content-between">
-                <h5 class="mb-0">Subscription Plan List</h5>
-                {{--<a href="{{route('user.instance.create')}}" class="btn btn-round btn-primary"><i class="fas fa-plus"></i> Add Instance</a>--}}
+                <h5 class="mb-0">{{ __('admin.subscription.list') }}</h5>
             </div>
             <div class="card-body">
                 @include('layouts.imports.messages')
@@ -21,11 +20,11 @@
                     <table id="plan-list" class="table thead-default vertical-middle mb-0">
                         <thead>
                         <tr>
-                            <th>Plan Name</th>
-                            <th>Price</th>
-                            <th>Credits</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>{{ __('admin.subscription.plan_name') }}</th>
+                            <th>{{ __('admin.subscription.price') }}</th>
+                            <th>{{ __('admin.subscription.credit') }}</th>
+                            <th>{{ __('admin.subscription.status') }}</th>
+                            <th>{{ __('admin.subscription.action') }}</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -38,30 +37,32 @@
                                     <td>
                                         @if(!empty($plan->status) && $plan->status == 'active')
                                             <button type="button" class="form-group btn btn-success mb-0"
-                                                    onclick="ChangeStatus('{{$plan->id}}','inactive')"
-                                                    title="make it inactive">Active
+                                                onclick="ChangeStatus('{{route('admin.subscription.update.status', $plan->id)}}', 'inactive')"
+                                                title="make it inactive">
+                                                {{ __('admin.subscription.statuses.active') }}
                                             </button>
                                         @else
                                             <button type="button" class="form-group btn btn-danger mb-0"
-                                                    onclick="ChangeStatus('{{$plan->id}}','active')"
-                                                    title="make it active">Inactive
+                                                onclick="ChangeStatus('{{route('admin.subscription.update.status', $plan->id)}}', 'active')"
+                                                title="make it active">
+                                                {{ __('admin.subscription.statuses.inactive') }}
                                             </button>
                                         @endif
                                     </td>
                                     <td>
-                                        <form action="{{ route('admin.plan.destroy',$plan->id) }}" method="POST">
+                                        <form action="{{ route('admin.subscription.destroy', $plan->id) }}" method="POST">
+                                            @csrf
+                                            @method('DELETE')
                                             <div class="d-flex align-items-center">
-                                                {{--<a href="{{route('admin.plan.show',$plan->id)}}"
+                                                <a href="{{route('admin.subscription.edit',$plan->id)}}"
                                                    class="form-group btn btn-icon btn-primary change-credit-model mb-0 mr-1"
-                                                   title="Show Plan"><i class="fa fa-eye"></i></a>--}}
-
-                                                <a href="{{route('admin.plan.edit',$plan->id)}}"
-                                                   class="form-group btn btn-icon btn-primary change-credit-model mb-0 mr-1"
-                                                   title="Edit Plan"><i class="fa fa-edit"></i></a>
-
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" onclick="return confirm('Are you sure?')" class="form-group btn btn-icon btn-danger change-credit-model mb-0"><i class="fa fa-trash"></i></button>
+                                                   title="{{ __('admin.subscription.edit_plan') }}">
+                                                    <i class="fa fa-edit"></i>
+                                                </a>
+                                                <button class="form-group btn btn-icon btn-danger change-credit-model mb-0"
+                                                    type="submit" onclick="return confirm('{{ __('keywords.are_you_sure') }}')">
+                                                    <i class="fa fa-trash"></i>
+                                                </button>
                                             </div>
                                         </form>
                                     </td>
@@ -79,22 +80,16 @@
 
 @section('script')
     <script>
-
         $(document).ready(function () {
             $('#plan-list').DataTable();
         });
 
-        function ChangeStatus(planId, status) {
-            var URL = '{{route('admin.plan.change-status')}}';
+        function ChangeStatus(url, status) {
             $.ajax({
-                type: 'post',
-                url: URL,
+                type: 'PUT',
+                url: url,
                 cache: false,
                 data: {
-                    _token: function () {
-                        return '{{csrf_token()}}';
-                    },
-                    id: planId,
                     status: status
                 },
                 success: function (data) {

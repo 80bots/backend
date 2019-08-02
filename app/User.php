@@ -12,12 +12,14 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\Mail;
 use Laravel\Cashier\Billable;
+use Laravel\Passport\HasApiTokens;
 
 class User extends Authenticatable
 {
     use Billable;
     use Notifiable;
     use SoftDeletes;
+    use HasApiTokens;
     /**
      * The attributes that are mass assignable.
      *
@@ -56,10 +58,10 @@ class User extends Authenticatable
         return $this->hasMany('App\UserInstances');
     }
 
-    public function sendMail($user){
+    public function welcomeEmail(){
         try {
-            Mail::send('mail.register', ['user' => $user], function($mail) use ($user) {
-                $mail->to($user->email, $user->name);
+            Mail::send('mail.register', ['user' => $this], function($mail) use ($user) {
+                $mail->to($this->email, $this->name);
                 $mail->subject('Test Register mail');
                 $mail->from(env('MAIL_FROM_ADDRESS', '80bots@inforca.com'), env('MAIL_FROM_NAME', '80bots'));
             });

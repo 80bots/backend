@@ -20,8 +20,8 @@ class AwsConnection extends BaseModel
             'region' => config('aws.region', 'us-east-2'),
             'version' => config('aws.version', 'latest'),
             'credentials' => [
-                'key' => config('aws.credentials.key', 'AKIAIO7MFUMEZ33ZDXKA'),
-                'secret' => config('aws.credentials.secret', '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'),
+                'key' => config('aws.credentials.key', 'AKIAQOGPXKZ2CRMWTNMB'),
+                'secret' => config('aws.credentials.secret', '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'),
             ],
         ]);
         return $ec2Client;

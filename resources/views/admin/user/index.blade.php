@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title')
-    Users List
+    {{ __('admin.users.title') . ' ' . __('keywords.list') }}
 @endsection
 
 @section('css')
@@ -12,8 +12,7 @@
     <div class="wrapper">
         <div class="card">
             <div class="card-header d-flex align-items-center justify-content-between">
-                <h5 class="mb-0">Users List</h5>
-                {{--<a href="{{route('user.instance.create')}}" class="btn btn-round btn-primary"><i class="fas fa-plus"></i> Add Instance</a>--}}
+                <h5 class="mb-0">{{ __('admin.users.title') . ' ' . __('keywords.list') }}</h5>
             </div>
             <div class="card-body">
                 @include('layouts.imports.messages')
@@ -21,12 +20,12 @@
                     <table id="user-list" class="table thead-default vertical-middle mb-0">
                         <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Credits</th>
-                            <th>Register Date</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>{{ __('admin.users.name') }}</th>
+                            <th>{{ __('admin.users.email') }}</th>
+                            <th>{{ __('admin.users.credits') }}</th>
+                            <th>{{ __('admin.users.register_date') }}</th>
+                            <th>{{ __('admin.users.status') }}</th>
+                            <th>{{ __('admin.users.action') }}</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -40,24 +39,30 @@
                                     <td>
                                         @if(!empty($user->status) && $user->status == 'active')
                                             <button type="button" class="form-group btn btn-success mb-0"
-                                                    onclick="ChangeStatus('{{$user->id}}','inactive')"
-                                                    title="make it inactive">Active
+                                                    onclick="ChangeStatus(`{{route('admin.user.update.status', ['id' => $user->id])}}`, 'inactive')"
+                                                    title="make it inactive">
+                                                {{ __('keywords.user.statuses.active') }}
                                             </button>
                                         @else
                                             <button type="button" class="form-group btn btn-danger mb-0"
-                                                    onclick="ChangeStatus('{{$user->id}}','active')"
-                                                    title="make it active">Inactive
+                                                    onclick="ChangeStatus(`{{route('admin.user.update.status', ['id' => $user->id])}}`, 'active')"
+                                                    title="make it active">
+                                                {{ __('keywords.user.statuses.inactive') }}
                                             </button>
                                         @endif
                                     </td>
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            <button class="form-group btn btn-icon btn-primary change-credit-model mb-0 mr-1"  data-val="{{$user->remaining_credits}}"
-                                                    value="{{$user->id}}" title="update credits"><i
-                                                        class="fa fa-edit"></i></button>
-                                            <a href="{{ url('admin/instance/all/' . $user->id) }}"
+                                            <button class="form-group btn btn-icon btn-primary change-credit-model mb-0 mr-1"
+                                                    data-val="{{$user->remaining_credits}}"
+                                                    value="{{$user->id}}" title="update credits">
+                                                <i class="fa fa-edit"></i>
+                                            </button>
+                                            <a href="{{ route('admin.bots.user.running', ['user' => $user->id]) }}"
                                                class="form-group btn btn-icon btn-secondary mb-0"
-                                               title="List Of All Instances"><i class="fa fa-eye"></i></a>
+                                               title="{{ __('admin.users.list_all') }}">
+                                                <i class="fa fa-eye"></i>
+                                            </a>
                                         </div>
                                     </td>
                                 </tr>
@@ -69,25 +74,28 @@
             </div>
         </div>
     </div>
-
     <div class="modal fade" id="updateCredit" role="dialog">
         <div class="modal-dialog modal-sm">
             <div class="modal-content">
                 <form id="update-credit-form" action="" method="post">
-                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                    @csrf
+                    @method('PUT')
                     <div class="modal-header">
-                        <h4 class="modal-title">Credits</h4>
+                        <h4 class="modal-title">{{ __('admin.users.credits') }}</h4>
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                     </div>
                     <div class="modal-body">
                         <div class="input-group">
                             <input type="hidden" name="id" id="user_id" value="">
-                            <input type="text" id="credit-score" minlength="1" on  name="remaining_credits" class="form-control" required>
+                            <input type="text" id="credit-score" minlength="1" name="remaining_credits"
+                               class="form-control" required>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <input type="submit" class="btn btn-success" value="submit">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">
+                            {{ __('keywords.close') }}
+                        </button>
                     </div>
                 </form>
             </div>
@@ -106,20 +114,13 @@
             });
         });
 
-        function ChangeStatus(userId, status) {
-            var URL = '{{route('admin.user.change-status')}}';
+        function ChangeStatus(url, status) {
             $.ajax({
-                type: 'post',
-                url: URL,
+                type: 'PUT',
+                url: url,
                 cache: false,
-                data: {
-                    _token: function () {
-                        return '{{csrf_token()}}';
-                    },
-                    id: userId,
-                    status: status
-                },
-                success: function (data) {
+                data: { status },
+                success: function () {
                     location.reload();
                 }
             });
@@ -127,11 +128,11 @@
 
         $(document).on('click', '.change-credit-model', function () {
             // Get user id for click button
-            var userId = $(this).val();
+            const userId = $(this).val();
             // Get amount from user list
-            var amount = $(this).attr('data-val');
+            const amount = $(this).attr('data-val');
             $('#credit-score').val(amount);
-            $('#update-credit-form').attr('action', '{{route("admin.user.update-credit")}}');
+            $('#update-credit-form').attr('action', '{{route('admin.user.update.credit')}}');
             $('#user_id').val(userId);
             $('#updateCredit').modal('show');
         });

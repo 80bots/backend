@@ -30,7 +30,7 @@ class Platforms extends Model
 
     public static function findByName(string $platform_name)
     {
-        return self::where('name',$platform_name)->first();
+        return self::where('name', $platform_name)->first();
     }
 
     public function bots()

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\ResetsPasswords;
+use Illuminate\Http\Request;
 
 class ResetPasswordController extends Controller
 {
@@ -25,7 +26,7 @@ class ResetPasswordController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/user';
+    protected $redirectTo = '/';
 
     /**
      * Create a new controller instance.
@@ -35,5 +36,26 @@ class ResetPasswordController extends Controller
     public function __construct()
     {
         $this->middleware('guest');
+    }
+
+    protected function sendResetResponse(Request $request, $response)
+    {
+        if($request->wantsJson()) {
+            return $this->success(null, __('auth.password_changed'));
+        } else {
+            return redirect($this->redirectPath())
+                ->with('status', trans($response));
+        }
+    }
+
+    protected function sendResetLinkFailedResponse(Request $request, $response)
+    {
+        if($request->wantsJson()) {
+            return $this->error(__('auth.bad_request'), __('auth.wrong_credentials'));
+        } else {
+            return redirect()->back()
+                ->withInput($request->only('email'))
+                ->withErrors(['email' => trans($response)]);
+        }
     }
 }

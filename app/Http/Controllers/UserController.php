@@ -6,17 +6,19 @@ use App\Timezone;
 use App\User;
 use App\SubscriptionPlan;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class UserController extends AppController
 {
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @param  Request  $request
+     * @return View
      */
-    public function index()
+    public function index(Request $request)
     {
-        return view('user.dashboard');
+        //
     }
 
     /**
@@ -43,17 +45,17 @@ class UserController extends AppController
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Request $request)
     {
-        $user = User::find($id);
+        $user = $request->user();
         $used_credit = $user->userInstances->sum('used_credit');
         $plan = null;
         if($user->subscribed(config('services.stripe.product'))) { 
             $subscription = $user->subscription(config('services.stripe.product'));
-            $plan = SubscriptionPlan::where('stripe_plan',$subscription->stripe_plan)->first();
+            $plan = SubscriptionPlan::where('stripe_plan', $subscription->stripe_plan)->first();
         }
 
         $timezones = Timezone::all();

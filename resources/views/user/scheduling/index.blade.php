@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title')
-    Scheduling List
+    {{ __('keywords.scheduling.title') }}
 @endsection
 
 @section('css')
@@ -10,24 +10,17 @@
 
 @section('content')
     <div class="wrapper">
-        <div class="align-items-center bg-purple d-flex p-3 rounded shadow-sm text-white-50 mb-3">
-            <h4 class="border mb-0 mr-2 pb-2 pl-3 pr-3 pt-2 rounded text-white">8</h4>
-            <div class="lh-100">
-                <h6 class="mb-0 text-white lh-100">80bots</h6>
-                <small>Since 2019</small>
-            </div>
-        </div>
+        @include('includes.banner')
         @include('layouts.imports.messages')
         @if(!empty($results) && isset($results))
-
             <div class="table-responsive">
                 <table id="scheduling_instances" class="table thead-default vertical-middle mb-0">
                     <thead>
                     <tr>
-                        <th>Instance Id</th>
-                        <th>Bot Name</th>
-                        <th>Status</th>
-                        <th>Action</th>
+                        <th>{{ __('keywords.bots.instance_id') }}</th>
+                        <th>{{ __('keywords.bots.bot_name') }}</th>
+                        <th>{{ __('keywords.status') }}</th>
+                        <th>{{ __('keywords.action') }}</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -56,7 +49,7 @@
                                            class="form-group btn btn-icon btn-primary change-credit-model mb-0 mr-1"
                                            title="Edit Bot"><i class="fa fa-edit"></i></a>
 
-                                        <form action="{{ route('user.scheduling.destroy',$row->id) }}" method="POST">
+                                        <form action="{{ route('scheduling.destroy',$row->id) }}" method="POST">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit"
@@ -74,7 +67,7 @@
             </div>
         @endif
     </div>
-    @include('user.scheduling.include-schedule-popup')
+    @include('user.scheduling.create-schedule-popup')
 @endsection
 
 @section('script')
@@ -82,21 +75,17 @@
     <script type="text/javascript" src="{{ asset('js/moment.min.js')}}"></script>
     <script type="text/javascript" src="{{ asset('js/tempusdominus-bootstrap-4.min.js')}}"></script>
     <script>
-        var current_time_zone =  moment().format('Z');
+        let current_time_zone =  moment().format('Z');
         $('#user-time-zone').val(current_time_zone);
 
         $(document).on('change', '.schedulingStatus', function () {
-            var status = $(this).val();
-            var schedulingId = $(this).data('id');
-            var URL = '{{route('user.scheduling.change-status')}}';
+            let status = $(this).val();
+            let schedulingId = $(this).data('id');
             $.ajax({
-                type: 'post',
-                url: URL,
+                type: 'put',
+                url: `{{route('scheduling.update.status')}}`,
                 cache: false,
                 data: {
-                    _token: function () {
-                        return '{{csrf_token()}}';
-                    },
                     id: schedulingId,
                     status: status
                 },
@@ -106,5 +95,5 @@
             });
         })
     </script>
-    @include('user.scheduling.schedulerscripts')
+    @include('user.scheduling.scheduler-scripts')
 @endsection

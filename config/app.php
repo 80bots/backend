@@ -131,6 +131,8 @@ return [
 
     'currency_symbol' => env('APP_CURRENCY_SYMBOL', '$'),
 
+    'access_token_lifetime_days' => env('APP_ACCESS_TOKEN_LIFETIME_DAYS', 3),
+
     /*
     |--------------------------------------------------------------------------
     | Autoloaded Service Providers
@@ -182,6 +184,7 @@ return [
         App\Providers\AuthServiceProvider::class,
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
+        App\Providers\HorizonServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
  
     ],

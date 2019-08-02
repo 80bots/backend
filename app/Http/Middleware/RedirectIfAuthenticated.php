@@ -28,14 +28,13 @@ class RedirectIfAuthenticated
     {
         // User role
         $role = Auth::user()->role->name;
-
         // Check user role
         switch ($role) {
             case 'Admin':
-                return '/admin/user';
+                return route('admin.bots.index');
                 break;
             case 'User':
-                return 'user/bots';
+                return '/bots';
                 break;
             default:
                 return '/login';

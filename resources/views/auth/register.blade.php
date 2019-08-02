@@ -14,7 +14,7 @@
             @include('layouts.imports.messages')
           </div>
           <div class="p-4 login-box mb-3">
-            <form method="POST" action="{{ route('register') }}" id="frmSignup" class="smart-form client-form">
+            <form method="POST" action="{{ route('auth.register') }}" id="frmSignup" class="smart-form client-form">
                 @csrf
                 <a href="/" class="sidebar-brand text-decoration-none"><img src="{{ asset('assets/images/80bots.svg') }}" alt=""></a>
                 <input type="hidden" id="timezone" name="timezone">

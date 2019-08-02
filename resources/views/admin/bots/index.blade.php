@@ -14,7 +14,6 @@
             <div class="card-header d-flex align-items-center justify-content-between">
                 <h5 class="mb-0">All Bots</h5>
                 <h5 class="mb-0">
-                    <!-- <a href="/admin/bots/sync-instances" class="btn btn-round btn-info">Sync Instances</a> -->
                     <a href="{{route('admin.bots.create')}}" class="btn btn-round btn-primary"><i
                                 class="fas fa-plus-circle"></i></a>
                 </h5>
@@ -46,12 +45,12 @@
                                 <td>
                                     @if( $bot->status && $bot->status == 'active')
                                         <button type="button" class="form-group btn btn-success mb-0"
-                                                onclick="changeStatus('{{$bot->id}}','inactive')"
+                                                onclick="changeStatus('{{route('admin.bots.update.status', ['id' => $bot->id])}}','inactive')"
                                                 title="make it inactive">Active
                                         </button>
                                     @else
                                         <button type="button" class="form-group btn btn-danger mb-0"
-                                                onclick="changeStatus('{{$bot->id}}','active')"
+                                                onclick="changeStatus('{{route('admin.bots.update.status', ['id' => $bot->id])}}','active')"
                                                 title="make it active">Inactive
                                         </button>
                                     @endif
@@ -66,7 +65,6 @@
                                             <a href="{{route('admin.bots.edit',$bot->id)}}"
                                                class="form-group btn btn-icon btn-primary change-credit-model mb-0 mr-1"
                                                title="Edit Bot"><i class="fa fa-edit"></i></a>
-
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" onclick="return confirm('Are you sure?')"
@@ -77,8 +75,9 @@
                                 </td>
                                 <td>
                                     <a href="javascript:void(0)" onclick="launchInstance({{$bot->id}});"
-                                       class="btn font-size-16" data-id="{{$bot->id}}">Launch <i class="fa fa-rocket"
-                                                                                                 aria-hidden="true"></i></a>
+                                       class="btn font-size-16" data-id="{{$bot->id}}">
+                                        Launch <i class="fa fa-rocket" aria-hidden="true"></i>
+                                    </a>
                                 </td>
                             </tr>
                         @empty
@@ -104,19 +103,12 @@
             $('[name="bot_id"]').val(botId);
         }
 
-        function changeStatus(id, status) {
-            var URL = '{{route('admin.bots.change-status')}}';
+        function changeStatus(url, status) {
             $.ajax({
-                type: 'post',
-                url: URL,
+                type: 'PUT',
+                url,
                 cache: false,
-                data: {
-                    _token: function () {
-                        return '{{csrf_token()}}';
-                    },
-                    id: id,
-                    status: status
-                },
+                data: { status },
                 success: function (data) {
                     location.reload();
                 }
@@ -141,15 +133,12 @@
 
         $(document).on('click', '#launch-inspection-submit-btn', function () {
             $.ajax({
-                url: "/admin/storeSession",
-                type: "POST",
+                url: `{{ route('admin.session.create') }}`,
+                type: 'POST',
                 beforeSend: function () {
                     $('#launch-inspection-submit-btn').attr('disabled', true);
                 },
                 data: {
-                    _token: function () {
-                        return '{{csrf_token()}}';
-                    },
                     user_id: '{{ Auth::id() }}',
                     bot_id: $('[name="bot_id"]').val(),
                 },
@@ -171,28 +160,13 @@
 
         function checkBotIdInQueue() {
             $.ajax({
-                url: "/admin/checkBotIdInQueue",
-                type: "POST",
-                data: {
-                    _token: function () {
-                        return '{{csrf_token()}}';
-                    }
-                },
+                url: `{{ route('admin.bots.running.check') }}`,
+                type: 'POST',
                 success: function (response) {
-
                     if (response.type === 'success') {
-                        // console.log(response);
-                        // if(response.data !== undefined && response.data.length) {
-                        //     let $botWrapper = $('#dvBotWrapper');
-                        //     for(let eachData of response.data) {
-                        //         $botWrapper.find('[data-id="'+eachData+'"]').attr('data-target','').prepend('<i class="fa fa-spinner fa-spin"></i>');
-                        //     }
-                        // }
                     }
-
                 },
                 error: function (response) {
-
                 }
             });
         }

@@ -1,22 +1,20 @@
 @extends('layouts.app')
 
 @section('title')
-Scheduling instances edit
+    {{ __('keywords.scheduling.title') .' '. __('keywords.edit') }}
 @endsection
 
 @section('css')
-
+    <link rel="stylesheet" type="text/css" media="screen" href="{{ asset('css/tempusdominus-bootstrap-4.min.css')}}">
 @endsection
 
 @section('content')
-    <link rel="stylesheet" type="text/css" media="screen"
-     href="{{ asset('css/tempusdominus-bootstrap-4.min.css')}}">
    <div class="wrapper">
-    <form class="card" id="scheduling_update" action="{{route('user.scheduling.update',$id)}}" method="post">
-        @method('PATCH')
-            @csrf
+    <form class="card" id="scheduling_update" action="{{route('scheduling.update', $id)}}" method="post">
+        @csrf
+        @method('PUT')
         <div class="card-header d-flex align-items-center justify-content-between">
-            <h5 class="mb-0">Add Scheduling</h5>
+            <h5 class="mb-0">{{ __('keywords.scheduling.add') }}</h5>
         </div>
         <div class="card-body">
             <div class="row">

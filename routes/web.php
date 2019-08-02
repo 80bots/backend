@@ -1,39 +1,83 @@
 <?php
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
-
-Route::get('/', function () {
-    return view('auth.login');
-});
-
-
+// Authentication routes
+Route::view('/', 'auth.login');
 Auth::routes();
-Route::get('CalUserCreditScore', 'AppController@CalUserCreditScore')->name('CreditScoreEmail');
 
-//Route::get('/home', 'HomeController@index')->name('home');
-Route::get('/user-activation/{id}', 'AppController@UserActivation')->name('user-activation');
+// General routes
+Route::get('/profile', 'UserController@show')->name('profile');
 
-Route::group(['middleware' => ['auth']], function() {
-    Route::get('profile/{id}', 'UserController@show')->name('user.profile');
-    Route::post('update/timezone', 'UserController@updateTimezone')->name('user.update.timezone');
+// User routes
+Route::group(['middleware' => ['auth', 'user']], function () {
+    Route::resource('subscription', 'SubscriptionController');
+
+    Route::group(['prefix' => 'bots', 'as' => 'bots.'], function () {
+        Route::get('/', 'BotController@index')->name('index');
+        Route::get('/all', 'BotController@getAll')->name('all');
+        Route::get('/running', 'BotInstanceController@index')->name('running');
+        Route::put('/running/status', 'BotInstanceController@changeStatus')->name('running.update.status');
+        Route::post('/running/dispatch', 'BotInstanceController@dispatchLaunchInstace')->name('running.dispatch');
+        Route::get('/check', 'BotInstanceController@checkBotIdInQueue')->name('running.check');
+    });
+
+    Route::group(['prefix' => 'user', 'as' => 'user.'], function() {
+        Route::get('/', 'UserController@index')->name('index');
+        Route::put('/{id}/status', 'UserController@changeStatus')->name('update.status');
+        Route::put('/credit', 'UserController@updateCredit')->name('update.credit');
+        Route::put('/{id}/timezone', 'UserController@updateTimezone')->name('update.timezone');
+    });
+
+    Route::group(['prefix' => 'scheduling', 'as' => 'scheduling'], function () {
+        Route::get('/', 'ScheduleController@index')->name('.index');
+        Route::post('/store', 'ScheduleController@store')->name('.store');
+        Route::delete('/details', 'ScheduleController@deleteSchedulerDetails')->name('.delete.details');
+        Route::put('/status', 'ScheduleController@changeStatus')->name('.update.status');
+    });
+
+    Route::group(['prefix' => 'session', 'as' => 'session.'], function () {
+        Route::get('/', 'InstanceSessionHistoryController@index')->name('index');
+        Route::post('/', 'BotInstanceController@storeBotIdInSession')->name('create');
+    });
 });
 
-include('admin.php');
-include('user.php');
+// Admin routes
+Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin'], 'namespace' => 'Admin', 'as' => 'admin.'], function () {
+    Route::group(['prefix' => 'bots', 'as' => 'bots.'], function () {
+        Route::get('/running', 'BotInstanceController@index')->name('running');
+        Route::put('/{id}/status', 'BotController@changeStatus')->name('update.status');
+        Route::get('/all', 'BotController@getAll')->name('all');
+        Route::get('/running/{userId}', 'BotInstanceController@index')->name('user.running');
+        Route::put('/running/status', 'BotInstanceController@changeStatus')->name('running.update.status');
+        Route::post('/running/dispatch', 'BotInstanceController@dispatchLaunchInstace')->name('running.dispatch');
+        Route::get('/check', 'BotInstanceController@checkBotIdInQueue')->name('running.check');
+    });
 
-Route::post(
-    'stripe/webhook',
-    '\App\Http\Controllers\WebhookController@handleWebhook'
-);
+    Route::group(['prefix' => 'user', 'as' => 'user.'], function() {
+        Route::get('/', 'UserController@index')->name('index');
+        Route::put('/{id}/status', 'UserController@changeStatus')->name('update.status');
+        Route::put('/credit', 'UserController@updateCredit')->name('update.credit');
+        Route::put('/{id}/timezone', 'UserController@updateTimezone')->name('update.timezone');
+    });
 
+    Route::group(['prefix' => 'session', 'as' => 'session.'], function () {
+        Route::get('/', 'InstanceSessionHistoryController@index')->name('index');
+        Route::post('/', 'BotInstanceController@storeBotIdInSession')->name('create');
+    });
 
-//Route::get('stripe-payment', 'StripeController@SendPayment')->name('stripe-payment');
+    Route::group(['prefix' => 'subscription', 'as' => 'subscription.'], function () {
+        Route::put('/{id}/status', 'SubscriptionController@changeStatus')->name('update.status');
+    });
+
+    Route::resource('notification', 'NotificationController');
+    Route::resource('subscription', 'SubscriptionController');
+    Route::resource('bots', 'BotController');
+});
+
+Route::get('/user/credits', 'AppController@CalUserCreditScore')->name('CreditScoreEmail');
+Route::get('/user/activation/{token}', 'AppController@UserActivation')->name('user-activation');
+
+// Stripe routes
+Route::post('/stripe/webhook', 'WebhookController@handleWebhook');
+Route::get('/stripe-payment', 'StripeController@SendPayment')->name('stripe-payment');

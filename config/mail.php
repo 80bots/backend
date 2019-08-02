@@ -16,7 +16,7 @@ return [
     |
     */
 
-    'driver' => 'ses',
+    'driver' => env('MAIL_DRIVER', 'ses'),
 
     /*
     |--------------------------------------------------------------------------
@@ -29,7 +29,7 @@ return [
     |
     */
 
-    'host' => 'email-smtp.us-west-2.amazonaws.com',
+    'host' => env('MAIL_HOST', 'email-smtp.us-west-2.amazonaws.com'),
 
     /*
     |--------------------------------------------------------------------------
@@ -42,7 +42,7 @@ return [
     |
     */
 
-    'port' => 587,
+    'port' => env('MAIL_PORT', 587),
 
     /*
     |--------------------------------------------------------------------------
@@ -71,7 +71,7 @@ return [
     |
     */
 
-    'encryption' => 'tls',
+    'encryption' => env('MAIL_ENCRYPTION', 'tls'),
 
     /*
     |--------------------------------------------------------------------------
@@ -84,8 +84,8 @@ return [
     |
     */
 
-    'username' => 'AKIAIQGIM5HSECC6T56A',
-    'password' => 'BBmpVDUt8NqvEuxaub8/0SE5xZ6A+SDP6otb0wKTqan+',
+    'username' => env('MAIL_USERNAME', 'AKIAIQGIM5HSECC6T56A'),
+    'password' => env('MAIL_PASSWORD', 'BBmpVDUt8NqvEuxaub8/0SE5xZ6A+SDP6otb0wKTqan+'),
 
     /*
     |--------------------------------------------------------------------------

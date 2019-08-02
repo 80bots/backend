@@ -2,7 +2,7 @@
 use Illuminate\Support\Facades\Auth;
 $user = Auth::user();
 @endphp
-    <!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -12,7 +12,7 @@ $user = Auth::user();
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@yield('title') | 80bots</title>
+    <title>@yield('title') | {{ __('keywords.brand') }}</title>
 
     <link rel="stylesheet" href="{{asset('css/app.css')}}">
     <!--link rel="stylesheet" href="{{asset('css/bootstrap.min.css')}}"-->
@@ -31,39 +31,33 @@ $user = Auth::user();
     @endif
 </head>
 <body>
-<div class="main-wrapper d-flex align-items-stretch">
-    @if(isset($user))
-        @if($user->role->name == 'User')
-            @include('layouts.imports.side-left')
-        @else
-            @include('layouts.imports.admin-side-left')
+    <div class="main-wrapper d-flex align-items-stretch">
+        @if(isset($user))
+            @if($user->role->name == 'User')
+                @include('layouts.imports.sidebar')
+            @else
+                @include('layouts.imports.admin-sidebar')
+            @endif
         @endif
-    @endif
 
-    <div class="body-content flex-grow-1">
-
-        @include('layouts.imports.header')
-
-        @yield('content')
+        <div class="body-content flex-grow-1">
+            @include('layouts.imports.header')
+            @yield('content')
+        </div>
     </div>
-</div>
-<script>
-    window.Laravel = {
-        'csrfToken': '{{ csrf_token() }}',
-        'user': '{{Auth::user()->id}}',
-        'type': '{{ Auth::user()->role->name }}'
-    };
-</script>
-<script type="text/javascript" src="{{asset('js/jquery-3.3.1.min.js')}}"></script>
-<!--script type="text/javascript" src="{{asset('js/bootstrap.min.js')}}"></script-->
-<script type="text/javascript" src="{{asset('js/app.js')}}"></script>
-<script type="text/javascript" src="{{asset('js/bootbox.all.min.js')}}"></script>
-<script type="text/javascript" src="{{asset('js/datatables.min.js')}}"></script>
-<script type="text/javascript" src="{{asset('vendors/select2/js/select2.full.min.js')}}"></script>
-<script type="text/javascript" src="{{asset('js/script.js')}}"></script>
-@yield('script')
-@yield('js')
-
-
+    <script>
+        window.Laravel = {
+            'user': '{{ $user->id}}',
+            'type': '{{ $user->role->name }}'
+        };
+    </script>
+    <script type="text/javascript" src="{{asset('js/jquery-3.3.1.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('js/app.js')}}"></script>
+    <script type="text/javascript" src="{{asset('js/bootbox.all.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('js/datatables.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('vendors/select2/js/select2.full.min.js')}}"></script>
+    <script type="text/javascript" src="{{asset('js/script.js')}}"></script>
+    @yield('script')
+    @yield('js')
 </body>
 </html>

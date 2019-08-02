@@ -1,4 +1,3 @@
-
 window._ = require('lodash');
 
 /**
@@ -51,7 +50,7 @@ toastr.options = {
     "hideDuration": "5000",
     "timeOut": "5000",
     "extendedTimeOut": "5000",
-}
+};
 
 if (typeof io !== 'undefined') {
     var echo = window.Echo = new Echo({
@@ -87,26 +86,27 @@ if (typeof io !== 'undefined') {
             addInstanceToList(response)
         });
     }
+}
 
-    function addInstanceToList(response) {
-        if (response.hasOwnProperty('instance') && Object.keys(response.instance).length) {
-            var _id = response.instance.id;
-            var _aws_public_ip = response.instance.aws_public_ip;
-            var _tag_name = response.instance.tag_name;
-            var _tag_user_email = response.user.email;
-            var _up_time = response.instance.up_time;
-            var _aws_instance_id = response.instance.aws_instance_id;
-            var _updated_at = response.instance.updated_at;
-            var _aws_pem_file_path = response.instance.aws_pem_file_path
+function addInstanceToList(response) {
+    if (response.hasOwnProperty('instance') && Object.keys(response.instance).length) {
+        var _id = response.instance.id;
+        var _aws_public_ip = response.instance.aws_public_ip;
+        var _tag_name = response.instance.tag_name;
+        var _tag_user_email = response.user.email;
+        var _up_time = response.instance.up_time;
+        var _aws_instance_id = response.instance.aws_instance_id;
+        var _updated_at = response.instance.updated_at;
+        var _aws_pem_file_path = response.instance.aws_pem_file_path
 
-            if (table !== 'undefined' || table !== null) {
-                var statusHtml = `<select name="instStatus" class="form-control instStatus" data-id="${_id}">
+        if (table !== 'undefined' || table !== null) {
+            var statusHtml = `<select name="instStatus" class="form-control instStatus" data-id="${_id}">
                             <option value="running">Running</option>
                             <option value="stop">Stop</option>
                             <option value="terminated">Terminate</option>
                         </select>`
 
-                var totalHtml = `<tr class="instance-${_id}" role="row">
+            var totalHtml = `<tr class="instance-${_id}" role="row">
                     <td class="tag_user_email sorting_1">${_tag_user_email}</td>
                     <td class="tag_name">${_tag_name}</td>
                     <td class="instanceId">${_aws_instance_id}</td>
@@ -123,19 +123,8 @@ if (typeof io !== 'undefined') {
                     </td>
                 </tr>`
 
-                var jRow = $(totalHtml)
-                table.row.add(jRow).draw();
-            }
+            var jRow = $(totalHtml)
+            table.row.add(jRow).draw();
         }
     }
 }
-
-
-// window.Pusher = require('pusher-js');
-
-// window.Echo = new Echo({
-//     broadcaster: 'pusher',
-//     key: process.env.MIX_PUSHER_APP_KEY,
-//     cluster: process.env.MIX_PUSHER_APP_CLUSTER,
-//     encrypted: true
-// });

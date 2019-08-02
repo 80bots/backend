@@ -13,7 +13,7 @@
         <div class="card">
             <div class="card-header d-flex align-items-center justify-content-between">
                 <h5 class="mb-0">View Bot</h5>
-                <a href="{{route('admin.bots.index')}}" class="btn btn-primary btn-round">Back</a>
+                <a href="{{route('bots.index')}}" class="btn btn-primary btn-round">Back</a>
             </div>
             <div class="card-body">
                 @include('layouts.imports.messages')
