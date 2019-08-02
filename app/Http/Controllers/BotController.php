@@ -10,7 +10,7 @@ class BotController extends Controller
 
     public function index($platformId = null)
     {
-        if(!$platformId) {
+        if (! $platformId) {
           $this->limit = 5;
         }
 

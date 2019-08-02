@@ -6,7 +6,20 @@ use Illuminate\Database\Eloquent\Model;
 
 class SchedulingInstancesDetails extends Model
 {
-    public static function findBySchedulingInstancesId($id) {
+    protected $table = 'scheduling_instances_details';
+
+    protected $fillable = [
+        'scheduling_instances_id',
+        'day',
+        'selected_time',
+        'time_zone',
+        'cron_data',
+        'schedule_type',
+        'status',
+    ];
+
+    public static function findBySchedulingInstancesId($id)
+    {
         return self::where('scheduling_instances_id' , $id);
     }
 

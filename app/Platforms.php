@@ -6,6 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Platforms extends Model
 {
+    protected $table = 'platforms';
+
+    protected $fillable = [
+        'name',
+        'status',
+    ];
 
     public function hasBots($limit = null, $platformId = null, $status = false)
     {

@@ -3,48 +3,44 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 use Stripe\Error\ApiConnection;
 use Stripe\Error\Card;
 use Stripe\Stripe;
 use Stripe\Token;
-
-use Laravel\Cashier\Cashier;
 
 class StripeModel extends Model
 {
     public function __construct()
     {
         parent::__construct();
-//        Cashier::useCurrency('eur', '€');
     }
 
-    public static function StripeConnection(){
+    public static function StripeConnection()
+    {
         try{
-            Stripe::setApiKey(env('STRIPE_SECRET'));
-            return 'Success';
+            Stripe::setApiKey(config('services.stripe.secret'));
         } catch (ApiConnection $exception){
-            return $exception->getMessage();
+            Log::error($exception->getMessage());
         }
     }
 
-    public static function CreateStripeToken($request){
+    public static function CreateStripeToken($request)
+    {
         self::StripeConnection();
-        $number = isset($request->number) ? $request->number : '';
-        $month = isset($request->month) ? $request->month : '';
-        $year = isset($request->year) ? $request->year : '';
-        $cvc = isset($request->cvc) ? $request->cvc : '';
+
         try {
-            $token = Token::create([
+            return Token::create([
                 'card' => [
-                    'number' => $number,
-                    'exp_month' => $month,
-                    'exp_year' => $year,
-                    'cvc' => $cvc
+                    'number'    => $request->input('number'),
+                    'exp_month' => $request->input('month'),
+                    'exp_year'  => $request->input('year'),
+                    'cvc'       => $request->input('cvc')
                 ]
-                ]);
-            return $token;
+            ]);
         } catch (Card $exception){
-            return $exception->getMessage();
+            Log::error($exception->getMessage());
+            return null;
         }
     }
 }

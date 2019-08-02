@@ -54,6 +54,8 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
+    'ip' => env('APP_IP', '127.0.0.1'),
+
     'asset_url' => env('ASSET_URL', null),
 
     /*
@@ -186,7 +188,7 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\HorizonServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
- 
+
     ],
 
     /*

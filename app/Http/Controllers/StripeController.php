@@ -2,58 +2,92 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Stripe\Charge;
-use Illuminate\Support\Facades\Auth;
-use Stripe\Stripe;
-use App\StripeModel;
-use App\SubscriptionPlan;
-
 use App\Http\Requests\SubscriptionPlanRequest;
 use App\Http\Requests\SwapSubscriptionPlanPost;
+use App\StripeModel;
+use App\SubscriptionPlan;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class StripeController extends Controller
 {
-    protected $user;
-
-    public function SendPayment(){
-//        StripeModel::CreateStripeToken($request);
-    }
-
+    /**
+     * @param SubscriptionPlanRequest $request
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     */
     public function createSubscription(SubscriptionPlanRequest $request)
     {
-        $token = StripeModel::CreateStripeToken($request);
-        $this->user = Auth::user();
-        if( !isset($request->plan_id) ) {
-            //session()->flash('error', 'Subscription Plan Can not Added Successfully');
-            return redirect('user/subscription-plans')->with('message', 'Subscription Plan Can not Added Successfully');
+        $planId = $request->input('plan_id');
+
+        if (empty($planId)) {
+            return redirect('user/subscription-plans')->with('message', 'Subscription plan can not added successfully');
         }
+
+        $plan = SubscriptionPlan::where('stripe_plan', $planId)->first();
+
+        if (empty($plan)) {
+            return redirect('user/subscription-plans')->with('message', 'Plan not found');
+        }
+
         try{
-            $this->user->newSubscription(config('services.stripe.product'), $request->plan_id)->create($token->id);           
-        } catch (Exception $e) {
+
+            $user   = Auth::user();
+            $token  = StripeModel::CreateStripeToken($request);
+
+            if (! empty($token)) {
+                $user->newSubscription(config('services.stripe.product'), $planId)->create($token->id);
+                $user->updateCredit($plan->credit);
+                session()->flash('success', 'Subscribed Successfully');
+            } else {
+                session()->flash('error', 'Subscribed Error');
+            }
+
+            return redirect()->back();
+
+        } catch (Throwable $e) {
+            Log::error($e->getMessage());
+            session()->flash('error', $e->getMessage());
             return redirect()->back();
         }
-        $plan = SubscriptionPlan::where('stripe_plan',$request->plan_id)->first();
-        $this->user->updateCredit($plan->credit);
-        session()->flash('success', 'Subscribed Successfully');
-        return redirect()->back();
-        //return redirect('user/subscription-plans');
     }
 
+    /**
+     * @param SwapSubscriptionPlanPost $request
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     */
     public function swapSubscriptionPlan(SwapSubscriptionPlanPost $request)
     {
-        $this->user = Auth::user();
-        $plan_id = $request->plan_id;
-        $plan = SubscriptionPlan::where('stripe_plan',$request->plan_id)->first();
+        $planId = $request->input('plan_id');
+
+        if (empty($planId)) {
+            return redirect('user/subscription-plans')->with('message', 'Subscription plan can not added successfully');
+        }
+
+        $plan = SubscriptionPlan::where('stripe_plan', $planId)->first();
+
+        if (empty($plan)) {
+            return redirect('user/subscription-plans')->with('message', 'Plan not found');
+        }
+
         try{
-            $this->user->subscription(config('services.stripe.product'))->noProrate()->swap($plan_id);
-        } catch (Exception $e) {
+            $user   = Auth::user();
+            $subscription = $user->subscription(config('services.stripe.product'));
+
+            if (! empty($subscription)) {
+                $subscription->noProrate()->swap($planId);
+                $user->updateCredit($plan->credit);
+                session()->flash('success', 'Changed Subscription Successfully');
+            } else {
+                session()->flash('error', 'Subscription not found');
+            }
+
+            return redirect()->back();
+
+        } catch (Throwable $e) {
+            Log::error($e->getMessage());
+            session()->flash('error', $e->getMessage());
             return redirect()->back();
         }
-        $plan = SubscriptionPlan::where('stripe_plan',$request->plan_id)->first();
-        $this->user->updateCredit($plan->credit);
-        session()->flash('success', 'Changed Subscription Successfully');
-        return redirect()->back();
     }
-
 }

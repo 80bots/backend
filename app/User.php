@@ -49,7 +49,7 @@ class User extends Authenticatable
 
     public static function findUserInstances()
     {
-        return self::with(['UserSubscriptionPlan'=>function($query){
+        return self::with(['UserSubscriptionPlan' => function($query){
             return $query->orderBy('id','Desc')->first();
         }])->whereHas('userInstances')->get();
     }
@@ -82,6 +82,24 @@ class User extends Authenticatable
     public function role()
     {
         return $this->belongsTo('App\Roles');
+    }
+
+    /**
+     * Check if User has a Role associated.
+     *
+     * @param string|array $name The role to check.
+     *
+     * @return bool
+     */
+    public function hasRole($name)
+    {
+        $role = $this->role()->pluck('name')->toArray();
+
+        if (! empty($role) && is_array($role)) {
+            return $role[0] === $name;
+        }
+
+        return false;
     }
 
     public function UserSubscriptionPlan()
@@ -119,6 +137,7 @@ class User extends Authenticatable
     public function DiscussionLikes() {
         return $this->hasMany('App\DiscussionLikes','user_id');
     }
+
     public function DiscussionDislikes() {
         return $this->hasMany('App\DiscussionDislikes','user_id');
     }

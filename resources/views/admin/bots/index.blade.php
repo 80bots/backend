@@ -98,10 +98,7 @@
             $('#bot-list').DataTable();
         });
 
-        function launchInstance(botId) {
-            $('#launch-instance').modal('show');
-            $('[name="bot_id"]').val(botId);
-        }
+
 
         function changeStatus(url, status) {
             $.ajax({
@@ -127,7 +124,6 @@
 
         function launchInstance(botId) {
             $('#launch-instance').modal('show');
-            console.log(botId)
             $('[name="bot_id"]').val(botId);
         }
 

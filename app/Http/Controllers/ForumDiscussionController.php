@@ -2,26 +2,26 @@
 
 namespace App\Http\Controllers;
 
-use Auth;
-use App\DiscussionLikes;
 use App\DiscussionDislikes;
-use Illuminate\Http\Request;
-use DevDojo\Chatter\Models\Models;
+use App\DiscussionLikes;
 use DevDojo\Chatter\Controllers\ChatterDiscussionController as ChatterDiscussionController;
+use DevDojo\Chatter\Models\Models;
+use Illuminate\Support\Facades\Auth;
 
 class ForumDiscussionController extends ChatterDiscussionController
 {
     /**
      * create the like by authenticated user.
      *
+     * @param int $discussion_id
      * @return \Illuminate\Http\Response
      */
-    public function likeDiscussion(Int $discussion_id)
+    public function likeDiscussion(int $discussion_id)
     {
-        $user_id = Auth::user()->id;
+        $user_id = Auth::id();
         $total = DiscussionLikes::where('discussion_id',$discussion_id)->count();
 
-        $dislikedQuery = DiscussionDislikes::where('user_id',$user_id)->where('discussion_id',$discussion_id);
+        $dislikedQuery = DiscussionDislikes::where('user_id', $user_id)->where('discussion_id',$discussion_id);
         if($dislikedQuery->count()) {
             $dislike = $dislikedQuery->first();
             return response()->json([
@@ -53,15 +53,17 @@ class ForumDiscussionController extends ChatterDiscussionController
                 ]
             ]);
         }
-        
-        
+
         $discussion->popularity = $discussion->popularity + 10;
         $discussion->save();
+
         $like = DiscussionLikes::create([
             'discussion_id' => $discussion_id,
             'user_id' => $user_id
         ]);
+
         $total = $total+1;
+
         return response()->json([
             'message' => 'success',
             'data' => [
@@ -75,14 +77,15 @@ class ForumDiscussionController extends ChatterDiscussionController
     /**
      * create the dislike by authenticated user.
      *
+     * @param int $discussion_id
      * @return \Illuminate\Http\Response
      */
-    public function dislikeDiscussion(Int $discussion_id)
+    public function dislikeDiscussion(int $discussion_id)
     {
-        $user_id = Auth::user()->id;
-        $total = DiscussionDislikes::where('discussion_id',$discussion_id)->count();
+        $user_id = Auth::id();
+        $total = DiscussionDislikes::where('discussion_id', $discussion_id)->count();
 
-        $likedQuery = DiscussionLikes::where('user_id',$user_id)->where('discussion_id',$discussion_id); 
+        $likedQuery = DiscussionLikes::where('user_id',$user_id)->where('discussion_id',$discussion_id);
         if($likedQuery->count()) {
             $like = $likedQuery->first();
             return response()->json([
@@ -109,12 +112,12 @@ class ForumDiscussionController extends ChatterDiscussionController
                 ]
             ]);
         }
-        
+
         $dislike = DiscussionDislikes::create([
             'discussion_id' => $discussion_id,
             'user_id' => $user_id
         ]);
-        
+
         $total = $total+1;
         return response()->json([
             'message' => 'success',

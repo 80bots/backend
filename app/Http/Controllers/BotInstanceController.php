@@ -3,24 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Bots;
-use App\Http\Controllers\AwsConnectionController;
-use App\Job;
-use App\Jobs\StoreUserInstance;
-use App\Platforms;
 use App\UserInstances;
-use App\UserInstancesDetails;
-use function GuzzleHttp\Promise\all;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Session;
-use App\Traits\AWSInstances;
+use Throwable;
 
-class BotInstanceController extends AwsConnectionController
+class BotInstanceController extends AppController
 {
-    use AWSInstances;
-
     /**
      * Display a listing of the resource.
      *
@@ -28,20 +19,20 @@ class BotInstanceController extends AwsConnectionController
      */
     public function index()
     {
-        $user_id = Auth::user()->id;
         try{
-            $UserInstance = UserInstances::findByUserId($user_id)->get();
+
+            $UserInstance = UserInstances::findByUserId(Auth::id())->get();
             $botsArr = Bots::all();
-            if(!$UserInstance->isEmpty()){
-                $instancesId = [];
-                array_push($instancesId,$UserInstance[0]->aws_instance_id);
-                //$this->InstanceMonitoring($instancesId);
-                return view('user.bots.running.index',compact('UserInstance','botsArr'));
+
+            if ($UserInstance->isEmpty()) {
+                session()->flash('error', 'Instance Not Found');
+                return view('user.bots.running.index');
             }
-            session()->flash('error', 'Instance Not Found');
-            return view('user.bots.running.index');
-        } catch (\Exception $e) {
-            session()->flash('error', $e->getMessage());
+
+            return view('user.bots.running.index', compact('UserInstance','botsArr'));
+
+        } catch (Throwable $throwable) {
+            session()->flash('error', $throwable->getMessage());
             return view('user.bots.running.index');
         }
     }
@@ -58,72 +49,6 @@ class BotInstanceController extends AwsConnectionController
         $StartUpScript = array_filter(explode(';',$string));
         $runScript = $this->RunStartUpScript($StartUpScript);
         dd($runScript);*/
-    }
-
-
-    public function changeStatus(Request $request)
-    {
-        try{
-            $instanceObj = UserInstances::find($request->id);
-            $instanceDetail = UserInstancesDetails::where(['user_instance_id' => $request->id])->latest()->first();
-            $instanceIds = [];
-            array_push($instanceIds, $instanceObj->aws_instance_id);
-            $currentDate = date('Y-m-d H:i:s');
-
-            $describeInstancesResponse = $this->DescribeInstances($instanceIds);
-            $reservationObj = $describeInstancesResponse->getPath('Reservations');
-            if(empty($reservationObj)){
-                $instanceObj->status = 'terminated';
-                $instanceObj->save();
-                session()->flash('error', 'This instance does not exist');
-                return 'false';
-            }
-            $InstStatus = $reservationObj[0]['Instances'][0]['State']['Name'];
-            if($InstStatus == 'terminated'){
-                $instanceObj->status = 'terminated';
-                $instanceObj->save();
-                session()->flash('error', 'This instance is already terminated');
-                return 'false';
-            }
-
-            if($request->status == 'start'){
-                $instanceObj->status = 'running';
-                $startObj = $this->StartInstance($instanceIds);
-                $instanceDetail = new UserInstancesDetails();
-                $instanceDetail->user_instance_id = $request->id;
-                $instanceDetail->start_time = $currentDate;
-                $instanceDetail->save();
-            } elseif($request->status == 'stop') {
-                $instanceObj->status = 'stop';
-                $stopObj = $this->StopInstance($instanceIds);
-                $instanceDetail->end_time = $currentDate;
-                $diffTime = $this->DiffTime($instanceDetail->start_time, $instanceDetail->end_date);
-                $instanceDetail->total_time = $diffTime;
-                if($instanceDetail->save()){
-                    if($diffTime > $instanceObj->cron_up_time){
-                        $instanceObj->cron_up_time = 0;
-                        $tempUpTime = !empty($instanceObj->temp_up_time) ? $instanceObj->temp_up_time: 0;
-                        $upTime = $diffTime + $tempUpTime;
-                        $instanceObj->temp_up_time = $upTime;
-                        $instanceObj->up_time = $upTime;
-                        $instanceObj->used_credit = $this->CalUsedCredit($upTime);
-                    }
-                }
-            } else {
-                $instanceObj->status = 'terminated';
-                $terminateInstance = $this->TerminateInstance($instanceIds);
-            }
-
-            if($instanceObj->save()){
-                session()->flash('success', 'Instance '.$request->status.' successfully!');
-                return 'true';
-            }
-            session()->flash('error', 'Instance '.$request->status.' Not successfully!');
-            return 'false';
-        } catch (\Exception $e){
-            session()->flash('error', $e->getMessage());
-            return 'false';
-        }
     }
 
     /**
@@ -254,19 +179,18 @@ class BotInstanceController extends AwsConnectionController
     }
 
 
-    /* store bot_id in session */
     public function storeBotIdInSession(Request $request)
     {
-            $userInstance = new UserInstances();
-            $userInstance->user_id = $request->user_id;
-            $userInstance->bot_id = $request->bot_id;
-            if($userInstance->save()){
-                Log::debug('IN-queued Instance : '.json_encode($userInstance));
-                Session::put('instance_id', $userInstance->id);
-                return response()->json(['type' => 'success','data' => $userInstance->id],200);
-            }
+        $userInstance = new UserInstances();
+        $userInstance->user_id = $request->user_id;
+        $userInstance->bot_id = $request->bot_id;
+        if($userInstance->save()){
+            Log::debug('IN-queued Instance : '.json_encode($userInstance));
+            Session::put('instance_id', $userInstance->id);
+            return response()->json(['type' => 'success','data' => $userInstance->id],200);
+        }
 
-            return response()->json(['type' => 'error','data' => ''],200);
+        return response()->json(['type' => 'error','data' => ''],200);
     }
 
     /* execute job to store user instance data */
@@ -294,5 +218,4 @@ class BotInstanceController extends AwsConnectionController
         }
         return response()->json(['type' => 'success','data' => $instance_ids],200);
     }
-
 }

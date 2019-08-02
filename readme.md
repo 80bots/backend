@@ -13,6 +13,6 @@ User Module
 
 For converting the time to User's Timezone
 ```
- App\Helper\CommonHelper::convertTimeZone(`time`,'timezone`, `format (optional)`)
+ App\Helpers\CommonHelper::convertTimeZone(`time`,'timezone`, `format (optional)`)
 ```
 

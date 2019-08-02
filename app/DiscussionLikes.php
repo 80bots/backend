@@ -13,13 +13,14 @@ class DiscussionLikes extends Model
         'discussion_id'
     ];
 
-    public function user() {
+    public function user()
+    {
         return $this->belongsTo('App\User','user_id');
     }
 
     public function getDecayedValueOfLike()
     {
-        $result = DB::select(DB::raw('SELECT (10 * EXP( -('.config('chatter.discussions_hotness.decay_rate').') * time_to_sec(timediff(NOW(), \'' . $this->created_at . '\')) / 3600 )) AS newpopularity'));
-        return ($result[0]->newpopularity);
+        $result = DB::selectOne(DB::raw('SELECT (10 * EXP( -('.config('chatter.discussions_hotness.decay_rate').') * time_to_sec(timediff(NOW(), \'' . $this->created_at . '\')) / 3600 )) AS newpopularity'));
+        return $result->newpopularity ?? 0;
     }
 }

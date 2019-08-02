@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 
 class NotificationController extends AppController
 {
-		
+
 	public function index(){
 		$percentages = CreditPercentage::all();
 		return view('admin.notification.list',compact('percentages'));
@@ -25,9 +25,9 @@ class NotificationController extends AppController
 
 		$request->validate([
 		    'percentage' => 'required|unique:credit_percentages',
-		]);	
+		]);
 
-		$percentage = new CreditPercentage();
+		$percentage = new CreditPercentage;
 		$percentage->percentage = $request->percentage;
 		if($percentage->save()){
 			return redirect()->route('admin.notification.index')->with('success','Credit Percentage Successfully Added.');
@@ -51,11 +51,11 @@ class NotificationController extends AppController
     }
 
     /* update credit percentage */
-    public function update(Request $request){  	
+    public function update(Request $request){
 
 		$request->validate([
 		    'percentage' => 'required|unique:credit_percentages,percentage,'.$request->id,
-		]);	
+		]);
 
 		$percentage = CreditPercentage::findOrFail($request->id);
 		$percentage->percentage = $request->percentage;
@@ -67,7 +67,7 @@ class NotificationController extends AppController
 
     /* delete credit percentages */
     public function destroy($id){
-    	
+
     	try {
 
     		$percentage = CreditPercentage::findOrFail($id);

@@ -7,6 +7,7 @@ use App\User;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends AppController
 {
