@@ -94,7 +94,7 @@ class StoreUserInstance implements ShouldQueue
             if ($newInstanceResponse->hasKey('Instances')) {
                 $instanceId = $newInstanceResponse->get('Instances')[0]['InstanceId'] ?? null;
 
-                Log::info('Lauched instance ' . $instanceId);
+                Log::info('Launched instance ' . $instanceId);
 
                 $waitUntilResponse = $aws->waitUntil([$instanceId]);
 

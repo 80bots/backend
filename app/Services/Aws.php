@@ -604,25 +604,25 @@ HERECONSOLE;
      * @return string
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    protected function getServerIp(): string
+    protected function getServerIp(): ?string
     {
-        $serverIp = config('app.ip');
-
-        // To view all categories of instance metadata from within a running instance, use the following URI:
-        $client = new Client(['base_uri' => config('aws.instance_metadata')]);
-
-        try {
-            $response = $client->request('GET', 'public-ipv4');
-            if ($response->getStatusCode() === 200) {
-                $content = $response->getBody()->getContents();
-                if (! empty($content) && is_string($content)) {
-                    $serverIp = $content;
+        if(config('app.env') === 'local') {
+            return '127.0.0.1';
+        } else {
+            // To view all categories of instance metadata from within a running instance, use the following URI:
+            $client = new Client(['base_uri' => config('aws.instance_metadata')]);
+            try {
+                $response = $client->request('GET', 'public-ipv4');
+                if ($response->getStatusCode() === 200) {
+                    $content = $response->getBody()->getContents();
+                    if (!empty($content) && is_string($content)) {
+                        return $content;
+                    }
                 }
+            } catch (RequestException $exception) {
+                Log::error("File: {$exception->getFile()} / function: setSecretGroupIngress / {$exception->getMessage()}");
+                return null;
             }
-        } catch (RequestException $exception) {
-            Log::error("File: {$exception->getFile()} / function: setSecretGroupIngress / {$exception->getMessage()}");
         }
-
-        return $serverIp;
     }
 }
