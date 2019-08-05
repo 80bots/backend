@@ -70,7 +70,7 @@ class UserInstances extends BaseModel
 
     public function bots()
     {
-        return $this->belongsTo('App\Bots','bot_id');
+        return $this->belongsTo('App\Bot','bot_id');
     }
 
     public function user()

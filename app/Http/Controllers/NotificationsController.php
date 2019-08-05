@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Notifications;
+use App\Notification;
 use Illuminate\Http\Request;
 
 class NotificationsController extends AppController
@@ -41,10 +41,10 @@ class NotificationsController extends AppController
     /**
      * Display the specified resource.
      *
-     * @param  \App\Notifications  $notifications
+     * @param  \App\Notification  $notifications
      * @return \Illuminate\Http\Response
      */
-    public function show(Notifications $notifications)
+    public function show(Notification $notifications)
     {
         //
     }
@@ -52,10 +52,10 @@ class NotificationsController extends AppController
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Notifications  $notifications
+     * @param  \App\Notification  $notifications
      * @return \Illuminate\Http\Response
      */
-    public function edit(Notifications $notifications)
+    public function edit(Notification $notifications)
     {
         //
     }
@@ -64,10 +64,10 @@ class NotificationsController extends AppController
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Notifications  $notifications
+     * @param  \App\Notification  $notifications
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Notifications $notifications)
+    public function update(Request $request, Notification $notifications)
     {
         //
     }
@@ -75,10 +75,10 @@ class NotificationsController extends AppController
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Notifications  $notifications
+     * @param  \App\Notification  $notifications
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Notifications $notifications)
+    public function destroy(Notification $notifications)
     {
         //
     }

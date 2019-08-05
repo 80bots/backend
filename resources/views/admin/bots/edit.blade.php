@@ -10,7 +10,7 @@
 
 @section('content')
     <div class="wrapper">
-        <form class="card" id="bot-create" action="{{ route('admin.bots.update', $id)}}" method="post">
+        <form class="card" id="bot-create" action="{{ route('admin.bots.update', $bot->id) }}" method="post">
             @method('PUT')
             @csrf
             <div class="card-header d-flex align-items-center justify-content-between">
@@ -23,14 +23,15 @@
                         <div class="form-group">
                             <label for="">{{ __('admin.bots.platform') }}*</label>
                             <input type="text" name="platform"
-                                   value="{{isset($bots->platform->name) ? $bots->platform->name : ''}}"
+                                   value="{{ $bot->platform->name ?? '' }}"
                                    class="form-control">
                         </div>
                     </div>
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
                             <label for="">{{ __('keywords.bots.bot_name') }}*</label>
-                            <input type="text" name="bot_name" value="{{isset($bots->bot_name) ? $bots->bot_name : ''}}"
+                            <input type="text" name="name"
+                                   value="{{ $bot->name ?? '' }}"
                                    class="form-control"/>
                         </div>
                     </div>
@@ -38,7 +39,7 @@
                         <div class="form-group">
                             <label for="">{{ __('keywords.bots.ami_id') }}*</label>
                             <input type="text" name="aws_ami_image_id"
-                                   value="{{isset($bots->aws_ami_image_id) ? $bots->aws_ami_image_id : ''}}"
+                                   value="{{ $bot->aws_ami_image_id ?? '' }}"
                                    class="form-control"/>
                         </div>
                     </div>
@@ -46,7 +47,7 @@
                         <div class="form-group">
                             <label for="">{{ __('keywords.bots.ami_name') }}</label>
                             <input type="text" name="aws_ami_name"
-                                   value="{{isset($bots->aws_ami_name) ? $bots->aws_ami_name : ''}}"
+                                   value="{{ $bot->aws_ami_name ?? '' }}"
                                    class="form-control"/>
                         </div>
                     </div>
@@ -54,7 +55,7 @@
                         <div class="form-group">
                             <label for="">{{ __('keywords.bots.instance_type') }}*</label>
                             <input type="text" name="aws_instance_type"
-                                   value="{{isset($bots->aws_instance_type) ? $bots->aws_instance_type : ''}}"
+                                   value="{{ $bot->aws_instance_type ?? '' }}"
                                    class="form-control"/>
                         </div>
                     </div>
@@ -62,7 +63,7 @@
                         <div class="form-group">
                             <label for="">{{ __('keywords.bots.storage') }}*</label>
                             <input type="text" name="aws_storage_gb"
-                                   value="{{isset($bots->aws_storage_gb) ? $bots->aws_storage_gb : ''}}"
+                                   value="{{ $bot->aws_storage_gb ?? '' }}"
                                    class="form-control"/>
                         </div>
                     </div>
@@ -71,7 +72,7 @@
                             <label for="aws_startup_script">{{ __('keywords.bots.startup_script') }}</label>
                             <textarea name="aws_startup_script"
                                       class="form-control"
-                                      rows="23">{{isset($bots->aws_startup_script)?$bots->aws_startup_script:''}}</textarea>
+                                      rows="23">{{ $bot->aws_startup_script ?? '' }}</textarea>
                         </div>
                     </div>
                     <div class="col-md-12 col-sm-12">
@@ -79,21 +80,38 @@
                             <label for="aws_custom_script">{{ __('keywords.bots.bot_script') }}</label>
                             <textarea id="aws_custom_script" name="aws_custom_script"
                                       class="form-control"
-                                      rows="23">{{isset($bots->aws_custom_script)?$bots->aws_custom_script:''}}</textarea>
+                                      rows="23">{{ $bot->aws_custom_script ?? '' }}</textarea>
                         </div>
                     </div>
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
                             <label for="">{{ __('keywords.bots.bot_desc') }}*</label>
                             <textarea name="description"
-                                      class="form-control">{{isset($bots->description)?$bots->description:''}}</textarea>
+                                      class="form-control">{{ $bot->description ?? '' }}</textarea>
                         </div>
                     </div>
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
                             <label for="">{{ __('keywords.bots.tags') }}*</label>
                             <textarea name="tags" class="form-control"
-                                      placeholder="{{ __('keywords.bots.tags_placeholder') }}">{{isset($tags)?$tags:''}}</textarea>
+                                      placeholder="{{ __('keywords.bots.tags_placeholder') }}">{{ $tags }}</textarea>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label for="">{{ __('keywords.bots.type') }}</label>
+                            <select name="type" class="form-control">
+                                <option @if($bot->type === 'public') selected @endif value="public">Public</option>
+                                <option @if($bot->type === 'private') selected @endif value="private">Private</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label for="">{{ __('keywords.bots.users') }}</label>
+                            <textarea name="users"
+                                      class="form-control"
+                                      placeholder="{{ __('keywords.bots.users_placeholder') }}">{{ $users }}</textarea>
                         </div>
                     </div>
                 </div>
@@ -116,7 +134,7 @@
                 description: {
                     required: true
                 },
-                bot_name: {
+                name: {
                     required: true
                 },
                 aws_ami_image_id: {

@@ -26,7 +26,7 @@
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
                             <label for="">{{ __('keywords.bots.bot_name') }}*</label>
-                            <input type="text" name="bot_name" class="form-control"/>
+                            <input type="text" name="name" class="form-control"/>
                         </div>
                     </div>
                     <div class="col-md-6 col-sm-12">
@@ -74,9 +74,26 @@
                     </div>
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label for="">{{ __('keywords.bots.tags') }}</label>
+                            <label for="">{{ __('keywords.bots.tags') }}*</label>
                             <textarea name="tags" class="form-control"
                                       placeholder="{{ __('keywords.bots.tags_placeholder') }}"></textarea>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label for="">{{ __('keywords.bots.type') }}</label>
+                            <select name="type" class="form-control">
+                                <option value="public">Public</option>
+                                <option value="private">Private</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label for="">{{ __('keywords.bots.users') }}</label>
+                            <textarea name="users"
+                                      class="form-control"
+                                      placeholder="{{ __('keywords.bots.users_placeholder') }}"></textarea>
                         </div>
                     </div>
                 </div>

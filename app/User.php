@@ -81,7 +81,7 @@ class User extends Authenticatable
 
     public function role()
     {
-        return $this->belongsTo('App\Roles');
+        return $this->belongsTo('App\Role');
     }
 
     /**
@@ -134,11 +134,18 @@ class User extends Authenticatable
         }
     }
 
-    public function DiscussionLikes() {
+    public function DiscussionLikes()
+    {
         return $this->hasMany('App\DiscussionLikes','user_id');
     }
 
-    public function DiscussionDislikes() {
+    public function DiscussionDislikes()
+    {
         return $this->hasMany('App\DiscussionDislikes','user_id');
+    }
+
+    public function privateBots()
+    {
+        return $this->belongsToMany(Bot::class, 'bot_user');
     }
 }

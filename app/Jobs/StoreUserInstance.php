@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Bots;
+use App\Bot;
 use App\Http\Controllers\AwsConnectionController;
 use App\Http\Controllers\BotInstanceController;
 use App\Events\dispatchedInstanceEvent;
@@ -62,7 +62,7 @@ class StoreUserInstance implements ShouldQueue
             ini_set('memory_limit', '-1');
 
             $userInstance   = UserInstances::findOrFail($this->id);
-            $bot            = Bots::findOrFail($userInstance->bot_id);
+            $bot            = Bot::findOrFail($userInstance->bot_id);
 
             if (empty($bot)) {
                 session()->flash('error', 'Bot Not Found Please Try Again');
