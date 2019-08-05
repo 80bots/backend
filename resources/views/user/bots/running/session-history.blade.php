@@ -44,10 +44,8 @@
                                 @endif
                                 <td>{{!empty($session->schedulingInstance->userInstances) ? $session->schedulingInstance->userInstances->aws_instance_id : ''}}</td>
                                 <td>{{!empty($session->schedule_type) ? $session->schedule_type : ''}}</td>
-                                {{--                                    $currentDate = new DateTime(date("d-m-Y H:i P", strtotime($session->created_at)));--}}
-                                {{--                                    $currentDate = $currentDate->setTimezone( new DateTimeZone($session->current_time_zone ?? 'UTC') )->format('jS F, Y h:i A');--}}
                                 @php
-                                        $currentDate = \App\Helpers\CommonHelper::convertTimeZone($session->created_at, auth()->user()->timezone, 'jS F, Y h:i A');
+                                    $currentDate = App\Helpers\CommonHelper::convertTimeZone($session->created_at, auth()->user()->timezone, 'jS F, Y h:i A');
                                 @endphp
                                 <td>{{!empty($currentDate) ? $currentDate : ''}}</td>
                             </tr>                                

@@ -141,21 +141,17 @@
     }
 
     function deleteRow(ids, numRow){
-        var url = '{{route('scheduling.delete.details')}}';
         $.ajax({
-            type: 'post',
+            type: 'DELETE',
+            url: `{{ route('scheduling.delete.details') }}`,
             async: false,
-            url: url,
             cache: false,
             data: {
-                _token : function () {
-                    return '{{csrf_token()}}';
-                },
                 ids : ids
             },
-            success: function (data) {
-                var response = JSON.parse(data);
-                if(response.status == 'true'){
+            success: function (data, textStatus, xhr) {
+                const response = JSON.parse(data);
+                if(xhr.status === 200){
                     $("#message").fadeIn().html("<div class='alert alert-success fade show'>" +
                         "<button data-dismiss='alert' class='close close-sm' type='button'>" +
                         "<i class='fa fa-times'></i>" +
@@ -169,8 +165,7 @@
                 }
             },
             complete: function() {
-                var row_lenth = $('#scheduler-row .row').length;
-                if(row_lenth == 0){
+                if($('#scheduler-row .row').length === 0){
                     addSchedulerRow();
                 }
             }
@@ -178,13 +173,14 @@
     }
 
     function convertUtcToUser(str){
-        var url = '{{url('user/scheduling/convert-time-utc-to-user')}}/'+str+'/'+current_time_zone;
-        var value = '';
+        let value = '';
         $.ajax({
-            type: 'get',
+            type: 'POST',
+            url: `{{ route('scheduling.convert.zone') }}`,
+            data: {
+                str, timeZone: current_time_zone
+            },
             async: false,
-            url: url,
-            cache: false,
             success: function (data) {
                 value = data;
             }
@@ -200,34 +196,29 @@
     }
 
     function checkSchedule(id) {
-        var url = '{{url('user/scheduling/check-scheduled')}}/' + id;
         $.ajax({
-            type: 'get',
-            url: url,
+            type: 'GET',
+            url: `{{ url('scheduling') }}` + '/' + id + '/check',
             cache: false,
             success: function (data) {
-                var response = JSON.parse(data);
-                if (response.status == 'true') {
-                    var schedulingInstance = response.data;
-                    var scheduling_instance_details = schedulingInstance.scheduling_instance_details;
-                    var lenth = scheduling_instance_details.length;
-                    for (i = 0; i < lenth; i++) {
-                        var day = scheduling_instance_details[i].day;
-                        var schedule_type = scheduling_instance_details[i].schedule_type;
-                        var scheduled_time = scheduling_instance_details[i].selected_time;
-                        var end_time = '';
-                        var row =
-                            '<div class="row">\n';
-                        var ids = [];
-                        if (scheduling_instance_details[i] != '' && typeof scheduling_instance_details[i] != 'undefined') {
-                            ids.push(scheduling_instance_details[i].id);
+                const response = JSON.parse(data);
+                if (response.status === 'true') {
+                    const schedule = response.data;
+                    const details = schedule.details;
+                    for (let i = 0; i < details.length; i++) {
+                        const day = details[i].day;
+                        const schedule_type = details[i].schedule_type;
+                        const scheduled_time = details[i].selected_time;
+                        const end_time = '';
+                        let ids = [];
+                        if (details[i] != '' && typeof details[i] != 'undefined') {
+                            ids.push(details[i].id);
                         }
                         addSchedulerRow(ids, day, scheduled_time, end_time, schedule_type);
                     }
-                    if(lenth == 0){
+                    if(details.length === 0){
                         addSchedulerRow();
                     }
-
                 } else {
                     addSchedulerRow();
                 }

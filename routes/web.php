@@ -30,6 +30,8 @@ Route::group(['middleware' => ['auth', 'user']], function () {
     Route::group(['prefix' => 'scheduling', 'as' => 'scheduling.'], function () {
         Route::delete('/details', 'ScheduleController@deleteSchedulerDetails')->name('delete.details');
         Route::put('/status', 'ScheduleController@changeStatus')->name('update.status');
+        Route::get('/{id}/check', 'ScheduleController@checkScheduled')->name('check');
+        Route::post('/convert', 'SchedulingInstancesController@convertTimeToUSERzone')->name('convert.zone');
     });
 
     Route::group(['prefix' => 'session', 'as' => 'session.'], function () {

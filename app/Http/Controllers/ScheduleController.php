@@ -49,13 +49,14 @@ class ScheduleController extends Controller
         }
     }
 
-    public function convertTimeToUSERzone($str, $userTimezone, $format = 'h:i A')
+    public function convertTimeToUserZone(Request $request)
     {
-        if(is_null($str) || empty($str) || $str === "null"){
+        $format = 'h:i A';
+        if(is_null($request->str) || empty($str) || $request->str === "null"){
             return '';
         }
-        $new_str = new DateTime($str, new DateTimeZone('UTC'));
-        $new_str->setTimeZone(new DateTimeZone($userTimezone));
+        $new_str = new DateTime($request->str, new DateTimeZone('UTC'));
+        $new_str->setTimeZone(new DateTimeZone($request->timeZone));
         return $new_str->format($format);
     }
 
@@ -80,7 +81,7 @@ class ScheduleController extends Controller
         }
     }
 
-    public function CheckScheduled($id)
+    public function checkScheduled($id)
     {
         try {
             $scheduleInstanceObj = SchedulingInstance::findByUserInstanceId($id, Auth::id())->first();
