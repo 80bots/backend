@@ -17,7 +17,7 @@ class CreateBotsTable extends Migration
         Schema::create('bots', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('platform_id')->nullable();
-            $table->string('bot_name')->nullable();
+            $table->string('name')->nullable();
             $table->text('description')->nullable();
             $table->string('aws_ami_image_id')->nullable();
             $table->string('aws_ami_name')->nullable();
@@ -25,7 +25,8 @@ class CreateBotsTable extends Migration
             $table->text('aws_startup_script')->nullable();
             $table->text('aws_custom_script')->nullable();
             $table->integer('aws_storage_gb')->nullable();
-            $table->enum('status',['active','inactive'])->default('active');
+            $table->enum('status', ['active', 'inactive'])->default('active');
+            $table->enum('type', ['public', 'private'])->default('public');
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'));
 

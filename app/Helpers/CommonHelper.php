@@ -3,6 +3,7 @@
 namespace App\Helpers;
 
 use Carbon\Carbon;
+use function Aws\map;
 
 class CommonHelper
 {
@@ -41,5 +42,18 @@ class CommonHelper
     public static function calculateUsedCredit($upTime)
     {
         return $upTime > 0 ? round($upTime * (float)config('app.credit') / (float)config('app.up_time'), 2) : 0;
+    }
+
+    /**
+     * @param string $string
+     * @return array
+     */
+    public static function explodeByComma(string $string): array
+    {
+        return collect(explode(',', rtrim($string,',')))
+            ->map(function ($item, $key) {
+                return trim($item);
+            })
+            ->toArray();
     }
 }

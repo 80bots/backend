@@ -39,6 +39,9 @@ return [
         'bot_desc' => 'Bot Description',
         'tags' => 'Tags',
         'tags_placeholder' => 'Comma(,) consider as new Tags',
+        'type' => 'Type',
+        'users' => 'Users',
+        'users_placeholder' => 'Comma(,) consider as User Email',
         'statuses' => [
             'in_queue' => 'In Queue',
             'terminated' => 'Terminated',

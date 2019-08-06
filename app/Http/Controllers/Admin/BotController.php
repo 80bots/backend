@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Bots;
-use App\BotTags;
+use App\Bot;
+use App\Helpers\CommonHelper;
 use App\Http\Controllers\AppController;
-use App\Platforms;
-use App\Tags;
-use Illuminate\Http\Request;
-use Auth;
+use App\Platform;
+use App\Tag;
+use App\User;
 use App\UserInstances;
-use App\UserInstancesDetails;
-use Aws\Ec2\Ec2Client;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Throwable;
 
 class BotController extends AppController
 {
@@ -24,11 +24,8 @@ class BotController extends AppController
      */
     public function index()
     {
-        $bots = Bots::all();
-        if(!$bots->count()){
-          session()->flash('error', 'Bots Not Found');
-        }
-        return view('admin.bots.index',compact('bots'));
+        $bots = Bot::all();
+        return view('admin.bots.index', compact('bots'));
     }
 
     /**
@@ -39,10 +36,10 @@ class BotController extends AppController
     public function create()
     {
         try{
-            $platforms = Platforms::get();
+            $platforms = Platform::get();
             return view('admin.bots.create', compact('platforms'));
-        } catch (\Exception $exception){
-            session()->flash('error', $exception->getMessage());
+        } catch (Throwable $throwable){
+            session()->flash('error', $throwable->getMessage());
             return view('admin.bots.create');
         }
     }
@@ -56,14 +53,113 @@ class BotController extends AppController
     public function store(Request $request)
     {
         try{
-            $platformObj = Platforms::findByName($request->input('platform'));
-            if(empty($platformObj)){
-                $platformObj = Platforms::create([
+            $platform = Platform::findByName($request->input('platform'));
+
+            if (empty($platform)) {
+                $platform = Platform::create([
                     'name' => $request->input('platform')
                 ]);
             }
 
-            $botObj = Bots::create([
+            $bot = Bot::create([
+                'name'                  => $request->input('name'),
+                'platform_id'           => $platform->id ?? null,
+                'description'           => $request->input('description'),
+                'aws_ami_image_id'      => $request->input('aws_ami_image_id'),
+                'aws_ami_name'          => $request->input('aws_ami_name'),
+                'aws_instance_type'     => $request->input('aws_instance_type'),
+                'aws_startup_script'    => $request->input('aws_startup_script'),
+                'aws_custom_script'     => $request->input('aws_custom_script'),
+                'aws_storage_gb'        => $request->input('aws_storage_gb'),
+                'type'                  => $request->input('type')
+            ]);
+
+            $this->addTagsToBot($bot, $request->input('tags'));
+
+            $this->addUsersToBot($bot, $request->input('users'));
+
+            return redirect(route('admin.bots.index'))->with('success', 'Bot Added Successfully');
+
+        } catch(Throwable $throwable) {
+            return redirect(route('admin.bots.index'))->with('error', $throwable->getMessage());
+        }
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param Request $request
+     * @param $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show(Request $request, $id)
+    {
+        try{
+            $bot = Bot::find($id);
+            if (! empty($bot)) {
+                return view('admin.bots.view', compact('bot', 'id'));
+            }
+            return redirect(route('admin.bots.index'))->with('error', 'Bot not found');
+        } catch (Throwable $throwable){
+            return redirect(route('admin.bots.index'))->with('error', $throwable->getMessage());
+        }
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+        try{
+            $bot = Bot::find($id);
+
+            if (empty($bot)) {
+                return redirect(route('admin.bots.index'))->with('error', 'Bot not found');
+            }
+
+            $tags = implode(', ', $bot->tags()->pluck('name')->toArray());
+            $users = implode(', ', $bot->users()->pluck('email')->toArray());
+
+            $platforms = Platform::get();
+
+            return view('admin.bots.edit',compact('bot', 'platforms', 'tags', 'users'));
+
+        } catch (Throwable $throwable){
+            return redirect(route('admin.bots.index'))->with('error', $throwable->getMessage());
+        }
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+    {
+        try{
+
+            $bot = Bot::find($id);
+
+            if (empty($bot)) {
+                return redirect(route('admin.bots.index'))
+                    ->with('error', 'Bot not found');
+            }
+
+            $platform = Platform::findByName($request->input('platform'));
+
+            if (empty($platform)) {
+                $platform = Platform::create([
+                    'name' => $request->input('platform')
+                ]);
+            }
+
+            $bot->fill([
+                'platform_id' => $platform->id ?? null,
                 'bot_name' => $request->input('bot_name'),
                 'description' => $request->input('description'),
                 'aws_ami_image_id' => $request->input('aws_ami_image_id'),
@@ -72,192 +168,77 @@ class BotController extends AppController
                 'aws_startup_script' => $request->input('aws_startup_script'),
                 'aws_custom_script' => $request->input('aws_custom_script'),
                 'aws_storage_gb' => $request->input('aws_storage_gb'),
-                'platform_id' => $platformObj->id
             ]);
 
-            if(! empty($botObj) && ! empty($request->input('tags'))){
-
-                $tagString = rtrim($request->tags,',');
-
-                $tags = explode(',', $tagString);
-
-                foreach ($tags as $tag){
-
-                    $tagObj = Tags::findByName($tag);
-
-                    if(!isset($tagObj) && empty($tagObj)){
-                        $tagObj = new Tags();
-                        $tagObj->name = $tag;
-                        $tagObj->save();
-                    }
-                    $botTagsObj = new BotTags();
-                    $botTagsObj->bots_id = $botObj->id;
-                    $botTagsObj->tags_id = $tagObj->id;
-                    $botTagsObj->save();
-                }
-
-                return redirect(route('admin.bots.index'))->with('success', 'Bot Added Successfully');
+            if ($bot->save()) {
+                $this->addTagsToBot($bot, $request->input('tags'));
+                $this->addUsersToBot($bot, $request->input('users'));
+                return redirect(route('admin.bots.index'))->with('success', 'Bot update successfully');
             }
-            session()->flash('error', 'Bot Can not Added Successfully');
-            return redirect()->back();
-        } catch(\Exception $exception) {
-            session()->flash('error', $exception->getMessage());
-            return redirect()->back();
-        }
-    }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Bots  $bots
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Request $request, $id)
-    {
-        try{
-            $bots = Bots::find($id);
-            if(isset($bots) && !empty($bots)){
-                return view('admin.bots.view',compact('bots', 'id'));
-            }
-            session()->flash('error', 'Please Try Again');
-            return redirect()->back();
-        } catch (\Exception $exception){
-            session()->flash('error', $exception->getMessage());
-            return redirect()->back();
-        }
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Bots  $bots
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        try{
-            $bots = Bots::find($id);
-            $tagsArray = [];
-            if(isset($bots->botTags) && !empty($bots->botTags)){
-                foreach ($bots->botTags as $tag){
-                    array_push($tagsArray, $tag->tags->name);
-                }
-            }
-            $tags = implode(',',$tagsArray);
-            $platforms = Platforms::get();
-            if(isset($bots) && !empty($bots)){
-                return view('admin.bots.edit',compact('platforms','bots', 'id', 'tags'));
-            }
-            session()->flash('error', 'Please Try Again');
-            return redirect()->back();
-        } catch (\Exception $exception){
-            session()->flash('error', $exception->getMessage());
-            return redirect()->back();
-        }
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Bots  $bots
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        try{
-            $botObj = Bots::find($id);
-            $botObj->bot_name = isset($request->bot_name) ? $request->bot_name : '';
-            $botObj->description = isset($request->description) ? $request->description : '';
-            $botObj->aws_ami_image_id = isset($request->aws_ami_image_id) ? $request->aws_ami_image_id : '';
-            $botObj->aws_ami_name = isset($request->aws_ami_name) ? $request->aws_ami_name : '';
-            $botObj->aws_instance_type = isset($request->aws_instance_type) ? $request->aws_instance_type : '';
-            $botObj->aws_startup_script = isset($request->aws_startup_script) ? $request->aws_startup_script : '';
-            $botObj->aws_custom_script = isset($request->aws_custom_script) ? $request->aws_custom_script : '';
-            $botObj->aws_storage_gb = isset($request->aws_storage_gb) ? $request->aws_storage_gb : '';
-
-            $platform_name = isset($request->Platform) ? $request->Platform : '';
-            $platformObj = Platforms::findByName($platform_name);
-            if(empty($platformObj)){
-                $platformObj = new Platforms();
-                $platformObj->name = $platform_name;
-                $platformObj->save();
-            }
-            $botObj->platform_id = $platformObj->id;
-
-            if($botObj->save()){
-                if(!empty($request->tags) && isset($request->tags)){
-                    BotTags::deleteByBotId($id);
-                    $tagString = rtrim($request->tags,',');
-                    $tags = explode(',', $tagString);
-                    foreach ($tags as $tag){
-                        $tagObj = Tags::findByName($tag);
-                        if(!isset($tagObj) && empty($tagObj)){
-                            $tagObj = new Tags();
-                            $tagObj->name = $tag;
-                            $tagObj->save();
-                        }
-                        $botTagsObj = New BotTags();
-                        $botTagsObj->bots_id = $botObj->id;
-                        $botTagsObj->tags_id = $tagObj->id;
-                        $botTagsObj->save();
-                    }
-                }
-                return redirect(route('admin.bots.index'))->with('success', 'Bot Update Successfully');
-            }
-            session()->flash('error', 'Bot Can not Updated Successfully');
-            return redirect()->back();
-        } catch (\Exception $exception){
-            session()->flash('error', $exception->getMessage());
-            return redirect()->back();
+            return redirect(route('admin.bots.index'))->with('error', 'Bot can not updated successfully');
+        } catch (Throwable $throwable){
+            return redirect(route('admin.bots.index'))->with('error', $throwable->getMessage());
         }
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Bots  $bots
+     * @param $id
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
     {
         try{
-            $botObj = Bots::find($id);
-            if($botObj->delete()){
+            $botObj = Bot::find($id);
+            if ($botObj->delete()) {
                 return redirect(route('admin.bots.index'))->with('success', 'Bot Delete Successfully');
             }
-            session()->flash('error', 'Bot Can not Deleted Successfully');
-            return redirect()->back();
-        } catch (\Exception $exception){
-            session()->flash('error', $exception->getMessage());
-            return redirect()->back();
+            return redirect(route('admin.bots.index'))->with('error', 'Bot Can not Deleted Successfully');
+        } catch (Throwable $throwable){
+            return redirect(route('admin.bots.index'))->with('error', $throwable->getMessage());
         }
     }
 
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|string
+     */
     public function changeStatus(Request $request)
     {
         try{
-            $botObj = Bots::find($request->id);
-            $botObj->status = $request->status;
-            if($botObj->save()){
-                session()->flash('success', 'Status Successfully Change');
-                return 'true';
+
+            $update = Bot::where('id', '=', $request->id ?? null)
+                ->update(['status' => $request->input('status')]);
+
+            if($update){
+                return response()->json([
+                    'error'     => false,
+                    'message'   => ''
+                ]);
             }
-            session()->flash('error', 'Status Change Fail Please Try Again');
-            return 'false';
-        } catch (\Exception $exception){
-            session()->flash('error', $exception->getMessage());
-            return 'false';
+
+            return response()->json([
+                'error'     => true,
+                'message'   => 'Status Change Fail Please Try Again'
+            ]);
+
+        } catch (Throwable $throwable){
+            return response()->json([
+                'error'     => true,
+                'message'   => $throwable->getMessage()
+            ]);
         }
     }
 
     public function list($platformId = null)
     {
-        if(!$platformId) {
+        if (! $platformId) {
           $this->limit = 5;
         }
 
-        $platforms = new Platforms;
+        $platforms = new Platform;
 
         $platforms = $platforms->hasBots($this->limit, $platformId)->paginate(5);
 
@@ -270,13 +251,57 @@ class BotController extends AppController
         $instancesId = [];
 
         $userInstances = UserInstances::findByUserId($userId)->get();
-        $bots = Bots::all();
+        $bots = Bot::all();
 
-        if(!$userInstances->count()) {
+        if (! $userInstances->count()) {
           session()->flash('error', 'Instance Not Found');
         }
 
         return view('admin.instance.my-bots', compact('userInstances', 'bots'));
     }
 
+    /**
+     * @param Bot $bot
+     * @param string|null $input
+     */
+    private function addTagsToBot(Bot $bot, ?string $input): void
+    {
+        if (! empty($bot) && ! empty($input)) {
+
+            $bot->tags()->detach();
+
+            $tags = CommonHelper::explodeByComma($input);
+
+            $tagsIds = [];
+
+            foreach ($tags as $tag){
+
+                $tagObj = Tag::findByName($tag);
+
+                if (empty($tagObj)) {
+                    $tagObj = Tag::create([
+                        'name' => $tag
+                    ]);
+                }
+
+                $tagsIds[] = $tagObj->id ?? null;
+            }
+
+            $bot->tags()->attach($tagsIds);
+        }
+    }
+
+    /**
+     * @param Bot $bot
+     * @param string|null $input
+     */
+    private function addUsersToBot(Bot $bot, ?string $input): void
+    {
+        if (! empty($bot) && ! empty($input)) {
+            $bot->users()->detach();
+            $emails = CommonHelper::explodeByComma($input);
+            $users  = User::whereIn('email', $emails)->pluck('id')->toArray();
+            $bot->users()->sync($users);
+        }
+    }
 }

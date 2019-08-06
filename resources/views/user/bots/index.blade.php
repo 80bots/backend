@@ -13,7 +13,7 @@
         @forelse($platforms as $platform)
             <div class="mb-3 p-3 bg-white rounded shadow-sm">
                 <h6 class="border-bottom  pb-2 mb-0">{{$platform->name}}</h6>
-                @forelse ($platform->activeBots()->get() as $bot)
+                @forelse ($platform->activeBotsWithPrivate as $bot)
                     <div class="media text-muted pt-3 d-flex align-items-start">
                         <svg class="bd-placeholder-img mr-2 rounded flex-shrink-0" width="32" height="32"
                              xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"
@@ -24,18 +24,16 @@
                         </svg>
                         <div class="row flex-grow-1 ml-0 mr-0 border-bottom pb-3">
                             <div class="col-md-2 col-sm-3">
-                                <strong class="d-block text-gray-dark">{{$bot->bot_name}}</strong>
+                                <strong class="d-block text-gray-dark">{{$bot->name}}</strong>
                             </div>
                             <div class="col-md-5 col-sm-9">
                                 {{$bot->description}}
                             </div>
                             <div class="col-md-3 col-sm-12">
-                                @foreach($bot->botTags as $botTag)
-                                  @if($tag = $botTag->tags)
+                                @foreach($bot->tags as $tag)
                                     <span class="badge badge-pill badge-info font-size-16 mr-1 mb-1">
                                         {{ $tag->name }}
                                     </span>
-                                  @endif
                                 @endforeach
                             </div>
                             @if(!empty(Session::get('bot_id')))
@@ -62,7 +60,7 @@
                     <h3>{{ __('keywords.bots.not_found') }}</h3>
                 @endforelse
                 <small class="d-block text-right mt-3">
-                    <a href="{{route('bots.all', ['id' => $platform->id])}}">
+                    <a href="{{route('bots.index', ['id' => $platform->id])}}">
                         {{ __('user.bots.all') }}
                     </a>
                 </small>

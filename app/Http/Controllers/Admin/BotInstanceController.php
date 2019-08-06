@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Bots;
+use App\Bot;
 use App\Http\Controllers\AppController;
 use App\Jobs\StoreUserInstance;
 use App\Services\Aws;
@@ -147,7 +147,7 @@ class BotInstanceController extends AppController
           $awsInstancesIn = [];
           foreach ($instancesByStatus as $status => $instances) {
             foreach ($instances as $key => $instance) {
-              $bot = Bots::where('aws_ami_image_id', $instance['aws_ami_id'])->first();
+              $bot = Bot::where('aws_ami_image_id', $instance['aws_ami_id'])->first();
 
               if($bot) {
                 $instance['bot_id'] = $bot->id;

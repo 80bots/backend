@@ -13,7 +13,7 @@
                 </a>
             </li>
             <li class="sidebar-item ">
-                <a href="{{route('bots.all')}}"
+                <a href="{{route('bots.index')}}"
                    class="sidebar-link {{ (request()->is('bots')) ? 'active' : '' }}">
                     Bots List
                 </a>

@@ -2,7 +2,7 @@
 
 namespace App\Traits;
 use Aws\Ec2\Ec2Client;
-use App\Bots;
+use App\Bot;
 
 trait AWSInstances
 {
