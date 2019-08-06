@@ -37,7 +37,7 @@
                         <tbody>
                         @forelse($bots as $bot)
                             <tr>
-                                <td>{{ $bot->bot_name ?? '' }}</td>
+                                <td>{{ $bot->name ?? '' }}</td>
                                 <td>{{ $bot->aws_ami_image_id ?? '' }}</td>
                                 <td>{{ $bot->aws_ami_name ?? '' }}</td>
                                 <td>{{ $bot->aws_instance_type ?? '' }}</td>
@@ -45,12 +45,12 @@
                                 <td>
                                     @if( $bot->status && $bot->status == 'active')
                                         <button type="button" class="form-group btn btn-success mb-0"
-                                                onclick="changeStatus('{{route('admin.bots.update.status', ['id' => $bot->id])}}','inactive')"
+                                                onclick="changeStatus('{{ route('admin.bots.update.status', ['id' => $bot->id])}}', 'inactive')"
                                                 title="make it inactive">Active
                                         </button>
                                     @else
                                         <button type="button" class="form-group btn btn-danger mb-0"
-                                                onclick="changeStatus('{{route('admin.bots.update.status', ['id' => $bot->id])}}','active')"
+                                                onclick="changeStatus('{{ route('admin.bots.update.status', ['id' => $bot->id])}}', 'active')"
                                                 title="make it active">Inactive
                                         </button>
                                     @endif
@@ -58,11 +58,11 @@
                                 <td>
                                     <form action="{{ route('admin.bots.destroy',$bot->id) }}" method="POST">
                                         <div class="d-flex align-items-center">
-                                            <a href="{{route('admin.bots.show',$bot->id)}}"
+                                            <a href="{{route('admin.bots.show', $bot->id)}}"
                                                class="form-group btn btn-icon btn-primary change-credit-model mb-0 mr-1"
                                                title="Edit Bot"><i class="fa fa-eye"></i></a>
 
-                                            <a href="{{route('admin.bots.edit',$bot->id)}}"
+                                            <a href="{{route('admin.bots.edit', $bot->id)}}"
                                                class="form-group btn btn-icon btn-primary change-credit-model mb-0 mr-1"
                                                title="Edit Bot"><i class="fa fa-edit"></i></a>
                                             @csrf
@@ -74,8 +74,8 @@
                                     </form>
                                 </td>
                                 <td>
-                                    <a href="javascript:void(0)" onclick="launchInstance({{$bot->id}});"
-                                       class="btn font-size-16" data-id="{{$bot->id}}">
+                                    <a href="javascript:void(0)" onclick="launchInstance({{ $bot->id }});"
+                                       class="btn font-size-16" data-id="{{ $bot->id }}">
                                         Launch <i class="fa fa-rocket" aria-hidden="true"></i>
                                     </a>
                                 </td>
@@ -135,7 +135,7 @@
                     $('#launch-inspection-submit-btn').attr('disabled', true);
                 },
                 data: {
-                    user_id: '{{ Auth::id() }}',
+                    user_id: '{{ auth()->id() }}',
                     bot_id: $('[name="bot_id"]').val(),
                 },
                 success: function (response) {
@@ -143,11 +143,10 @@
                     $('#launch-instance').modal('hide');
                     $('#launch-inspection-submit-btn').removeAttr('disabled');
                     if (response.type === 'success') {
-                        window.location = "/admin/instance/running?bots_filter=mybots";
+                        window.location = `{{ route('admin.bots.running') }}`;
                     }
                 },
                 error: function (response) {
-                    console.log(response);
                     alert('Something went wrong!');
                     $('#launch-inspection-submit-btn').removeAttr('disabled');
                 }

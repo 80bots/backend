@@ -14,6 +14,18 @@ return [
         'placeholder' => 'Placeholder',
         'view_bot' => 'View Bot',
     ],
+    'scheduling' => [
+        'title' => 'Scheduling List',
+        'not_found' => 'No scheduling found!',
+        'all_scheduling' => 'All scheduling',
+        'my_scheduling' => 'My scheduling',
+        'user' => 'User',
+        'instance_id' => 'Instance Id',
+        'bot_name' => 'Bot Name',
+        'status' => 'Status',
+        'details' => 'Details',
+        'actions' => 'Actions',
+    ],
     'notifications' => [
         'title' => 'Add Low Credit Notification',
         'select_percentage' => 'Select Percentage',
@@ -52,5 +64,8 @@ return [
     'dashboard' => [
         'title' => 'Dashboard',
         'logged_in' => 'Admin You are logged in!'
-    ]
+    ],
+    'not_found' => 'Not found',
+    'active' => 'Active',
+    'inactive' => 'Inactive',
 ];

@@ -1,5 +1,4 @@
 @php
-    use Illuminate\Support\Facades\Auth;
     $requestUrl = explode('/', ltrim($_SERVER['REQUEST_URI'],'/'));
     $role = $user->role->name ?? null;
 @endphp

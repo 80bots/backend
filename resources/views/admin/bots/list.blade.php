@@ -88,7 +88,7 @@
                     _token: function () {
                         return '{{csrf_token()}}';
                     },
-                    user_id: '{{ Auth::id() }}',
+                    user_id: '{{ auth()->id() }}',
                     bot_id: $('[name="bot_id"]').val(),
                 },
                 success: function (response) {

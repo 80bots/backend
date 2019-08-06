@@ -102,7 +102,7 @@
             '                <option value="">-Select-</option>\n';
             row += '            </select>\n' +
             '        </div>\n' +
-            '    </div>\n' + 
+            '    </div>\n' +
                 '<div class="col-sm-1 border-right">' +
                 '<a href="javascript:void(0)" onclick="deleteRow(['+ids+'],'+numRow+')" class="btn btn-round btn-icon btn-danger">x</a>' +
                 '</div>' +

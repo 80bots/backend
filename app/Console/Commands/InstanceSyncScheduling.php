@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Bots;
+use App\Bot;
 use App\Services\Aws;
 use App\User;
 use App\UserInstances;
@@ -84,7 +84,7 @@ class InstanceSyncScheduling extends Command
             foreach ($instancesByStatus as $status => $instances) {
                 foreach ($instances as $key => $instance) {
 
-                    $bot = Bots::where('aws_ami_image_id', $instance['aws_ami_id'])->first();
+                    $bot = Bot::where('aws_ami_image_id', $instance['aws_ami_id'])->first();
 
                     if (! empty($bot)) {
                         $instance['bot_id'] = $bot->id;

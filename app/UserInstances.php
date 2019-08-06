@@ -60,22 +60,22 @@ class UserInstances extends BaseModel
 
     public function userInstanceDetails()
     {
-        return $this->hasMany('App\UserInstancesDetails');
+        return $this->hasMany(UserInstancesDetails::class);
     }
 
     public function userInstanceDetail()
     {
-        return $this->hasOne('App\UserInstancesDetails');
+        return $this->hasOne(UserInstancesDetails::class);
     }
 
     public function bots()
     {
-        return $this->belongsTo('App\Bots','bot_id');
+        return $this->belongsTo(Bot::class,'bot_id');
     }
 
     public function user()
     {
-        return $this->belongsTo('App\User');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     // public function schedulingInstance()

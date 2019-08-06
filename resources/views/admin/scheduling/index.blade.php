@@ -10,69 +10,89 @@
 
 @section('content')
     <div class="wrapper">
-        <div class="align-items-center bg-purple d-flex p-3 rounded shadow-sm text-white-50 mb-3">
-            <h4 class="border mb-0 mr-2 pb-2 pl-3 pr-3 pt-2 rounded text-white">8</h4>
-            <div class="lh-100">
-                <h6 class="mb-0 text-white lh-100">80bots</h6>
-                <small>Since 2019</small>
+        <div class="card">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <h5 class="mb-0">{{ __('admin.scheduling.title') }}</h5>
+                <h5 class="mb-0">
+                    <div class="form-check flex">
+                        <form action="{{ route('admin.scheduling.index') }}" method="get" id="filter-my-scheduling">
+                            <select name="list" id="scheduling-filter-dropdown" class="form-control">
+                                <option value="all" {{ $filter == 'all' ? 'selected' : '' }}>
+                                    {{ __('admin.scheduling.all_scheduling') }}
+                                </option>
+                                <option value="my" {{ $filter == 'my'? 'selected' : '' }}>
+                                    {{ __('admin.scheduling.my_scheduling') }}
+                                </option>
+                            </select>
+                        </form>
+                    </div>
+                </h5>
+            </div>
+            <div class="card-body">
+                @include('layouts.imports.messages')
+                <div class="table-responsive">
+                    <table id="scheduling-instances" class="table thead-default vertical-middle mb-0">
+                        <thead>
+                        <tr>
+                            <th>{{ __('admin.scheduling.user') }}</th>
+                            <th>{{ __('admin.scheduling.instance_id') }}</th>
+                            <th>{{ __('admin.scheduling.bot_name') }}</th>
+                            <th>{{ __('admin.scheduling.status') }}</th>
+                            <th>{{ __('admin.scheduling.details') }}</th>
+                            <th>{{ __('admin.scheduling.actions') }}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($results as $row)
+                                <tr>
+                                    <td>{{ $row->user->email }}</td>
+                                    <td>{{ $row->userInstance->aws_instance_id }}</td>
+                                    <td>{{ $row->userInstance->bots->bot_name }}</td>
+                                    <td>
+                                        <select name="status" class="form-control schedulingStatus" data-id="{{ $row->id }}">
+                                            @if(!empty($row->status) && $row->status == 'active')
+                                                <option selected="selected" value="active">{{ __('admin.active') }}</option>
+                                                <option value="inactive">{{ __('admin.inactive') }}</option>
+                                            @else
+                                                <option selected="selected" value="inactive">{{ __('admin.inactive') }}</option>
+                                                <option value="active">{{ __('admin.active') }}</option>
+                                            @endif
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <ul>
+                                        @forelse($row->details as $details)
+                                            <li>{{ ucfirst($details->schedule_type) }} ({{ $details->cron_data }})</li>
+                                        @empty
+                                            <li>{{ __('admin.not_found') }}</li>
+                                        @endforelse
+                                        </ul>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <a href="javascript:void(0)" data-toggle="modal" data-target="#create-scheduler"
+                                               onclick="SetBotName('{{ $row->userInstance->bots->bot_name }}','{{$row->userInstance->id}}')"
+                                               class="form-group btn btn-icon btn-primary change-credit-model mb-0 mr-1"
+                                               title="Edit Bot"><i class="fa fa-edit"></i></a>
+
+                                            <form action="{{ route('admin.scheduling.destroy', $row->id) }}" method="POST">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit"
+                                                        onclick="return confirm('Are you sure? you want to remove this record')"
+                                                        class="form-group btn btn-icon btn-danger change-credit-model mb-0">
+                                                    <i class="fa fa-trash"></i></button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @empty
+                                @endforelse
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-        @include('layouts.imports.messages')
-        @if(!empty($results) && isset($results))
-
-            <div class="table-responsive">
-                <table id="scheduling_instances" class="table thead-default vertical-middle mb-0">
-                    <thead>
-                    <tr>
-                        <th>Instance Id</th>
-                        <th>Bot Name</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    @if(isset($results) && !empty($results))
-                        @foreach($results as $row)
-                            <tr>
-                                <td> {{!empty($row->userInstances['aws_instance_id']) ? $row->userInstances['aws_instance_id'] : ''}}</td>
-                                <td>{{isset($row->userInstances->bots) && !empty($row->userInstances->bots->bot_name) ? $row->userInstances->bots->bot_name : ''}}</td>
-                                <td>
-                                    <select name="status" class="form-control schedulingStatus" data-id="{{$row->id}}">
-                                        @if(!empty($row->status) && $row->status == 'active')
-                                            <option selected="selected" value="active">Active</option>
-                                            <option value="inactive">Inactive</option>
-                                        @else
-                                            <option selected="selected" value="inactive">Inactive</option>
-                                            <option value="active">Active</option>
-                                        @endif
-                                    </select>
-                                </td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        @php $bot_name=isset($row->userInstances->bots) && !empty($row->userInstances->bots->bot_name) ? $row->userInstances->bots->bot_name : ''@endphp
-
-                                        <a href="javascript:void(0)" data-toggle="modal" data-target="#create-scheduler"
-                                           onclick="SetBotName('{{$bot_name}}','{{$row->userInstances->id}}')"
-                                           class="form-group btn btn-icon btn-primary change-credit-model mb-0 mr-1"
-                                           title="Edit Bot"><i class="fa fa-edit"></i></a>
-
-                                        <form action="{{ route('admin.scheduling.destroy',$row->id) }}" method="POST">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit"
-                                                    onclick="return confirm('Are you sure? you want to remove this record')"
-                                                    class="form-group btn btn-icon btn-danger change-credit-model mb-0">
-                                                <i class="fa fa-trash"></i></button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforeach
-                    @endif
-                    </tbody>
-                </table>
-            </div>
-        @endif
     </div>
     @include('admin.scheduling.include-schedule-popup')
 @endsection
@@ -82,20 +102,27 @@
     <script type="text/javascript" src="{{ asset('js/moment.min.js')}}"></script>
     <script type="text/javascript" src="{{ asset('js/tempusdominus-bootstrap-4.min.js')}}"></script>
     <script>
-        var current_time_zone =  moment().format('Z');
+        let current_time_zone =  moment().format('Z');
         $('#user-time-zone').val(current_time_zone);
 
+        $(document).ready(function() {
+            table = $('#scheduling-instances').DataTable();
+        });
+
+        $(document).on('change', '#scheduling-filter-dropdown', function () {
+            $('#filter-my-scheduling').submit();
+        });
+
         $(document).on('change', '.schedulingStatus', function () {
-            var status = $(this).val();
-            var schedulingId = $(this).data('id');
-            var URL = '{{route('admin.scheduling.change-status')}}';
+            let status = $(this).val();
+            let schedulingId = $(this).data('id');
             $.ajax({
                 type: 'post',
-                url: URL,
+                url: `{{ route('admin.scheduling.change-status') }}`,
                 cache: false,
                 data: {
                     _token: function () {
-                        return '{{csrf_token()}}';
+                        return '{{ csrf_token() }}';
                     },
                     id: schedulingId,
                     status: status

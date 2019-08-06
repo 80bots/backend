@@ -21,6 +21,7 @@ return [
     'stop' => 'Stop',
     'are_you_sure' => 'Are You Sure?',
     'status' => 'Status',
+    'details' => 'Details',
     'action' => 'Action',
     'placeholder' => 'Placeholder',
     'bots' => [
@@ -38,6 +39,9 @@ return [
         'bot_desc' => 'Bot Description',
         'tags' => 'Tags',
         'tags_placeholder' => 'Comma(,) consider as new Tags',
+        'type' => 'Type',
+        'users' => 'Users',
+        'users_placeholder' => 'Comma(,) consider as User Email',
         'statuses' => [
             'in_queue' => 'In Queue',
             'terminated' => 'Terminated',
@@ -68,6 +72,7 @@ return [
         ],
     ],
     'scheduling' => [
+        'not_found' => 'No scheduling found!',
         'title' => 'Scheduling Bots',
         'add' => 'Add Scheduling',
         'select_instance' => 'Select Bot',

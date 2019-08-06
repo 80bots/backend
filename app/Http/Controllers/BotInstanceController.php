@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Bots;
+use App\Bot;
+use App\Role;
 use App\UserInstances;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,7 +24,7 @@ class BotInstanceController extends AppController
         try{
 
             $UserInstance = UserInstances::findByUserId(Auth::id())->get();
-            $botsArr = Bots::all();
+            $botsArr = Bot::all();
 
             if ($UserInstance->isEmpty()) {
                 session()->flash('error', 'Instance Not Found');

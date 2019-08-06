@@ -14,14 +14,19 @@ class SchedulingInstance extends Model
         'status',
     ];
 
-   	public static function findByUserId($user_id)
+   	public function scopeFindByUserId($query, $user_id)
     {
-        return self::with('userInstances.bots')->where('user_id' , $user_id);
+        return $query->with('userInstance.bots')->where('user_id' , $user_id);
     }
 
     public static function findByUserInstanceId($id, $user_id)
     {
    	    return self::where('user_instances_id', $id)->where('user_id', $user_id)->with('details');
+    }
+
+    public function scopeByInstanceId($query, $id)
+    {
+        return $query->where('user_instances_id', $id)->with('details');
     }
 
     public function scopeScheduling($query, $type)
@@ -32,18 +37,23 @@ class SchedulingInstance extends Model
             }, 'userInstances']);
     }
 
-    public function userInstances()
+    public function user()
     {
-        return $this->belongsTo('App\UserInstances','user_instances_id');
+        return $this->belongsTo(User::class,'user_id');
+    }
+
+    public function userInstance()
+    {
+        return $this->belongsTo(UserInstances::class,'user_instances_id');
     }
 
     public function details()
     {
-   	    return $this->hasMany('App\SchedulingInstancesDetails','scheduling_instances_id','id');
+   	    return $this->hasMany(SchedulingInstancesDetails::class,'scheduling_instances_id','id');
     }
 
     public function history()
     {
-        return $this->hasMany('App\InstanceSessionsHistory','scheduling_instances_id');
+        return $this->hasMany(InstanceSessionsHistory::class,'scheduling_instances_id');
     }
 }

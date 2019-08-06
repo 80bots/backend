@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Bots;
+use App\Bot;
 use App\Http\Controllers\AppController;
 use App\Jobs\StoreUserInstance;
 use App\Services\Aws;
@@ -29,24 +29,15 @@ class BotInstanceController extends AppController
     public function index(Request $request)
     {
         Session::forget('error');
-        $userInstances = UserInstances::with('user');
-        if($status = 'running') {
-            $request->offsetSet('status', 'running');
-        }
 
-        if($request->status = 'running') {
-            $userInstances = $userInstances->where('status', $request->status);
+        switch ($request->input('list')) {
+            case 'my_bots':
+                $userInstances = UserInstances::with('user')->findByUserId(Auth::id())->get();
+                break;
+            default:
+                $userInstances = UserInstances::with('user')->get();
+                break;
         }
-
-        if($request->list && $request->list == 'my_bots') {
-            $userInstances = $userInstances->where('status', Auth::id());
-        }
-
-        if($request->userId) {
-            $userInstances = $userInstances->findByUserId($request->userId);
-        }
-
-        $userInstances = $userInstances->get();
 
         $filters = $request->all();
 
@@ -156,7 +147,7 @@ class BotInstanceController extends AppController
           $awsInstancesIn = [];
           foreach ($instancesByStatus as $status => $instances) {
             foreach ($instances as $key => $instance) {
-              $bot = Bots::where('aws_ami_image_id', $instance['aws_ami_id'])->first();
+              $bot = Bot::where('aws_ami_image_id', $instance['aws_ami_id'])->first();
 
               if($bot) {
                 $instance['bot_id'] = $bot->id;
