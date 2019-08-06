@@ -13,7 +13,8 @@ class LoginController extends Controller
 {
     use AuthenticatesUsers;
 
-    protected function redirectTo() {
+    protected function redirectTo()
+    {
         if(Auth::user()->role->name === 'Admin') {
             return route('admin.bots.index');
         } else {
@@ -21,15 +22,18 @@ class LoginController extends Controller
         }
     }
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->middleware('guest')->except('logout');
     }
 
-    public function apiLogin(Request $request) {
+    public function apiLogin(Request $request)
+    {
         $data = $request->only('email', 'password');
+
         $user = User::where('email', '=', $data['email'])->first();
 
-        if(!$user) {
+        if (empty($user)) {
             return $this->notFound(__('auth.forbidden'), __('auth.not_found'));
         }
 
@@ -37,13 +41,12 @@ class LoginController extends Controller
             return $this->forbidden(__('auth.forbidden'),  __('auth.inactive'));
         }
 
-        if ($user->deleted_at) {
+        if (! empty($user->deleted_at)) {
             return $this->forbidden(__('auth.forbidden'),  __('auth.deleted'));
         }
 
         if (Auth::attempt($data)) {
-            $user = Auth::user();
-            $result = UserHelper::getUserToken($user);
+            $result = UserHelper::getUserToken(Auth::user());
             return $this->success($result);
         } else {
             return $this->forbidden(__('auth.forbidden'), __('auth.failed'));

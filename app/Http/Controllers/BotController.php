@@ -2,17 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use App\Platform;
+use App\Bot;
+use App\Http\Resources\BotCollection;
+use Illuminate\Http\Request;
+use Throwable;
 
 class BotController extends Controller
 {
-    public function index($platformId = null)
+    const PAGINATE = 1;
+
+    public function index(Request $request)
     {
-        $limit = empty($platformId) ? 5 : null;
+        try {
 
-        $platforms = Platform::hasBots($limit, $platformId, $status = 'active')
-            ->paginate(5);
+            $resource = Bot::ajax();
 
-        return view('user.bots.index', compact('platforms'));
+            // TODO: Add Filters
+
+            return new BotCollection($resource->paginate(self::PAGINATE));
+
+        } catch (Throwable $throwable) {
+            return $this->forbidden(__('auth.forbidden'), $throwable->getMessage());
+        }
     }
 }

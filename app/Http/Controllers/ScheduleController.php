@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ScheduleCollection;
 use App\SchedulingInstance;
 use App\SchedulingInstancesDetails;
 use App\UserInstances;
@@ -15,15 +16,20 @@ use Throwable;
 
 class ScheduleController extends Controller
 {
+    const PAGINATE = 1;
+
     public function index(Request $request)
     {
         try {
-            $results = SchedulingInstance::findByUserId($request->user()->id)->get();
-            return view('user.scheduling.index', compact('results'));
+
+            $resource = SchedulingInstance::findByUserId(Auth::id());
+
+            // TODO: Add Filters
+
+            return new ScheduleCollection($resource->paginate(self::PAGINATE));
+
         } catch (Throwable $throwable) {
-            session()->flash('error', $throwable->getMessage());
-            dd($throwable->getMessage());
-            return redirect(route('scheduling.index'));
+            return $this->forbidden(__('auth.forbidden'), $throwable->getMessage());
         }
     }
 

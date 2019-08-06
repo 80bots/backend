@@ -11,23 +11,23 @@ class ApiResponse
 
     public function __construct($data, $message = null)
     {
-       $this->data = $data;
-       $this->message = $message;
+       $this->data      = $data;
+       $this->message   = $message;
     }
 
     public function get()
     {
-        $response = [];
-        if($this->data) $response['data'] = $this->data;
-        if($this->message) $response['message'] = $this->message;
-        return $response;
+        return [
+            'data'      => $this->data ?? null,
+            'message'   => $this->message ?? ''
+        ];
     }
 
     public function getError()
     {
         return [
-            'reason' => $this->data,
-            'message' => $this->message
+            'reason'    => $this->data,
+            'message'   => $this->message
         ];
     }
 }

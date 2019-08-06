@@ -2,40 +2,36 @@
 
 namespace App\Http\Controllers;
 
-use App\Bot;
-use App\Role;
+use App\Http\Resources\UserInstanceCollection;
+use App\Jobs\StoreUserInstance;
 use App\UserInstances;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Throwable;
-use App\Jobs\StoreUserInstance;
 
 class BotInstanceController extends AppController
 {
+    const PAGINATE = 1;
+
     /**
      * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @return UserInstanceCollection
      */
-    public function index()
+    public function index(Request $request)
     {
-        try{
+        try {
 
-            $UserInstance = UserInstances::findByUserId(Auth::id())->get();
-            $botsArr = Bot::all();
+            $resource = UserInstances::findByUserId(Auth::id());
 
-            if ($UserInstance->isEmpty()) {
-                session()->flash('error', 'Instance Not Found');
-                return view('user.bots.running.index');
-            }
+            // TODO: Add Filters
 
-            return view('user.bots.running.index', compact('UserInstance','botsArr'));
+            return new UserInstanceCollection($resource->paginate(self::PAGINATE));
 
         } catch (Throwable $throwable) {
-            session()->flash('error', $throwable->getMessage());
-            return view('user.bots.running.index');
+            return $this->forbidden(__('auth.forbidden'), $throwable->getMessage());
         }
     }
 

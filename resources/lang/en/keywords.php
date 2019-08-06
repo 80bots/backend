@@ -92,6 +92,6 @@ return [
             'active' => 'Active',
             'inactive' => 'Inactive'
         ]
-    ]
-
+    ],
+    'not_found' => 'Not found!',
 ];
