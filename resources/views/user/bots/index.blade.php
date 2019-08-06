@@ -91,7 +91,7 @@
                 $('#launch-inspection-submit-btn').attr('disabled', true);
               },
               data : {
-                  user_id : '{{ Auth::id() }}',
+                  user_id : '{{ auth()->id() }}',
                   bot_id : $('[name="bot_id"]').val(),
               },
               success : function(response){

@@ -13,11 +13,20 @@ use Throwable;
 
 class SchedulingInstancesController
 {
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $results = SchedulingInstance::findByUserId(Auth::id())->get();
-            return view('admin.scheduling.index',compact('results'));
+            $filter = $request->input('list');
+            switch ($filter) {
+                case 'my':
+                    $results = SchedulingInstance::findByUserId(Auth::id())->get();
+                    break;
+                default:
+                    $results = SchedulingInstance::get();
+                    break;
+            }
+
+            return view('admin.scheduling.index', compact('results', 'filter'));
         } catch (Throwable $throwable) {
             session()->flash('error', $throwable->getMessage());
             return redirect(route('admin.scheduling.index'));
@@ -71,22 +80,25 @@ class SchedulingInstancesController
         }
     }
 
-    public function CheckScheduled($id)
+    public function checkScheduled(Request $request, $id)
     {
         try {
-            $scheduleInstanceObj = SchedulingInstance::findByUserInstanceId($id, Auth::id())->first();
-            if (! empty($scheduleInstanceObj)) {
-                $scheduleInstanceObj = $scheduleInstanceObj->toArray();
-                $return['status'] = 'true';
-                $return['data'] = $scheduleInstanceObj;
+            //$scheduleInstance = SchedulingInstance::findByUserInstanceId($id, Auth::id())->first();
+            $scheduleInstance = SchedulingInstance::byInstanceId($id)->first();
+
+            if (! empty($scheduleInstance)) {
+                $return['status'] = true;
+                $return['data'] = $scheduleInstance->toArray();
             } else {
-                $return['status'] = 'false';
-                $return['data'] = $scheduleInstanceObj;
+                $return['status'] = false;
+                $return['data'] = $scheduleInstance;
             }
-            return json_encode($return);
+            return response()->json($return);
         } catch (Throwable $throwable) {
-            $return['status'] = 'false';
-            return $return;
+            return response()->json([
+                'status' => false,
+                'message' => $throwable->getMessage()
+            ]);
         }
     }
 

@@ -21,6 +21,7 @@ return [
     'stop' => 'Stop',
     'are_you_sure' => 'Are You Sure?',
     'status' => 'Status',
+    'details' => 'Details',
     'action' => 'Action',
     'placeholder' => 'Placeholder',
     'bots' => [
@@ -68,6 +69,7 @@ return [
         ],
     ],
     'scheduling' => [
+        'not_found' => 'No scheduling found!',
         'title' => 'Scheduling Bots',
         'add' => 'Add Scheduling',
         'select_instance' => 'Select Bot',

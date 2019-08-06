@@ -55,6 +55,12 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin'], 'namespace
         Route::get('/check', 'BotInstanceController@checkBotIdInQueue')->name('running.check');
     });
 
+    Route::group(['prefix' => 'scheduling', 'as' => 'scheduling.'], function () {
+        Route::put('/status', 'SchedulingInstancesController@changeStatus')->name('change-status');
+        Route::put('/delete-details', 'SchedulingInstancesController@deleteSchedulerDetails')->name('delete-scheduler-details');
+        Route::get('/check-scheduled/{id}', 'SchedulingInstancesController@checkScheduled')->name('check-scheduler');
+    });
+
     Route::group(['prefix' => 'user', 'as' => 'user.'], function() {
         Route::get('/', 'UserController@index')->name('index');
         Route::put('/{id}/status', 'UserController@changeStatus')->name('update.status');
@@ -74,6 +80,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin'], 'namespace
     Route::resource('notification', 'NotificationController');
     Route::resource('subscription', 'SubscriptionController');
     Route::resource('bots', 'BotController');
+    Route::resource('scheduling', 'SchedulingInstancesController');
 });
 
 Route::get('/user/credits', 'AppController@CalUserCreditScore')->name('CreditScoreEmail');

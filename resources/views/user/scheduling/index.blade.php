@@ -20,15 +20,15 @@
                         <th>{{ __('keywords.bots.instance_id') }}</th>
                         <th>{{ __('keywords.bots.bot_name') }}</th>
                         <th>{{ __('keywords.status') }}</th>
+                        <th>{{ __('keywords.details') }}</th>
                         <th>{{ __('keywords.action') }}</th>
                     </tr>
                     </thead>
                     <tbody>
-                    @if(isset($results) && !empty($results))
-                        @foreach($results as $row)
+                        @forelse($results as $row)
                             <tr>
-                                <td> {{!empty($row->userInstances['aws_instance_id']) ? $row->userInstances['aws_instance_id'] : ''}}</td>
-                                <td>{{isset($row->userInstances->bots) && !empty($row->userInstances->bots->bot_name) ? $row->userInstances->bots->bot_name : ''}}</td>
+                                <td>{{ $row->userInstance->aws_instance_id }}</td>
+                                <td>{{ $row->userInstance->bots->bot_name }}</td>
                                 <td>
                                     <select name="status" class="form-control schedulingStatus" data-id="{{$row->id}}">
                                         @if(!empty($row->status) && $row->status == 'active')
@@ -41,15 +41,22 @@
                                     </select>
                                 </td>
                                 <td>
+                                    <ul>
+                                        @forelse($row->details as $details)
+                                            <li>{{ ucfirst($details->schedule_type) }} ({{ $details->cron_data }})</li>
+                                        @empty
+                                            <li>Not found</li>
+                                        @endforelse
+                                    </ul>
+                                </td>
+                                <td>
                                     <div class="d-flex align-items-center">
-                                        @php $bot_name=isset($row->userInstances->bots) && !empty($row->userInstances->bots->bot_name) ? $row->userInstances->bots->bot_name : ''@endphp
-
                                         <a href="javascript:void(0)" data-toggle="modal" data-target="#create-scheduler"
-                                           onclick="SetBotName('{{$bot_name}}','{{$row->userInstances->id}}')"
+                                           onclick="SetBotName('{{ $row->userInstance->bots->bot_name }}','{{ $row->userInstance->id }}')"
                                            class="form-group btn btn-icon btn-primary change-credit-model mb-0 mr-1"
                                            title="Edit Bot"><i class="fa fa-edit"></i></a>
 
-                                        <form action="{{ route('scheduling.destroy',$row->id) }}" method="POST">
+                                        <form action="{{ route('scheduling.destroy', $row->id) }}" method="POST">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit"
@@ -60,8 +67,9 @@
                                     </div>
                                 </td>
                             </tr>
-                        @endforeach
-                    @endif
+                        @empty
+                            <h3>{{ __('keywords.scheduling.not_found') }}</h3>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
@@ -81,10 +89,9 @@
         $(document).on('change', '.schedulingStatus', function () {
             let status = $(this).val();
             let schedulingId = $(this).data('id');
-            console.log(`{{route('scheduling.update.status')}}`);
             $.ajax({
                 type: 'PUT',
-                url: ` {{route('scheduling.update.status')}} `,
+                url: `{{route('scheduling.update.status')}}`,
                 cache: false,
                 data: {
                     id: schedulingId,

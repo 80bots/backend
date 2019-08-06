@@ -135,7 +135,7 @@
                     $('#launch-inspection-submit-btn').attr('disabled', true);
                 },
                 data: {
-                    user_id: '{{ Auth::id() }}',
+                    user_id: '{{ auth()->id() }}',
                     bot_id: $('[name="bot_id"]').val(),
                 },
                 success: function (response) {
@@ -143,11 +143,10 @@
                     $('#launch-instance').modal('hide');
                     $('#launch-inspection-submit-btn').removeAttr('disabled');
                     if (response.type === 'success') {
-                        window.location = "/admin/instance/running?bots_filter=mybots";
+                        window.location = `{{ route('admin.bots.running') }}`;
                     }
                 },
                 error: function (response) {
-                    console.log(response);
                     alert('Something went wrong!');
                     $('#launch-inspection-submit-btn').removeAttr('disabled');
                 }

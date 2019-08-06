@@ -29,24 +29,15 @@ class BotInstanceController extends AppController
     public function index(Request $request)
     {
         Session::forget('error');
-        $userInstances = UserInstances::with('user');
-        if($status = 'running') {
-            $request->offsetSet('status', 'running');
-        }
 
-        if($request->status = 'running') {
-            $userInstances = $userInstances->where('status', $request->status);
+        switch ($request->input('list')) {
+            case 'my_bots':
+                $userInstances = UserInstances::with('user')->findByUserId(Auth::id())->get();
+                break;
+            default:
+                $userInstances = UserInstances::with('user')->get();
+                break;
         }
-
-        if($request->list && $request->list == 'my_bots') {
-            $userInstances = $userInstances->where('status', Auth::id());
-        }
-
-        if($request->userId) {
-            $userInstances = $userInstances->findByUserId($request->userId);
-        }
-
-        $userInstances = $userInstances->get();
 
         $filters = $request->all();
 

@@ -1,6 +1,5 @@
 @php
-use Illuminate\Support\Facades\Auth;
-$user = Auth::user();
+$user = auth()->user();
 @endphp
 <!doctype html>
 <html lang="en">

@@ -19,6 +19,12 @@
                 </a>
             </li>
             <li class="sidebar-item ">
+                <a href="{{route('admin.scheduling.index')}}"
+                   class="sidebar-link {{ (request()->is('admin/scheduling')) ? 'active' : '' }}">
+                    Scheduling List
+                </a>
+            </li>
+            <li class="sidebar-item ">
                 <a href="{{ route('admin.bots.index') }}"
                    class="sidebar-link {{ (request()->is('admin/bots')) ? 'active' : '' }}">
                     {{ __('layouts.sidebar.all_bots') }}

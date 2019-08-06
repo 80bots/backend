@@ -102,7 +102,7 @@
             '                <option value="">-Select-</option>\n';
             row += '            </select>\n' +
             '        </div>\n' +
-            '    </div>\n' + 
+            '    </div>\n' +
                 '<div class="col-sm-1 border-right">' +
                 '<a href="javascript:void(0)" onclick="deleteRow(['+ids+'],'+numRow+')" class="btn btn-round btn-icon btn-danger">x</a>' +
                 '</div>' +
@@ -200,34 +200,30 @@
     }
 
     function checkSchedule(id) {
-        var url = '{{url('admin/scheduling/check-scheduled')}}/' + id;
         $.ajax({
             type: 'get',
-            url: url,
+            url: `{{ url('admin/scheduling/check-scheduled') }}/${id}`,
             cache: false,
             success: function (data) {
-                var response = JSON.parse(data);
-                if (response.status == 'true') {
-                    var schedulingInstance = response.data;
-                    var scheduling_instance_details = schedulingInstance.scheduling_instance_details;
-                    var lenth = scheduling_instance_details.length;
-                    for (i = 0; i < lenth; i++) {
+                if (data.status) {
+                    let schedulingInstance = data.data;
+                    let scheduling_instance_details = schedulingInstance.details;
+                    let length = scheduling_instance_details.length;
+                    for (let i = 0; i < length; i++) {
                         var day = scheduling_instance_details[i].day;
                         var schedule_type = scheduling_instance_details[i].schedule_type;
                         var scheduled_time = scheduling_instance_details[i].selected_time;
                         var end_time = '';
-                        var row =
-                            '<div class="row">\n';
+                        var row = '<div class="row">\n';
                         var ids = [];
-                        if (scheduling_instance_details[i] != '' && typeof scheduling_instance_details[i] != 'undefined') {
+                        if (scheduling_instance_details[i] !== '' && typeof scheduling_instance_details[i] != 'undefined') {
                             ids.push(scheduling_instance_details[i].id);
                         }
                         addSchedulerRow(ids, day, scheduled_time, end_time, schedule_type);
                     }
-                    if(lenth == 0){
+                    if(length === 0){
                         addSchedulerRow();
                     }
-
                 } else {
                     addSchedulerRow();
                 }
