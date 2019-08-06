@@ -11,7 +11,7 @@ class ScheduleCollection extends ResourceCollection
      *
      * @var string
      */
-    //public $collects = 'App\Http\Resources\ScheduleResource';
+    public $collects = 'App\Http\Resources\ScheduleResource';
 
     /**
      * Transform the resource collection into an array.

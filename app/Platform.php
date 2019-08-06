@@ -44,7 +44,7 @@ class Platform extends Model
 
     public function scopeFindByName($query, string $name)
     {
-        return $query->where('name', $name)->first();
+        return $query->where('name', $name);
     }
 
     public function bots()

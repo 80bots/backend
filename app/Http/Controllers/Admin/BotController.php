@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Bot;
 use App\Helpers\CommonHelper;
 use App\Http\Controllers\AppController;
+use App\Http\Resources\BotCollection;
 use App\Platform;
 use App\Tag;
 use App\User;
@@ -15,17 +16,28 @@ use Throwable;
 
 class BotController extends AppController
 {
+    const PAGINATE = 1;
+
     public $limit;
 
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return BotCollection|\Illuminate\Http\JsonResponse
      */
     public function index()
     {
-        $bots = Bot::all();
-        return view('admin.bots.index', compact('bots'));
+        try {
+
+            $resource = Bot::ajax();
+
+            // TODO: Add Filters
+
+            return new BotCollection($resource->paginate(self::PAGINATE));
+
+        } catch (Throwable $throwable) {
+            return $this->forbidden(__('auth.forbidden'), $throwable->getMessage());
+        }
     }
 
     /**
@@ -53,7 +65,7 @@ class BotController extends AppController
     public function store(Request $request)
     {
         try{
-            $platform = Platform::findByName($request->input('platform'));
+            $platform = Platform::findByName($request->input('platform'))->first();
 
             if (empty($platform)) {
                 $platform = Platform::create([

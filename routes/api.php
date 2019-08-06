@@ -20,4 +20,17 @@ Route::group(['middleware' => ['auth:api']], function() {
 //        Route::get('/check', 'BotInstanceController@checkBotIdInQueue')->name('running.check');
     });
 
+    // User scheduling
+    Route::group(['prefix' => 'scheduling', 'as' => 'scheduling.'], function () {
+        Route::get('/', 'ScheduleController@index')->name('index');
+    });
+
+});
+
+Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['auth:api', 'api.admin']], function() {
+
+    Route::group(['prefix' => 'bots', 'as' => 'bots.'], function () {
+        Route::get('/', 'BotController@index')->name('index');
+    });
+
 });

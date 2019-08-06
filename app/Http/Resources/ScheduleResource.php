@@ -14,9 +14,23 @@ class ScheduleResource extends JsonResource
      */
     public function toArray($request)
     {
+        $details = $this->details->map(function ($object) {
+            return [
+                'id'            => $object->id ?? null,
+                'day'           => $object->day ?? '',
+                'selected_time' => $object->selected_time ?? '',
+                'cron_data'     => $object->cron_data ?? '',
+                'schedule_type' => $object->schedule_type ?? '',
+                'status'        => $object->status ?? '',
+                'created_at'    => $object->created_at ?? '',
+            ];
+        })->toArray();
+
         return [
-            'id'    => $this->id ?? '',
-            'name'  => $this->name ?? '',
+            'id'        => $this->id ?? '',
+            'name'      => $this->name ?? '',
+            'details'   => $details,
+            'status'    => $this->status ?? null,
         ];
     }
 }
