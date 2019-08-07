@@ -5,16 +5,18 @@ namespace App\Http\Controllers\Admin;
 use App\Bot;
 use App\Helpers\CommonHelper;
 use App\Http\Controllers\AppController;
-use App\Http\Resources\BotCollection;
+use App\Http\Resources\Admin\BotCollection;
+use App\Http\Resources\Admin\BotResource;
+use App\Http\Resources\Admin\PlatformCollection;
 use App\Platform;
 use App\Tag;
 use App\User;
-use App\UserInstances;
+use App\UserInstance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
 
-class BotController extends AppController
+class BotsController extends AppController
 {
     const PAGINATE = 1;
 
@@ -36,46 +38,42 @@ class BotController extends AppController
             return new BotCollection($resource->paginate(self::PAGINATE));
 
         } catch (Throwable $throwable) {
-            return $this->forbidden(__('auth.forbidden'), $throwable->getMessage());
+            return $this->error(__('admin.server_error'), $throwable->getMessage());
         }
     }
 
     /**
      * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function create()
     {
         try{
-            $platforms = Platform::get();
-            return view('admin.bots.create', compact('platforms'));
+
+            $platforms = (new PlatformCollection(Platform::get()))->response()->getData();
+
+            return $this->success([
+                'platforms' => $platforms->data ?? []
+            ]);
+
         } catch (Throwable $throwable){
-            session()->flash('error', $throwable->getMessage());
-            return view('admin.bots.create');
+            return $this->error(__('admin.server_error'), $throwable->getMessage());
         }
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {
         try{
-            $platform = Platform::findByName($request->input('platform'))->first();
-
-            if (empty($platform)) {
-                $platform = Platform::create([
-                    'name' => $request->input('platform')
-                ]);
-            }
 
             $bot = Bot::create([
                 'name'                  => $request->input('name'),
-                'platform_id'           => $platform->id ?? null,
+                'platform_id'           => $this->getPlatformId($request->input('platform')),
                 'description'           => $request->input('description'),
                 'aws_ami_image_id'      => $request->input('aws_ami_image_id'),
                 'aws_ami_name'          => $request->input('aws_ami_name'),
@@ -86,14 +84,19 @@ class BotController extends AppController
                 'type'                  => $request->input('type')
             ]);
 
-            $this->addTagsToBot($bot, $request->input('tags'));
+            if (empty($bot)) {
+                return $this->error(__('admin.server_error'), __('admin.bots.error_create'));
+            }
 
+            $this->addTagsToBot($bot, $request->input('tags'));
             $this->addUsersToBot($bot, $request->input('users'));
 
-            return redirect(route('admin.bots.index'))->with('success', 'Bot Added Successfully');
+            return $this->success([
+                'id' => $bot->id ?? null
+            ], __('admin.bots.success_create'));
 
         } catch(Throwable $throwable) {
-            return redirect(route('admin.bots.index'))->with('error', $throwable->getMessage());
+            return $this->error(__('admin.server_error'), $throwable->getMessage());
         }
     }
 
@@ -102,54 +105,60 @@ class BotController extends AppController
      *
      * @param Request $request
      * @param $id
-     * @return \Illuminate\Http\Response
+     * @return BotResource
      */
     public function show(Request $request, $id)
     {
         try{
             $bot = Bot::find($id);
-            if (! empty($bot)) {
-                return view('admin.bots.view', compact('bot', 'id'));
+
+            if (empty($bot)) {
+                return $this->notFound(__('admin.not_found'), __('admin.bots.not_found'));
             }
-            return redirect(route('admin.bots.index'))->with('error', 'Bot not found');
+
+            return new BotResource($bot);
+
         } catch (Throwable $throwable){
-            return redirect(route('admin.bots.index'))->with('error', $throwable->getMessage());
+            return $this->error(__('admin.server_error'), $throwable->getMessage());
         }
     }
 
     /**
      * Show the form for editing the specified resource.
-     *
      * @param $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function edit($id)
     {
         try{
+
             $bot = Bot::find($id);
 
             if (empty($bot)) {
-                return redirect(route('admin.bots.index'))->with('error', 'Bot not found');
+                return $this->notFound(__('admin.not_found'), __('admin.bots.not_found'));
             }
 
-            $tags = implode(', ', $bot->tags()->pluck('name')->toArray());
-            $users = implode(', ', $bot->users()->pluck('email')->toArray());
+            $platforms  = (new PlatformCollection(Platform::get()))->response()->getData();
+            $resource   = (new BotResource($bot))->response()->getData();
 
-            $platforms = Platform::get();
-
-            return view('admin.bots.edit',compact('bot', 'platforms', 'tags', 'users'));
+            return $this->success([
+                'bot'       => $resource->data ?? null,
+                'tags'      => implode(', ', $bot->tags()->pluck('name')->toArray()),
+                'users'     => implode(', ', $bot->users()->pluck('email')->toArray()),
+                'platforms' => $platforms->data ?? [],
+            ]);
 
         } catch (Throwable $throwable){
-            return redirect(route('admin.bots.index'))->with('error', $throwable->getMessage());
+            return $this->error(__('admin.server_error'), $throwable->getMessage());
         }
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param Request $request
      * @param $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function update(Request $request, $id)
     {
@@ -158,39 +167,32 @@ class BotController extends AppController
             $bot = Bot::find($id);
 
             if (empty($bot)) {
-                return redirect(route('admin.bots.index'))
-                    ->with('error', 'Bot not found');
-            }
-
-            $platform = Platform::findByName($request->input('platform'));
-
-            if (empty($platform)) {
-                $platform = Platform::create([
-                    'name' => $request->input('platform')
-                ]);
+                return $this->notFound(__('admin.not_found'), __('admin.bots.not_found'));
             }
 
             $bot->fill([
-                'platform_id' => $platform->id ?? null,
-                'bot_name' => $request->input('bot_name'),
-                'description' => $request->input('description'),
-                'aws_ami_image_id' => $request->input('aws_ami_image_id'),
-                'aws_ami_name' => $request->input('aws_ami_name'),
-                'aws_instance_type' => $request->input('aws_instance_type'),
-                'aws_startup_script' => $request->input('aws_startup_script'),
-                'aws_custom_script' => $request->input('aws_custom_script'),
-                'aws_storage_gb' => $request->input('aws_storage_gb'),
+                'name'                  => $request->input('name'),
+                'platform_id'           => $this->getPlatformId($request->input('platform')),
+                'description'           => $request->input('description'),
+                'aws_ami_image_id'      => $request->input('aws_ami_image_id'),
+                'aws_ami_name'          => $request->input('aws_ami_name'),
+                'aws_instance_type'     => $request->input('aws_instance_type'),
+                'aws_startup_script'    => $request->input('aws_startup_script'),
+                'aws_custom_script'     => $request->input('aws_custom_script'),
+                'aws_storage_gb'        => $request->input('aws_storage_gb'),
             ]);
 
             if ($bot->save()) {
                 $this->addTagsToBot($bot, $request->input('tags'));
                 $this->addUsersToBot($bot, $request->input('users'));
-                return redirect(route('admin.bots.index'))->with('success', 'Bot update successfully');
+                return $this->success([
+                    'id' => $bot->id ?? null
+                ], __('admin.bots.success_update'));
             }
 
-            return redirect(route('admin.bots.index'))->with('error', 'Bot can not updated successfully');
+            return $this->error(__('admin.server_error'), __('admin.bots.not_updated'));
         } catch (Throwable $throwable){
-            return redirect(route('admin.bots.index'))->with('error', $throwable->getMessage());
+            return $this->error(__('admin.server_error'), $throwable->getMessage());
         }
     }
 
@@ -203,13 +205,23 @@ class BotController extends AppController
     public function destroy($id)
     {
         try{
-            $botObj = Bot::find($id);
-            if ($botObj->delete()) {
-                return redirect(route('admin.bots.index'))->with('success', 'Bot Delete Successfully');
+
+            $bot = Bot::find($id);
+
+            if (empty($bot)) {
+                return $this->notFound(__('admin.not_found'), __('admin.bots.not_found'));
             }
-            return redirect(route('admin.bots.index'))->with('error', 'Bot Can not Deleted Successfully');
+
+            if ($bot->delete()) {
+                return $this->success([
+                    'id' => $bot->id ?? null
+                ], __('admin.bots.success_delete'));
+            }
+
+            return $this->error(__('admin.server_error'), __('admin.bots.not_deleted'));
+
         } catch (Throwable $throwable){
-            return redirect(route('admin.bots.index'))->with('error', $throwable->getMessage());
+            return $this->error(__('admin.server_error'), $throwable->getMessage());
         }
     }
 
@@ -262,7 +274,7 @@ class BotController extends AppController
         $userId = Auth::id();
         $instancesId = [];
 
-        $userInstances = UserInstances::findByUserId($userId)->get();
+        $userInstances = UserInstance::findByUserId($userId)->get();
         $bots = Bot::all();
 
         if (! $userInstances->count()) {
@@ -315,5 +327,22 @@ class BotController extends AppController
             $users  = User::whereIn('email', $emails)->pluck('id')->toArray();
             $bot->users()->sync($users);
         }
+    }
+
+    /**
+     * @param string|null $name
+     * @return int|null
+     */
+    private function getPlatformId(?string $name): ?int
+    {
+        $platform = Platform::findByName($name)->first();
+
+        if (empty($platform)) {
+            $platform = Platform::create([
+                'name' => $name
+            ]);
+        }
+
+        return $platform->id ?? null;
     }
 }

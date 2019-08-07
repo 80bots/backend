@@ -4,12 +4,12 @@ namespace App\Jobs;
 
 use App\Bot;
 use App\Http\Controllers\AwsConnectionController;
-use App\Http\Controllers\BotInstanceController;
+use App\Http\Controllers\BotInstancesController;
 use App\Events\dispatchedInstanceEvent;
 use App\Events\InstanceCreation;
 use App\Services\Aws;
 use App\User;
-use App\UserInstances;
+use App\UserInstance;
 use App\UserInstancesDetails;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Bus\Queueable;
@@ -61,7 +61,7 @@ class StoreUserInstance implements ShouldQueue
         try {
             ini_set('memory_limit', '-1');
 
-            $userInstance   = UserInstances::findOrFail($this->id);
+            $userInstance   = UserInstance::findOrFail($this->id);
             $bot            = Bot::findOrFail($userInstance->bot_id);
 
             if (empty($bot)) {

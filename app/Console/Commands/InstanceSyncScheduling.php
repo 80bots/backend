@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use App\Bot;
 use App\Services\Aws;
 use App\User;
-use App\UserInstances;
+use App\UserInstance;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
@@ -94,7 +94,7 @@ class InstanceSyncScheduling extends Command
                         $status = 'stop';
                     }
 
-                    $userInstance = UserInstances::where('aws_instance_id' , $instance['aws_instance_id'])->first();
+                    $userInstance = UserInstance::where('aws_instance_id' , $instance['aws_instance_id'])->first();
 
                     if (! empty($userInstance)) {
 
@@ -127,7 +127,7 @@ class InstanceSyncScheduling extends Command
                                 $instance['is_in_queue']  = 0;
                             }
 
-                            $userInstance = UserInstances::updateOrCreate([
+                            $userInstance = UserInstance::updateOrCreate([
                                 'aws_instance_id' => $instance['aws_instance_id']
                             ], $instance);
 
@@ -138,14 +138,14 @@ class InstanceSyncScheduling extends Command
                 }
             }
 
-            UserInstances::where(function($query) use($awsInstancesIn) {
+            UserInstance::where(function($query) use($awsInstancesIn) {
                 $query->whereNotIn('aws_instance_id', $awsInstancesIn)
                     ->orWhere('aws_instance_id', null)
                     ->orWhere('status', 'terminated');
             })->whereNotIn('status', ['start', 'stop'])
                 ->delete();
 
-            UserInstances::where(function($query) {
+            UserInstance::where(function($query) {
                 $query->where('is_in_queue', 1)
                     ->orWhereIn('status', ['start', 'stop']);
             })->where('updated_at', '<' , Carbon::now()->subMinutes(10)->toDateTimeString())

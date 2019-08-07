@@ -11,26 +11,45 @@ Route::group(['prefix' => 'auth', 'as' => 'auth.', 'namespace' => 'Auth'], funct
 
 Route::group(['middleware' => ['auth:api']], function() {
 
+    Route::group(['prefix' => 'user', 'as' => 'user.'], function() {
+        Route::get('/', 'UserController@index')->name('index');
+        Route::get('/timezones', 'UserController@getTimezones')->name('timezones');
+    });
+
     // User bots
     Route::group(['prefix' => 'bots', 'as' => 'bots.'], function () {
-        Route::get('/', 'BotController@index')->name('index');
-        Route::get('/running', 'BotInstanceController@index')->name('running');
-//        Route::put('/running/status', 'BotInstanceController@changeStatus')->name('running.update.status');
-//        Route::post('/running/dispatch', 'BotInstanceController@dispatchLaunchInstace')->name('running.dispatch');
-//        Route::get('/check', 'BotInstanceController@checkBotIdInQueue')->name('running.check');
+        Route::get('/running', 'BotInstancesController@index')->name('running');
+        Route::put('/running/status', 'BotInstancesController@changeStatus')->name('running.update.status');
     });
 
     // User scheduling
     Route::group(['prefix' => 'scheduling', 'as' => 'scheduling.'], function () {
-        Route::get('/', 'ScheduleController@index')->name('index');
     });
+
+    Route::resources([
+        'bots'          => 'BotsController',
+        'scheduling'    => 'SchedulesController',
+    ]);
 
 });
 
 Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['auth:api', 'api.admin']], function() {
 
-    Route::group(['prefix' => 'bots', 'as' => 'bots.'], function () {
-        Route::get('/', 'BotController@index')->name('index');
+    Route::group(['prefix' => 'users', 'as' => 'user.'], function() {
     });
+
+    Route::group(['prefix' => 'bots', 'as' => 'bots.'], function () {
+        Route::get('/running', 'BotInstancesController@index')->name('running');
+        Route::put('/running/status', 'BotInstancesController@changeStatus')->name('running.update.status');
+    });
+
+    Route::group(['prefix' => 'scheduling', 'as' => 'scheduling.'], function () {
+    });
+
+    Route::resources([
+        'users'         => 'UsersController',
+        'bots'          => 'BotsController',
+        'scheduling'    => 'SchedulingInstancesController',
+    ]);
 
 });

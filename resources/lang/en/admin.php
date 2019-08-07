@@ -13,6 +13,13 @@ return [
         'platform' => 'Platform',
         'placeholder' => 'Placeholder',
         'view_bot' => 'View Bot',
+        'error_create' => 'Error creating bot',
+        'success_create' => 'Bot Added Successfully',
+        'success_update' => 'Bot update successfully',
+        'success_delete' => 'Bot delete Successfully',
+        'not_found' => 'Bot not found',
+        'not_updated' => 'Bot can not updated successfully',
+        'not_deleted' => 'Bot can not deleted successfully',
     ],
     'scheduling' => [
         'title' => 'Scheduling List',
@@ -68,4 +75,5 @@ return [
     'not_found' => 'Not found',
     'active' => 'Active',
     'inactive' => 'Inactive',
+    'server_error' => 'Server error'
 ];

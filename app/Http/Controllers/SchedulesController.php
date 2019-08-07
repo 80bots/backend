@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\ScheduleCollection;
+use App\Http\Resources\User\ScheduleCollection;
 use App\SchedulingInstance;
 use App\SchedulingInstancesDetails;
-use App\UserInstances;
+use App\UserInstance;
 use Carbon\Carbon;
 use DateTime;
 use DateTimeZone;
@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
-class ScheduleController extends Controller
+class SchedulesController extends Controller
 {
     const PAGINATE = 1;
 
@@ -29,14 +29,14 @@ class ScheduleController extends Controller
             return new ScheduleCollection($resource->paginate(self::PAGINATE));
 
         } catch (Throwable $throwable) {
-            return $this->forbidden(__('auth.forbidden'), $throwable->getMessage());
+            return $this->error(__('auth.forbidden'), $throwable->getMessage());
         }
     }
 
     public function create()
     {
         try {
-            $instances = UserInstances::where(['status' => 'stop','user_id'=> Auth::id()])->get();
+            $instances = UserInstance::where(['status' => 'stop','user_id'=> Auth::id()])->get();
             return view('user.scheduling.create', compact('instances'));
         } catch (Throwable $throwable) {
             session()->flash('error', $throwable->getMessage());
@@ -218,7 +218,7 @@ class ScheduleController extends Controller
     public function edit($id)
     {
         try{
-            $instances = UserInstances::where(['status' => 'stop','user_id'=> Auth::id()])->get();
+            $instances = UserInstance::where(['status' => 'stop','user_id'=> Auth::id()])->get();
             $scheduling = SchedulingInstance::with('userInstances')->find($id);
             return view('user.scheduling.edit', compact('scheduling','instances' ,'id'));
         } catch (Throwable $throwable){

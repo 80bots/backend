@@ -2,13 +2,15 @@
 
 namespace App;
 
-use DateTime;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class UserInstances extends BaseModel
+class UserInstance extends BaseModel
 {
     use SoftDeletes;
+
+    const STATUS_TERMINATED = 'terminated';
+    const STATUS_RUNNING    = 'running';
+    const STATUS_STOP       = 'stop';
 
     protected $table = "user_instances";
 
@@ -35,8 +37,16 @@ class UserInstances extends BaseModel
         'updated_at'
     ];
 
-    protected $hidden = [
-    ];
+    /**
+     * Creation of an object for further applying with filters
+     *
+     * @param $query
+     * @return mixed
+     */
+    public function scopeAjax($query)
+    {
+        return $query;
+    }
 
     public function scopeFindByUserId($query, $userId)
     {

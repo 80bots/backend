@@ -93,5 +93,14 @@ return [
             'inactive' => 'Inactive'
         ]
     ],
+    'instance' => [
+        'not_exist' => 'This instance does not exist',
+        'already_terminated' => 'This instance is already terminated',
+        'change_not_success' => 'Instance :status not successfully!',
+        'change_success' => 'Instance :status successfully!'
+    ],
+    'aws' => [
+        'error' => 'Aws error'
+    ],
     'not_found' => 'Not found!',
 ];

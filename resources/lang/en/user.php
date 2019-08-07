@@ -51,5 +51,6 @@ return [
         'view_title' => 'Bots View',
         'view_bot' => 'View Bot',
         'create_scheduler' => 'Create Scheduler For'
-    ]
+    ],
+    'server_error' => 'Server error'
 ];

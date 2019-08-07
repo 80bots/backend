@@ -6,7 +6,7 @@ use App\CreditPercentage;
 use App\Helpers\CommonHelper;
 use App\Services\Aws;
 use App\User;
-use App\UserInstances;
+use App\UserInstance;
 use App\UserInstancesDetails;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -136,7 +136,7 @@ class CalculateUserCreditScore extends Command
 
                     if ($CurrentState['Name'] == 'stopped' || $CurrentState['Name'] == 'stopping') {
 
-                        $UserInstance = UserInstances::findByInstanceId($instanceId)->first();
+                        $UserInstance = UserInstance::findByInstanceId($instanceId)->first();
                         $UserInstance->status = 'stop';
 
                         $instanceDetail = UserInstancesDetails::where(['user_instance_id' => $UserInstance->id, 'end_time' => null])->latest()->first();

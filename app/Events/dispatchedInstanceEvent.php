@@ -9,7 +9,7 @@ use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
-use App\UserInstances;
+use App\UserInstance;
 
 class dispatchedInstanceEvent implements ShouldBroadcast
 {
@@ -22,7 +22,7 @@ class dispatchedInstanceEvent implements ShouldBroadcast
      *
      * @return void
      */
-    public function __construct(UserInstances $userInstance)
+    public function __construct(UserInstance $userInstance)
     {
         $this->data = $userInstance;
     }

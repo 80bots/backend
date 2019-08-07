@@ -2,41 +2,48 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\AppController;
+use App\Http\Resources\Admin\SchedulingInstanceCollection;
 use App\SchedulingInstance;
 use App\SchedulingInstancesDetails;
-use App\UserInstances;
+use App\UserInstance;
 use DateTime;
 use DateTimeZone;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
 
-class SchedulingInstancesController
+class SchedulingInstancesController extends AppController
 {
+    const PAGINATE = 1;
+
     public function index(Request $request)
     {
         try {
-            $filter = $request->input('list');
-            switch ($filter) {
+
+            $resource = SchedulingInstance::ajax();
+
+            // TODO: Add Filters
+            switch ($request->input('list')) {
                 case 'my':
-                    $results = SchedulingInstance::findByUserId(Auth::id())->get();
+                    $resource->findByUserId(Auth::id());
                     break;
                 default:
-                    $results = SchedulingInstance::get();
                     break;
             }
 
-            return view('admin.scheduling.index', compact('results', 'filter'));
+
+            return new SchedulingInstanceCollection($resource->paginate(self::PAGINATE));
+
         } catch (Throwable $throwable) {
-            session()->flash('error', $throwable->getMessage());
-            return redirect(route('admin.scheduling.index'));
+            return $this->error(__('admin.server_error'), $throwable->getMessage());
         }
     }
 
     public function create()
     {
         try {
-            $instances = UserInstances::where(['status' => 'stop','user_id'=> Auth::id()])->get();
+            $instances = UserInstance::where(['status' => 'stop','user_id'=> Auth::id()])->get();
             return view('admin.scheduling.create',compact('instances'));
         } catch (Throwable $throwable) {
             session()->flash('error', $throwable->getMessage());
@@ -191,7 +198,7 @@ class SchedulingInstancesController
     public function edit($id)
     {
         try{
-            $instances = UserInstances::where(['status' => 'stop','user_id'=> Auth::id()])->get();
+            $instances = UserInstance::where(['status' => 'stop','user_id'=> Auth::id()])->get();
             $scheduling = SchedulingInstance::with('userInstances')->find($id);
             return view('admin.scheduling.edit',compact('scheduling','instances' ,'id'));
         } catch (Throwable $throwable){

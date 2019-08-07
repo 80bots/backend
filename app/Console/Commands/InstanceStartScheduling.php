@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use App\Helpers\InstanceHelper;
 use App\SchedulingInstance;
 use App\Services\Aws;
-use App\UserInstances;
+use App\UserInstance;
 use App\UserInstancesDetails;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -86,7 +86,7 @@ class InstanceStartScheduling extends Command
 
                     if ($currentState['Name'] == 'pending' || $currentState['Name'] == 'running') {
 
-                        $userInstance = UserInstances::findByInstanceId($instanceId)->first();
+                        $userInstance = UserInstance::findByInstanceId($instanceId)->first();
                         $userInstance->status = 'running';
 
                         if ($userInstance->save()) {

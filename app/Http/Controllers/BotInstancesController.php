@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\UserInstanceCollection;
+use App\Http\Resources\User\UserInstanceCollection;
 use App\Jobs\StoreUserInstance;
-use App\UserInstances;
+use App\UserInstance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Throwable;
 
-class BotInstanceController extends AppController
+class BotInstancesController extends AppController
 {
     const PAGINATE = 1;
 
@@ -24,14 +24,14 @@ class BotInstanceController extends AppController
     {
         try {
 
-            $resource = UserInstances::findByUserId(Auth::id());
+            $resource = UserInstance::findByUserId(Auth::id());
 
             // TODO: Add Filters
 
             return new UserInstanceCollection($resource->paginate(self::PAGINATE));
 
         } catch (Throwable $throwable) {
-            return $this->forbidden(__('auth.forbidden'), $throwable->getMessage());
+            return $this->error(__('auth.forbidden'), $throwable->getMessage());
         }
     }
 
@@ -134,10 +134,10 @@ class BotInstanceController extends AppController
     /**
      * Display the specified resource.
      *
-     * @param  \App\UserInstances  $userInstances
+     * @param  \App\UserInstance  $userInstances
      * @return \Illuminate\Http\Response
      */
-    public function show(UserInstances $userInstances)
+    public function show(UserInstance $userInstances)
     {
         //
     }
@@ -145,10 +145,10 @@ class BotInstanceController extends AppController
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\UserInstances  $userInstances
+     * @param  \App\UserInstance  $userInstances
      * @return \Illuminate\Http\Response
      */
-    public function edit(UserInstances $userInstances)
+    public function edit(UserInstance $userInstances)
     {
         //
     }
@@ -157,10 +157,10 @@ class BotInstanceController extends AppController
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\UserInstances  $userInstances
+     * @param  \App\UserInstance  $userInstances
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, UserInstances $userInstances)
+    public function update(Request $request, UserInstance $userInstances)
     {
         //
     }
@@ -168,10 +168,10 @@ class BotInstanceController extends AppController
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\UserInstances  $userInstances
+     * @param  \App\UserInstance  $userInstances
      * @return \Illuminate\Http\Response
      */
-    public function destroy(UserInstances $userInstances)
+    public function destroy(UserInstance $userInstances)
     {
         //
     }
@@ -179,7 +179,7 @@ class BotInstanceController extends AppController
 
     public function storeBotIdInSession(Request $request)
     {
-        $userInstance = new UserInstances();
+        $userInstance = new UserInstance();
         $userInstance->user_id = $request->user_id;
         $userInstance->bot_id = $request->bot_id;
         if($userInstance->save()){
@@ -204,7 +204,7 @@ class BotInstanceController extends AppController
     {
         $instance_ids = array();
         $user = $request->user();
-        $userInstances = UserInstances::select('bot_id', 'id as instance_id', 'user_id')->where('user_id', $user->id)
+        $userInstances = UserInstance::select('bot_id', 'id as instance_id', 'user_id')->where('user_id', $user->id)
             ->where('is_in_queue','=',1)
             ->get();
         foreach ($userInstances as $value) {

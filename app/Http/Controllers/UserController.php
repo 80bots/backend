@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\User\TimezoneCollection;
 use App\SubscriptionPlan;
 use App\Timezone;
 use App\User;
@@ -9,6 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class UserController extends AppController
 {
@@ -105,5 +107,17 @@ class UserController extends AppController
         $user->save();
 
         return redirect()->back();
+    }
+
+    /**
+     * @return TimezoneCollection|\Illuminate\Http\JsonResponse
+     */
+    public function getTimezones()
+    {
+        try {
+            return new TimezoneCollection(Timezone::get());
+        } catch (Throwable $throwable) {
+            return $this->error(__('user.server_error'), $throwable->getMessage());
+        }
     }
 }

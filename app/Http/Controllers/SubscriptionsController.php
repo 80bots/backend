@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\SubscriptionPlan;
 use Illuminate\Support\Facades\Auth;
 
-class SubscriptionController extends Controller
+class SubscriptionsController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -28,7 +28,7 @@ class SubscriptionController extends Controller
             'plans' => $plans,
             'user' => $user,
             'subscription_ended' => $subscription_ended,
-            'activeplan' => $activeplan 
+            'activeplan' => $activeplan
         ]);
     }
 

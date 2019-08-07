@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Bot;
-use App\Http\Resources\BotCollection;
+use App\Http\Resources\User\BotCollection;
 use Illuminate\Http\Request;
 use Throwable;
 
-class BotController extends Controller
+class BotsController extends Controller
 {
     const PAGINATE = 1;
 
@@ -22,7 +22,7 @@ class BotController extends Controller
             return new BotCollection($resource->paginate(self::PAGINATE));
 
         } catch (Throwable $throwable) {
-            return $this->forbidden(__('auth.forbidden'), $throwable->getMessage());
+            return $this->error(__('auth.forbidden'), $throwable->getMessage());
         }
     }
 }

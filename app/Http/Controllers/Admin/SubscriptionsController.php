@@ -7,7 +7,7 @@ use App\SubscriptionPlan;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
-class SubscriptionController extends AppController
+class SubscriptionsController extends AppController
 {
     /**
      * Display a listing of the resource.

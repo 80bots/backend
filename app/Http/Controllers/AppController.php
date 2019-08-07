@@ -6,8 +6,9 @@ use App\Helpers\CommonHelper;
 use App\Jobs\StoreUserInstance;
 use App\Services\Aws;
 use App\User;
-use App\UserInstances;
+use App\UserInstance;
 use App\UserInstancesDetails;
+use Aws\Result;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -32,7 +33,7 @@ class AppController extends Controller
      */
     protected function storeBotIdInSession(Request $request)
     {
-        $userInstance = new UserInstances;
+        $userInstance = new UserInstance;
         $userInstance->fill([
             'user_id'   => $request->input('user_id'),
             'bot_id'    => $request->input('bot_id'),
@@ -52,7 +53,7 @@ class AppController extends Controller
      */
     protected function checkBotIdInQueue(Request $request)
     {
-        $instanceIds = UserInstances::select('id')
+        $instanceIds = UserInstance::select('id')
             ->where('user_id', Auth::id())
             ->where('is_in_queue', '=', 1)
             ->pluck('id')->toArray();
@@ -73,74 +74,49 @@ class AppController extends Controller
      */
     protected function changeStatus(Request $request)
     {
-        try{
+        try {
 
-            $instanceObj = UserInstances::find($request->input('id'));
+            $instance = $this->getInstanceWithCheckUser($request->input('id'));
 
-            if (empty($instanceObj)) {
-                session()->flash('error', 'This user instance does not exist');
-                return response()->json([
-                    'error'     => true,
-                    'message'   => 'This user instance does not exist'
-                ]);
+            if (empty($instance)) {
+                return $this->notFound(__('keywords.not_found'), __('keywords.instance.not_exist'));
             }
 
-            $aws = new Aws;
+            $currentDate    = Carbon::now()->toDateTimeString();
+            $aws            = new Aws;
 
-            $currentDate = Carbon::now()->toDateTimeString();
-
-            $describeInstancesResponse = $aws->describeInstances([$instanceObj->aws_instance_id]);
+            $describeInstancesResponse = $aws->describeInstances([$instance->aws_instance_id ?? null]);
 
             if (! $describeInstancesResponse->hasKey('Reservations')) {
-                return response()->json([
-                    'error'     => true,
-                    'message'   => ''
-                ]);
+                return $this->error(__('admin.server_error'), __('keywords.aws.error'));
             }
 
-            $reservationObj = $describeInstancesResponse->get('Reservations');
-
-            if(empty($reservationObj)){
-                $instanceObj->fill(['status' => 'terminated']);
-                $instanceObj->save();
-                session()->flash('error', 'This instance does not exist');
-                return response()->json([
-                    'error'     => true,
-                    'message'   => 'This instance does not exist'
-                ]);
-            }
-
-            $instanceStatus = $reservationObj[0]['Instances'][0]['State']['Name'];
-
-            if ($instanceStatus === 'terminated') {
-                $instanceObj->fill(['status' => 'terminated']);
-                $instanceObj->save();
-                session()->flash('error', 'This instance is already terminated');
-                return response()->json([
-                    'error'     => true,
-                    'message'   => 'This instance is already terminated'
-                ]);
+            if ($this->checkTerminatedStatus($describeInstancesResponse)) {
+                $instance->update(['status' => UserInstance::STATUS_TERMINATED]);
+                return $this->notFound(__('keywords.not_found'), __('keywords.instance.not_exist'));
             }
 
             switch ($request->input('status')) {
 
                 case 'start':
 
-                    $instanceObj->fill(['status' => 'running']);
+                    $instance->fill(['status' => UserInstance::STATUS_RUNNING]);
 
-                    $aws->startInstance([$instanceObj->aws_instance_id]);
+                    // TODO: Check result
+                    $aws->startInstance([$instance->aws_instance_id ?? null]);
 
                     UserInstancesDetails::create([
-                        'user_instance_id' => $instanceObj->id,
-                        'start_time' => $currentDate
+                        'user_instance_id'  => $instance->id ?? null,
+                        'start_time'        => $currentDate
                     ]);
 
                     break;
                 case 'stop':
 
-                    $instanceObj->fill(['status' => 'stop']);
+                    $instance->fill(['status' => UserInstance::STATUS_STOP]);
 
-                    $aws->stopInstance([$instanceObj->aws_instance_id]);
+                    // TODO: Check result
+                    $aws->stopInstance([$instance->aws_instance_id ?? null]);
 
                     $instanceDetail = UserInstancesDetails::where('user_instance_id', '=', $request->input('id'))
                         ->latest()
@@ -154,43 +130,44 @@ class AppController extends Controller
                     ]);
 
                     if ($instanceDetail->save()) {
-                        if($diffTime > $instanceObj->cron_up_time){
-                            $instanceObj->cron_up_time = 0;
-                            $tempUpTime = !empty($instanceObj->temp_up_time) ? $instanceObj->temp_up_time: 0;
+                        if($diffTime > $instance->cron_up_time){
+                            $instance->cron_up_time = 0;
+                            $tempUpTime = !empty($instance->temp_up_time) ? $instance->temp_up_time: 0;
                             $upTime = $diffTime + $tempUpTime;
-                            $instanceObj->temp_up_time = $upTime;
-                            $instanceObj->up_time = $upTime;
-                            $instanceObj->used_credit = CommonHelper::calculateUsedCredit($upTime);
+                            $instance->temp_up_time = $upTime;
+                            $instance->up_time = $upTime;
+                            $instance->used_credit = CommonHelper::calculateUsedCredit($upTime);
                         }
                     }
 
                     break;
                 default:
-                    $instanceObj->fill(['status' => 'terminated']);
-                    $aws->terminateInstance([$instanceObj->aws_instance_id]);
+                    $instance->fill(['status' => UserInstance::STATUS_TERMINATED]);
+                    // TODO: Check result
+                    $aws->terminateInstance([$instance->aws_instance_id]);
                     break;
             }
 
-            if($instanceObj->save()){
-                session()->flash('success', "Instance {$request->input('status')} successfully!");
-                return response()->json([
-                    'error'     => false,
-                    'message'   => "Instance {$request->input('status')} successfully!"
-                ]);
+            if($instance->save()){
+                return $this->success(
+                    [
+                        'id' => $instance->id ?? null
+                    ],
+                    __('keywords.instance.change_success', [
+                        'status' => $request->input('status')
+                    ])
+                );
             }
 
-            session()->flash('error', "Instance {$request->input('status')} not successfully!");
-            return response()->json([
-                'error'     => true,
-                'message'   => "Instance {$request->input('status')} not successfully!"
-            ]);
+            return $this->error(
+                [],
+                __('keywords.instance.change_not_success', [
+                    'status' => $request->input('status')
+                ])
+            );
 
         } catch (Throwable $throwable){
-            session()->flash('error', $throwable->getMessage());
-            return response()->json([
-                'error'     => true,
-                'message'   => $throwable->getMessage()
-            ]);
+            return $this->error(__('admin.server_error'), $throwable->getMessage());
         }
     }
 
@@ -208,6 +185,34 @@ class AppController extends Controller
             }
         } else {
             return redirect(route('login'))->with('error', 'Unauthorized');
+        }
+    }
+
+    /**
+     * @param Result $describeInstancesResponse
+     * @return bool
+     */
+    private function checkTerminatedStatus(Result $describeInstancesResponse): bool
+    {
+        $reservationObj = $describeInstancesResponse->get('Reservations');
+        return empty($reservationObj) || $reservationObj[0]['Instances'][0]['State']['Name'] === 'terminated';
+    }
+
+    /**
+     * @param string|null $id
+     * @return UserInstance|null
+     */
+    private function getInstanceWithCheckUser(?string $id): ?UserInstance
+    {
+        if (Auth::user()->isAdmin()) {
+            return UserInstance::find($id);
+        } elseif (Auth::user()->isUser()) {
+            return UserInstance::where([
+                ['id', '=', $id],
+                ['user_id', '=', Auth::id()]
+            ])->first();
+        } else {
+            return null;
         }
     }
 }

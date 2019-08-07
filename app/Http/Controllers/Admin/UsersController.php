@@ -3,32 +3,44 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\AppController;
+use App\Http\Resources\Admin\UserCollection;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use Exception;
 use Illuminate\Support\Facades\Auth;
+use Throwable;
 
-class UserController extends AppController
+class UsersController extends AppController
 {
+    const PAGINATE = 1;
+
     /**
      * Display a listing of the resource.
      *
-     * @return View
+     * @param Request $request
+     * @return UserCollection
      */
-    public function index()
+    public function index(Request $request)
     {
-        try{
-            $userListObj = User::where('role_id', 2)->get();
-            if(!$userListObj->isEmpty()){
-                return view('admin.user.index',compact('userListObj'));
-            } else {
-                session()->flash('error', 'User Not Found');
-                return view('admin.user.index');
+        try {
+
+            $resource = User::ajax();
+
+            // TODO: Add Filters
+
+            switch ($request->input('role')) {
+                case 'users':
+                    $resource->onlyUsers();
+                    break;
+                case 'admins':
+                    $resource->onlyAdmins();
+                    break;
             }
-        } catch (Exception $exception){
-            session()->flash('error', $exception->getMessage());
-            return view('admin.user.index');
+
+            return new UserCollection($resource->paginate(self::PAGINATE));
+
+        } catch (Throwable $throwable) {
+            return $this->error(__('admin.server_error'), $throwable->getMessage());
         }
     }
 
@@ -98,7 +110,8 @@ class UserController extends AppController
         //
     }
 
-    public function changeStatus(Request $request){
+    public function changeStatus(Request $request)
+    {
         try{
             $userObj = User::find($request->id);
             $userObj->status = $request->status;

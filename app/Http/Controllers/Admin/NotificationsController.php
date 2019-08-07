@@ -7,7 +7,7 @@ use App\Http\Controllers\AppController;
 use Exception;
 use Illuminate\Http\Request;
 
-class NotificationController extends AppController
+class NotificationsController extends AppController
 {
 
 	public function index(){

@@ -6,7 +6,7 @@ use App\Helpers\CommonHelper;
 use App\Helpers\InstanceHelper;
 use App\SchedulingInstance;
 use App\Services\Aws;
-use App\UserInstances;
+use App\UserInstance;
 use App\UserInstancesDetails;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -89,7 +89,7 @@ class InstanceStopScheduling extends Command
 
                     if ($currentState['Name'] == 'stopped' || $currentState['Name'] == 'stopping') {
 
-                        $userInstance = UserInstances::findByInstanceId($instanceId)->first();
+                        $userInstance = UserInstance::findByInstanceId($instanceId)->first();
                         $userInstance->status = 'stop';
 
                         $instanceDetail = UserInstancesDetails::where([

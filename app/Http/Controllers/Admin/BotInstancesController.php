@@ -4,44 +4,48 @@ namespace App\Http\Controllers\Admin;
 
 use App\Bot;
 use App\Http\Controllers\AppController;
-use App\Jobs\StoreUserInstance;
+use App\Http\Resources\Admin\UserInstanceCollection;
 use App\Services\Aws;
 use App\User;
-use App\UserInstances;
-use App\UserInstancesDetails;
+use App\UserInstance;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Session;
+use Throwable;
 
-class BotInstanceController extends AppController
+class BotInstancesController extends AppController
 {
+    const PAGINATE = 1;
+
     /**
      * Display a listing of the resource.
-     *
      * @param Request $request
-     * @param string $status
-     * @param null $userId
-     * @return \Illuminate\Http\Response
+     * @return UserInstanceCollection|\Illuminate\Http\JsonResponse
      */
     public function index(Request $request)
     {
-        Session::forget('error');
+        try {
 
-        switch ($request->input('list')) {
-            case 'my_bots':
-                $userInstances = UserInstances::with('user')->findByUserId(Auth::id())->get();
-                break;
-            default:
-                $userInstances = UserInstances::with('user')->get();
-                break;
+            $resource = UserInstance::ajax();
+
+            // TODO: Add Filters
+
+            switch ($request->input('list')) {
+                case 'my_bots':
+                    $resource->with('user')->findByUserId(Auth::id());
+                    break;
+                default:
+                    $resource->with('user');
+                    break;
+            }
+
+            return new UserInstanceCollection($resource->paginate(self::PAGINATE));
+
+        } catch (Throwable $throwable) {
+            return $this->error(__('admin.server_error'), $throwable->getMessage());
         }
-
-        $filters = $request->all();
-
-        return view('admin.bots.running.index', compact('userInstances', 'filters'));
     }
 
     /**
@@ -153,7 +157,7 @@ class BotInstanceController extends AppController
                 $instance['bot_id'] = $bot->id;
               }
 
-              $userInstance = UserInstances::where('aws_instance_id' , $instance['aws_instance_id'])->first();
+              $userInstance = UserInstance::where('aws_instance_id' , $instance['aws_instance_id'])->first();
 
               if($status == 'stopped') {
                   $status = 'stop';
@@ -168,7 +172,7 @@ class BotInstanceController extends AppController
                   if($status == 'running') {
                     $instance['is_in_queue']  = 0;
                   }
-                  $userInstance = UserInstances::updateOrCreate([
+                  $userInstance = UserInstance::updateOrCreate([
                     'aws_instance_id' => $instance['aws_instance_id']
                   ], $instance);
                 } else {
@@ -189,14 +193,14 @@ class BotInstanceController extends AppController
             }
           }
 
-          UserInstances::where(function($query) use($awsInstancesIn) {
+          UserInstance::where(function($query) use($awsInstancesIn) {
                           $query->whereNotIn('aws_instance_id', $awsInstancesIn)
                           ->orWhere('aws_instance_id', null)
                           ->orWhere('status', 'terminated');
                         })->whereNotIn('status', ['start', 'stop'])
                         ->delete();
 
-          UserInstances::where(function($query) {
+          UserInstance::where(function($query) {
                           $query->where('is_in_queue', 1)
                           ->orWhereIn('status', ['start', 'stop']);
                         })->where('updated_at', '<' , Carbon::now()->subMinutes(10)->toDateTimeString())
