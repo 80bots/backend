@@ -2,6 +2,7 @@
 
 namespace App;
 
+use DevDojo\Chatter\Models\Models;
 use Illuminate\Database\Eloquent\Model;
 
 class DiscussionDislikes extends Model
@@ -12,11 +13,24 @@ class DiscussionDislikes extends Model
         'discussion_id'
     ];
 
-    public function user() {
-        return $this->belongsTo('App\User','user_id');
+    /**
+     * Creation of an object for further applying with filters
+     *
+     * @param $query
+     * @return mixed
+     */
+    public function scopeAjax($query)
+    {
+        return $query;
     }
 
-    public function discussion() {
-        return $this->belongsTo('DevDojo\Chatter\Models','discussion_id');
+    public function user()
+    {
+        return $this->belongsTo(User::class,'user_id');
+    }
+
+    public function discussion()
+    {
+        return $this->belongsTo(Models::class,'discussion_id');
     }
 }

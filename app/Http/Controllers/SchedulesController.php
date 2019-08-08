@@ -3,12 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\User\ScheduleCollection;
+use App\Http\Resources\User\ScheduleResource;
+use App\Http\Resources\User\UserInstanceCollection;
 use App\SchedulingInstance;
 use App\SchedulingInstancesDetails;
 use App\UserInstance;
 use Carbon\Carbon;
 use DateTime;
 use DateTimeZone;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -29,18 +33,18 @@ class SchedulesController extends Controller
             return new ScheduleCollection($resource->paginate(self::PAGINATE));
 
         } catch (Throwable $throwable) {
-            return $this->error(__('auth.forbidden'), $throwable->getMessage());
+            return $this->error(__('user.server_error'), $throwable->getMessage());
         }
     }
 
     public function create()
     {
         try {
-            $instances = UserInstance::where(['status' => 'stop','user_id'=> Auth::id()])->get();
-            return view('user.scheduling.create', compact('instances'));
+            // TODO: status stop ?????
+            $resource = UserInstance::where(['status' => 'stop','user_id'=> Auth::id()]);
+            return new UserInstanceCollection($resource->paginate(self::PAGINATE));
         } catch (Throwable $throwable) {
-            session()->flash('error', $throwable->getMessage());
-            return redirect(route('scheduling.index'));
+            return $this->error(__('user.server_error'), $throwable->getMessage());
         }
     }
 
@@ -55,55 +59,31 @@ class SchedulesController extends Controller
         }
     }
 
-    public function convertTimeToUserZone(Request $request)
-    {
-        $format = 'h:i A';
-        if(is_null($request->str) || empty($str) || $request->str === "null"){
-            return '';
-        }
-        $new_str = new DateTime($request->str, new DateTimeZone('UTC'));
-        $new_str->setTimeZone(new DateTimeZone($request->timeZone));
-        return $new_str->format($format);
-    }
-
-    public function deleteSchedulerDetails(Request $request)
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function deleteSchedulerDetails(Request $request): JsonResponse
     {
         if (! empty($request->input('ids'))) {
-            try {
-                SchedulingInstancesDetails::destroy($request->input('ids'));
-                $return['status'] = 'true';
-                $return['message'] = 'Delete Successfully';
-                return json_encode($return);
-            }
-            catch(\Exception $e) {
-                $return['status'] = 'false';
-                $return['message'] = 'Please try again';
-                return json_encode($return);
-            }
-        } else {
-            $return['status'] = 'false';
-            $return['message'] = 'No Ids Found';
-            return json_encode($return);
-        }
-    }
 
-    public function checkScheduled($id)
-    {
-        try {
-            $scheduleInstanceObj = SchedulingInstance::findByUserInstanceId($id, Auth::id())->first();
-            if (! empty($scheduleInstanceObj)) {
-                $scheduleInstanceObj = $scheduleInstanceObj->toArray();
-                $return['status'] = 'true';
-                $return['data'] = $scheduleInstanceObj;
-            } else {
-                $return['status'] = 'false';
-                $return['data'] = $scheduleInstanceObj;
+            try {
+
+                $count = SchedulingInstancesDetails::whereHas('schedulingInstance', function (Builder $query) {
+                    $query->where('user_id', '=', Auth::id());
+                })->whereIn('id', $request->input('ids'))->delete();
+
+                if ($count) {
+                    return $this->success();
+                }
+
+                return $this->error(__('user.error'), __('user.delete_error'));
+            } catch(Throwable $throwable) {
+                return $this->error(__('user.server_error'), $throwable->getMessage());
             }
-            return json_encode($return);
-        } catch (\Exception $e) {
-            $return['status'] = 'false';
-            return $return;
         }
+
+        return $this->error(__('user.error'), __('user.parameters_incorrect'));
     }
 
     /**
@@ -206,7 +186,23 @@ class SchedulesController extends Controller
      */
     public function show($id)
     {
+        if (! empty($id)) {
+            try {
 
+                $scheduleInstance = SchedulingInstance::findByUserInstanceId($id, Auth::id())->first();
+
+                if (! empty($scheduleInstance)) {
+                    return $this->success($scheduleInstance);
+                }
+
+                return $this->notFound(__('user.not_found'), __('user.not_found'));
+
+            } catch (Throwable $throwable) {
+                return $this->error(__('user.server_error'), $throwable->getMessage());
+            }
+        }
+
+        return $this->error(__('user.error'), __('user.parameters_incorrect'));
     }
 
     /**
@@ -217,14 +213,26 @@ class SchedulesController extends Controller
      */
     public function edit($id)
     {
-        try{
-            $instances = UserInstance::where(['status' => 'stop','user_id'=> Auth::id()])->get();
-            $scheduling = SchedulingInstance::with('userInstances')->find($id);
-            return view('user.scheduling.edit', compact('scheduling','instances' ,'id'));
-        } catch (Throwable $throwable){
-            session()->flash('error', $throwable->getMessage());
-            return redirect()->back();
+        if (! empty($id)) {
+
+            try {
+
+                // TODO: ????
+                $instances = UserInstance::where(['status' => 'stop', 'user_id' => Auth::id()])->get();
+
+                $resource = new ScheduleResource(SchedulingInstance::with('userInstance')->find($id));
+
+                return $this->success([
+                    'instances'     => $instances,
+                    'scheduling'    => $resource->response()->getData(),
+                ]);
+
+            } catch (Throwable $throwable) {
+                return $this->error(__('user.server_error'), $throwable->getMessage());
+            }
         }
+
+        return $this->error(__('user.error'), __('user.parameters_incorrect'));
     }
 
     /**

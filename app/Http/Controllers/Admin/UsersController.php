@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\MailHelper;
 use App\Http\Controllers\AppController;
 use App\Http\Resources\Admin\UserCollection;
 use App\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -128,24 +130,33 @@ class UsersController extends AppController
         }
     }
 
-    public function updateCredit(Request $request){
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function updateCredit(Request $request): JsonResponse
+    {
         try{
-            $userObj = User::find($request->id);
-//            $total_credit = $userObj->remaining_credits + $request->remaining_credits;
-            $userObj->remaining_credits = $request->remaining_credits;
-            $userObj->temp_remaining_credits = $request->remaining_credits;
-            if ($userObj->save()) {
-                $User = new User;
-                $dataResult = $User->updateUserCreditSendEmail($userObj);
 
-                session()->flash('success', 'Credit Add Successfully');
-                return redirect()->back();
+            if (! empty($request->input('credits')) && ! empty($request->input('id'))) {
+                $update = User::where('id', '=', $request->input('id'))
+                    ->update([
+                        'remaining_credits'         => $request->input('credits'),
+                        'temp_remaining_credits'    => $request->input('credits'),
+                    ]);
+
+                if (! empty($update)) {
+                    MailHelper::updateUserCreditSendEmail(User::find($request->input('id')));
+                    return $this->success([], __('admin.users.credit_added_success'));
+                }
+
+                return $this->error([], __('admin.users.credit_added_error'));
             }
-            session()->flash('error', 'Credit Add Fail Please Try Again');
-            return redirect()->back();
-        } catch (\Exception $exception){
-            session()->flash('error', $exception->getMessage());
-            return redirect()->back();
+
+            return $this->error([], __('admin.parameters_incorrect'));
+
+        } catch (Throwable $throwable){
+            return $this->error(__('admin.server_error'), $throwable->getMessage());
         }
     }
 }

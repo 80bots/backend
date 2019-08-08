@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'prcing_plans' => 'Subscription Plans',
+    'pricing_plans' => 'Subscription Plans',
     'credits' => [
         'singular' => 'Credit',
         'plural' => 'Credits',
@@ -83,24 +83,28 @@ return [
         'days' => 'Days',
         'time' => 'Scheduled Time',
         'statuses' => [
-            'active' => 'Active',
-            'inactive' => 'Inactive'
+            'active'    => 'Active',
+            'inactive'  => 'Inactive'
         ]
     ],
     'user' => [
         'statuses' => [
-            'active' => 'Active',
-            'inactive' => 'Inactive'
+            'active'    => 'Active',
+            'inactive'  => 'Inactive'
         ]
     ],
     'instance' => [
-        'not_exist' => 'This instance does not exist',
-        'already_terminated' => 'This instance is already terminated',
-        'change_not_success' => 'Instance :status not successfully!',
-        'change_success' => 'Instance :status successfully!'
+        'not_exist'             => 'This instance does not exist',
+        'already_terminated'    => 'This instance is already terminated',
+        'change_not_success'    => 'Instance :status not successfully!',
+        'change_success'        => 'Instance :status successfully!',
+        'launch_success'        => 'Instance launched successfully!',
+        'launch_error'          => 'Instance launch failed!'
     ],
     'aws' => [
         'error' => 'Aws error'
     ],
-    'not_found' => 'Not found!',
+    'not_found'     => 'Not found!',
+    'server_error'  => 'Server error',
+    'error'         => 'Error',
 ];

@@ -2,11 +2,15 @@
 
 namespace App\Helpers;
 
+use App\Bot;
 use App\InstanceSessionsHistory;
 use App\SchedulingInstancesDetails;
+use App\User;
+use App\UserInstance;
 use Carbon\Carbon;
 use Carbon\CarbonTimeZone;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Log;
 
 class InstanceHelper
 {
@@ -89,5 +93,92 @@ class InstanceHelper
                 'created_at'    => $object->created_at->format('Y-m-d H:m:i') ?? '',
             ];
         })->toArray();
+    }
+
+    /**
+     * @param array $instancesByStatus
+     */
+    public static function syncInstances(array $instancesByStatus): void
+    {
+        $awsInstancesIn = collect($instancesByStatus)->collapse()->map(function ($item, $key) {
+            return $item['aws_instance_id'];
+        })->toArray();
+
+        foreach ($instancesByStatus as $status => $instances) {
+            foreach ($instances as $key => $instance) {
+                $bot = Bot::where('aws_ami_image_id', $instance['aws_ami_id'])->first();
+
+                if (! empty($bot)) {
+                    $instance['bot_id'] = $bot->id;
+                }
+
+                if ($status === 'stopped' || $status === 'stopping') {
+                    $status = 'stop';
+                }
+
+                $userInstance = UserInstance::where('aws_instance_id' , $instance['aws_instance_id'])->first();
+
+                if (! empty($userInstance)) {
+
+                    $fill = [
+                        'status'            => $status,
+                        'tag_name'          => $instance['tag_name'] ?? '',
+                        'tag_user_email'    => $instance['tag_user_email'] ?? '',
+                    ];
+
+                    if($status === 'running') {
+                        $fill['is_in_queue'] = 0;
+                    }
+
+                    $userInstance->fill($fill);
+                    $userInstance->save();
+
+                } else {
+
+                    Log::info($instance['aws_instance_id'] . ' has not been recorded while launch or manually launched from the aws');
+
+                    $admin = User::onlyAdmins()->first();
+
+                    if (! empty($admin)) {
+
+                        $instance['user_id']      = $admin->id;
+                        $instance['status']       = $status;
+                        if($status == 'running') {
+                            $instance['is_in_queue']  = 0;
+                        }
+
+                        $userInstance = UserInstance::updateOrCreate([
+                            'aws_instance_id' => $instance['aws_instance_id']
+                        ], $instance);
+
+                    } else {
+                        Log::info($instance['aws_instance_id'] . ' cannot be synced');
+                    }
+                }
+            }
+        }
+
+        self::deleteUserInstances($awsInstancesIn);
+
+        Log::info('Synced completed at ' . date('Y-m-d h:i:s'));
+    }
+
+    /**
+     * @param array $awsInstancesIn
+     */
+    public static function deleteUserInstances(array $awsInstancesIn): void
+    {
+        UserInstance::where(function($query) use($awsInstancesIn) {
+            $query->whereNotIn('aws_instance_id', $awsInstancesIn)
+                ->orWhere('aws_instance_id', null)
+                ->orWhere('status', 'terminated');
+        })->whereNotIn('status', ['start', 'stop'])
+            ->delete();
+
+        UserInstance::where(function($query) {
+            $query->where('is_in_queue', 1)
+                ->orWhereIn('status', ['start', 'stop']);
+        })->where('updated_at', '<' , Carbon::now()->subMinutes(10)->toDateTimeString())
+            ->delete();
     }
 }

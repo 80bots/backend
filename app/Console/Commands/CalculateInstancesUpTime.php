@@ -54,9 +54,9 @@ class CalculateInstancesUpTime extends Command
 
         foreach ($users as $user) {
 
-            if (! empty($user->userInstances)) {
+            if (! empty($user->instances)) {
 
-                foreach ($user->userInstances as $instance) {
+                foreach ($user->instances as $instance) {
 
                     if ($instance->status === 'running') {
 

@@ -26,45 +26,32 @@ class AppController extends Controller
     }
 
     /**
-     * store bot_id in session
+     * Launch EC2 Instance
      *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    protected function storeBotIdInSession(Request $request)
+    protected function launchInstance(Request $request)
     {
-        $userInstance = new UserInstance;
-        $userInstance->fill([
-            'user_id'   => $request->input('user_id'),
-            'bot_id'    => $request->input('bot_id'),
-        ]);
-        if($userInstance->save()){
-            Log::debug('IN-queued Instance : '.json_encode($userInstance));
-            Session::put('instance_id', $userInstance->id ?? null);
-            return response()->json(['type' => 'success', 'data' => $userInstance->id ?? null],200);
+        try {
+
+            $instance = UserInstance::create([
+                'user_id'   => Auth::id(),
+                'bot_id'    => $request->input('bot_id'),
+            ]);
+
+            if (! empty($instance)) {
+                dispatch(new StoreUserInstance($instance->id ?? null, Auth::user()));
+                return $this->success([
+                    'instance_id' => $instance->id ?? null
+                ], __('keywords.instance.launch_success'));
+            }
+
+            return $this->error(__('keywords.error'), __('keywords.instance.launch_error'));
+
+        } catch (Throwable $throwable) {
+            return $this->error(__('keywords.server_error'), $throwable->getMessage());
         }
-
-        return response()->json(['type' => 'error','data' => ''],200);
-    }
-
-    /**
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    protected function checkBotIdInQueue(Request $request)
-    {
-        $instanceIds = UserInstance::select('id')
-            ->where('user_id', Auth::id())
-            ->where('is_in_queue', '=', 1)
-            ->pluck('id')->toArray();
-
-        $instanceIds = array_unique($instanceIds);
-
-        foreach($instanceIds as $instanceId) {
-            dispatch(new StoreUserInstance($instanceId, Auth::user()));
-        }
-
-        return response()->json(['type' => 'success', 'data' => $instanceIds], 200);
     }
 
     /**
@@ -125,18 +112,19 @@ class AppController extends Controller
                     $diffTime = CommonHelper::diffTimeInMinutes($instanceDetail->start_time, $currentDate);
 
                     $instanceDetail->fill([
-                        'end_time' => $currentDate,
-                        'total_time' => $diffTime
+                        'end_time'      => $currentDate,
+                        'total_time'    => $diffTime
                     ]);
 
                     if ($instanceDetail->save()) {
-                        if($diffTime > $instance->cron_up_time){
-                            $instance->cron_up_time = 0;
-                            $tempUpTime = !empty($instance->temp_up_time) ? $instance->temp_up_time: 0;
-                            $upTime = $diffTime + $tempUpTime;
-                            $instance->temp_up_time = $upTime;
-                            $instance->up_time = $upTime;
-                            $instance->used_credit = CommonHelper::calculateUsedCredit($upTime);
+                        if($diffTime > ($instance->cron_up_time ?? 0)){
+                            $upTime = $diffTime + ($instance->temp_up_time ?? 0);
+                            $instance->fill([
+                                'cron_up_time'  => 0,
+                                'temp_up_time'  => $upTime,
+                                'up_time'       => $upTime,
+                                'used_credit'   => CommonHelper::calculateUsedCredit($upTime)
+                            ]);
                         }
                     }
 
@@ -144,7 +132,7 @@ class AppController extends Controller
                 default:
                     $instance->fill(['status' => UserInstance::STATUS_TERMINATED]);
                     // TODO: Check result
-                    $aws->terminateInstance([$instance->aws_instance_id]);
+                    $aws->terminateInstance([$instance->aws_instance_id ?? null]);
                     break;
             }
 
@@ -160,7 +148,7 @@ class AppController extends Controller
             }
 
             return $this->error(
-                [],
+                __('keywords.error'),
                 __('keywords.instance.change_not_success', [
                     'status' => $request->input('status')
                 ])

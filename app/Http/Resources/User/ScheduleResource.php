@@ -15,9 +15,19 @@ class ScheduleResource extends JsonResource
      */
     public function toArray($request)
     {
+        $instance = $this->userInstance ?? null;
+
+        if (! empty($instance)) {
+            $instance = collect($instance->toArray())
+                ->only([
+                    'id', 'tag_name', 'aws_instance_id'
+                ])
+                ->toArray();
+        }
+
         return [
             'id'        => $this->id ?? '',
-            'name'      => $this->name ?? '',
+            'instance'  => $instance,
             'details'   => InstanceHelper::getSchedulingDetails($this->details ?? null),
             'status'    => $this->status ?? null,
         ];

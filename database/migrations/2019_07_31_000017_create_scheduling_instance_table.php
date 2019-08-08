@@ -17,7 +17,7 @@ class CreateSchedulingInstanceTable extends Migration
         Schema::create('scheduling_instances', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedInteger('user_id');
-            $table->unsignedBigInteger('user_instances_id');
+            $table->unsignedBigInteger('user_instance_id');
             $table->enum('status', ['active', 'inactive']);
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'));
@@ -27,7 +27,7 @@ class CreateSchedulingInstanceTable extends Migration
                 ->references('id')->on('users')
                 ->onUpdate('cascade')->onDelete('cascade');
 
-            $table->foreign('user_instances_id')
+            $table->foreign('user_instance_id')
                 ->references('id')->on('user_instances')
                 ->onUpdate('cascade')->onDelete('cascade');
         });

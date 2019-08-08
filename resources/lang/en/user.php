@@ -14,7 +14,9 @@ return [
         'active_plan' => 'Active Plan',
         'my_timezone' => 'My Timezone',
         'timezone' => 'Timezone',
-        'select_timezone' => 'Select Timezone'
+        'select_timezone' => 'Select Timezone',
+        'update_timezone_success' => 'Timezone update was successful',
+        'update_timezone_error' => 'Timezone update failed',
     ],
     'bots' => [
         'title' => 'Bots List',
@@ -52,5 +54,10 @@ return [
         'view_bot' => 'View Bot',
         'create_scheduler' => 'Create Scheduler For'
     ],
-    'server_error' => 'Server error'
+    'server_error' => 'Server error',
+    'error' => 'Error',
+    'parameters_incorrect' => 'Passed parameters are incorrect',
+    'delete_error' => '',
+    'delete_success' => '',
+    'not_found' => 'Not found',
 ];

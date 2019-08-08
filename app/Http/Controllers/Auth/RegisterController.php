@@ -2,16 +2,15 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Mail\register;
-use App\User;
+use App\Helpers\MailHelper;
 use App\Http\Controllers\Controller;
+use App\Role;
+use App\User;
 use Illuminate\Auth\Events\Registered;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class RegisterController extends Controller
 {
@@ -22,7 +21,6 @@ class RegisterController extends Controller
      *
      * @var string
      */
-
     protected function redirectTo(){
         return '/login';
     }
@@ -59,18 +57,21 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-        $user = new User();
-        $user->name = $data['email'];
-        $user->email = $data['email'];
-        $user->password = bcrypt($data['password']);
-        $user->timezone = $data['timezone'];
-        $user->verification_token = str_random();
-        $user->role_id = 2;
-        $user->remaining_credits = 8;
-        $user->temp_remaining_credits = 8;
-        if($user->save()){
-           $sendMail = $user->welcomeEmail($user);
+        $user = User::create([
+            'name'                      => $data['name'] ?? '',
+            'email'                     => $data['email'],
+            'password'                  => bcrypt($data['password']),
+            'timezone'                  => $data['timezone'] ?? '',
+            'verification_token'        => Str::random(16),
+            'role_id'                   => Role::getUserRole()->id ?? null,
+            'remaining_credits'         => config('auth.register.remaining_credits'),
+            'temp_remaining_credits'    => config('auth.register.remaining_credits'),
+        ]);
+
+        if (! empty($user)) {
+            MailHelper::welcomeEmail($user);
         }
+
         return $user;
     }
 
@@ -78,11 +79,11 @@ class RegisterController extends Controller
     {
         $this->validator($request->all())->validate();
         event(new Registered($user = $this->create($request->all())));
-        if(!$request->wantsJson()) {
+
+        if (! $request->wantsJson()) {
             return redirect($this->redirectPath())->with('success', 'Please check your Mail for activate your account');
         } else {
             return $this->success(null, __('auth.registered'));
         }
-
     }
 }

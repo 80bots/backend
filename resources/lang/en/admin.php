@@ -21,6 +21,10 @@ return [
         'not_updated' => 'Bot can not updated successfully',
         'not_deleted' => 'Bot can not deleted successfully',
     ],
+    'instances' => [
+        'success_sync' => 'Instances sync was successfully',
+        'error_sync' => 'Instances sync failed',
+    ],
     'scheduling' => [
         'title' => 'Scheduling List',
         'not_found' => 'No scheduling found!',
@@ -66,7 +70,9 @@ return [
         'register_date' => 'Register Date',
         'status' => 'Status',
         'action' => 'Action',
-        'list_all' => 'List Of All Instances'
+        'list_all' => 'List Of All Instances',
+        'credit_added_success' => 'Credits were successfully added to the user ',
+        'credit_added_error' => 'Credits addition to the user failed',
     ],
     'dashboard' => [
         'title' => 'Dashboard',
@@ -75,5 +81,6 @@ return [
     'not_found' => 'Not found',
     'active' => 'Active',
     'inactive' => 'Inactive',
-    'server_error' => 'Server error'
+    'server_error' => 'Server error',
+    'parameters_incorrect' => 'Passed parameters are incorrect',
 ];

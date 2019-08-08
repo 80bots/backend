@@ -31,7 +31,7 @@ class BotInstancesController extends AppController
             return new UserInstanceCollection($resource->paginate(self::PAGINATE));
 
         } catch (Throwable $throwable) {
-            return $this->error(__('auth.forbidden'), $throwable->getMessage());
+            return $this->error(__('keywords.server_error'), $throwable->getMessage());
         }
     }
 
@@ -174,46 +174,5 @@ class BotInstancesController extends AppController
     public function destroy(UserInstance $userInstances)
     {
         //
-    }
-
-
-    public function storeBotIdInSession(Request $request)
-    {
-        $userInstance = new UserInstance();
-        $userInstance->user_id = $request->user_id;
-        $userInstance->bot_id = $request->bot_id;
-        if($userInstance->save()){
-            Log::debug('IN-queued Instance : '.json_encode($userInstance));
-            Session::put('instance_id', $userInstance->id);
-            return response()->json(['type' => 'success','data' => $userInstance->id],200);
-        }
-
-        return response()->json(['type' => 'error','data' => ''],200);
-    }
-
-    /* execute job to store user instance data */
-    public function dispatchLaunchInstance(Request $request)
-    {
-        $user = Auth::user();
-        $result =  dispatch(new StoreUserInstance($request->all(), $user));
-        Session::forget('instance_id');
-        return response()->json(['type' => 'success'],200);
-    }
-
-    public function checkBotIdInQueue(Request $request)
-    {
-        $instance_ids = array();
-        $user = $request->user();
-        $userInstances = UserInstance::select('bot_id', 'id as instance_id', 'user_id')->where('user_id', $user->id)
-            ->where('is_in_queue','=',1)
-            ->get();
-        foreach ($userInstances as $value) {
-            array_push($instance_ids, $value->instance_id);
-        }
-        $instance_ids = array_unique($instance_ids);
-        foreach($instance_ids as $instance_id) {
-            $result = dispatch(new StoreUserInstance($instance_id, $user));
-        }
-        return response()->json(['type' => 'success','data' => $instance_ids],200);
     }
 }

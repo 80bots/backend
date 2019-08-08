@@ -12,14 +12,19 @@ Route::group(['prefix' => 'auth', 'as' => 'auth.', 'namespace' => 'Auth'], funct
 Route::group(['middleware' => ['auth:api']], function() {
 
     Route::group(['prefix' => 'user', 'as' => 'user.'], function() {
-        Route::get('/', 'UserController@index')->name('index');
+        Route::get('/profile', 'UserController@show')->name('profile');
         Route::get('/timezones', 'UserController@getTimezones')->name('timezones');
+        Route::post('/profile/timezone', 'UserController@updateTimezone')->name('profile.timezone');
     });
 
     // User bots
     Route::group(['prefix' => 'bots', 'as' => 'bots.'], function () {
         Route::get('/running', 'BotInstancesController@index')->name('running');
         Route::put('/running/status', 'BotInstancesController@changeStatus')->name('running.update.status');
+    });
+
+    Route::group(['prefix' => 'instances', 'as' => 'instances.'], function () {
+        Route::post('/launch', 'BotInstancesController@launchInstance')->name('launch');
     });
 
     // User scheduling
@@ -36,6 +41,7 @@ Route::group(['middleware' => ['auth:api']], function() {
 Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['auth:api', 'api.admin']], function() {
 
     Route::group(['prefix' => 'users', 'as' => 'user.'], function() {
+        Route::post('/update/credit', 'UsersController@updateCredit')->name('update.credit');
     });
 
     Route::group(['prefix' => 'bots', 'as' => 'bots.'], function () {
@@ -43,7 +49,16 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
         Route::put('/running/status', 'BotInstancesController@changeStatus')->name('running.update.status');
     });
 
+    Route::group(['prefix' => 'instances', 'as' => 'instances.'], function () {
+        Route::post('/launch', 'BotInstancesController@launchInstance')->name('launch');
+        Route::get('/sync', 'BotInstancesController@syncInstances')->name('sync');
+    });
+
     Route::group(['prefix' => 'scheduling', 'as' => 'scheduling.'], function () {
+    });
+
+    Route::group(['prefix' => 'histories', 'as' => 'histories.'], function () {
+        Route::get('/', 'InstanceSessionHistoriesController@index')->name('index');
     });
 
     Route::resources([

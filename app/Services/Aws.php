@@ -33,6 +33,11 @@ class Aws
     protected $s3;
 
     /**
+     * @var array
+     */
+    protected $ignore;
+
+    /**
      * @return void
      */
     public function ec2Connection(): void
@@ -42,6 +47,8 @@ class Aws
             'version'       => config('aws.version', 'latest'),
             'credentials'   => config('aws.credentials'),
         ]);
+
+        $this->ignore = config('aws.instance_ignore');
     }
 
     public function s3Connection(): void
@@ -319,7 +326,7 @@ class Aws
                                 }
                             }
 
-                            if($name && $name == 'SaaS') {
+                            if(! empty($name) && in_array($name, $this->ignore)) {
                                 continue;
                             }
 

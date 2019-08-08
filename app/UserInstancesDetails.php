@@ -21,4 +21,9 @@ class UserInstancesDetails extends Model
         'total_time',
         'status',
     ];
+
+    public function userInstance()
+    {
+        return $this->belongsTo(UserInstance::class);
+    }
 }

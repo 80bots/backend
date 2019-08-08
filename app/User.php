@@ -62,7 +62,7 @@ class User extends Authenticatable
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function userInstances()
+    public function instances()
     {
         return $this->hasMany(UserInstance::class);
     }
@@ -166,8 +166,8 @@ class User extends Authenticatable
     public static function findUserInstances()
     {
         return self::with(['UserSubscriptionPlan' => function($query){
-            return $query->orderBy('id','Desc')->first();
-        }])->whereHas('userInstances')->get();
+            return $query->orderBy('id', 'desc')->first();
+        }])->whereHas('instances')->get();
     }
 
     /**
@@ -181,49 +181,6 @@ class User extends Authenticatable
             return true;
         }
         return false;
-    }
-
-    public function welcomeEmail()
-    {
-        try {
-            Mail::send('mail.register', ['user' => $this], function($mail) use ($user) {
-                $mail->to($this->email, $this->name);
-                $mail->subject('Test Register mail');
-                $mail->from(env('MAIL_FROM_ADDRESS', '80bots@inforca.com'), env('MAIL_FROM_NAME', '80bots'));
-            });
-            return "Success";
-        } catch (Exception $ex) {
-            return "We've got errors!";
-        }
-    }
-
-    public function updateUserCreditSendEmail($user)
-    {
-
-        try {
-            Mail::send('mail.update_user_credit', ['user' => $user], function($mail) use ($user) {
-                $mail->to($user->email, $user->name);
-                $mail->subject('Your account credit is update by admin.');
-                $mail->from(env('MAIL_FROM_ADDRESS', '80bots@inforca.com'), env('MAIL_FROM_NAME', '80bots'));
-            });
-            return "Success";
-        } catch (Exception $ex) {
-            return "We've got errors!";
-        }
-    }
-
-    public static function UserCreditSendEmail($user)
-    {
-        try {
-            Mail::send('mail.user_credit', ['user' => $user], function($mail) use ($user) {
-                $mail->to($user->email, $user->name);
-                $mail->subject('Your credit is low please check your credit.');
-                $mail->from(env('MAIL_FROM_ADDRESS', '80bots@inforca.com'), env('MAIL_FROM_NAME', '80bots'));
-            });
-            return "Success";
-        } catch (Exception $ex) {
-            return "We've got errors!";
-        }
     }
 
 }

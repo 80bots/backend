@@ -10,7 +10,7 @@ class SchedulingInstance extends Model
 
     protected $fillable = [
         'user_id',
-        'user_instances_id',
+        'user_instance_id',
         'status',
     ];
 
@@ -30,14 +30,14 @@ class SchedulingInstance extends Model
         return $query->with('userInstance.bots')->where('user_id' , $user_id);
     }
 
-    public static function findByUserInstanceId($id, $user_id)
+    public function scopeFindByUserInstanceId($query, $instanceId, $userId)
     {
-   	    return self::where('user_instances_id', $id)->where('user_id', $user_id)->with('details');
+   	    return $query->where('user_instance_id', $instanceId)->where('user_id', $userId)->with('details');
     }
 
     public function scopeByInstanceId($query, $id)
     {
-        return $query->where('user_instances_id', $id)->with('details');
+        return $query->where('user_instance_id', $id)->with('details');
     }
 
     public function scopeScheduling($query, $type)
@@ -55,12 +55,12 @@ class SchedulingInstance extends Model
 
     public function userInstance()
     {
-        return $this->belongsTo(UserInstance::class,'user_instances_id');
+        return $this->belongsTo(UserInstance::class,'user_instance_id');
     }
 
     public function details()
     {
-   	    return $this->hasMany(SchedulingInstancesDetails::class,'scheduling_instances_id','id');
+   	    return $this->hasMany(SchedulingInstancesDetails::class,'scheduling_instance_id','id');
     }
 
     public function history()

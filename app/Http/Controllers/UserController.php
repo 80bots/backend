@@ -3,119 +3,82 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\User\TimezoneCollection;
+use App\SchedulingInstancesDetails;
 use App\SubscriptionPlan;
 use App\Timezone;
 use App\User;
-use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Throwable;
 
 class UserController extends AppController
 {
     /**
-     * Display a listing of the resource.
-     *
-     * @param  Request  $request
-     * @return View
-     */
-    public function index(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
      * Display the specified resource.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @return JsonResponse
      */
-    public function show(Request $request)
-    {
-        $user = $request->user();
-        $used_credit = $user->userInstances->sum('used_credit');
-        $plan = null;
-        if($user->subscribed(config('services.stripe.product'))) {
-            $subscription = $user->subscription(config('services.stripe.product'));
-            $plan = SubscriptionPlan::where('stripe_plan', $subscription->stripe_plan)->first();
-        }
-
-        $timezones = Timezone::all();
-        return view('user.profile', compact('user', 'used_credit', 'plan', 'timezones'));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
-    }
-
-    public function updateTimezone(Request $request)
-    {
-        $user = auth()->user();
-        $user->timezone = $request->get('timezone');
-        $user->save();
-
-        return redirect()->back();
-    }
-
-    /**
-     * @return TimezoneCollection|\Illuminate\Http\JsonResponse
-     */
-    public function getTimezones()
+    public function show(Request $request): JsonResponse
     {
         try {
-            return new TimezoneCollection(Timezone::get());
+
+            $user = User::find(Auth::id());
+            $plan = null;
+            if ($user->subscribed(config('services.stripe.product'))) {
+                $subscription = $user->subscription(config('services.stripe.product'));
+                $plan = SubscriptionPlan::where('stripe_plan', $subscription->stripe_plan)->first();
+            }
+
+            return $this->success([
+                'user'          => $user,
+                'used_credit'   => $user->instances->sum('used_credit'),
+                'plan'          => $plan,
+                'timezones'     => (new TimezoneCollection(Timezone::get()))->response()->getData()
+            ]);
+
+        } catch (Throwable $throwable) {
+            return $this->error(__('user.server_error'), $throwable->getMessage());
+        }
+    }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function updateTimezone(Request $request): JsonResponse
+    {
+        try {
+
+            if (empty($request->input('timezone'))) {
+                return $this->error(__('user.error'), __('user.parameters_incorrect'));
+            }
+
+            $update = User::where('id', '=', Auth::id())
+                ->update([
+                    'timezone' => $request->input('timezone')
+                ]);
+
+            if (! empty($update)) {
+                return $this->success([], __('user.update_timezone_success'));
+            }
+
+            return $this->error(__('user.error'), __('user.update_timezone_error'));
+
+        } catch (Throwable $throwable) {
+            return $this->error(__('user.server_error'), $throwable->getMessage());
+        }
+    }
+
+    /**
+     * Get list timezones
+     * @return JsonResponse
+     */
+    public function getTimezones(): JsonResponse
+    {
+        try {
+            return $this->success((new TimezoneCollection(Timezone::get()))->response()->getDate());
         } catch (Throwable $throwable) {
             return $this->error(__('user.server_error'), $throwable->getMessage());
         }

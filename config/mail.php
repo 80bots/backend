@@ -56,8 +56,8 @@ return [
     */
 
     'from' => [
-        'address' => '80bots@inforca.com',
-        'name' => '80bots',
+        'address'   => env('MAIL_FROM_ADDRESS', '80bots@inforca.com'),
+        'name'      => env('MAIL_FROM_NAME', '80bots'),
     ],
 
     /*
@@ -139,5 +139,4 @@ return [
             'verify_peer_name' => false,
         ],
     ],
-
 ];

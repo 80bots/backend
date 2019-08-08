@@ -29,4 +29,5 @@ return [
     'instance_type' => env('AWS_INSTANCE_TYPE', 't3a.small'),
     'volume_size' => env('AWS_VOLUME_SIZE', '16'),
     'instance_metadata' => env('AWS_INSTANCE_METADATA', 'http://169.254.169.254/latest/meta-data/'),
+    'instance_ignore' =>  ['SaaS', 'kabas']
 ];
