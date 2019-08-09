@@ -29,6 +29,7 @@ Route::group(['middleware' => ['auth:api']], function() {
 
     // User scheduling
     Route::group(['prefix' => 'scheduling', 'as' => 'scheduling.'], function () {
+        Route::put('/status', 'SchedulesController@changeSchedulingStatus')->name('update.status');
     });
 
     Route::resources([

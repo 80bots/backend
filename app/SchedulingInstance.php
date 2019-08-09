@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class SchedulingInstance extends Model
 {
+    const STATUS_ACTIVE     = 'active';
+    const STATUS_INACTIVE   = 'inactive';
+
     protected $table = 'scheduling_instances';
 
     protected $fillable = [

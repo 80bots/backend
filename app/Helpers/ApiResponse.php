@@ -9,7 +9,7 @@ class ApiResponse
     private $data;
     private $message;
 
-    public function __construct($data, $message = null)
+    public function __construct($data = null, $message = '')
     {
        $this->data      = $data;
        $this->message   = $message;
@@ -26,8 +26,8 @@ class ApiResponse
     public function getError()
     {
         return [
-            'reason'    => $this->data,
-            'message'   => $this->message
+            'reason'    => $this->data ?? null,
+            'message'   => $this->message ?? ''
         ];
     }
 }

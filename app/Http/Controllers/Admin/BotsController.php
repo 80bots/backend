@@ -213,12 +213,10 @@ class BotsController extends AppController
             }
 
             if ($bot->delete()) {
-                return $this->success([
-                    'id' => $bot->id ?? null
-                ], __('admin.bots.success_delete'));
+                return $this->success(null, __('admin.bots.success_delete'));
             }
 
-            return $this->error(__('admin.server_error'), __('admin.bots.not_deleted'));
+            return $this->error(__('admin.error'), __('admin.bots.not_deleted'));
 
         } catch (Throwable $throwable){
             return $this->error(__('admin.server_error'), $throwable->getMessage());
