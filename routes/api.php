@@ -30,6 +30,7 @@ Route::group(['middleware' => ['auth:api']], function() {
     // User scheduling
     Route::group(['prefix' => 'scheduling', 'as' => 'scheduling.'], function () {
         Route::put('/status', 'SchedulesController@changeSchedulingStatus')->name('update.status');
+        Route::delete('/details/delete', 'SchedulesController@deleteSchedulerDetails')->name('details.delete');
     });
 
     Route::resources([

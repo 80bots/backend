@@ -35,7 +35,9 @@ class SchedulingInstance extends Model
 
     public function scopeFindByUserInstanceId($query, $instanceId, $userId)
     {
-   	    return $query->where('user_instance_id', $instanceId)->where('user_id', $userId)->with('details');
+   	    return $query->where('user_instance_id', $instanceId)
+            ->where('user_id', $userId)
+            ->with('details');
     }
 
     public function scopeByInstanceId($query, $id)

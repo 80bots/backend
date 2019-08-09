@@ -9,13 +9,10 @@ use App\SchedulingInstance;
 use App\SchedulingInstancesDetails;
 use App\UserInstance;
 use Carbon\Carbon;
-use DateTime;
-use DateTimeZone;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class SchedulesController extends Controller
@@ -45,17 +42,6 @@ class SchedulesController extends Controller
             return new UserInstanceCollection($resource->paginate(self::PAGINATE));
         } catch (Throwable $throwable) {
             return $this->error(__('user.server_error'), $throwable->getMessage());
-        }
-    }
-
-    public function convertTimeToUserTime($day, $str, $userTimezone, $format = 'D h:i A')
-    {
-        try {
-            $new_str = new DateTime("{$day} {$str}", new DateTimeZone($userTimezone));
-            return $new_str->format($format);
-        } catch (Throwable $throwable) {
-            Log::error($throwable->getMessage());
-            return null;
         }
     }
 
@@ -100,118 +86,21 @@ class SchedulesController extends Controller
             $userTimeZone   = $request->input('timezone');
             $details        = $request->input('details');
 
-            $schedulingInstance = SchedulingInstance::findByUserInstanceId($userInstanceId, Auth::id())->first();
+            $instance = SchedulingInstance::findByUserInstanceId($userInstanceId, Auth::id())->first();
 
-            if (empty($schedulingInstance)) {
-                $schedulingInstance = SchedulingInstance::create([
+            if (empty($instance)) {
+                $instance = SchedulingInstance::create([
                     'user_id'           => Auth::id(),
                     'user_instances_id' => $userInstanceId,
                 ]);
             }
 
-            /**
-             * details[0][id]
-             * details[0][type]
-             * details[0][time]
-             * details[0][day]
-             */
             if (! empty($details) && is_array($details)) {
-
-                foreach ($details as $detail) {
-
-                    switch ($detail['type']) {
-                        case SchedulingInstancesDetails::TYPE_START:
-                        case SchedulingInstancesDetails::TYPE_STOP:
-                            $type = $detail['type'];
-                            break;
-                        default:
-                            $type = SchedulingInstancesDetails::TYPE_STOP;
-                            break;
-                    }
-
-                    $selectedTime = $this->convertTimeToUserTime($detail['day'], $detail['time'], $userTimeZone);
-                    $data['selected_time'] = date('h:i A', strtotime($selectedTime));
-
-                    $schedulingInstanceDetail = SchedulingInstancesDetails::create([
-                        'scheduling_instance_id' => $schedulingInstance->id ?? null,
-                        'day' => $detail['day'] ?? '',
-                        'selected_time' => $detail['time'] ?? '',
-                        'time_zone' => $userTimeZone,
-                        'cron_data' => "{$selectedTime} {$userTimeZone}",
-                        'schedule_type' => $type,
-                        'status' => SchedulingInstancesDetails::STATUS_ACTIVE
-                    ]);
-
-                    $schedulingInstanceDetail = $this->getSchedulingInstancesDetails($detail['id'] ?? null);
-
-                    dd($detail, $schedulingInstanceDetail);
-                }
+                $this->updateOrCreateSchedulingInstancesDetails($instance, $details, $userTimeZone);
+                return $this->success();
             }
 
-
-//            $requestData = [];
-//
-//            foreach ($days as $key => $day) {
-//
-//                if (! empty($day)) {
-//
-//                    $data = [];
-//                    $data['day'] = $day;
-//                    $ids = isset($request->ids) ? explode(',',$request->ids[$key]) : '';
-//                    $scheduled_time = $request->scheduled_time ?? '';
-//                    $type = $request->type ?? '';
-//
-//                    if (! empty($scheduled_time)) {
-//
-//                        $data['schedule_type'] = $type[$key];
-//
-//                        if(!empty($scheduled_time[$key])){
-//                            $selected_time = $this->convertTimeToUserTime($day, $scheduled_time[$key], $userTimeZone);
-//                            $data['selected_time'] = date('h:i A', strtotime($selected_time));
-//                            $data['time_zone'] = $userTimeZone;
-//                            $data['cron_data'] = $selected_time.' '.$userTimeZone;
-//                        } else {
-//                            $data['selected_time'] = '';
-//                            $data['time_zone'] = '';
-//                            $data['cron_data'] = '';
-//                        }
-//                        if(!empty($ids) && $ids[0] != "0"){
-//                            $data['id'] = $ids[0];
-//                        }
-//
-//                        array_push($requestData, $data);
-//                    }
-//                }
-//            }
-//
-//
-//
-//            if (! empty($schedulingInstance)) {
-//
-//                foreach ($requestData as $scheduleDetail){
-//
-//                    if (! empty($scheduleDetail['id'])) {
-//                        $schedulingInstanceDetail = SchedulingInstancesDetails::findById($scheduleDetail['id'])->first();
-//                    } else {
-//                        $schedulingInstanceDetail = new SchedulingInstancesDetails;
-//                    }
-//
-//                    $schedulingInstanceDetail->fill([
-//                        'scheduling_instances_id'   => $schedulingInstance->id,
-//                        'schedule_type'             => $scheduleDetail['schedule_type'],
-//                        'day'                       => $scheduleDetail['day'],
-//                        'selected_time'             => $scheduleDetail['selected_time'],
-//                        'time_zone'                 => $scheduleDetail['time_zone'],
-//                        'cron_data'                 => $scheduleDetail['cron_data'],
-//                    ]);
-//
-//                    $schedulingInstanceDetail->save();
-//                }
-//
-//                return $this->success();
-//            }
-
-            return $this->error(__('user.error'), __('user.scheduling.error_create'));
+            return $this->error(__('user.error'), __('user.parameters_incorrect'));
 
         } catch (Throwable $throwable) {
             return $this->error(__('user.server_error'), $throwable->getMessage());
@@ -229,10 +118,15 @@ class SchedulesController extends Controller
         if (! empty($id)) {
             try {
 
-                $scheduleInstance = SchedulingInstance::findByUserInstanceId($id, Auth::id())->first();
+                $instance = SchedulingInstance::with('userInstance')->where('user_id', '=', Auth::id())
+                    ->where('id', '=', $id)->first();
 
-                if (! empty($scheduleInstance)) {
-                    return $this->success($scheduleInstance);
+                if (! empty($instance)) {
+                    $resource = new ScheduleResource($instance);
+
+                    return $this->success([
+                        'instance' => $resource->response()->getData(),
+                    ]);
                 }
 
                 return $this->notFound(__('user.not_found'), __('user.not_found'));
@@ -260,12 +154,18 @@ class SchedulesController extends Controller
                 // TODO: ????
                 $instances = UserInstance::where(['status' => 'stop', 'user_id' => Auth::id()])->get();
 
-                $resource = new ScheduleResource(SchedulingInstance::with('userInstance')->find($id));
+                $instance = SchedulingInstance::with('userInstance')->where('user_id', '=', Auth::id())
+                    ->where('id', '=', $id)->first();
 
-                return $this->success([
-                    'instances'     => $instances,
-                    'scheduling'    => $resource->response()->getData(),
-                ]);
+                if (! empty($instance)) {
+                    $resource = new ScheduleResource($instance);
+                    return $this->success([
+                        'instances' => $instances,
+                        'scheduling' => $resource->response()->getData(),
+                    ]);
+                }
+
+                return $this->notFound(__('user.not_found'), __('user.not_found'));
 
             } catch (Throwable $throwable) {
                 return $this->error(__('user.server_error'), $throwable->getMessage());
@@ -286,26 +186,22 @@ class SchedulesController extends Controller
     {
         try{
 
-            $instance = SchedulingInstance::find($id);
+            $instance = SchedulingInstance::where('user_id', '=', Auth::id())
+                ->where('id', '=', $id)->first();
 
-//            if (empty($instance)) {
-//                return $this->notFound(__('user.not_found'), __('user.scheduling.not_found'));
-//            }
-//
-//            $instance->fill([
-//                'start_time'        => $request->input('start_time'),
-//                'end_time'          => $request->input('end_time'),
-//                'utc_start_time'    => $request->input('utc_start_time'),
-//                'utc_end_time'      => $request->input('utc_end_time'),
-//                'status'            => $request->input('status'),
-//                'current_time_zone' => $request->input('current_time_zone'),
-//            ]);
-//
-//            if ($instance->save()) {
-//                return $this->success();
-//            }
+            if (empty($instance)) {
+                return $this->notFound(__('user.not_found'), __('user.scheduling.not_found'));
+            }
 
-            return $this->error(__('user.error'), __('user.scheduling.not_update'));
+            $userTimeZone   = $request->input('timezone');
+            $details        = $request->input('details');
+
+            if (! empty($details) && is_array($details)) {
+                $this->updateOrCreateSchedulingInstancesDetails($instance, $details, $userTimeZone);
+                return $this->success();
+            }
+
+            return $this->error(__('user.error'), __('user.parameters_incorrect'));
 
         } catch (Throwable $throwable){
             return $this->error(__('user.server_error'), $throwable->getMessage());
@@ -321,7 +217,8 @@ class SchedulesController extends Controller
     public function destroy($id)
     {
         try{
-            $instance = SchedulingInstance::find($id);
+            $instance = SchedulingInstance::where('user_id', '=', Auth::id())
+                ->where('id', '=', $id)->first();
 
             if (empty($instance)) {
                 return $this->notFound(__('user.not_found'), __('user.scheduling.not_found'));
@@ -356,8 +253,9 @@ class SchedulesController extends Controller
                     break;
             }
 
-            $update = SchedulingInstance::where('id', $request->input('id'))
-                ->update(['status' => $status]);
+            $update = SchedulingInstance::whereHas('schedulingInstance', function(Builder $query) {
+                $query->where('user_id', '=', Auth::id());
+            })->where('id', '=', $request->input('id'))->update(['status' => $status]);
 
             if ($update) {
                 return $this->success();
@@ -371,19 +269,60 @@ class SchedulesController extends Controller
     }
 
     /**
-     * @param null $id
-     * @return SchedulingInstancesDetails
+     * @param SchedulingInstance $instance
+     * @param array $details
+     * @param string $timezone
+     * @return void
      */
-    private function getSchedulingInstancesDetails($id = null): ?SchedulingInstancesDetails
+    private function updateOrCreateSchedulingInstancesDetails(SchedulingInstance $instance, array $details, string $timezone): void
     {
-        if (empty($id)) {
-            return new SchedulingInstancesDetails;
-        } else {
-            return SchedulingInstancesDetails::whereHas('schedulingInstance', function($query) {
-                $query->whereHas('user', function (Builder $query) {
-                    $query->where('id', '=', Auth::id());
-                });
-            })->where('id', '=', $id)->first();
+        /**
+         * details[0][id] = 1 | empty
+         * details[0][type] = stop | start
+         * details[0][time] = 6:00 PM
+         * details[0][day] = Friday
+         */
+        foreach ($details as $detail) {
+
+            switch ($detail['type']) {
+                case SchedulingInstancesDetails::TYPE_START:
+                case SchedulingInstancesDetails::TYPE_STOP:
+                    $type = $detail['type'];
+                    break;
+                default:
+                    $type = SchedulingInstancesDetails::TYPE_STOP;
+                    break;
+            }
+
+            $selectedTime = Carbon::parse("{$detail['day']} {$detail['time']}")
+                ->setTimezone($timezone);
+
+            $schedulingDetails = SchedulingInstancesDetails::whereHas('schedulingInstance', function(Builder $query) {
+                $query->where('user_id', '=', Auth::id());
+            })->where('id', '=', $detail['id'] ?? null)->first();
+
+            if (! empty($schedulingDetails)) {
+                $schedulingDetails->fill([
+                    'scheduling_instance_id'    => $instance->id ?? null,
+                    'day'                       => $detail['day'] ?? '',
+                    'selected_time'             => $selectedTime->format('h:i A'),
+                    'time_zone'                 => $timezone,
+                    'cron_data'                 => "{$selectedTime->format('D h:i A')} {$timezone}",
+                    'schedule_type'             => $type,
+                    'status'                    => SchedulingInstancesDetails::STATUS_ACTIVE
+                ]);
+                $schedulingDetails->save();
+            } else {
+                SchedulingInstancesDetails::create([
+                    'scheduling_instance_id'    => $instance->id ?? null,
+                    'day'                       => $detail['day'] ?? '',
+                    'selected_time'             => $selectedTime->format('h:i A'),
+                    'time_zone'                 => $timezone,
+                    'cron_data'                 => "{$selectedTime->format('D h:i A')} {$timezone}",
+                    'schedule_type'             => $type,
+                    'status'                    => SchedulingInstancesDetails::STATUS_ACTIVE
+                ]);
+            }
         }
     }
 
