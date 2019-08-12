@@ -17,10 +17,17 @@ class ApiResponse
 
     public function get()
     {
-        return [
-            'data'      => $this->data ?? null,
-            'message'   => $this->message ?? ''
-        ];
+        $response = [];
+
+        if (! empty($this->message)) {
+            $response['message'] = $this->message;
+        }
+
+        foreach ($this->data as $key => $data) {
+            $response[$key] = $data;
+        }
+
+        return $response;
     }
 
     public function getError()

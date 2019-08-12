@@ -2,24 +2,28 @@
 
 namespace App\Helpers;
 
+use App\Http\Resources\User\UserResource;
+use App\User;
 use Illuminate\Contracts\Auth\Authenticatable;
 
 class UserHelper
 {
     /**
-     * @param Authenticatable $user
+     * @param Authenticatable $authenticatable
      * @return array
      */
-    public static function getUserToken(Authenticatable $user): array
+    public static function getUserToken(Authenticatable $authenticatable): array
     {
-        $tokenResult = $user->createToken(config('app.name'));
+        $tokenResult = $authenticatable->createToken(config('app.name'));
         $token = $tokenResult->token;
         $token->expires_at = now()->addDays(config('app.access_token_lifetime_days'));
         $token->save();
 
+        $user = new UserResource(User::find($authenticatable->id ?? null));
+
         return [
             'token' => $tokenResult->accessToken,
-            'user'  => $user
+            'user'  => $user->response()->getData()
         ];
     }
 }

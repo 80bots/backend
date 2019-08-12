@@ -1,4 +1,6 @@
 <?php
+
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 // Authentication Routes. Auth::routes() is not used to not provide unneeded routes
@@ -10,6 +12,16 @@ Route::group(['prefix' => 'auth', 'as' => 'auth.', 'namespace' => 'Auth'], funct
 });
 
 Route::group(['middleware' => ['auth:api']], function() {
+
+    Route::get('/auth/login', 'CheckController@apiCheckLogin')->name('check');
+
+//    Route::get('/auth/login', function(Request $request) {
+//        if($request->user()) {
+//            return response()->json([ 'user' => $request->user() ], 200);
+//        } else {
+//            return response()->json([ 'reason' => 'Forbidden', 'message' => 'Invalid access token'], 401);
+//        }
+//    });
 
     Route::group(['prefix' => 'user', 'as' => 'user.'], function() {
         Route::get('/profile', 'UserController@show')->name('profile');
@@ -28,7 +40,7 @@ Route::group(['middleware' => ['auth:api']], function() {
     });
 
     // User scheduling
-    Route::group(['prefix' => 'scheduling', 'as' => 'scheduling.'], function () {
+    Route::group(['prefix' => 'schedules', 'as' => 'schedules.'], function () {
         Route::put('/status', 'SchedulesController@changeSchedulingStatus')->name('update.status');
         Route::delete('/details/delete', 'SchedulesController@deleteSchedulerDetails')->name('details.delete');
     });

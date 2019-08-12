@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Bot;
+use App\Helpers\CommonHelper;
 use App\Http\Resources\User\BotCollection;
 use Illuminate\Http\Request;
 use Throwable;
@@ -19,7 +20,14 @@ class BotsController extends Controller
 
             // TODO: Add Filters
 
-            return new BotCollection($resource->paginate(self::PAGINATE));
+            $bots = (new BotCollection($resource->paginate(self::PAGINATE)))->response()->getData();
+
+            $response = [
+                'bots'      => $bots->data ?? [],
+                'paginate'  => CommonHelper::getPaginateInfo($bots->meta ?? null)
+            ];
+
+            return $this->success($response);
 
         } catch (Throwable $throwable) {
             return $this->error(__('auth.forbidden'), $throwable->getMessage());

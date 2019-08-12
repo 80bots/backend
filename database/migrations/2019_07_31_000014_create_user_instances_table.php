@@ -34,11 +34,10 @@ class CreateUserInstancesTable extends Migration
             $table->string('aws_pem_file_path')->nullable();
             $table->enum('status', [
                 'pending',
-                'start',
                 'running',
-                'stop',
+                'stopped',
                 'terminated'
-            ])->default('running');
+            ])->default('pending');
             $table->boolean('is_in_queue')->default(1);
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'));

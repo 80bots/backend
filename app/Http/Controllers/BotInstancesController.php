@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\CommonHelper;
 use App\Http\Resources\User\UserInstanceCollection;
 use App\Jobs\StoreUserInstance;
 use App\UserInstance;
@@ -28,7 +29,14 @@ class BotInstancesController extends AppController
 
             // TODO: Add Filters
 
-            return new UserInstanceCollection($resource->paginate(self::PAGINATE));
+            $bots = (new UserInstanceCollection($resource->paginate(self::PAGINATE)))->response()->getData();
+
+            $response = [
+                'botInstances'  => $bots->data ?? [],
+                'paginate'      => CommonHelper::getPaginateInfo($bots->meta ?? null)
+            ];
+
+            return $this->success($response);
 
         } catch (Throwable $throwable) {
             return $this->error(__('keywords.server_error'), $throwable->getMessage());

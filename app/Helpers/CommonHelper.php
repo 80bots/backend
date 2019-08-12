@@ -3,6 +3,7 @@
 namespace App\Helpers;
 
 use Carbon\Carbon;
+use phpDocumentor\Reflection\Types\Object_;
 use function Aws\map;
 
 class CommonHelper
@@ -55,5 +56,17 @@ class CommonHelper
                 return trim($item);
             })
             ->toArray();
+    }
+
+    /**
+     * @param $meta
+     * @return array
+     */
+    public static function getPaginateInfo($meta = null): array
+    {
+        return [
+            'page'  => $meta->current_page ?? 1,
+            'total' => $meta->total ?? 0,
+        ];
     }
 }

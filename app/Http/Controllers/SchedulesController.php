@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\CommonHelper;
 use App\Http\Resources\User\ScheduleCollection;
 use App\Http\Resources\User\ScheduleResource;
 use App\Http\Resources\User\UserInstanceCollection;
@@ -27,7 +28,14 @@ class SchedulesController extends Controller
 
             // TODO: Add Filters
 
-            return new ScheduleCollection($resource->paginate(self::PAGINATE));
+            $schedules = (new ScheduleCollection($resource->paginate(self::PAGINATE)))->response()->getData();
+
+            $response = [
+                'schedules' => $schedules->data ?? [],
+                'paginate'  => CommonHelper::getPaginateInfo($schedules->meta ?? null)
+            ];
+
+            return $this->success($response);
 
         } catch (Throwable $throwable) {
             return $this->error(__('user.server_error'), $throwable->getMessage());
