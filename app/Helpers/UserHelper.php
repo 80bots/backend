@@ -19,11 +19,11 @@ class UserHelper
         $token->expires_at = now()->addDays(config('app.access_token_lifetime_days'));
         $token->save();
 
-        $user = new UserResource(User::find($authenticatable->id ?? null));
+        $user = (new UserResource(User::find($authenticatable->id ?? null)))->response()->getData();
 
         return [
             'token' => $tokenResult->accessToken,
-            'user'  => $user->response()->getData()
+            'user'  => $user->data ?? null
         ];
     }
 }

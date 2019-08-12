@@ -12,8 +12,8 @@ class CheckController extends Controller
     public function apiCheckLogin(Request $request)
     {
         if(Auth::check()) {
-            $user = new UserResource(User::find(Auth::id()));
-            return response()->json([ 'user' => $user->response()->getData() ], 200);
+            $user = (new UserResource(User::find(Auth::id())))->response()->getData();
+            return response()->json([ 'user' => $user->data ?? null ], 200);
         } else {
             return response()->json([ 'reason' => 'Forbidden', 'message' => 'Invalid access token'], 401);
         }
