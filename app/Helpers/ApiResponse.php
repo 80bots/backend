@@ -23,8 +23,10 @@ class ApiResponse
             $response['message'] = $this->message;
         }
 
-        foreach ($this->data as $key => $data) {
-            $response[$key] = $data;
+        if (! empty($this->data)) {
+            foreach ($this->data as $key => $data) {
+                $response[$key] = $data;
+            }
         }
 
         return $response;

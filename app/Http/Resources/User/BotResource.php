@@ -14,6 +14,15 @@ class BotResource extends JsonResource
      */
     public function toArray($request)
     {
+        $tags = $this->tags->isNotEmpty() ? $this->tags : collect([]);
+
+        $tags = $tags->map(function ($item, $key) {
+            return [
+                'id'    => $item['id'] ?? null,
+                'name'  => $item['name'] ?? '',
+            ];
+        })->toArray();
+
         return [
             'id'                => $this->id ?? '',
             'name'              => $this->name ?? '',
@@ -27,6 +36,7 @@ class BotResource extends JsonResource
             'aws_custom_script' => $this->aws_custom_script ?? '',
             'status'            => $this->status ?? '',
             'type'              => $this->type ?? '',
+            'tags'              => $tags
         ];
     }
 }

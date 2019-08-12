@@ -2,21 +2,16 @@
 
 namespace App;
 
-use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Mail;
 use Laravel\Cashier\Billable;
 use Laravel\Passport\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use Billable;
-    use Notifiable;
-    use SoftDeletes;
-    use HasApiTokens;
+    use Billable, Notifiable, SoftDeletes, HasApiTokens;
 
     const ROLE_NAME_USER    = 'User';
     const ROLE_NAME_ADMIN   = 'Admin';

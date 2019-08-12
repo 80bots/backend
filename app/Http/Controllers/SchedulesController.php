@@ -261,7 +261,7 @@ class SchedulesController extends Controller
                     break;
             }
 
-            $update = SchedulingInstance::whereHas('schedulingInstance', function(Builder $query) {
+            $update = SchedulingInstance::whereHas('userInstance', function(Builder $query) {
                 $query->where('user_id', '=', Auth::id());
             })->where('id', '=', $request->input('id'))->update(['status' => $status]);
 

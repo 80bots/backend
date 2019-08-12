@@ -26,10 +26,11 @@ class ScheduleResource extends JsonResource
         }
 
         return [
-            'id'        => $this->id ?? '',
-            'instance'  => $instance,
-            'details'   => InstanceHelper::getSchedulingDetails($this->details ?? null),
-            'status'    => $this->status ?? null,
+            'id'            => $this->id ?? '',
+            'bot_name'      => $instance['tag_name'] ?? '',
+            'instance_id'   => $instance['aws_instance_id'] ?? '',
+            'status'        => $this->status ?? null,
+            'details'       => InstanceHelper::getSchedulingDetails($this->details ?? null),
         ];
     }
 }

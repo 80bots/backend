@@ -39,15 +39,19 @@ Route::group(['middleware' => ['auth:api']], function() {
         Route::post('/launch', 'BotInstancesController@launchInstance')->name('launch');
     });
 
-    // User scheduling
+    // User schedules
     Route::group(['prefix' => 'schedules', 'as' => 'schedules.'], function () {
         Route::put('/status', 'SchedulesController@changeSchedulingStatus')->name('update.status');
         Route::delete('/details/delete', 'SchedulesController@deleteSchedulerDetails')->name('details.delete');
     });
 
+    Route::group(['prefix' => 'subscriptions', 'as' => 'subscriptions.'], function () {
+        Route::get('/', 'SubscriptionsController@index')->name('index');
+    });
+
     Route::resources([
-        'bots'          => 'BotsController',
-        'scheduling'    => 'SchedulesController',
+        'bots'      => 'BotsController',
+        'schedules' => 'SchedulesController',
     ]);
 
 });
