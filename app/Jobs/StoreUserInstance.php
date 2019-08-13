@@ -4,7 +4,7 @@ namespace App\Jobs;
 
 use App\Bot;
 use App\Http\Controllers\AwsConnectionController;
-use App\Http\Controllers\BotInstancesController;
+use App\Http\Controllers\BotInstanceController;
 use App\Events\dispatchedInstanceEvent;
 use App\Events\InstanceCreation;
 use App\Services\Aws;

@@ -1,12 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\AppController;
-use App\UserInstancesDetails;
+use App\Notification;
 use Illuminate\Http\Request;
 
-class UserInstancesDetailsController extends AppController
+class NotificationController extends AppController
 {
     /**
      * Display a listing of the resource.
@@ -42,10 +41,10 @@ class UserInstancesDetailsController extends AppController
     /**
      * Display the specified resource.
      *
-     * @param  \App\UserInstancesDetails  $userInstancesDetails
+     * @param  \App\Notification  $notifications
      * @return \Illuminate\Http\Response
      */
-    public function show(UserInstancesDetails $userInstancesDetails)
+    public function show(Notification $notifications)
     {
         //
     }
@@ -53,10 +52,10 @@ class UserInstancesDetailsController extends AppController
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\UserInstancesDetails  $userInstancesDetails
+     * @param  \App\Notification  $notifications
      * @return \Illuminate\Http\Response
      */
-    public function edit(UserInstancesDetails $userInstancesDetails)
+    public function edit(Notification $notifications)
     {
         //
     }
@@ -65,10 +64,10 @@ class UserInstancesDetailsController extends AppController
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\UserInstancesDetails  $userInstancesDetails
+     * @param  \App\Notification  $notifications
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, UserInstancesDetails $userInstancesDetails)
+    public function update(Request $request, Notification $notifications)
     {
         //
     }
@@ -76,10 +75,10 @@ class UserInstancesDetailsController extends AppController
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\UserInstancesDetails  $userInstancesDetails
+     * @param  \App\Notification  $notifications
      * @return \Illuminate\Http\Response
      */
-    public function destroy(UserInstancesDetails $userInstancesDetails)
+    public function destroy(Notification $notifications)
     {
         //
     }

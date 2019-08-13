@@ -16,7 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
 
-class SchedulesController extends Controller
+class ScheduleController extends Controller
 {
     const PAGINATE = 1;
 

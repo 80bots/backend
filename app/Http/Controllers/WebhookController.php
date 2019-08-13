@@ -11,7 +11,7 @@ use Illuminate\Routing\Controller;
 use Symfony\Component\HttpFoundation\Response;
 use Laravel\Cashier\Http\Middleware\VerifyWebhookSignature;
 
-class WebhooksController extends Controller
+class WebhookController extends Controller
 {
     /**
      * Create a new webhook controller instance.

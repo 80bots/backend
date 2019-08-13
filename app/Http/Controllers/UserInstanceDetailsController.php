@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\UserInstancesDetails;
 use Illuminate\Http\Request;
 
-class UserInstancesDetailsController extends AppController
+class UserInstanceDetailsController extends AppController
 {
     /**
      * Display a listing of the resource.

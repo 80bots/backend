@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
 
-class SchedulingInstancesController extends AppController
+class ScheduleInstanceController extends AppController
 {
     const PAGINATE = 1;
 

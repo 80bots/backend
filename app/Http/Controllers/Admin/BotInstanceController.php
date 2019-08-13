@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
-class BotInstancesController extends AppController
+class BotInstanceController extends AppController
 {
     const PAGINATE = 1;
     const SYNC_LIMIT = 5;

@@ -16,7 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
 
-class BotsController extends AppController
+class BotController extends AppController
 {
     const PAGINATE = 1;
 

@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
-use App\Platform;
+use App\Http\Controllers\AppController;
+use App\UserInstancesDetails;
 use Illuminate\Http\Request;
 
-class PlatformsController extends Controller
+class UserInstanceDetailsController extends AppController
 {
     /**
      * Display a listing of the resource.
@@ -41,10 +42,10 @@ class PlatformsController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Platform  $platforms
+     * @param  \App\UserInstancesDetails  $userInstancesDetails
      * @return \Illuminate\Http\Response
      */
-    public function show(Platform $platforms)
+    public function show(UserInstancesDetails $userInstancesDetails)
     {
         //
     }
@@ -52,10 +53,10 @@ class PlatformsController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Platform  $platforms
+     * @param  \App\UserInstancesDetails  $userInstancesDetails
      * @return \Illuminate\Http\Response
      */
-    public function edit(Platform $platforms)
+    public function edit(UserInstancesDetails $userInstancesDetails)
     {
         //
     }
@@ -64,10 +65,10 @@ class PlatformsController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Platform  $platforms
+     * @param  \App\UserInstancesDetails  $userInstancesDetails
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Platform $platforms)
+    public function update(Request $request, UserInstancesDetails $userInstancesDetails)
     {
         //
     }
@@ -75,10 +76,10 @@ class PlatformsController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Platform  $platforms
+     * @param  \App\UserInstancesDetails  $userInstancesDetails
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Platform $platforms)
+    public function destroy(UserInstancesDetails $userInstancesDetails)
     {
         //
     }

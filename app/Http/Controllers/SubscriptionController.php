@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use App\SubscriptionPlan;
 use Illuminate\Support\Facades\Auth;
 
-class SubscriptionsController extends Controller
+class SubscriptionController extends Controller
 {
     /**
      * Display a listing of the resource.

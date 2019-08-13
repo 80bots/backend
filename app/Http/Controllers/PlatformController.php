@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Notification;
+use App\Platform;
 use Illuminate\Http\Request;
 
-class NotificationsController extends AppController
+class PlatformController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -41,10 +41,10 @@ class NotificationsController extends AppController
     /**
      * Display the specified resource.
      *
-     * @param  \App\Notification  $notifications
+     * @param  \App\Platform  $platforms
      * @return \Illuminate\Http\Response
      */
-    public function show(Notification $notifications)
+    public function show(Platform $platforms)
     {
         //
     }
@@ -52,10 +52,10 @@ class NotificationsController extends AppController
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Notification  $notifications
+     * @param  \App\Platform  $platforms
      * @return \Illuminate\Http\Response
      */
-    public function edit(Notification $notifications)
+    public function edit(Platform $platforms)
     {
         //
     }
@@ -64,10 +64,10 @@ class NotificationsController extends AppController
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Notification  $notifications
+     * @param  \App\Platform  $platforms
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Notification $notifications)
+    public function update(Request $request, Platform $platforms)
     {
         //
     }
@@ -75,10 +75,10 @@ class NotificationsController extends AppController
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Notification  $notifications
+     * @param  \App\Platform  $platforms
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Notification $notifications)
+    public function destroy(Platform $platforms)
     {
         //
     }

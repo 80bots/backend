@@ -8,7 +8,7 @@ use App\Http\Resources\User\BotCollection;
 use Illuminate\Http\Request;
 use Throwable;
 
-class BotsController extends Controller
+class BotController extends Controller
 {
     const PAGINATE = 1;
 

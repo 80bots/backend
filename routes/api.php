@@ -22,27 +22,26 @@ Route::group(['middleware' => ['auth:api']], function() {
 
     // User bots
     Route::group(['prefix' => 'bots', 'as' => 'bots.'], function () {
-        Route::get('/running', 'BotInstancesController@index')->name('running');
-        Route::put('/running/status', 'BotInstancesController@changeStatus')->name('running.update.status');
+        Route::get('/running', 'BotInstanceController@index')->name('running');        Route::put('/running/status', 'BotInstanceController@changeStatus')->name('running.update.status');
     });
 
     Route::group(['prefix' => 'instances', 'as' => 'instances.'], function () {
-        Route::post('/launch', 'BotInstancesController@launchInstance')->name('launch');
+        Route::post('/launch', 'BotInstanceController@launchInstance')->name('launch');
     });
 
     // User schedules
     Route::group(['prefix' => 'schedules', 'as' => 'schedules.'], function () {
-        Route::put('/status', 'SchedulesController@changeSchedulingStatus')->name('update.status');
-        Route::delete('/details/delete', 'SchedulesController@deleteSchedulerDetails')->name('details.delete');
+        Route::put('/status', 'ScheduleController@changeSchedulingStatus')->name('update.status');
+        Route::delete('/details/delete', 'ScheduleController@deleteSchedulerDetails')->name('details.delete');
     });
 
     Route::group(['prefix' => 'subscriptions', 'as' => 'subscriptions.'], function () {
-        Route::get('/', 'SubscriptionsController@index')->name('index');
+        Route::get('/', 'SubscriptionController@index')->name('index');
     });
 
     Route::resources([
-        'bots'      => 'BotsController',
-        'schedules' => 'SchedulesController',
+        'bots'      => 'BotController',
+        'schedules' => 'ScheduleController',
     ]);
 
 });
@@ -50,16 +49,13 @@ Route::group(['middleware' => ['auth:api']], function() {
 Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['auth:api', 'api.admin']], function() {
 
     Route::group(['prefix' => 'bots', 'as' => 'bots.'], function () {
-        Route::get('/running', 'BotInstancesController@index')->name('running');
-        Route::put('/running/status', 'BotInstancesController@changeStatus')->name('running.update.status');
+        Route::get('/running', 'BotInstanceController@index')->name('running');
+        Route::put('/running/status', 'BotInstanceController@changeStatus')->name('running.update.status');
     });
 
     Route::group(['prefix' => 'instances', 'as' => 'instances.'], function () {
-        Route::post('/launch', 'BotInstancesController@launchInstance')->name('launch');
-        Route::get('/sync', 'BotInstancesController@syncInstances')->name('sync');
-    });
-
-    Route::group(['prefix' => 'scheduling', 'as' => 'scheduling.'], function () {
+        Route::post('/launch', 'BotInstanceController@launchInstance')->name('launch');
+        Route::get('/sync', 'BotInstanceController@syncInstances')->name('sync');
     });
 
     Route::group(['prefix' => 'histories', 'as' => 'histories.'], function () {
@@ -68,8 +64,8 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
 
     Route::resources([
         'user'          => 'UserController',
-        'bots'          => 'BotsController',
-        'scheduling'    => 'SchedulingInstancesController',
+        'bots'          => 'BotController',
+        'schedules'     => 'ScheduleInstanceController',
         'notification'  => 'NotificationController'
     ]);
 });
