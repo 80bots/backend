@@ -7,12 +7,12 @@ use App\Http\Controllers\AppController;
 use Exception;
 use Illuminate\Http\Request;
 
-class NotificationsController extends AppController
+class NotificationController extends AppController
 {
 
 	public function index(){
 		$percentages = CreditPercentage::all();
-		return view('admin.notification.list',compact('percentages'));
+		return $this->success($percentages);
 	}
 
 	/* display form to add credit percentage */
@@ -23,16 +23,16 @@ class NotificationsController extends AppController
     /* store percentage */
     public function store(Request $request){
 
-		$request->validate([
+		$data = $request->validate([
 		    'percentage' => 'required|unique:credit_percentages',
 		]);
-
 		$percentage = new CreditPercentage;
-		$percentage->percentage = $request->percentage;
+		$percentage->percentage = $data['percentage'];
+
 		if($percentage->save()){
-			return redirect()->route('admin.notification.index')->with('success','Credit Percentage Successfully Added.');
+			return $this->success($percentage->toArray());
 		} else {
-			return redirect()->back()->with('error','Credit Percentage Not Added.');
+            return $this->error('System Error', 'Cannot add notification right now');
 		}
 
     }
@@ -67,17 +67,14 @@ class NotificationsController extends AppController
 
     /* delete credit percentages */
     public function destroy($id){
-
     	try {
-
     		$percentage = CreditPercentage::findOrFail($id);
     		if($percentage->delete()){
-    			return redirect()->back()->with('success','Credit Percentage Successfully Deleted.');
+    			return response(null, 200);
     		}
     	}
-
     	catch(Exception $e){
-    		return redirect()->back()->with('error',$e->getMessage());
+    		return $this->error('System Error', 'Cannot delete notification right now');
     	}
     }
 

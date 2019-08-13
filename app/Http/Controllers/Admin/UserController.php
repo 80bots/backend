@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Helpers\MailHelper;
 use App\Http\Controllers\AppController;
 use App\Http\Resources\Admin\UserCollection;
+use App\Http\Resources\Admin\UserResource;
 use App\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -12,7 +13,7 @@ use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
 
-class UsersController extends AppController
+class UserController extends AppController
 {
     const PAGINATE = 1;
 
@@ -108,7 +109,41 @@ class UsersController extends AppController
      */
     public function update(Request $request, $id)
     {
-        //
+        try {
+            $updateData = $request->validate([
+               'update.status' => 'in:active,inactive',
+               'update.remaining_credits' => 'integer'
+            ]);
+
+            $user = User::find($id);
+
+            foreach ($updateData['update'] as $key => $value) {
+                switch ($key) {
+                    case 'status':
+                        $user->status = $value;
+                        $user->verification_token = '';
+                        if ($user->save()) {
+                            return $this->success((new UserResource($user))->toArray($request));
+                        }
+                        break;
+                    case 'remaining_credits':
+                        $user->remaining_credits = $value;
+                        $user->temp_remaining_credits = $value;
+                        if ($user->save()) {
+                            MailHelper::updateUserCreditSendEmail($user);
+                            return $this->success(
+                                (new UserResource($user))->toArray($request),
+                                __('admin.users.credit_added_success')
+                            );
+                        }
+                        break;
+                }
+            }
+
+            return $this->error('System Error', 'Cannot update user at this moment');
+        } catch (\Exception $exception){
+            return $this->error('System Error', $exception->getMessage());
+        }
     }
 
     /**
