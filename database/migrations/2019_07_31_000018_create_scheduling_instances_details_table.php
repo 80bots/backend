@@ -27,7 +27,7 @@ class CreateSchedulingInstancesDetailsTable extends Migration
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'));
             $table->softDeletes();
 
-            $table->foreign('scheduling_instances_id')
+            $table->foreign('scheduling_instance_id')
                 ->references('id')->on('scheduling_instances')
                 ->onUpdate('cascade')->onDelete('cascade');
         });
@@ -41,7 +41,7 @@ class CreateSchedulingInstancesDetailsTable extends Migration
     public function down()
     {
         Schema::table('scheduling_instances_details', function (Blueprint $table) {
-            $table->dropForeign(['scheduling_instances_id']);
+            $table->dropForeign(['scheduling_instance_id']);
         });
 
         Schema::dropIfExists('scheduling_instances_details');

@@ -20,11 +20,12 @@ class BotsController extends Controller
 
             // TODO: Add Filters
 
-            $bots = (new BotCollection($resource->paginate(self::PAGINATE)))->response()->getData();
+            $bots   = (new BotCollection($resource->paginate(self::PAGINATE)))->response()->getData();
+            $meta   = $bots->meta ?? null;
 
             $response = [
-                'bots'      => $bots->data ?? [],
-                'paginate'  => CommonHelper::getPaginateInfo($bots->meta ?? null)
+                'bots'  => $bots->data ?? [],
+                'total' => $meta->total ?? 0
             ];
 
             return $this->success($response);
