@@ -28,11 +28,12 @@ class SchedulesController extends Controller
 
             // TODO: Add Filters
 
-            $schedules = (new ScheduleCollection($resource->paginate(self::PAGINATE)))->response()->getData();
+            $schedules  = (new ScheduleCollection($resource->paginate(self::PAGINATE)))->response()->getData();
+            $meta       = $schedules->meta ?? null;
 
             $response = [
                 'schedules' => $schedules->data ?? [],
-                'paginate'  => CommonHelper::getPaginateInfo($schedules->meta ?? null)
+                'total'     => $meta->total ?? 0
             ];
 
             return $this->success($response);

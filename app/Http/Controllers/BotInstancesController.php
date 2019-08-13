@@ -29,11 +29,12 @@ class BotInstancesController extends AppController
 
             // TODO: Add Filters
 
-            $bots = (new UserInstanceCollection($resource->paginate(self::PAGINATE)))->response()->getData();
+            $bots   = (new UserInstanceCollection($resource->paginate(self::PAGINATE)))->response()->getData();
+            $meta   = $bots->meta ?? null;
 
             $response = [
                 'botInstances'  => $bots->data ?? [],
-                'paginate'      => CommonHelper::getPaginateInfo($bots->meta ?? null)
+                'total'         => $meta->total ?? 0
             ];
 
             return $this->success($response);
