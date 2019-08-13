@@ -16,7 +16,8 @@ class DatabaseSeeder extends Seeder
              AddUserSeeder::class,
              AddPlatformsSeeder::class,
              SubscriptionPlansTableSeeder::class,
-             TimezonesTableSeeder::class
+             TimezonesTableSeeder::class,
+             BotsTableSeeder::class
          ]);
     }
 }
