@@ -16,15 +16,11 @@ class SubscriptionController extends AppController
      */
     public function index()
     {
-        try{
-            $planListObj = SubscriptionPlan::all();
-            if(!$planListObj->isEmpty()){
-                return view('admin.subscription.index', compact('planListObj'));
-            }
-            return view('admin.subscription.index');
+        try {
+            $plans = SubscriptionPlan::all();
+            return $this->success($plans->toArray());
         } catch (\Exception $exception){
-            session()->flash('error', $exception->getMessage());
-            return view('admin.subscription.index');
+            $this->error('System Error', $exception->getMessage());
         }
     }
 
@@ -50,20 +46,19 @@ class SubscriptionController extends AppController
         $plan_name = isset($request->plan_name) ? $request->plan_name : '';
         $price = isset($request->price) ? $request->price : '';
         $credit = isset($request->credit) ? $request->credit : '';
-        try{
+        try {
             $subscriptionPlanObj = New SubscriptionPlan();
             $subscriptionPlanObj->name = $plan_name;
             $subscriptionPlanObj->price = $price;
             $subscriptionPlanObj->credit = $credit;
             if($subscriptionPlanObj->save())
             {
-                return redirect(route('admin.subscription.index'))->with('success', 'Subscription Plan Added Successfully');
+                response(null, 200);
+            } else {
+                $this->error('System Error', 'Cannot create subscription');
             }
-            session()->flash('error', 'Subscription Plan Can not Added Successfully');
-            return redirect()->back();
         } catch (\Exception $exception){
-            session()->flash('error', $exception->getMessage());
-            return view('admin.subscription.create');
+            $this->error('System Error', $exception->getMessage());
         }
     }
 
@@ -108,7 +103,39 @@ class SubscriptionController extends AppController
      */
     public function update(Request $request, $id)
     {
-        $plan_name = isset($request->plan_name) ? $request->plan_name : '';
+        try {
+            $updateData = $request->validate([
+                'update.status' => 'in:active,inactive',
+                'update.name'   => 'string',
+                'update.credit' => 'integer',
+                'update.price'  => 'integer'
+            ]);
+
+            $plan = SubscriptionPlan::find($id);
+
+            foreach ($updateData['update'] as $key => $value) {
+                switch ($key) {
+                    case 'status':
+                        $plan->status = $value;
+                        break;
+                    case 'name':
+                        $plan->name = $value;
+                        break;
+                    case 'credit':
+                        $plan->credit = $value;
+                    case 'price':
+                        $plan->price = $value;
+                }
+            }
+
+            if ($plan->save()) {
+                return $this->success($plan->toArray());
+            }
+            return $this->error('System Error', 'Cannot update user at this moment');
+        } catch (\Exception $exception){
+            return $this->error('System Error', $exception->getMessage());
+        }
+        /*$plan_name = isset($request->plan_name) ? $request->plan_name : '';
         $price = isset($request->price) ? $request->price : '';
         $credit = isset($request->credit) ? $request->credit : '';
         try {
@@ -125,7 +152,7 @@ class SubscriptionController extends AppController
         } catch (\Exception $exception){
             session()->flash('error', $exception->getMessage());
             return redirect()->back();
-        }
+        }*/
     }
 
     /**
@@ -139,13 +166,12 @@ class SubscriptionController extends AppController
         try{
             $subscription = SubscriptionPlan::find($id);
             if($subscription->delete()){
-                return redirect(route('admin.plan.index'))->with('success', 'Subscription Plan Delete Successfully');
+                return response(null, 200);
+            } else {
+                return $this->error('System Error', 'Cannot delete subscription plan right now');
             }
-            session()->flash('error', 'Subscription Plan Can not Deleted Successfully');
-            return redirect()->back();
         } catch (\Exception $exception){
-            session()->flash('error', $exception->getMessage());
-            return redirect()->back();
+            return $this->error('System Error', $exception->getMessage());
         }
     }
 

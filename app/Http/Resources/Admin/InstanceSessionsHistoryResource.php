@@ -15,13 +15,13 @@ class InstanceSessionsHistoryResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id'        => $this->id ?? '',
-            'instance'  => $this->schedulingInstance->userInstance->aws_instance_id ?? '',
-            'user'      => $this->schedulingInstance->user->name ?? '',
-            'type'      => $this->schedule_type ?? '',
-            'time'      => $this->selected_time ?? '',
-            'cron'      => $this->cron_data ?? '',
-            'status'    => $this->status ?? ''
+            'id'           => $this->id ?? '',
+            'instance_id'  => $this->schedulingInstance->userInstance->aws_instance_id ?? '',
+            'user'         => $this->schedulingInstance->user->email ?? '',
+            'type'         => $this->schedule_type ?? '',
+            'time'         => $this->selected_time ?? '',
+            'cron'         => $this->cron_data ?? '',
+            'status'       => $this->status ?? ''
         ];
     }
 }

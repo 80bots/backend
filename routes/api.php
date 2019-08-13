@@ -59,14 +59,12 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
         Route::put('/{id}', 'BotInstanceController@update')->name('update');
     });
 
-    Route::group(['prefix' => 'histories', 'as' => 'histories.'], function () {
-        Route::get('/', 'InstanceSessionHistoriesController@index')->name('index');
-    });
-
     Route::resources([
         'user'          => 'UserController',
         'bots'          => 'BotController',
         'schedules'     => 'ScheduleInstanceController',
-        'notification'  => 'NotificationController'
+        'notification'  => 'NotificationController',
+        'subscription'  => 'SubscriptionController',
+        'session'       => 'InstanceSessionController'
     ]);
 });

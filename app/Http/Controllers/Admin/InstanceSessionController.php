@@ -8,7 +8,7 @@ use App\InstanceSessionsHistory;
 use Illuminate\Http\Request;
 use Throwable;
 
-class InstanceSessionHistoriesController extends AppController
+class InstanceSessionController extends AppController
 {
     const PAGINATE = 1;
 
