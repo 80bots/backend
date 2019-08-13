@@ -85,7 +85,7 @@ class AppController extends Controller
 
             switch ($request->input('status')) {
 
-                case 'start':
+                case UserInstance::STATUS_RUNNING:
 
                     $instance->fill(['status' => UserInstance::STATUS_RUNNING]);
 
@@ -98,9 +98,9 @@ class AppController extends Controller
                     ]);
 
                     break;
-                case 'stop':
+                case UserInstance::STATUS_STOPPED:
 
-                    $instance->fill(['status' => UserInstance::STATUS_STOP]);
+                    $instance->fill(['status' => UserInstance::STATUS_STOPPED]);
 
                     // TODO: Check result
                     $aws->stopInstance([$instance->aws_instance_id ?? null]);

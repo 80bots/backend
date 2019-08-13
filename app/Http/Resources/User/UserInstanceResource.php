@@ -20,6 +20,7 @@ class UserInstanceResource extends JsonResource
 
         return [
             'id'                => $this->id ?? '',
+            'aws_instance_id'   => $this->aws_instance_id ?? null,
             'name'              => $this->tag_name ?? '',
             'launched_at'       => $details->start_time ?? '',
             'tag_user_email'    => $this->tag_user_email ?? '',

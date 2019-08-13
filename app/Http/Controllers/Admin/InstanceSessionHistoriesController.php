@@ -22,12 +22,22 @@ class InstanceSessionHistoriesController extends AppController
     {
         try {
 
+            $limit = $request->query('limit') ?? self::PAGINATE;
+
             $resource = InstanceSessionsHistory::ajax();
 
             // TODO: Add Filters
             $resource->with('schedulingInstance.userInstance');
 
-            return new InstanceSessionsHistoryCollection($resource->paginate(self::PAGINATE));
+            $histories  = (new InstanceSessionsHistoryCollection($resource->paginate($limit)))->response()->getData();
+            $meta       = $histories->meta ?? null;
+
+            $response = [
+                'data'  => $histories->data ?? [],
+                'total' => $meta->total ?? 0
+            ];
+
+            return $this->success($response);
 
         } catch (Throwable $throwable) {
             return $this->error(__('admin.server_error'), $throwable->getMessage());

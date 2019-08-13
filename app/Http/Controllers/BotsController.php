@@ -16,15 +16,17 @@ class BotsController extends Controller
     {
         try {
 
+            $limit = $request->query('limit') ?? self::PAGINATE;
+
             $resource = Bot::ajax();
 
             // TODO: Add Filters
 
-            $bots   = (new BotCollection($resource->paginate(self::PAGINATE)))->response()->getData();
+            $bots   = (new BotCollection($resource->paginate($limit)))->response()->getData();
             $meta   = $bots->meta ?? null;
 
             $response = [
-                'bots'  => $bots->data ?? [],
+                'data'  => $bots->data ?? [],
                 'total' => $meta->total ?? 0
             ];
 

@@ -21,6 +21,8 @@ class SchedulingInstancesController extends AppController
     {
         try {
 
+            $limit = $request->query('limit') ?? self::PAGINATE;
+
             $resource = SchedulingInstance::ajax();
 
             // TODO: Add Filters
@@ -32,8 +34,15 @@ class SchedulingInstancesController extends AppController
                     break;
             }
 
+            $instances  = (new SchedulingInstanceCollection($resource->paginate($limit)))->response()->getData();
+            $meta       = $instances->meta ?? null;
 
-            return new SchedulingInstanceCollection($resource->paginate(self::PAGINATE));
+            $response = [
+                'data'  => $instances->data ?? [],
+                'total' => $meta->total ?? 0
+            ];
+
+            return $this->success($response);
 
         } catch (Throwable $throwable) {
             return $this->error(__('admin.server_error'), $throwable->getMessage());

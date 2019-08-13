@@ -26,6 +26,8 @@ class UsersController extends AppController
     {
         try {
 
+            $limit = $request->query('limit') ?? self::PAGINATE;
+
             $resource = User::ajax();
 
             // TODO: Add Filters
@@ -39,7 +41,15 @@ class UsersController extends AppController
                     break;
             }
 
-            return new UserCollection($resource->paginate(self::PAGINATE));
+            $users  = (new UserCollection($resource->paginate($limit)))->response()->getData();
+            $meta   = $users->meta ?? null;
+
+            $response = [
+                'data'  => $users->data ?? [],
+                'total' => $meta->total ?? 0
+            ];
+
+            return $this->success($response);
 
         } catch (Throwable $throwable) {
             return $this->error(__('admin.server_error'), $throwable->getMessage());

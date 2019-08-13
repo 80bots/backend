@@ -8,9 +8,10 @@ class UserInstance extends BaseModel
 {
     use SoftDeletes;
 
+    const STATUS_PENDING    = 'pending';
     const STATUS_TERMINATED = 'terminated';
     const STATUS_RUNNING    = 'running';
-    const STATUS_STOP       = 'stop';
+    const STATUS_STOPPED    = 'stopped';
 
     protected $table = "user_instances";
 

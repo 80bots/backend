@@ -27,15 +27,25 @@ class BotsController extends AppController
      *
      * @return BotCollection|\Illuminate\Http\JsonResponse
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
+
+            $limit = $request->query('limit') ?? self::PAGINATE;
 
             $resource = Bot::ajax();
 
             // TODO: Add Filters
 
-            return new BotCollection($resource->paginate(self::PAGINATE));
+            $bots   = (new BotCollection($resource->paginate($limit)))->response()->getData();
+            $meta   = $bots->meta ?? null;
+
+            $response = [
+                'data'  => $bots->data ?? [],
+                'total' => $meta->total ?? 0
+            ];
+
+            return $this->success($response);
 
         } catch (Throwable $throwable) {
             return $this->error(__('admin.server_error'), $throwable->getMessage());

@@ -2,14 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\CommonHelper;
 use App\Http\Resources\User\UserInstanceCollection;
-use App\Jobs\StoreUserInstance;
 use App\UserInstance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Session;
 use Throwable;
 
 class BotInstancesController extends AppController
@@ -25,16 +21,18 @@ class BotInstancesController extends AppController
     {
         try {
 
+            $limit = $request->query('limit') ?? self::PAGINATE;
+
             $resource = UserInstance::findByUserId(Auth::id());
 
             // TODO: Add Filters
 
-            $bots   = (new UserInstanceCollection($resource->paginate(self::PAGINATE)))->response()->getData();
+            $bots   = (new UserInstanceCollection($resource->paginate($limit)))->response()->getData();
             $meta   = $bots->meta ?? null;
 
             $response = [
-                'botInstances'  => $bots->data ?? [],
-                'total'         => $meta->total ?? 0
+                'data'  => $bots->data ?? [],
+                'total' => $meta->total ?? 0
             ];
 
             return $this->success($response);

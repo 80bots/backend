@@ -26,6 +26,8 @@ class BotInstancesController extends AppController
     {
         try {
 
+            $limit = $request->query('limit') ?? self::PAGINATE;
+
             $resource = UserInstance::ajax();
 
             // TODO: Add Filters
@@ -39,7 +41,15 @@ class BotInstancesController extends AppController
                     break;
             }
 
-            return new UserInstanceCollection($resource->paginate(self::PAGINATE));
+            $instances  = (new UserInstanceCollection($resource->paginate($limit)))->response()->getData();
+            $meta       = $instances->meta ?? null;
+
+            $response = [
+                'data'  => $instances->data ?? [],
+                'total' => $meta->total ?? 0
+            ];
+
+            return $this->success($response);
 
         } catch (Throwable $throwable) {
             return $this->error(__('admin.server_error'), $throwable->getMessage());
