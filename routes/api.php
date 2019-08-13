@@ -56,6 +56,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
     Route::group(['prefix' => 'instances', 'as' => 'instances.'], function () {
         Route::post('/launch', 'BotInstanceController@launchInstance')->name('launch');
         Route::get('/sync', 'BotInstanceController@syncInstances')->name('sync');
+        Route::put('/{id}', 'BotInstanceController@update')->name('update');
     });
 
     Route::group(['prefix' => 'histories', 'as' => 'histories.'], function () {

@@ -56,107 +56,90 @@ class AppController extends Controller
 
     /**
      * Change status ec2 instance
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @param $status
+     * @param $id
+     * @return bool
      */
-    protected function changeStatus(Request $request)
+    protected function changeStatus($status, $id): bool
     {
-        try {
+        $instance = $this->getInstanceWithCheckUser($id);
 
-            $instance = $this->getInstanceWithCheckUser($request->input('id'));
-
-            if (empty($instance)) {
-                return $this->notFound(__('keywords.not_found'), __('keywords.instance.not_exist'));
-            }
-
-            $currentDate    = Carbon::now()->toDateTimeString();
-            $aws            = new Aws;
-
-            $describeInstancesResponse = $aws->describeInstances([$instance->aws_instance_id ?? null]);
-
-            if (! $describeInstancesResponse->hasKey('Reservations')) {
-                return $this->error(__('admin.server_error'), __('keywords.aws.error'));
-            }
-
-            if ($this->checkTerminatedStatus($describeInstancesResponse)) {
-                $instance->update(['status' => UserInstance::STATUS_TERMINATED]);
-                return $this->notFound(__('keywords.not_found'), __('keywords.instance.not_exist'));
-            }
-
-            switch ($request->input('status')) {
-
-                case UserInstance::STATUS_RUNNING:
-
-                    $instance->fill(['status' => UserInstance::STATUS_RUNNING]);
-
-                    // TODO: Check result
-                    $aws->startInstance([$instance->aws_instance_id ?? null]);
-
-                    UserInstancesDetails::create([
-                        'user_instance_id'  => $instance->id ?? null,
-                        'start_time'        => $currentDate
-                    ]);
-
-                    break;
-                case UserInstance::STATUS_STOPPED:
-
-                    $instance->fill(['status' => UserInstance::STATUS_STOPPED]);
-
-                    // TODO: Check result
-                    $aws->stopInstance([$instance->aws_instance_id ?? null]);
-
-                    $instanceDetail = UserInstancesDetails::where('user_instance_id', '=', $request->input('id'))
-                        ->latest()
-                        ->first();
-
-                    $diffTime = CommonHelper::diffTimeInMinutes($instanceDetail->start_time, $currentDate);
-
-                    $instanceDetail->fill([
-                        'end_time'      => $currentDate,
-                        'total_time'    => $diffTime
-                    ]);
-
-                    if ($instanceDetail->save()) {
-                        if($diffTime > ($instance->cron_up_time ?? 0)){
-                            $upTime = $diffTime + ($instance->temp_up_time ?? 0);
-                            $instance->fill([
-                                'cron_up_time'  => 0,
-                                'temp_up_time'  => $upTime,
-                                'up_time'       => $upTime,
-                                'used_credit'   => CommonHelper::calculateUsedCredit($upTime)
-                            ]);
-                        }
-                    }
-
-                    break;
-                default:
-                    $instance->fill(['status' => UserInstance::STATUS_TERMINATED]);
-                    // TODO: Check result
-                    $aws->terminateInstance([$instance->aws_instance_id ?? null]);
-                    break;
-            }
-
-            if($instance->save()){
-                return $this->success(
-                    [
-                        'id' => $instance->id ?? null
-                    ],
-                    __('keywords.instance.change_success', [
-                        'status' => $request->input('status')
-                    ])
-                );
-            }
-
-            return $this->error(
-                __('keywords.error'),
-                __('keywords.instance.change_not_success', [
-                    'status' => $request->input('status')
-                ])
-            );
-
-        } catch (Throwable $throwable){
-            return $this->error(__('admin.server_error'), $throwable->getMessage());
+        if (empty($instance)) {
+            return false;
         }
+
+        $currentDate    = Carbon::now()->toDateTimeString();
+        $aws            = new Aws;
+
+        $describeInstancesResponse = $aws->describeInstances([$instance->aws_instance_id ?? null]);
+
+        if (! $describeInstancesResponse->hasKey('Reservations')) {
+            return false;
+        }
+
+        if ($this->checkTerminatedStatus($describeInstancesResponse)) {
+            $instance->update(['status' => UserInstance::STATUS_TERMINATED]);
+            return false;
+        }
+
+        switch ($status) {
+
+            case UserInstance::STATUS_RUNNING:
+
+                $instance->fill(['status' => UserInstance::STATUS_RUNNING]);
+
+                // TODO: Check result
+                $aws->startInstance([$instance->aws_instance_id ?? null]);
+
+                UserInstancesDetails::create([
+                    'user_instance_id'  => $instance->id ?? null,
+                    'start_time'        => $currentDate
+                ]);
+
+                break;
+            case UserInstance::STATUS_STOPPED:
+
+                $instance->fill(['status' => UserInstance::STATUS_STOPPED]);
+
+                // TODO: Check result
+                $aws->stopInstance([$instance->aws_instance_id ?? null]);
+
+                $instanceDetail = UserInstancesDetails::where('user_instance_id', '=', $id)
+                    ->latest()
+                    ->first();
+
+                $diffTime = CommonHelper::diffTimeInMinutes($instanceDetail->start_time, $currentDate);
+
+                $instanceDetail->fill([
+                    'end_time'      => $currentDate,
+                    'total_time'    => $diffTime
+                ]);
+
+                if ($instanceDetail->save()) {
+                    if($diffTime > ($instance->cron_up_time ?? 0)){
+                        $upTime = $diffTime + ($instance->temp_up_time ?? 0);
+                        $instance->fill([
+                            'cron_up_time'  => 0,
+                            'temp_up_time'  => $upTime,
+                            'up_time'       => $upTime,
+                            'used_credit'   => CommonHelper::calculateUsedCredit($upTime)
+                        ]);
+                    }
+                }
+
+                break;
+            default:
+                $instance->fill(['status' => UserInstance::STATUS_TERMINATED]);
+                // TODO: Check result
+                $aws->terminateInstance([$instance->aws_instance_id ?? null]);
+                break;
+        }
+
+        if ($instance->save()) {
+            return true;
+        }
+
+        return false;
     }
 
     public function UserActivation($id)

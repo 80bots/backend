@@ -180,30 +180,62 @@ class BotController extends AppController
                 return $this->notFound(__('admin.not_found'), __('admin.bots.not_found'));
             }
 
-            $bot->fill([
-                'name'                  => $request->input('name'),
-                'platform_id'           => $this->getPlatformId($request->input('platform')),
-                'description'           => $request->input('description'),
-                'aws_ami_image_id'      => $request->input('aws_ami_image_id'),
-                'aws_ami_name'          => $request->input('aws_ami_name'),
-                'aws_instance_type'     => $request->input('aws_instance_type'),
-                'aws_startup_script'    => $request->input('aws_startup_script'),
-                'aws_custom_script'     => $request->input('aws_custom_script'),
-                'aws_storage_gb'        => $request->input('aws_storage_gb'),
-            ]);
-
-            if ($bot->save()) {
-                $this->addTagsToBot($bot, $request->input('tags'));
-                $this->addUsersToBot($bot, $request->input('users'));
-                return $this->success([
-                    'id' => $bot->id ?? null
-                ], __('admin.bots.success_update'));
+            if (! empty($request->input('update'))) {
+                $updateData = $request->validate([
+                    'update.status' => 'in:active,inactive'
+                ]);
+                return $this->updateSimpleInfo($request, $updateData, $bot);
+            } else {
+                return $this->updateFullInfo($request, $bot);
             }
 
-            return $this->error(__('admin.server_error'), __('admin.bots.not_updated'));
         } catch (Throwable $throwable){
             return $this->error(__('admin.server_error'), $throwable->getMessage());
         }
+    }
+
+    private function updateSimpleInfo(Request $request, array $data, Bot $bot)
+    {
+        foreach ($data['update'] as $key => $value) {
+            switch ($key) {
+                case 'status':
+                    $bot->fill(['status' => $value]);
+                    if ($bot->save()) {
+                        return $this->success((new BotResource($bot))->toArray($request));
+                    } else {
+                        return $this->error(__('admin.server_error'), __('admin.bots.not_updated'));
+                    }
+                    break;
+                default:
+                    return $this->error(__('admin.server_error'), __('admin.bots.not_updated'));
+                    break;
+            }
+        }
+
+        return $this->error(__('admin.server_error'), __('admin.bots.not_updated'));
+    }
+
+    private function updateFullInfo(Request $request, Bot $bot)
+    {
+        $bot->fill([
+            'name'                  => $request->input('name'),
+            'platform_id'           => $this->getPlatformId($request->input('platform')),
+            'description'           => $request->input('description'),
+            'aws_ami_image_id'      => $request->input('aws_ami_image_id'),
+            'aws_ami_name'          => $request->input('aws_ami_name'),
+            'aws_instance_type'     => $request->input('aws_instance_type'),
+            'aws_startup_script'    => $request->input('aws_startup_script'),
+            'aws_custom_script'     => $request->input('aws_custom_script'),
+            'aws_storage_gb'        => $request->input('aws_storage_gb'),
+        ]);
+
+        if ($bot->save()) {
+            $this->addTagsToBot($bot, $request->input('tags'));
+            $this->addUsersToBot($bot, $request->input('users'));
+            return $this->success();
+        }
+
+        return $this->error(__('admin.server_error'), __('admin.bots.not_updated'));
     }
 
     /**

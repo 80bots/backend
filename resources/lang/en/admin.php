@@ -24,6 +24,8 @@ return [
     'instances' => [
         'success_sync' => 'Instances sync was successfully',
         'error_sync' => 'Instances sync failed',
+        'not_found' => '',
+        'not_updated' => ''
     ],
     'scheduling' => [
         'title' => 'Scheduling List',
