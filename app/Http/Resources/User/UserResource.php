@@ -19,7 +19,8 @@ class UserResource extends JsonResource
             'name'              => $this->name ?? '',
             'email'             => $this->email ?? '',
             'role'              => $this->role->name ?? '',
-            'remaining_credits' => $this->remaining_credits ?? 0
+            'remaining_credits' => $this->remaining_credits ?? 0,
+            'timezone'          => $this->timezone->timezone ?? ''
         ];
     }
 }

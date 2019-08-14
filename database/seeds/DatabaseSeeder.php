@@ -13,11 +13,11 @@ class DatabaseSeeder extends Seeder
     {
          $this->call([
              RolesTableseeder::class,
-             AddUserSeeder::class,
-             AddPlatformsSeeder::class,
              SubscriptionPlansTableSeeder::class,
              TimezonesTableSeeder::class,
-             BotsTableSeeder::class
+             AddUserSeeder::class,
+             AddPlatformsSeeder::class,
+             BotsTableSeeder::class,
          ]);
     }
 }

@@ -70,6 +70,11 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class);
     }
 
+    public function timezone()
+    {
+        return $this->belongsTo(Timezone::class);
+    }
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */

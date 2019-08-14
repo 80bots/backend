@@ -43,6 +43,30 @@ class UserController extends AppController
         }
     }
 
+    public function update(Request $request) {
+        try {
+            $updateData = $request->validate([
+                'update.timezone_id' => 'integer'
+            ]);
+
+            foreach ($updateData['update'] as $key => $value) {
+                switch ($key) {
+                    case 'timezone_id':
+                        $request->user()->timezone_id = $value;
+                        break;
+                }
+            }
+
+            if ($request->user()->save()) {
+                return $this->success();
+            }
+
+            return $this->error('System Error', 'Cannot update profile at this moment');
+        } catch (\Exception $exception){
+            return $this->error('System Error', $exception->getMessage());
+        }
+    }
+
     /**
      * @param Request $request
      * @return JsonResponse
@@ -78,7 +102,7 @@ class UserController extends AppController
     public function getTimezones(): JsonResponse
     {
         try {
-            return $this->success((new TimezoneCollection(Timezone::get()))->response()->getDate());
+            return $this->success((new TimezoneCollection(Timezone::all()))->response()->getData());
         } catch (Throwable $throwable) {
             return $this->error(__('user.server_error'), $throwable->getMessage());
         }

@@ -16,7 +16,8 @@ Route::group(['middleware' => ['auth:api']], function() {
 
     Route::group(['prefix' => 'user', 'as' => 'user.'], function() {
         Route::get('/profile', 'UserController@show')->name('profile');
-        Route::get('/timezones', 'UserController@getTimezones')->name('timezones');
+        Route::put('/profile', 'UserController@update')->name('update.profile');
+        Route::get('/timezone', 'UserController@getTimezones')->name('timezones');
         Route::post('/profile/timezone', 'UserController@updateTimezone')->name('profile.timezone');
     });
 
@@ -42,7 +43,7 @@ Route::group(['middleware' => ['auth:api']], function() {
 
     Route::resources([
         'bots'      => 'BotController',
-        'schedules' => 'ScheduleController',
+        'schedule' => 'ScheduleController',
     ]);
 
 });
@@ -62,7 +63,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
     Route::resources([
         'user'          => 'UserController',
         'bots'          => 'BotController',
-        'schedules'     => 'ScheduleInstanceController',
+        'schedule'     => 'ScheduleInstanceController',
         'notification'  => 'NotificationController',
         'subscription'  => 'SubscriptionController',
         'session'       => 'InstanceSessionController'

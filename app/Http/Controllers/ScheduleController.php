@@ -96,25 +96,24 @@ class ScheduleController extends Controller
     {
         try {
 
-            $userInstanceId = $request->input('instance_id');
-            $userTimeZone   = $request->input('timezone');
-            $details        = $request->input('details');
+            $data = $request->validate([
+               'instance_id' => 'required|string'
+            ]);
 
-            // TODO: Check instance_id by user
+            $instance = UserInstance::findByInstanceId($data['instance_id'])->first();
 
-            $instance = SchedulingInstance::findByUserInstanceId($userInstanceId, Auth::id())
+            if(empty($instance)) return $this->error(__('user.server_error'), 'Such bot does not exists');
+
+            $schedule = SchedulingInstance::findByUserInstanceId($instance->id, Auth::id())
                 ->first();
 
-            if (empty($instance)) {
-                $instance = SchedulingInstance::create([
+            if (empty($schedule)) {
+                $schedule = SchedulingInstance::create([
                     'user_id'           => Auth::id(),
-                    'user_instances_id' => $userInstanceId,
+                    'user_instance_id' => $instance->id,
                 ]);
-            }
 
-            if (! empty($details) && is_array($details)) {
-                $this->updateOrCreateSchedulingInstancesDetails($instance, $details, $userTimeZone);
-                return $this->success();
+                if($schedule) return $this->success();
             }
 
             return $this->error(__('user.error'), __('user.parameters_incorrect'));
@@ -202,7 +201,6 @@ class ScheduleController extends Controller
     public function update(Request $request, $id)
     {
         try{
-
             $instance = SchedulingInstance::where('user_id', '=', Auth::id())
                 ->where('id', '=', $id)->first();
 
@@ -216,7 +214,6 @@ class ScheduleController extends Controller
             if (! empty($request->input('update'))) {
                 $updateData = $request->validate([
                     'update.status'     => "in:{$active},{$inactive}",
-                    'update.timezone'   => 'string',
                     'update.details'    => 'array',
                 ]);
                 return $this->updateSimpleInfo($request, $updateData, $instance);
@@ -241,9 +238,9 @@ class ScheduleController extends Controller
                         return $this->error(__('user.server_error'), __('user.scheduling.not_updated'));
                     }
                 case 'details':
-                    $userTimeZone = $request->input('timezone');
-                    $this->updateOrCreateSchedulingInstancesDetails($instance, $value, $userTimeZone);
-                    return $this->success();
+                    $this->updateOrCreateSchedulingInstancesDetails($instance, $value,
+                        $request->user()->timezone->value ?? '+00:00');
+                    return $this->success((new ScheduleResource($instance))->toArray($request));
                 default:
                     return $this->error(__('user.server_error'), __('user.scheduling.not_updated'));
             }
@@ -286,45 +283,12 @@ class ScheduleController extends Controller
     }
 
     /**
-     * @param Request $request
-     * @return JsonResponse
-     */
-    public function changeSchedulingStatus(Request $request): JsonResponse
-    {
-        try{
-
-            switch ($request->input('status')) {
-                case SchedulingInstance::STATUS_ACTIVE:
-                case SchedulingInstance::STATUS_INACTIVE:
-                    $status = $request->input('status');
-                    break;
-                default:
-                    $status = SchedulingInstance::STATUS_INACTIVE;
-                    break;
-            }
-
-            $update = SchedulingInstance::whereHas('userInstance', function(Builder $query) {
-                $query->where('user_id', '=', Auth::id());
-            })->where('id', '=', $request->input('id'))->update(['status' => $status]);
-
-            if ($update) {
-                return $this->success();
-            }
-
-            return $this->error(__('user.error'), __('user.scheduling.status_error'));
-
-        } catch (Throwable $throwable){
-            return $this->error(__('user.server_error'), $throwable->getMessage());
-        }
-    }
-
-    /**
      * @param SchedulingInstance $instance
      * @param array $details
      * @param string $timezone
      * @return void
      */
-    private function updateOrCreateSchedulingInstancesDetails(SchedulingInstance $instance, array $details, string $timezone): void
+    private function updateOrCreateSchedulingInstancesDetails(SchedulingInstance $instance, array $details, $timezone): void
     {
         // Delete all
         SchedulingInstancesDetails::whereHas('schedulingInstance', function(Builder $query) {
@@ -336,6 +300,7 @@ class ScheduleController extends Controller
          * details[0][time] = 6:00 PM
          * details[0][day] = Friday
          */
+
         foreach ($details as $detail) {
 
             switch ($detail['type']) {
@@ -348,8 +313,7 @@ class ScheduleController extends Controller
                     break;
             }
 
-            $selectedTime = Carbon::parse("{$detail['day']} {$detail['time']}")
-                ->setTimezone($timezone);
+            $selectedTime = Carbon::parse("{$detail['day']} {$detail['time']}");
 
             SchedulingInstancesDetails::create([
                 'scheduling_instance_id'    => $instance->id ?? null,

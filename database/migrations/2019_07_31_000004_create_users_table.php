@@ -17,6 +17,7 @@ class CreateUsersTable extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedTinyInteger('role_id');
+            $table->unsignedInteger('timezone_id')->nullable();
             $table->string('name')->nullable();
             $table->string('email')->unique();
             $table->string('stripe_id')->nullable();
@@ -33,14 +34,18 @@ class CreateUsersTable extends Migration
             $table->double('temp_remaining_credits')->default(0);
             $table->enum('status', ['pending', 'active', 'inactive'])->default('pending');
             $table->double('sent_email_status')->default(0);
-            $table->string('timezone')->nullable();
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'));
             $table->softDeletes();
+        });
 
+        Schema::table('users', function($table) {
             $table->foreign('role_id')
                 ->references('id')->on('roles')
                 ->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('timezone_id')
+                ->references('id')->on('timezones')
+                ->onDelete('no action')->onUpdate('no action');
         });
     }
 
@@ -52,7 +57,7 @@ class CreateUsersTable extends Migration
     public function down()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropForeign(['role_id']);
+            $table->dropForeign(['role_id', 'timezone_id']);
         });
 
         Schema::dropIfExists('users');
