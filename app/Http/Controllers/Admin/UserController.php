@@ -27,7 +27,10 @@ class UserController extends AppController
     {
         try {
 
-            $limit = $request->query('limit') ?? self::PAGINATE;
+            $limit  = $request->query('limit') ?? self::PAGINATE;
+            $search = $request->input('search');
+            $sort   = $request->input('sort');
+            $order  = $request->input('order') ?? 'asc';
 
             $resource = User::ajax();
 
@@ -40,6 +43,17 @@ class UserController extends AppController
                 case 'admins':
                     $resource->onlyAdmins();
                     break;
+            }
+
+            //
+            if (! empty($search)) {
+                $resource->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            }
+
+            //
+            if (! empty($sort)) {
+                $resource->orderBy($sort, $order);
             }
 
             $users  = (new UserCollection($resource->paginate($limit)))->response()->getData();

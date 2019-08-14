@@ -23,10 +23,25 @@ class BotInstanceController extends AppController
         try {
 
             $limit = $request->query('limit') ?? self::PAGINATE;
+            $search = $request->input('search');
+            $sort   = $request->input('sort');
+            $order  = $request->input('order') ?? 'asc';
 
             $resource = UserInstance::findByUserId(Auth::id());
 
             // TODO: Add Filters
+
+            //
+            if (! empty($search)) {
+                $resource->where('tag_name', 'like', "%{$search}%")
+                    ->orWhere('aws_instance_id', 'like', "%{$search}%");
+            }
+
+            //
+            if (! empty($sort)) {
+                $resource->orderBy($sort, $order);
+            }
+
 
             $bots   = (new UserInstanceCollection($resource->paginate($limit)))->response()->getData();
             $meta   = $bots->meta ?? null;
