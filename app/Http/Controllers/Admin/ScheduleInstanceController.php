@@ -9,6 +9,7 @@ use App\SchedulingInstancesDetails;
 use App\UserInstance;
 use DateTime;
 use DateTimeZone;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
@@ -21,17 +22,34 @@ class ScheduleInstanceController extends AppController
     {
         try {
 
-            $limit = $request->query('limit') ?? self::PAGINATE;
+            $limit  = $request->query('limit') ?? self::PAGINATE;
+            $list   = $request->input('list');
+            $search = $request->input('search');
+            $sort   = $request->input('sort');
+            $order  = $request->input('order') ?? 'asc';
 
             $resource = SchedulingInstance::ajax();
 
             // TODO: Add Filters
-            switch ($request->input('list')) {
+            switch ($list) {
                 case 'my':
                     $resource->findByUserId(Auth::id());
                     break;
                 default:
                     break;
+            }
+
+            //
+            if (! empty($search)) {
+                $resource->whereHas('user', function (Builder $query) use ($search) {
+                    $query->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
+            }
+
+            //
+            if (! empty($sort)) {
+                $resource->orderBy($sort, $order);
             }
 
             $instances  = (new SchedulingInstanceCollection($resource->paginate($limit)))->response()->getData();
@@ -272,25 +290,6 @@ class ScheduleInstanceController extends AppController
         } catch (Throwable $throwable){
             session()->flash('error', $throwable->getMessage());
             return redirect()->back();
-        }
-    }
-
-    public function changeStatus(Request $request)
-    {
-        try{
-            $Scheduling = SchedulingInstance::find($request->id);
-            $Scheduling->status = $request->status;
-            if($Scheduling->save()){
-                session()->flash('success', 'Schedule '.$request->status.' successfully!');
-                return 'true';
-            } else {
-                session()->flash('error', 'Schedule '.$request->status.' Not successfully!');
-                return 'false';
-            }
-
-        } catch (Throwable $throwable){
-            session()->flash('error', 'Schedule '.$request->status.' Not successfully!');
-            return 'false';
         }
     }
 }

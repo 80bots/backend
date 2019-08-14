@@ -24,7 +24,10 @@ class ScheduleController extends Controller
     {
         try {
 
-            $limit = $request->query('limit') ?? self::PAGINATE;
+            $limit  = $request->query('limit') ?? self::PAGINATE;
+            $search = $request->input('search');
+            $sort   = $request->input('sort');
+            $order  = $request->input('order') ?? 'asc';
 
             $resource = SchedulingInstance::findByUserId(Auth::id());
 

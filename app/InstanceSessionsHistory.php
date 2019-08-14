@@ -29,8 +29,13 @@ class InstanceSessionsHistory extends Model
         return $query;
     }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class,'user_id');
+    }
+
     public function schedulingInstance()
     {
-        return $this->belongsTo('App\SchedulingInstance','scheduling_instances_id');
+        return $this->belongsTo(SchedulingInstance::class,'scheduling_instances_id');
     }
 }

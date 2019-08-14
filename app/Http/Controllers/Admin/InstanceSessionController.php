@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\AppController;
 use App\Http\Resources\Admin\InstanceSessionsHistoryCollection;
 use App\InstanceSessionsHistory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Throwable;
 
@@ -22,12 +23,29 @@ class InstanceSessionController extends AppController
     {
         try {
 
-            $limit = $request->query('limit') ?? self::PAGINATE;
+            $limit  = $request->query('limit') ?? self::PAGINATE;
+            $search = $request->input('search');
+            $sort   = $request->input('sort');
+            $order  = $request->input('order') ?? 'asc';
 
             $resource = InstanceSessionsHistory::ajax();
 
             // TODO: Add Filters
-            $resource->with('schedulingInstance.userInstance');
+            $resource->with(['schedulingInstance.userInstance', 'user']);
+
+            //
+            if (! empty($search)) {
+                $resource->whereHas('user', function (Builder $query) use ($search) {
+                    $query->where('email', 'like', "%{$search}%");
+                })->orWhereHas('schedulingInstance.userInstance', function (Builder $query) use ($search) {
+                    $query->where('aws_instance_id', 'like', "%{$search}%");
+                });
+            }
+
+            //
+            if (! empty($sort)) {
+                $resource->orderBy($sort, $order);
+            }
 
             $histories  = (new InstanceSessionsHistoryCollection($resource->paginate($limit)))->response()->getData();
             $meta       = $histories->meta ?? null;

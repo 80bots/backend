@@ -42,7 +42,6 @@ class BotInstanceController extends AppController
                 $resource->orderBy($sort, $order);
             }
 
-
             $bots   = (new UserInstanceCollection($resource->paginate($limit)))->response()->getData();
             $meta   = $bots->meta ?? null;
 

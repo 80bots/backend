@@ -17,7 +17,7 @@ class InstanceSessionsHistoryResource extends JsonResource
         return [
             'id'           => $this->id ?? '',
             'instance_id'  => $this->schedulingInstance->userInstance->aws_instance_id ?? '',
-            'user'         => $this->schedulingInstance->user->email ?? '',
+            'user'         => $this->user->email ?? '',
             'type'         => $this->schedule_type ?? '',
             'time'         => $this->selected_time ?? '',
             'cron'         => $this->cron_data ?? '',

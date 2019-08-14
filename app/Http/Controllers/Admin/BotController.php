@@ -12,6 +12,7 @@ use App\Platform;
 use App\Tag;
 use App\User;
 use App\UserInstance;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
@@ -25,17 +26,41 @@ class BotController extends AppController
     /**
      * Display a listing of the resource.
      *
+     * @param Request $request
      * @return BotCollection|\Illuminate\Http\JsonResponse
      */
     public function index(Request $request)
     {
         try {
 
-            $limit = $request->query('limit') ?? self::PAGINATE;
+            $limit      = $request->query('limit') ?? self::PAGINATE;
+            $platform   = $request->input('platform');
+            $search     = $request->input('search');
+            $sort       = $request->input('sort');
+            $order      = $request->input('order') ?? 'asc';
 
             $resource = Bot::ajax();
 
             // TODO: Add Filters
+
+            //
+            if (! empty($platform)) {
+                $resource->whereHas('platform', function (Builder $query) use ($platform) {
+                    $query->where('name', '=', $platform);
+                });
+            }
+
+            //
+            if (! empty($search)) {
+                $resource->where('name', 'like', "%{$search}%")
+                    ->orWhere('aws_ami_image_id', 'like', "%{$search}%")
+                    ->orWhere('aws_ami_name', 'like', "%{$search}%");
+            }
+
+            //
+            if (! empty($sort)) {
+                $resource->orderBy($sort, $order);
+            }
 
             $bots   = (new BotCollection($resource->paginate($limit)))->response()->getData();
             $meta   = $bots->meta ?? null;
