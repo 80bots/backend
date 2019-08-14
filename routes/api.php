@@ -27,6 +27,7 @@ Route::group(['middleware' => ['auth:api']], function() {
 
     Route::group(['prefix' => 'instances', 'as' => 'instances.'], function () {
         Route::post('/launch', 'BotInstanceController@launchInstance')->name('launch');
+        Route::put('/{id}', 'BotInstanceController@update')->name('update');
     });
 
     // User schedules
@@ -50,7 +51,6 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
 
     Route::group(['prefix' => 'bots', 'as' => 'bots.'], function () {
         Route::get('/running', 'BotInstanceController@index')->name('running');
-        Route::put('/running/status', 'BotInstanceController@changeStatus')->name('running.update.status');
     });
 
     Route::group(['prefix' => 'instances', 'as' => 'instances.'], function () {

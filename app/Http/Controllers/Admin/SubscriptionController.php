@@ -135,30 +135,12 @@ class SubscriptionController extends AppController
         } catch (\Exception $exception){
             return $this->error('System Error', $exception->getMessage());
         }
-        /*$plan_name = isset($request->plan_name) ? $request->plan_name : '';
-        $price = isset($request->price) ? $request->price : '';
-        $credit = isset($request->credit) ? $request->credit : '';
-        try {
-            $subscriptionPlanObj = SubscriptionPlan::find($id);
-            $subscriptionPlanObj->name = $plan_name;
-            $subscriptionPlanObj->price = $price;
-            $subscriptionPlanObj->credit = $credit;
-            if($subscriptionPlanObj->save())
-            {
-                return redirect(route('admin.subscription.index'))->with('success', 'Subscription Plan Update Successfully');
-            }
-            session()->flash('error', 'Subscription Plan Can not Update Successfully');
-            return redirect()->back();
-        } catch (\Exception $exception){
-            session()->flash('error', $exception->getMessage());
-            return redirect()->back();
-        }*/
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\SubscriptionPlan  $subscriptionPlan
+     * @param $id
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
@@ -172,23 +154,6 @@ class SubscriptionController extends AppController
             }
         } catch (\Exception $exception){
             return $this->error('System Error', $exception->getMessage());
-        }
-    }
-
-    public function ChangeStatus(Request $request)
-    {
-        try{
-            $planObj = SubscriptionPlan::find($request->id);
-            $planObj->status = $request->status;
-            if($planObj->save()){
-                session()->flash('success', 'Status Successfully Change');
-                return 'true';
-            }
-            session()->flash('error', 'Status Change Fail Please Try Again');
-            return 'false';
-        } catch (\Exception $exception){
-            session()->flash('error', $exception->getMessage());
-            return 'false';
         }
     }
 }

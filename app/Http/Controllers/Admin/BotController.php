@@ -180,9 +180,12 @@ class BotController extends AppController
                 return $this->notFound(__('admin.not_found'), __('admin.bots.not_found'));
             }
 
+            $active     = Bot::STATUS_ACTIVE;
+            $inactive   = Bot::STATUS_INACTIVE;
+
             if (! empty($request->input('update'))) {
                 $updateData = $request->validate([
-                    'update.status' => 'in:active,inactive'
+                    'update.status' => "in:{$active},{$inactive}"
                 ]);
                 return $this->updateSimpleInfo($request, $updateData, $bot);
             } else {
@@ -205,10 +208,8 @@ class BotController extends AppController
                     } else {
                         return $this->error(__('admin.server_error'), __('admin.bots.not_updated'));
                     }
-                    break;
                 default:
                     return $this->error(__('admin.server_error'), __('admin.bots.not_updated'));
-                    break;
             }
         }
 
@@ -262,37 +263,6 @@ class BotController extends AppController
 
         } catch (Throwable $throwable){
             return $this->error(__('admin.server_error'), $throwable->getMessage());
-        }
-    }
-
-    /**
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse|string
-     */
-    public function changeStatus(Request $request)
-    {
-        try{
-
-            $update = Bot::where('id', '=', $request->id ?? null)
-                ->update(['status' => $request->input('status')]);
-
-            if($update){
-                return response()->json([
-                    'error'     => false,
-                    'message'   => ''
-                ]);
-            }
-
-            return response()->json([
-                'error'     => true,
-                'message'   => 'Status Change Fail Please Try Again'
-            ]);
-
-        } catch (Throwable $throwable){
-            return response()->json([
-                'error'     => true,
-                'message'   => $throwable->getMessage()
-            ]);
         }
     }
 

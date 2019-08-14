@@ -157,24 +157,6 @@ class UserController extends AppController
         //
     }
 
-    public function changeStatus(Request $request)
-    {
-        try{
-            $userObj = User::find($request->id);
-            $userObj->status = $request->status;
-            $userObj->verification_token = '';
-            if($userObj->save()){
-                session()->flash('success', 'Status Successfully Change');
-                return 'true';
-            }
-            session()->flash('error', 'Status Change Fail Please Try Again');
-            return 'false';
-        } catch (\Exception $exception){
-            session()->flash('error', $exception->getMessage());
-            return 'false';
-        }
-    }
-
     /**
      * @param Request $request
      * @return JsonResponse

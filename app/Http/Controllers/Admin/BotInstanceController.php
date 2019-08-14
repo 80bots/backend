@@ -112,10 +112,8 @@ class BotInstanceController extends AppController
                                 return $this->error(__('admin.server_error'), __('admin.instances.not_updated'));
                             }
 
-                            break;
                         default:
                             return $this->error(__('admin.server_error'), __('admin.instances.not_updated'));
-                            break;
                     }
                 }
 

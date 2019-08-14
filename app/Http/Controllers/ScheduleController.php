@@ -207,19 +207,51 @@ class ScheduleController extends Controller
                 return $this->notFound(__('user.not_found'), __('user.scheduling.not_found'));
             }
 
-            $userTimeZone   = $request->input('timezone');
-            $details        = $request->input('details');
+            $active     = SchedulingInstance::STATUS_ACTIVE;
+            $inactive   = SchedulingInstance::STATUS_INACTIVE;
 
-            if (! empty($details) && is_array($details)) {
-                $this->updateOrCreateSchedulingInstancesDetails($instance, $details, $userTimeZone);
-                return $this->success();
+            if (! empty($request->input('update'))) {
+                $updateData = $request->validate([
+                    'update.status'     => "in:{$active},{$inactive}",
+                    'update.timezone'   => 'string',
+                    'update.details'    => 'array',
+                ]);
+                return $this->updateSimpleInfo($request, $updateData, $instance);
+            } else {
+                return $this->updateFullInfo($request, $instance);
             }
-
-            return $this->error(__('user.error'), __('user.parameters_incorrect'));
 
         } catch (Throwable $throwable){
             return $this->error(__('user.server_error'), $throwable->getMessage());
         }
+    }
+
+    private function updateSimpleInfo(Request $request, array $updateData, SchedulingInstance $instance)
+    {
+        foreach ($updateData['update'] as $key => $value) {
+            switch ($key) {
+                case 'status':
+                    $instance->fill(['status' => $value]);
+                    if ($instance->save()) {
+                        return $this->success((new ScheduleResource($instance))->toArray($request));
+                    } else {
+                        return $this->error(__('user.server_error'), __('user.scheduling.not_updated'));
+                    }
+                case 'details':
+                    $userTimeZone = $request->input('timezone');
+                    $this->updateOrCreateSchedulingInstancesDetails($instance, $value, $userTimeZone);
+                    return $this->success();
+                default:
+                    return $this->error(__('user.server_error'), __('user.scheduling.not_updated'));
+            }
+        }
+
+        return $this->error(__('user.error'), __('user.parameters_incorrect'));
+    }
+
+    private function updateFullInfo(Request $request, SchedulingInstance $instance)
+    {
+        return $this->error(__('user.error'), __('user.parameters_incorrect'));
     }
 
     /**

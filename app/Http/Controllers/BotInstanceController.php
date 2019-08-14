@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\User\UserInstanceCollection;
+use App\Http\Resources\User\UserInstanceResource;
 use App\UserInstance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -163,13 +164,56 @@ class BotInstanceController extends AppController
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\UserInstance  $userInstances
-     * @return \Illuminate\Http\Response
+     * @param \Illuminate\Http\Request $request
+     * @param $id
+     * @return void
      */
-    public function update(Request $request, UserInstance $userInstances)
+    public function update(Request $request, $id)
     {
-        //
+        try {
+
+            $instance = UserInstance::where([
+                ['id', '=', $id],
+                ['user_id', '=', Auth::id()]
+            ])->first();
+
+            if (empty($instance)) {
+                return $this->notFound(__('user.not_found'), __('user.instances.not_found'));
+            }
+
+            $running    = UserInstance::STATUS_RUNNING;
+            $stopped    = UserInstance::STATUS_STOPPED;
+            $terminated = UserInstance::STATUS_TERMINATED;
+
+            if (! empty($request->input('update'))) {
+                $updateData = $request->validate([
+                    'update.status' => "in:{$running},{$stopped},{$terminated}"
+                ]);
+
+                foreach ($updateData['update'] as $key => $value) {
+                    switch ($key) {
+                        case 'status':
+
+                            if ($this->changeStatus($value, $id)) {
+                                return $this->success((new UserInstanceResource(UserInstance::find($id)))->toArray($request));
+                            } else {
+                                return $this->error(__('user.server_error'), __('user.instances.not_updated'));
+                            }
+
+                            break;
+                        default:
+                            return $this->error(__('user.server_error'), __('user.instances.not_updated'));
+                            break;
+                    }
+                }
+
+            }
+
+            return $this->error(__('user.server_error'), __('user.instances.not_updated'));
+
+        } catch (Throwable $throwable){
+            return $this->error(__('user.server_error'), $throwable->getMessage());
+        }
     }
 
     /**

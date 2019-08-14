@@ -172,12 +172,12 @@ class InstanceHelper
             $query->whereNotIn('aws_instance_id', $awsInstancesIn)
                 ->orWhere('aws_instance_id', null)
                 ->orWhere('status', 'terminated');
-        })->whereNotIn('status', ['start', 'stop'])
+        })->whereNotIn('status', ['running', 'stopped'])
             ->delete();
 
         UserInstance::where(function($query) {
             $query->where('is_in_queue', 1)
-                ->orWhereIn('status', ['start', 'stop']);
+                ->orWhereIn('status', ['running', 'stopped']);
         })->where('updated_at', '<' , Carbon::now()->subMinutes(10)->toDateTimeString())
             ->delete();
     }

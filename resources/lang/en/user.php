@@ -33,6 +33,10 @@ return [
             'date_time' => 'Date & Time'
         ]
     ],
+    'instances' => [
+        'not_updated' => '',
+        'not_found' => '',
+    ],
     'subscription' => [
         'title' => 'Subscription Plans',
         'button' => 'Select',
