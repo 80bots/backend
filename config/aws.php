@@ -22,6 +22,7 @@ return [
     ],
     'region' => env('AWS_REGION', 'us-east-2'),
     'version' => 'latest',
+    'bucket' => env('AWS_BUCKET', '80bots'),
     'ua_append' => [
         'L5MOD/' . AwsServiceProvider::VERSION,
     ],

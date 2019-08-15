@@ -8,6 +8,7 @@ use App\Http\Resources\Admin\UserInstanceCollection;
 use App\Http\Resources\Admin\UserInstanceResource;
 use App\Services\Aws;
 use App\UserInstance;
+use GuzzleHttp\Psr7\LazyOpenStream;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -38,7 +39,7 @@ class BotInstanceController extends AppController
             // TODO: Add Filters
 
             switch ($list) {
-                case 'my_bots':
+                case 'my':
                     $resource->with('user')->findByUserId(Auth::id());
                     break;
                 default:
@@ -139,5 +140,40 @@ class BotInstanceController extends AppController
         } catch (Throwable $throwable){
             return $this->error(__('admin.server_error'), $throwable->getMessage());
         }
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\JsonResponse|\Illuminate\Http\Response
+     */
+    public function getInstancePemFile(Request $request)
+    {
+        $instance = $request->query('instance');
+
+        if (! empty($instance)) {
+
+            try {
+                $instance = UserInstance::find($instance);
+
+                if (!empty($instance)) {
+                    $aws = new Aws;
+                    $aws->s3Connection();
+
+                    $result = $aws->getKeyPairObject($instance->aws_pem_file_path ?? '');
+
+                    $body = $result->get('Body');
+
+                    if (! empty($body) && $body instanceof LazyOpenStream) {
+                        return response($body)->header('Content-Type', $result->get('ContentType'));
+                    }
+
+                    return $this->error(__('admin.error'), __('admin.error'));
+                }
+            } catch (Throwable $throwable){
+                return $this->error(__('admin.server_error'), $throwable->getMessage());
+            }
+        }
+
+        return $this->error(__('admin.error'), __('admin.parameters_incorrect'));
     }
 }

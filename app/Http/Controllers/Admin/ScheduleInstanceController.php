@@ -4,12 +4,15 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\AppController;
 use App\Http\Resources\Admin\SchedulingInstanceCollection;
+use App\Http\Resources\Admin\SchedulingInstanceResource;
 use App\SchedulingInstance;
 use App\SchedulingInstancesDetails;
 use App\UserInstance;
+use Carbon\Carbon;
 use DateTime;
 use DateTimeZone;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
@@ -69,139 +72,61 @@ class ScheduleInstanceController extends AppController
 
     public function create()
     {
-        try {
-            $instances = UserInstance::where(['status' => 'stop','user_id'=> Auth::id()])->get();
-            return view('admin.scheduling.create',compact('instances'));
-        } catch (Throwable $throwable) {
-            session()->flash('error', $throwable->getMessage());
-            return redirect(route('admin.scheduling.index'));
-        }
     }
 
-    public function convertTimeToUserTime($day, $str, $userTimezone, $format = 'D h:i A')
-    {
-        $new_str = new DateTime("{$day} {$str}", new DateTimeZone($userTimezone));
-        return $new_str->format($format);
-    }
-
-    public function convertTimeToUSERzone($str, $userTimezone, $format = 'h:i A')
-    {
-        if(is_null($str) || empty($str) || $str === "null"){
-            return '';
-        }
-        $new_str = new DateTime($str, new DateTimeZone('UTC'));
-        $new_str->setTimeZone(new DateTimeZone($userTimezone));
-        return $new_str->format($format);
-    }
-
-    public function deleteSchedulerDetails(Request $request)
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function deleteSchedulerDetails(Request $request): JsonResponse
     {
         if (! empty($request->input('ids'))) {
+
             try {
-                SchedulingInstancesDetails::destroy($request->input('ids'));
-                $return['status'] = 'true';
-                $return['message'] = 'Delete Successfully';
-                return json_encode($return);
+
+                $count = SchedulingInstancesDetails::whereIn('id', $request->input('ids'))->delete();
+
+                if ($count) {
+                    return $this->success();
+                }
+
+                return $this->error(__('admin.error'), __('admin.delete_error'));
             } catch(Throwable $throwable) {
-                $return['status'] = 'false';
-                $return['message'] = 'Please try again';
-                return json_encode($return);
+                return $this->error(__('admin.server_error'), $throwable->getMessage());
             }
-        } else {
-            $return['status'] = 'false';
-            $return['message'] = 'No Ids Found';
-            return json_encode($return);
         }
-    }
 
-    public function checkScheduled(Request $request, $id)
-    {
-        try {
-            //$scheduleInstance = SchedulingInstance::findByUserInstanceId($id, Auth::id())->first();
-            $scheduleInstance = SchedulingInstance::byInstanceId($id)->first();
-
-            if (! empty($scheduleInstance)) {
-                $return['status'] = true;
-                $return['data'] = $scheduleInstance->toArray();
-            } else {
-                $return['status'] = false;
-                $return['data'] = $scheduleInstance;
-            }
-            return response()->json($return);
-        } catch (Throwable $throwable) {
-            return response()->json([
-                'status' => false,
-                'message' => $throwable->getMessage()
-            ]);
-        }
+        return $this->error(__('user.error'), __('user.parameters_incorrect'));
     }
 
     public function store(Request $request)
     {
         try {
-            $user_id = Auth::user()->id;
-            $userInstanceId = isset($request->instance_id) ? $request->instance_id : '';
-            $userTimeZone = isset($request->userTimeZone) ? $request->userTimeZone : '';
-            $days = isset($request->day) ? $request->day : '';
-            $requestData = [];
-            foreach ($days as $key => $day){
-                if(!empty($day)){
-                    $data = [];
-                    $data['day'] = $day;
-                    $ids = isset($request->ids) ? explode(',',$request->ids[$key]) : '';
-                    $scheduled_time = isset($request->scheduled_time) ? $request->scheduled_time : '';
-                    $type = isset($request->type) ? $request->type : '';
-                    $endTime = isset($request->end_time) ? $request->end_time : '';
-                    if(!empty($scheduled_time)) {
-                        $data['schedule_type'] = $type[$key];
-                        if(!empty($scheduled_time[$key])){
-                            $selected_time = $this->convertTimeToUserTime($day, $scheduled_time[$key], $userTimeZone);
-                            $data['selected_time'] = date('h:i A', strtotime($selected_time));
-                            $data['cron_data'] = $selected_time.' '.$userTimeZone;
-                        } else {
-                            $data['selected_time'] = '';
-                            $data['cron_data'] = '';
-                        }
-                        if(!empty($ids) && $ids[0] != "0"){
-                            $data['id'] = $ids[0];
-                        }
-                        array_push($requestData, $data);
-                    }
-                }
+
+            $data = $request->validate([
+                'instance_id' => 'required|string'
+            ]);
+
+            $instance = UserInstance::findByInstanceId($data['instance_id'])->first();
+
+            if(empty($instance)) return $this->error(__('admin.error'), 'Such bot does not exists');
+
+            $schedule = SchedulingInstance::findByUserInstanceId($instance->id, Auth::id())
+                ->first();
+
+            if (empty($schedule)) {
+                $schedule = SchedulingInstance::create([
+                    'user_id'           => Auth::id(),
+                    'user_instance_id'  => $instance->id,
+                ]);
+
+                if($schedule) return $this->success();
             }
 
-            $schedulingInstance = SchedulingInstance::findByUserInstanceId($userInstanceId, $user_id)->first();
-            if(empty($schedulingInstance)){
-                $schedulingInstance = new SchedulingInstance();
-            }
-            $schedulingInstance->user_id = $user_id;
-            $schedulingInstance->user_instances_id = $userInstanceId;
-            if($schedulingInstance->save()){
-                foreach ($requestData as $scheduleDetail){
-                    if(isset($scheduleDetail['id']) && !empty($scheduleDetail['id'])){
-                        $schedulingInstanceDetail = SchedulingInstancesDetails::findById($scheduleDetail['id'])->first();
-                    } else {
-                        $schedulingInstanceDetail = new SchedulingInstancesDetails();
-                    }
-                    $schedulingInstanceDetail->scheduling_instances_id = $schedulingInstance->id;
-                    $schedulingInstanceDetail->schedule_type = $scheduleDetail['schedule_type'];
-                    $schedulingInstanceDetail->day = $scheduleDetail['day'];
-                    $schedulingInstanceDetail->selected_time = $scheduleDetail['selected_time'];
-                    $schedulingInstanceDetail->cron_data = $scheduleDetail['cron_data'];
-                    $schedulingInstanceDetail->save();
-                }
-                session()->flash('success', 'Scheduling Create successfully');
-
-
-                return redirect(route('admin.my-bots'));
-            } else {
-                session()->flash('error', 'Please Try again later');
-                return redirect(route('admin.my-bots'));
-            }
+            return $this->error(__('admin.error'), __('admin.parameters_incorrect'));
 
         } catch (Throwable $throwable) {
-            session()->flash('error', $throwable->getMessage());
-            return redirect(route('admin.my-bots'));
+            return $this->error(__('admin.server_error'), $throwable->getMessage());
         }
     }
 
@@ -213,7 +138,28 @@ class ScheduleInstanceController extends AppController
      */
     public function show($id)
     {
+        if (! empty($id)) {
+            try {
 
+                $instance = SchedulingInstance::with('userInstance')
+                    ->where('id', '=', $id)->first();
+
+                if (! empty($instance)) {
+                    $resource = new SchedulingInstanceResource($instance);
+
+                    return $this->success([
+                        'instance' => $resource->response()->getData(),
+                    ]);
+                }
+
+                return $this->notFound(__('user.not_found'), __('user.not_found'));
+
+            } catch (Throwable $throwable) {
+                return $this->error(__('user.server_error'), $throwable->getMessage());
+            }
+        }
+
+        return $this->error(__('user.error'), __('user.parameters_incorrect'));
     }
 
     /**
@@ -224,14 +170,7 @@ class ScheduleInstanceController extends AppController
      */
     public function edit($id)
     {
-        try{
-            $instances = UserInstance::where(['status' => 'stop','user_id'=> Auth::id()])->get();
-            $scheduling = SchedulingInstance::with('userInstances')->find($id);
-            return view('admin.scheduling.edit',compact('scheduling','instances' ,'id'));
-        } catch (Throwable $throwable){
-            session()->flash('error', $throwable->getMessage());
-            return redirect()->back();
-        }
+
     }
 
     /**
@@ -244,32 +183,56 @@ class ScheduleInstanceController extends AppController
     public function update(Request $request, $id)
     {
         try{
-            $schedulingInstance = SchedulingInstance::find($id);
+            $instance = SchedulingInstance::find($id);
 
-            if (! empty($schedulingInstance)) {
-                $schedulingInstance->user_instances_id = $request->user_instances_id;
-                $schedulingInstance->start_time = $request->start_time;
-                $schedulingInstance->end_time = $request->end_time;
-                $schedulingInstance->utc_start_time = $request->utc_start_time ;
-                $schedulingInstance->utc_end_time = $request->utc_end_time;
-                $schedulingInstance->status = $request->status;
-                $schedulingInstance->current_time_zone =  $request->current_time_zone;
-
-                if ($schedulingInstance->save()) {
-                    return redirect(route('admin.scheduling.index'))->with('success', 'Scheduling Update Successfully');
-                } else {
-                    session()->flash('error', 'Bot Can not Updated Successfully');
-                    return redirect()->back();
-                }
+            if (empty($instance)) {
+                return $this->notFound(__('admin.not_found'), __('admin.scheduling.not_found'));
             }
 
-            session()->flash('error', 'Bot not found');
-            return redirect()->back();
+            $active     = SchedulingInstance::STATUS_ACTIVE;
+            $inactive   = SchedulingInstance::STATUS_INACTIVE;
+
+            if (! empty($request->input('update'))) {
+                $updateData = $request->validate([
+                    'update.status'     => "in:{$active},{$inactive}",
+                    'update.details'    => 'array',
+                ]);
+                return $this->updateSimpleInfo($request, $updateData, $instance);
+            } else {
+                return $this->updateFullInfo($request, $instance);
+            }
 
         } catch (Throwable $throwable){
-            session()->flash('error', $throwable->getMessage());
-            return redirect()->back();
+            return $this->error(__('user.server_error'), $throwable->getMessage());
         }
+    }
+
+    private function updateSimpleInfo(Request $request, array $updateData, SchedulingInstance $instance)
+    {
+        foreach ($updateData['update'] as $key => $value) {
+            switch ($key) {
+                case 'status':
+                    $instance->fill(['status' => $value]);
+                    if ($instance->save()) {
+                        return $this->success((new SchedulingInstanceResource($instance))->toArray($request));
+                    } else {
+                        return $this->error(__('admin.server_error'), __('admin.scheduling.not_updated'));
+                    }
+                case 'details':
+                    $this->updateOrCreateSchedulingInstancesDetails($instance, $value,
+                        $request->user()->timezone->value ?? '+00:00');
+                    return $this->success((new SchedulingInstanceResource($instance))->toArray($request));
+                default:
+                    return $this->error(__('admin.server_error'), __('admin.scheduling.not_updated'));
+            }
+        }
+
+        return $this->error(__('admin.error'), __('admin.parameters_incorrect'));
+    }
+
+    private function updateFullInfo(Request $request, SchedulingInstance $instance)
+    {
+        return $this->error(__('admin.error'), __('admin.parameters_incorrect'));
     }
 
     /**
@@ -281,15 +244,64 @@ class ScheduleInstanceController extends AppController
     public function destroy($id)
     {
         try{
-            $schedulingInstance = SchedulingInstance::find($id);
-            if($schedulingInstance->delete()){
-                return redirect(route('admin.scheduling.index'))->with('success', 'Scheduling Delete Successfully');
+
+            $instance = SchedulingInstance::find($id);
+
+            if (empty($instance)) {
+                return $this->notFound(__('admin.not_found'), __('admin.scheduling.not_found'));
             }
-            session()->flash('error', 'Scheduling Can not Deleted Successfully');
-            return redirect()->back();
+
+            if ($instance->delete()) {
+                return $this->success();
+            }
+
+            return $this->error(__('admin.error'), __('admin.scheduling.not_deleted'));
+
         } catch (Throwable $throwable){
-            session()->flash('error', $throwable->getMessage());
-            return redirect()->back();
+            return $this->error(__('admin.server_error'), $throwable->getMessage());
+        }
+    }
+
+    /**
+     * @param SchedulingInstance $instance
+     * @param array $details
+     * @param string $timezone
+     * @return void
+     */
+    private function updateOrCreateSchedulingInstancesDetails(SchedulingInstance $instance, array $details, $timezone): void
+    {
+        // Delete all
+        SchedulingInstancesDetails::where('scheduling_instance_id', '=', $instance->id ?? null)->delete();
+
+        /**
+         * details[0][type] = stop | start
+         * details[0][time] = 6:00 PM
+         * details[0][day] = Friday
+         */
+
+        foreach ($details as $detail) {
+
+            switch ($detail['type']) {
+                case SchedulingInstancesDetails::TYPE_START:
+                case SchedulingInstancesDetails::TYPE_STOP:
+                    $type = $detail['type'];
+                    break;
+                default:
+                    $type = SchedulingInstancesDetails::TYPE_STOP;
+                    break;
+            }
+
+            $selectedTime = Carbon::parse("{$detail['day']} {$detail['time']}");
+
+            SchedulingInstancesDetails::create([
+                'scheduling_instance_id'    => $instance->id ?? null,
+                'day'                       => $detail['day'] ?? '',
+                'selected_time'             => $selectedTime->format('h:i A'),
+                'time_zone'                 => $timezone,
+                'cron_data'                 => "{$selectedTime->format('D h:i A')} {$timezone}",
+                'schedule_type'             => $type,
+                'status'                    => SchedulingInstancesDetails::STATUS_ACTIVE
+            ]);
         }
     }
 }

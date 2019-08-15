@@ -38,6 +38,8 @@ return [
         'status' => 'Status',
         'details' => 'Details',
         'actions' => 'Actions',
+        'not_updated' => '',
+        'not_deleted' => '',
     ],
     'notifications' => [
         'title' => 'Add Low Credit Notification',
@@ -84,5 +86,6 @@ return [
     'active' => 'Active',
     'inactive' => 'Inactive',
     'server_error' => 'Server error',
+    'delete_error' => '',
     'parameters_incorrect' => 'Passed parameters are incorrect',
 ];

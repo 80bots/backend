@@ -55,6 +55,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
     });
 
     Route::group(['prefix' => 'instances', 'as' => 'instances.'], function () {
+        Route::get('/pem', 'BotInstanceController@getInstancePemFile')->name('pem');
         Route::post('/launch', 'BotInstanceController@launchInstance')->name('launch');
         Route::get('/sync', 'BotInstanceController@syncInstances')->name('sync');
         Route::put('/{id}', 'BotInstanceController@update')->name('update');
@@ -63,7 +64,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
     Route::resources([
         'user'          => 'UserController',
         'bots'          => 'BotController',
-        'schedule'     => 'ScheduleInstanceController',
+        'schedule'      => 'ScheduleInstanceController',
         'notification'  => 'NotificationController',
         'subscription'  => 'SubscriptionController',
         'session'       => 'InstanceSessionController'

@@ -33,6 +33,11 @@ class ScheduleController extends Controller
 
             // TODO: Add Filters
 
+            //
+            if (! empty($sort)) {
+                $resource->orderBy($sort, $order);
+            }
+
             $schedules  = (new ScheduleCollection($resource->paginate($limit)))->response()->getData();
             $meta       = $schedules->meta ?? null;
 
@@ -88,9 +93,8 @@ class ScheduleController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     *
      * @param Request $request
-     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     * @return JsonResponse
      */
     public function store(Request $request)
     {
@@ -110,7 +114,7 @@ class ScheduleController extends Controller
             if (empty($schedule)) {
                 $schedule = SchedulingInstance::create([
                     'user_id'           => Auth::id(),
-                    'user_instance_id' => $instance->id,
+                    'user_instance_id'  => $instance->id,
                 ]);
 
                 if($schedule) return $this->success();

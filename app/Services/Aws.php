@@ -13,6 +13,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
 
 use Nubs\RandomNameGenerator\All as AllRandomName;
@@ -32,6 +33,8 @@ class Aws
      */
     protected $s3;
 
+    protected $s3Bucket;
+
     /**
      * @var array
      */
@@ -48,7 +51,7 @@ class Aws
             'credentials'   => config('aws.credentials'),
         ]);
 
-        $this->ignore = config('aws.instance_ignore');
+        $this->ignore   = config('aws.instance_ignore');
     }
 
     public function s3Connection(): void
@@ -58,6 +61,8 @@ class Aws
             'version'       => config('aws.version', 'latest'),
             'credentials'   => config('aws.credentials'),
         ]);
+
+        $this->s3Bucket = config('aws.bucket');
     }
 
     /**
@@ -90,7 +95,7 @@ class Aws
             }
             // Save the private key
             $res = $this->s3->putObject([
-                'Bucket'    => '80bots',
+                'Bucket'    => $this->s3Bucket,
                 'Key'       => $saveKeyLocation,
                 'Body'      => $pemKey
             ]);
@@ -106,6 +111,27 @@ class Aws
         }
 
         return null;
+    }
+
+    public function getKeyPairObject($path = '')
+    {
+        $result = $this->s3->getObject([
+            'Bucket' => $this->s3Bucket,
+            'Key' => $path,
+            'SaveAs' => storage_path($path)
+        ]);
+
+        return $result;
+
+
+
+//        $file = storage_path($path);
+//
+//        $headers = array(
+//            'Content-Type: application/x-pem-file',
+//        );
+//
+        //return Response::download($file, 'KeyPair.pem', $headers);
     }
 
     /**
