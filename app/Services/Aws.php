@@ -632,4 +632,12 @@ HERECONSOLE;
             }
         }
     }
+
+    protected function getEc2InstanceTypes(): ?array
+    {
+        if (empty($this->ec2)) {
+            $this->ec2Connection();
+        }
+        // TODO: need to get available instance types here via pricing API
+    }
 }

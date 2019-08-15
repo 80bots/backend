@@ -27,6 +27,8 @@ class BotResource extends JsonResource
             'aws_custom_script' => $this->aws_custom_script ?? '',
             'status'            => $this->status ?? '',
             'type'              => $this->type ?? '',
+            'tags'              => array_map(function($item) { return $item->name; }, $this->tags->all()),
+            'users'             => $this->users->all()
         ];
     }
 }

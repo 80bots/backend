@@ -23,7 +23,8 @@ Route::group(['middleware' => ['auth:api']], function() {
 
     // User bots
     Route::group(['prefix' => 'bots', 'as' => 'bots.'], function () {
-        Route::get('/running', 'BotInstanceController@index')->name('running');        Route::put('/running/status', 'BotInstanceController@changeStatus')->name('running.update.status');
+        Route::get('/running', 'BotInstanceController@index')->name('running');
+        Route::put('/running/status', 'BotInstanceController@changeStatus')->name('running.update.status');
     });
 
     Route::group(['prefix' => 'instances', 'as' => 'instances.'], function () {
@@ -41,9 +42,14 @@ Route::group(['middleware' => ['auth:api']], function() {
         Route::get('/', 'SubscriptionController@index')->name('index');
     });
 
+    Route::group(['prefix' => 'platform', 'as' => 'platform.'], function() {
+       Route::get('/types', 'PlatformController@getInstanceTypes');
+    });
+
     Route::resources([
-        'bots'      => 'BotController',
+        'bots'     => 'BotController',
         'schedule' => 'ScheduleController',
+        'platform' => 'PlatformController'
     ]);
 
 });
@@ -52,6 +58,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
 
     Route::group(['prefix' => 'bots', 'as' => 'bots.'], function () {
         Route::get('/running', 'BotInstanceController@index')->name('running');
+        Route::get('/tags', 'BotController@getTags')->name('running');
     });
 
     Route::group(['prefix' => 'instances', 'as' => 'instances.'], function () {
