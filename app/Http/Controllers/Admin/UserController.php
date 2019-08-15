@@ -45,6 +45,8 @@ class UserController extends AppController
                     break;
             }
 
+            $resource->where('id', '!=', $request->user()->id);
+
             //
             if (! empty($search)) {
                 $resource->where('name', 'like', "%{$search}%")
