@@ -163,7 +163,7 @@ class BotInstanceController extends AppController
 
                     $body = $result->get('Body');
 
-                    if (! empty($body) && $body instanceof LazyOpenStream) {
+                    if (! empty($body)) {
                         return response($body)->header('Content-Type', $result->get('ContentType'));
                     }
 

@@ -117,21 +117,10 @@ class Aws
     {
         $result = $this->s3->getObject([
             'Bucket' => $this->s3Bucket,
-            'Key' => $path,
-            'SaveAs' => storage_path($path)
+            'Key' => $path
         ]);
 
         return $result;
-
-
-
-//        $file = storage_path($path);
-//
-//        $headers = array(
-//            'Content-Type: application/x-pem-file',
-//        );
-//
-        //return Response::download($file, 'KeyPair.pem', $headers);
     }
 
     /**
