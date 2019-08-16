@@ -133,7 +133,7 @@ class StoreUserInstance implements ShouldQueue
                         ]);
                         $userInstanceDetail->save();
                         session()->flash('success', 'Instance Created successfully');
-                        broadcast(new InstanceLaunched($userInstance, $this->user->role->name));
+                        broadcast(new InstanceLaunched($userInstance, $this->user));
                     }
                 }
 
