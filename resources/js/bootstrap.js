@@ -53,14 +53,14 @@ toastr.options = {
 };
 
 if (typeof io !== 'undefined') {
-    var echo = window.Echo = new Echo({
+/*    var echo = window.Echo = new Echo({
         broadcaster: 'socket.io',
         host: window.location.hostname + ':6001'
     });
 
     var channel = echo.channel('dispatched-instances.' + window.Laravel.user);
 
-    channel.on('App\\Events\\dispatchedInstanceEvent', function (response) {
+    channel.on('App\\Events\\enqueuedInstanceEvent', function (response) {
         if (response.hasOwnProperty('userInstance') && Object.keys(response.userInstance).length) {
             console.log('data > ', response.userInstance);
             var _id = response.userInstance.id;
@@ -82,10 +82,10 @@ if (typeof io !== 'undefined') {
 
     if (window.Laravel.type === 'Admin') {
         var livechannel = echo.channel('instance-live');
-        livechannel.on('App\\Events\\InstanceCreation', function (response) {
+        livechannel.on('App\\Events\\InstanceCreated', function (response) {
             addInstanceToList(response)
         });
-    }
+    }*/
 }
 
 function addInstanceToList(response) {

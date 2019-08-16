@@ -5,8 +5,8 @@ namespace App\Jobs;
 use App\Bot;
 use App\Http\Controllers\AwsConnectionController;
 use App\Http\Controllers\BotInstanceController;
-use App\Events\dispatchedInstanceEvent;
-use App\Events\InstanceCreation;
+use App\Events\InstanceLaunched;
+use App\Events\InstanceCreated;
 use App\Services\Aws;
 use App\User;
 use App\UserInstance;
@@ -133,11 +133,7 @@ class StoreUserInstance implements ShouldQueue
                         ]);
                         $userInstanceDetail->save();
                         session()->flash('success', 'Instance Created successfully');
-                        broadcast(new dispatchedInstanceEvent($userInstance));
-
-                        if(! empty($this->user) && $this->user->hasRole('User')) {
-                            broadcast(new InstanceCreation($this->user, $userInstance));
-                        }
+                        broadcast(new InstanceLaunched($userInstance, $this->user));
                     }
                 }
 

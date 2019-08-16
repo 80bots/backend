@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Events\InstanceLaunched;
 use App\Helpers\InstanceHelper;
 use App\Http\Controllers\AppController;
 use App\Http\Resources\Admin\UserInstanceCollection;
