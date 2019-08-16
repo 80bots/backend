@@ -9,22 +9,25 @@ use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
-use App\UserInstance;
+use Illuminate\Database\Eloquent\Builder;
+use App\User;
 
-class dispatchedInstanceEvent implements ShouldBroadcast
+class InstanceCreated implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    private $data;
+    private $user;
+    private $instance;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct(UserInstance $userInstance)
+    public function __construct(User $user, $instance)
     {
-        $this->data = $userInstance;
+        $this->user = $user;
+        $this->instance = $instance;
     }
 
     /**
@@ -34,7 +37,7 @@ class dispatchedInstanceEvent implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new Channel('dispatched-instances.' . $this->data['user_id']);
+        return new Channel('instance-live');
     }
 
     /**
@@ -45,7 +48,8 @@ class dispatchedInstanceEvent implements ShouldBroadcast
     public function broadcastWith()
     {
         return [
-            'userInstance' => $this->data,
+            'user' => $this->user,
+            'instance' => $this->instance,
         ];
     }
 }
