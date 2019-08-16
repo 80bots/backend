@@ -34,7 +34,7 @@ class BotInstanceController extends AppController
             $sort   = $request->input('sort');
             $order  = $request->input('order') ?? 'asc';
 
-            $resource = UserInstance::ajax();
+            $resource = UserInstance::withTrashed()->ajax();
 
             // TODO: Add Filters
 
@@ -123,7 +123,9 @@ class BotInstanceController extends AppController
                         case 'status':
 
                             if ($this->changeStatus($value, $id)) {
-                                return $this->success((new UserInstanceResource(UserInstance::find($id)))->toArray($request));
+                                $instance = new UserInstanceResource(UserInstance::withTrashed()
+                                    ->where('id', '=', $id));
+                                return $this->success($instance->toArray($request));
                             } else {
                                 return $this->error(__('admin.server_error'), __('admin.instances.not_updated'));
                             }

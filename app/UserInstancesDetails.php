@@ -24,6 +24,6 @@ class UserInstancesDetails extends Model
 
     public function userInstance()
     {
-        return $this->belongsTo(UserInstance::class);
+        return $this->belongsTo(UserInstance::class, 'user_instance_id', 'id');
     }
 }

@@ -69,14 +69,9 @@ class UserInstance extends BaseModel
         return self::where('status', 'running')->get();
     }
 
-    public function userInstanceDetails()
+    public function details()
     {
-        return $this->hasMany(UserInstancesDetails::class);
-    }
-
-    public function userInstanceDetail()
-    {
-        return $this->hasOne(UserInstancesDetails::class);
+        return $this->hasMany(UserInstancesDetails::class, 'user_instance_id', 'id');
     }
 
     public function bots()
@@ -87,6 +82,11 @@ class UserInstance extends BaseModel
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function getTest()
+    {
+        return "TSET";
     }
 
     // public function schedulingInstance()

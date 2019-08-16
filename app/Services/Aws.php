@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Helpers\GeneratorID;
 use Aws\Ec2\Ec2Client;
 use Aws\Result;
+use Aws\S3\Exception\S3Exception;
 use Aws\S3\S3Client;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
@@ -20,6 +21,7 @@ use Nubs\RandomNameGenerator\All as AllRandomName;
 use Nubs\RandomNameGenerator\Alliteration as AlliterationName;
 use Nubs\RandomNameGenerator\Vgng as VideoGameName;
 use Throwable;
+use function Psy\debug;
 
 class Aws
 {
@@ -33,6 +35,9 @@ class Aws
      */
     protected $s3;
 
+    /**
+     * @var string
+     */
     protected $s3Bucket;
 
     /**
@@ -41,36 +46,45 @@ class Aws
     protected $ignore;
 
     /**
+     * @param string $region
+     * @param array|null $credentials
      * @return void
      */
-    public function ec2Connection(): void
+    public function ec2Connection(string $region = '', array $credentials = null): void
     {
         $this->ec2 = new Ec2Client([
-            'region'        => config('aws.region', 'us-east-2'),
+            'region'        => empty($region) ? config('aws.region', 'us-east-2') : $region,
             'version'       => config('aws.version', 'latest'),
-            'credentials'   => config('aws.credentials'),
+            'credentials'   => empty($credentials) ? config('aws.credentials') : $credentials
         ]);
 
         $this->ignore   = config('aws.instance_ignore');
     }
 
-    public function s3Connection(): void
+    /**
+     * @param string $region
+     * @param array|null $credentials
+     * @param string $bucket
+     * @return void
+     */
+    public function s3Connection(string $region = '', array $credentials = null, string $bucket = ''): void
     {
         $this->s3 = new S3Client([
-            'region'        => config('aws.region', 'us-east-2'),
+            'region'        => empty($region) ? config('aws.region', 'us-east-2') : $region,
             'version'       => config('aws.version', 'latest'),
-            'credentials'   => config('aws.credentials'),
+            'credentials'   => empty($credentials) ? config('aws.credentials') : $credentials
         ]);
 
-        $this->s3Bucket = config('aws.bucket');
+        $this->s3Bucket = empty($bucket) ? config('aws.bucket') : $bucket;
     }
 
     /**
      * Create a Key Pair
      *
+     * @param string $bucket
      * @return array|null
      */
-    public function createKeyPair(): ?array
+    public function createKeyPair(string $bucket = ''): ?array
     {
         if (empty($this->ec2)) {
             $this->ec2Connection();
@@ -93,9 +107,12 @@ class Aws
             if (empty($this->s3)) {
                 $this->s3Connection();
             }
+
+            $bucket = empty($bucket) ? $this->s3Bucket : $bucket;
+
             // Save the private key
             $res = $this->s3->putObject([
-                'Bucket'    => $this->s3Bucket,
+                'Bucket'    => $bucket,
                 'Key'       => $saveKeyLocation,
                 'Body'      => $pemKey
             ]);
@@ -113,14 +130,108 @@ class Aws
         return null;
     }
 
-    public function getKeyPairObject($path = '')
+    /**
+     * @param string $path
+     * @param string $bucket
+     * @return Result|null
+     */
+    public function getKeyPairObject(string $path, string $bucket = ''): ?Result
     {
-        $result = $this->s3->getObject([
-            'Bucket' => $this->s3Bucket,
-            'Key' => $path
-        ]);
+        if (empty($this->s3)) {
+            $this->s3Connection();
+        }
 
-        return $result;
+        $bucket = empty($bucket) ? $this->s3Bucket : $bucket;
+
+        try {
+            return $this->s3->getObject([
+                'Bucket'    => $bucket,
+                'Key'       => $path
+            ]);
+        } catch (S3Exception $exception) {
+            return null;
+        }
+    }
+
+    /**
+     * @param string $name
+     */
+    public function deleteKeyPair(string $name): void
+    {
+        if (empty($this->ec2)) {
+            $this->ec2Connection();
+        }
+
+        try {
+            $result = $this->ec2->describeKeyPairs([
+                'KeyNames' => [$name]
+            ]);
+
+            if ($result->hasKey('KeyPairs')) {
+                $this->ec2->deleteKeyPair([
+                    'KeyName' => $name,
+                ]);
+            }
+        } catch (Throwable $throwable) {
+            Log::error("KeyPair ({$name}) removal is impossible");
+        }
+    }
+
+    public function deleteS3KeyPair(string $path, string $bucket = ''): void
+    {
+        if (empty($this->s3)) {
+            $this->s3Connection();
+        }
+
+        $bucket = empty($bucket) ? $this->s3Bucket : $bucket;
+
+        try {
+            $result = $this->s3->getObject([
+                'Bucket'    => $bucket,
+                'Key'       => $path
+            ]);
+
+            if ($result->hasKey('Body')) {
+                $this->s3->deleteObject([
+                    'Bucket'    => $bucket,
+                    'Key'       => $path
+                ]);
+            }
+        } catch (S3Exception $exception) {
+            Log::error("KeyPair ({$path}) removal is impossible");
+        }
+    }
+
+    public function deleteSecurityGroup(string $groupId): void
+    {
+        if (empty($this->ec2)) {
+            $this->ec2Connection();
+        }
+
+        try {
+            $result = $this->ec2->describeSecurityGroups([
+                'GroupIds' => [$groupId]
+            ]);
+            if ($result->hasKey('SecurityGroups')) {
+                $res = $this->ec2->deleteSecurityGroup([
+                    'GroupId' => $groupId,
+                ]);
+            }
+        } catch (Throwable $throwable) {
+            Log::error("SecurityGroups ({$groupId}) removal is impossible");
+        }
+    }
+
+    /**
+     * @return Result
+     */
+    public function getListKeyPairs(): Result
+    {
+        if (empty($this->ec2)) {
+            $this->ec2Connection();
+        }
+
+        return $this->ec2->describeKeyPairs();
     }
 
     /**
@@ -186,6 +297,10 @@ class Aws
      */
     public function setSecretGroupIngress($securityGroupName = null): Result
     {
+        if (empty($this->ec2)) {
+            $this->ec2Connection();
+        }
+
         $serverIp = $this->getServerIp();
 
         // Set ingress rules for the security group
@@ -641,8 +756,9 @@ HERECONSOLE;
                         return $content;
                     }
                 }
+                return null;
             } catch (RequestException $exception) {
-                Log::error("File: {$exception->getFile()} / function: setSecretGroupIngress / {$exception->getMessage()}");
+                Log::error("File: {$exception->getFile()} / {$exception->getMessage()}");
                 return null;
             }
         }

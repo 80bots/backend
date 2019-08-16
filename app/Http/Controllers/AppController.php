@@ -79,6 +79,8 @@ class AppController extends Controller
 
         if ($this->checkTerminatedStatus($describeInstancesResponse)) {
             $instance->update(['status' => UserInstance::STATUS_TERMINATED]);
+            //
+            $this->cleanUpTerminatedInstanceData($aws, $instance);
             return false;
         }
 
@@ -132,14 +134,36 @@ class AppController extends Controller
                 $instance->fill(['status' => UserInstance::STATUS_TERMINATED]);
                 // TODO: Check result
                 $aws->terminateInstance([$instance->aws_instance_id ?? null]);
+
+                $this->cleanUpTerminatedInstanceData($aws, $instance);
+
                 break;
         }
 
         if ($instance->save()) {
+
+            if ($instance->status === UserInstance::STATUS_TERMINATED) {
+                $instance->delete();
+            }
+
             return true;
         }
 
         return false;
+    }
+
+    /**
+     * Clean up unused keys and security groups
+     * @param Aws $aws
+     * @param UserInstance $instance
+     */
+    protected function cleanUpTerminatedInstanceData(Aws $aws, UserInstance $instance): void
+    {
+        //
+        if(preg_match('/^keys\/(.*)\.pem$/s', $instance->aws_pem_file_path ?? '', $matches)) {
+            $aws->deleteKeyPair($matches[1]);
+            $aws->deleteS3KeyPair($instance->aws_pem_file_path ?? '');
+        }
     }
 
     public function UserActivation($id)
