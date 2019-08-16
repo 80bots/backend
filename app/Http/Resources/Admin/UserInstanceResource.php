@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Admin;
 
 use App\UserInstance;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class UserInstanceResource extends JsonResource
@@ -10,7 +11,7 @@ class UserInstanceResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      * @return array
      */
     public function toArray($request)
@@ -22,7 +23,9 @@ class UserInstanceResource extends JsonResource
         return [
             'id'                => $this->id ?? '',
             'name'              => $this->tag_name ?? '',
-            'launched_by'       => $details->start_time ?? '',
+            'bot_name'          => $this->bots->name ?? '',
+            'launched_by'       => $this->tag_user_email ?? '',
+            'launched_at'       => $details->start_time ?? '',
             'instance_id'       => $this->aws_instance_id ?? '',
             'tag_user_email'    => $this->tag_user_email ?? '',
             'used_credit'       => $this->used_credit ?? 0,
