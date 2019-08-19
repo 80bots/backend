@@ -178,7 +178,7 @@ class BotInstanceController extends AppController
     /**
      * Update the specified resource in storage.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param Request $request
      * @param $id
      * @return void
      */
@@ -235,7 +235,7 @@ class BotInstanceController extends AppController
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\UserInstance  $userInstances
+     * @param  UserInstance  $userInstances
      * @return \Illuminate\Http\Response
      */
     public function destroy(UserInstance $userInstances)

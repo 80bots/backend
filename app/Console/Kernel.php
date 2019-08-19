@@ -4,6 +4,7 @@ namespace App\Console;
 
 use App\Console\Commands\CalculateInstancesUpTime;
 use App\Console\Commands\CalculateUserCreditScore;
+use App\Console\Commands\CleanUpUnused;
 use App\Console\Commands\InstanceStartScheduling;
 use App\Console\Commands\InstanceStopScheduling;
 use App\Console\Commands\InstanceSyncScheduling;
@@ -22,7 +23,8 @@ class Kernel extends ConsoleKernel
         InstanceStopScheduling::class,
         InstanceSyncScheduling::class,
         CalculateInstancesUpTime::class,
-        CalculateUserCreditScore::class
+        CalculateUserCreditScore::class,
+        CleanUpUnused::class
     ];
 
     /**
@@ -39,6 +41,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('instance:stop')->everyMinute();
         $schedule->command('instance:calculate-up-time')->everyTenMinutes();
         $schedule->command('instance:calculate-user-credit-score')->everyTenMinutes();
+        $schedule->command('instance:clean')->hourly();
     }
 
     /**

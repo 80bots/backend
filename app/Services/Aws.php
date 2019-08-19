@@ -202,23 +202,49 @@ class Aws
         }
     }
 
-    public function deleteSecurityGroup(string $groupId): void
+    /**
+     * @param string $groupId
+     * @param string $groupName
+     * @return bool
+     */
+    public function deleteSecurityGroup(string $groupId, string $groupName = ''): bool
     {
         if (empty($this->ec2)) {
             $this->ec2Connection();
         }
 
         try {
+
             $result = $this->ec2->describeSecurityGroups([
                 'GroupIds' => [$groupId]
             ]);
+
             if ($result->hasKey('SecurityGroups')) {
+
                 $res = $this->ec2->deleteSecurityGroup([
-                    'GroupId' => $groupId,
+                    'GroupId'   => $groupId,
+                    'GroupName' => $groupName
                 ]);
+
+                if ($res->hasKey('@metadata')) {
+                    $meta = $res->get('@metadata');
+
+                    Log::debug("deleteSecurityGroup @metadata => {$meta['statusCode']}");
+
+                    return $meta['statusCode'] === 200;
+                }
+
+                return false;
             }
+
+            return false;
+
         } catch (Throwable $throwable) {
+            if (strpos($throwable->getMessage(), "<Code>InvalidGroup.NotFound</Code>")) {
+                return true;
+            }
             Log::error("SecurityGroups ({$groupId}) removal is impossible");
+            return false;
         }
     }
 

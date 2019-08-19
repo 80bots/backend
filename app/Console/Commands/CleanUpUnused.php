@@ -2,12 +2,11 @@
 
 namespace App\Console\Commands;
 
-use App\Http\Resources\User\UserInstanceCollection;
-use App\Http\Resources\User\UserInstanceResource;
+use App\DeleteSecurityGroup;
 use App\Services\Aws;
-use App\UserInstance;
-use App\UserInstancesDetails;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Throwable;
 
 class CleanUpUnused extends Command
 {
@@ -43,27 +42,27 @@ class CleanUpUnused extends Command
     public function handle()
     {
         /**
-         * TODO: Get all the removed instances for the last day and remove connected groups,
+         * Get all the removed instances for the last hour and remove connected groups,
          * as it is impossible to remove a group once the instance isn't fully removed on AWS
          */
 
-//        $aws = new Aws;
-//
-//        $aws->deleteSecurityGroup('sg-06cf38cb1f88fa060');
-//
-//        $aws->deleteS3KeyPair('keys/0Mn1rfPmIEKQQ3QQHJmy_psbt.pem');
-//
-//        UserInstance::onlyTrashed()->chunk(100, function ($instances) use ($aws) {
-//            foreach ($instances as $instance) {
-//
-//                $aws->deleteSecurityGroup($instance->aws_security_group_id);
-//
-//                if(preg_match('/^keys\/(.*)\.pem$/s', $instance->aws_pem_file_path, $matches)) {
-//                    $aws->deleteKeyPair($matches[1]);
-//                    $aws->deleteS3KeyPair($instance->aws_pem_file_path);
-//                }
-//                $aws->deleteSecurityGroup($instance->aws_security_group_id);
-//            }
-//        });
+        $now = Carbon::now()->subHour();
+
+        $aws = new Aws;
+
+        DeleteSecurityGroup::where('created_at', '<', $now->toDateTimeString())
+            ->chunk(200, function ($groups) use ($aws) {
+                foreach ($groups as $group) {
+
+                    try {
+                        $result = $aws->deleteSecurityGroup($group->group_id ?? '', $group->group_name ?? '');
+
+                        if ($result) {
+                            $group->delete();
+                        }
+
+                    } catch (Throwable $throwable) {}
+                }
+        });
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\DeleteSecurityGroup;
 use App\Helpers\CommonHelper;
 use App\Jobs\StoreUserInstance;
 use App\Services\Aws;
@@ -59,6 +60,7 @@ class AppController extends Controller
      * @param $status
      * @param $id
      * @return bool
+     * @throws Throwable
      */
     protected function changeStatus($status, $id): bool
     {
@@ -164,6 +166,10 @@ class AppController extends Controller
             $aws->deleteKeyPair($matches[1]);
             $aws->deleteS3KeyPair($instance->aws_pem_file_path ?? '');
         }
+        DeleteSecurityGroup::create([
+            'group_id'      => $instance->aws_security_group_id ?? '',
+            'group_name'    => $instance->aws_security_group_name ?? '',
+        ]);
     }
 
     public function UserActivation($id)
