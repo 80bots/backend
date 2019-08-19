@@ -16,7 +16,7 @@ class UserInstanceResource extends JsonResource
      */
     public function toArray($request)
     {
-        $details = $this->userInstanceDetail()
+        $details = $this->details()
             ->orderBy('created_at', 'desc')
             ->first();
 

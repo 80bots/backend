@@ -48,10 +48,12 @@ class ResetPasswordController extends Controller
         }
     }
 
-    protected function sendResetLinkFailedResponse(Request $request, $response)
+    protected function sendResetFailedResponse(Request $request, $response)
     {
         if($request->wantsJson()) {
-            return $this->error(__('auth.bad_request'), __('auth.wrong_credentials'));
+            return response()->json([
+                'errors' => __('auth.wrong_credentials')
+            ], 422);
         } else {
             return redirect()->back()
                 ->withInput($request->only('email'))

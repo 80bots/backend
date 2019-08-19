@@ -3,14 +3,18 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Helpers\MailHelper;
+use App\Helpers\UserHelper;
 use App\Http\Controllers\Controller;
 use App\Role;
+use App\Timezone;
 use App\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Throwable;
 
 class RegisterController extends Controller
 {
@@ -22,7 +26,7 @@ class RegisterController extends Controller
      * @var string
      */
     protected function redirectTo(){
-        return '/login';
+        return '/';
     }
 
     /**
@@ -44,8 +48,8 @@ class RegisterController extends Controller
     protected function validator(array $data)
     {
         return Validator::make($data, [
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'email'     => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password'  => ['required', 'string', 'min:8', 'confirmed'],
         ]);
     }
 
@@ -57,11 +61,15 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
+        $timezone = Timezone::where('timezone', '=', $data['timezone'] ?? '')->first();
+
+        $name = ! empty($data['name']) ? $data['name'] : $data['email'];
+
         $user = User::create([
-            'name'                      => $data['name'] ?? '',
+            'name'                      => $name,
             'email'                     => $data['email'],
             'password'                  => bcrypt($data['password']),
-            'timezone'                  => $data['timezone'] ?? '',
+            'timezone_id'               => $timezone->id ?? null,
             'verification_token'        => Str::random(16),
             'role_id'                   => Role::getUserRole()->id ?? null,
             'remaining_credits'         => config('auth.register.remaining_credits'),
@@ -84,6 +92,29 @@ class RegisterController extends Controller
             return redirect($this->redirectPath())->with('success', 'Please check your Mail for activate your account');
         } else {
             return $this->success(null, __('auth.registered'));
+        }
+    }
+
+    public function apiRegister(Request $request)
+    {
+        $validator = $this->validator($request->all());
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+
+        try {
+            $user = $this->create($request->all());
+            event(new Registered($user));
+
+            $this->guard()->login($user);
+
+            $result = UserHelper::getUserToken(Auth::user());
+
+            return $this->success($result);
+
+        } catch (Throwable $throwable) {
+            return $this->error('auth.server_error', $throwable->getMessage());
         }
     }
 }

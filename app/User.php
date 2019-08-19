@@ -2,6 +2,8 @@
 
 namespace App;
 
+use App\Notifications\SaasVerifyEmail;
+use Illuminate\Auth\Notifications\ResetPassword as ResetPasswordNotification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -22,7 +24,18 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password', 'stripe_id', 'card_brand', 'card_last_four', 'trial_ends_at',
+        'name',
+        'email',
+        'password',
+        'role_id',
+        'timezone_id',
+        'verification_token',
+        'remaining_credits',
+        'temp_remaining_credits',
+        'stripe_id',
+        'card_brand',
+        'card_last_four',
+        'trial_ends_at',
     ];
 
     /**
@@ -31,7 +44,11 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token', 'verification_token', 'password_reset_token', 'auth_token',
+        'password',
+        'remember_token',
+        'verification_token',
+        'password_reset_token',
+        'auth_token',
     ];
 
     /**
@@ -183,4 +200,15 @@ class User extends Authenticatable
         return false;
     }
 
+    /**
+     * Send the email verification notification.
+     *
+     * @param $token
+     * @return void
+     */
+    public function sendPasswordResetNotification($token)
+    {
+        //$this->notify(new ResetPasswordNotification($token));
+        $this->notify(new SaasVerifyEmail($token));
+    }
 }
