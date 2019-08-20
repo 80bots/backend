@@ -14,44 +14,37 @@ class AddUserSeeder extends Seeder
      */
     public function run()
     {
-        $admin = Role::where('name', '=', 'Admin')->pluck('id')->first();
-        $user = Role::where('name', '=', 'User')->pluck('id')->first();
+        $adminRole = Role::where('name', '=', 'Admin')->pluck('id')->first();
+        $userRole = Role::where('name', '=', 'User')->pluck('id')->first();
         $timezone = Timezone::all()->pluck('id')->first();
 
-        DB::table('users')->insert([
-            'role_id' => $admin,
-            'timezone_id' => $timezone,
-            'name' => 'Darshan',
-            'email' => 'darshan.technostacks@gmail.com',
-            'password' => bcrypt('123456'),
-            'status' => 'active'
-        ]);
+        $users = [
+          ['name' => 'Francis', 'passwords' => ['q<jS\9EwtT9h(U`m', 'u&z!#d-RB]w]nX6@']],
+          ['name' => 'Mishra', 'passwords' => ['z8Gjhp4!v@#3Wxm', 'q6.USnjSSt,::9UG']],
+          ['name' => 'Kumar', 'passwords' => ['?9d8%?Pm(g3~2qS)', 'ht3!Q#u7w_?Pr9D3']],
+        ];
 
-        DB::table('users')->insert([
-            'role_id' => $admin,
-            'timezone_id' => $timezone,
-            'name' => 'Francis Admin',
-            'email' => 'francis+admin@inforca.com',
-            'password' => bcrypt('12345678'),
-            'status' => 'active'
-        ]);
+        foreach ($users as $user) {
+            $emailName = strtolower($user['name']);
+            $name = $user['name'];
 
-        DB::table('users')->insert([
-            'role_id' => $user,
-            'timezone_id' => $timezone,
-            'name' => 'Rathod',
-            'email' => 'darshan@technostacks.com',
-            'password' => bcrypt('123456'),
-            'status' => 'active'
-        ]);
+            DB::table('users')->insert([
+                'role_id' => $adminRole,
+                'timezone_id' => $timezone,
+                'name' => "$name Admin",
+                'email' => "$emailName+admin@inforca.com",
+                'password' => bcrypt($user['passwords'][0]),
+                'status' => 'active'
+            ]);
 
-        DB::table('users')->insert([
-            'role_id' => $user,
-            'timezone_id' => $timezone,
-            'name' => 'Francis User',
-            'email' => 'francis+user@inforca.com',
-            'password' => bcrypt('12345678'),
-            'status' => 'active'
-        ]);
+            DB::table('users')->insert([
+                'role_id' => $userRole,
+                'timezone_id' => $timezone,
+                'name' => "$name User",
+                'email' => "$emailName+user@inforca.com",
+                'password' => bcrypt($user['passwords'][1]),
+                'status' => 'active'
+            ]);
+        }
     }
 }
