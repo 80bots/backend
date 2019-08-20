@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\AwsRegion;
 use App\Events\InstanceLaunched;
 use App\Helpers\InstanceHelper;
 use App\Http\Controllers\AppController;
@@ -72,6 +73,15 @@ class BotInstanceController extends AppController
         } catch (Throwable $throwable) {
             return $this->error(__('admin.server_error'), $throwable->getMessage());
         }
+    }
+
+    public function regions(Request $request)
+    {
+        $regions = AwsRegion::onlyEc2()->pluck('name', 'code')->toArray();
+
+        return $this->success([
+            'regions' => $regions
+        ]);
     }
 
     public function syncInstances()

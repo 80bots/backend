@@ -7,21 +7,15 @@ use Aws\Ec2\Ec2Client;
 use Aws\Result;
 use Aws\S3\Exception\S3Exception;
 use Aws\S3\S3Client;
-use Carbon\Carbon;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Request;
-use Illuminate\Support\Facades\Response;
-use Illuminate\Support\Facades\Storage;
-
 use Nubs\RandomNameGenerator\All as AllRandomName;
 use Nubs\RandomNameGenerator\Alliteration as AlliterationName;
 use Nubs\RandomNameGenerator\Vgng as VideoGameName;
 use Throwable;
-use function Psy\debug;
 
 class Aws
 {
@@ -76,6 +70,85 @@ class Aws
         ]);
 
         $this->s3Bucket = empty($bucket) ? config('aws.bucket') : $bucket;
+    }
+
+    /**
+     * @return array
+     */
+    public static function getEc2Regions(): array
+    {
+        $ec2 = new Ec2Client([
+            'region'        => empty($region) ? config('aws.region', 'us-east-2') : $region,
+            'version'       => config('aws.version', 'latest'),
+            'credentials'   => empty($credentials) ? config('aws.credentials') : $credentials
+        ]);
+
+        try {
+
+            $result = $ec2->describeRegions();
+
+            if ($result->hasKey('Regions')) {
+                return collect($result->get('Regions'))->map(function ($item, $key) {
+                    return $item['RegionName'] ?? '';
+                })->toArray();
+            }
+
+            return [];
+
+        } catch (Throwable $throwable) {
+            Log::error($throwable->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * @return array
+     */
+    public function getEc2RegionsWithName(): array
+    {
+        $regions = self::getEc2Regions();
+
+        if (! empty($regions)) {
+
+            try {
+
+                $client = new Client;
+                $res = $client->request('GET', 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html', []);
+
+                if ($res->getStatusCode() === 200) {
+
+                    $content = $res->getBody()->getContents();
+
+                    $pattern = '/<p><code class="code">(.*)<\/code><\/p>\s*<\/td>\s*<td>\s*<p>(.*)<\/p>/im';
+
+                    if (preg_match_all($pattern, $content, $matches)) {
+                        $codes = $matches[1];
+                        $names = $matches[2];
+
+                        $result = [];
+
+                        foreach ($codes as $key => $code) {
+                            if (in_array($code, $regions)) {
+                                $result[] = [
+                                    'code'  => $code,
+                                    'name'  => $names[$key]
+                                ];
+                            }
+                        }
+
+                        return $result;
+                    }
+
+                    return [];
+                }
+
+            } catch (Throwable $throwable) {
+                Log::error($throwable->getMessage());
+                return [];
+            }
+        }
+
+        return [];
     }
 
     /**
@@ -788,6 +861,22 @@ HERECONSOLE;
                 return null;
             }
         }
+    }
+
+    public function describeImages()
+    {
+        if (empty($this->ec2)) {
+            $this->ec2Connection();
+        }
+
+        $result = $this->ec2->describeImages([
+            'Filters' => [
+                ['Name' => 'owner-id', 'Values' => ['030500410996']],
+//                ['Name' => 'image-id', 'Values' => ['ami-0de51bde84cbc7049']]
+            ]
+        ]);
+
+        dd($result);
     }
 
     protected function getEc2InstanceTypes(): ?array

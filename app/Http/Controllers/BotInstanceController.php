@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\AwsRegion;
 use App\Http\Resources\User\UserInstanceCollection;
 use App\Http\Resources\User\UserInstanceResource;
+use App\Services\Aws;
 use App\UserInstance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -55,6 +57,15 @@ class BotInstanceController extends AppController
         } catch (Throwable $throwable) {
             return $this->error(__('keywords.server_error'), $throwable->getMessage());
         }
+    }
+
+    public function regions(Request $request)
+    {
+        $regions = AwsRegion::onlyEc2()->pluck('name', 'code')->toArray();
+
+        return $this->success([
+            'regions' => $regions
+        ]);
     }
 
     /**

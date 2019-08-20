@@ -3,10 +3,7 @@
 namespace App\Jobs;
 
 use App\Bot;
-use App\Http\Controllers\AwsConnectionController;
-use App\Http\Controllers\BotInstanceController;
 use App\Events\InstanceLaunched;
-use App\Events\InstanceCreated;
 use App\Services\Aws;
 use App\User;
 use App\UserInstance;
@@ -38,15 +35,28 @@ class StoreUserInstance implements ShouldQueue
     protected $id;
 
     /**
+     * @var string
+     */
+    protected $region;
+
+    /**
      * Create a new job instance.
      *
      * @param $id
      * @param $user
+     * @param string $region
      */
-    public function __construct($id, $user)
+    public function __construct($id, $user, $region = '')
     {
         $this->id   = $id;
         $this->user = $user;
+        $regions    = Aws::getEc2Regions();
+
+        if (! empty($regions) && in_array($region, $regions)) {
+            $this->region = $region;
+        } else {
+            $this->region = config('aws.region', 'us-east-2');
+        }
     }
 
     /**
@@ -65,12 +75,13 @@ class StoreUserInstance implements ShouldQueue
             $bot            = Bot::findOrFail($userInstance->bot_id);
 
             if (empty($bot)) {
-                session()->flash('error', 'Bot Not Found Please Try Again');
-                return response()->json(['message' => 'Bot Not Found Please Try Again'], 404);
+                return false;
             }
 
-            $aws            = new Aws;
-            $keyPair        = $aws->createKeyPair();
+            $aws = new Aws;
+            $aws->ec2Connection($this->region);
+
+            $keyPair = $aws->createKeyPair();
 
             if (empty($keyPair)) {
                 return false;
