@@ -40,6 +40,7 @@ Route::group(['middleware' => ['auth:api']], function() {
 
     Route::group(['prefix' => 'subscriptions', 'as' => 'subscriptions.'], function () {
         Route::get('/', 'SubscriptionController@index')->name('index');
+        Route::post('/subscribe', 'SubscriptionController@subscribe')->name('subscribe');
     });
 
     Route::group(['prefix' => 'platform', 'as' => 'platform.'], function() {
