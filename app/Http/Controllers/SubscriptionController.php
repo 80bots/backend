@@ -41,4 +41,15 @@ class SubscriptionController extends Controller
 
         return $this->success($response);
     }
+
+    public function subscribe(Request $request) {
+        $data = $request->validate([
+            'plan_id'   => 'integer|required',
+            'token_id' => 'string|required'
+        ]);
+
+        $user = $request->user();
+
+        dd($data);
+    }
 }
