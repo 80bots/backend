@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Helpers\UserHelper;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\ResetsPasswords;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ResetPasswordController extends Controller
 {
@@ -40,18 +42,23 @@ class ResetPasswordController extends Controller
 
     protected function sendResetResponse(Request $request, $response)
     {
-        if($request->wantsJson()) {
-            return $this->success(null, __('auth.password_changed'));
+        if ($request->wantsJson()) {
+            $result = UserHelper::getUserToken(Auth::user());
+            return $this->success($result);
         } else {
             return redirect($this->redirectPath())
                 ->with('status', trans($response));
         }
     }
 
-    protected function sendResetLinkFailedResponse(Request $request, $response)
+    protected function sendResetFailedResponse(Request $request, $response)
     {
-        if($request->wantsJson()) {
-            return $this->error(__('auth.bad_request'), __('auth.wrong_credentials'));
+        if ($request->wantsJson()) {
+            return response()->json([
+                'errors' => [
+                    'credentials' => __('auth.wrong_credentials')
+                ]
+            ], 422);
         } else {
             return redirect()->back()
                 ->withInput($request->only('email'))

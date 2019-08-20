@@ -11,5 +11,6 @@ return [
     'bad_request' => 'Bad request',
     'password_changed' => 'Password was successfully changed',
     'wrong_credentials' => 'Wrong email provided',
-    'registered' => 'User was successfully registered'
+    'registered' => 'User was successfully registered',
+    'server_error' => 'Server error',
 ];

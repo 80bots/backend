@@ -43,11 +43,18 @@ class ForgotPasswordController extends Controller
     protected function sendResetLinkFailedResponse(Request $request, $response)
     {
         if($request->wantsJson()) {
-            return $this->error(__('auth.bad_request'), __('auth.not_found'));
+            return response()->json([
+                'errors' => ['email' => [__('auth.not_found')]]
+            ], 422);
         } else {
             return back()
                 ->withInput($request->only('email'))
                 ->withErrors(['email' => trans($response)]);
         }
+    }
+
+    public function apiShowLinkRequestForm(Request $request)
+    {
+        return response()->json([]);
     }
 }
