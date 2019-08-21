@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Console\Commands\AwsSyncAmis;
 use App\Console\Commands\AwsSyncRegions;
 use App\Console\Commands\CalculateInstancesUpTime;
 use App\Console\Commands\CalculateUserCreditScore;
@@ -26,7 +27,8 @@ class Kernel extends ConsoleKernel
         CalculateInstancesUpTime::class,
         CalculateUserCreditScore::class,
         CleanUpUnused::class,
-        AwsSyncRegions::class
+        AwsSyncRegions::class,
+        AwsSyncAmis::class
     ];
 
     /**
@@ -45,6 +47,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('instance:calculate-user-credit-score')->everyTenMinutes();
         $schedule->command('instance:clean')->hourly();
         $schedule->command('aws:sync-regions')->daily();
+        $schedule->command('aws:sync-amis')->everyThirtyMinutes();
     }
 
     /**

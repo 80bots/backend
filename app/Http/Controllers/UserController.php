@@ -25,13 +25,6 @@ class UserController extends AppController
     {
         try {
 
-            $aws = new Aws;
-            $regions = $aws->getEc2RegionsWithName();
-
-            dd($regions);
-
-            dd("DIE");
-
             $user = User::find(Auth::id());
             $plan = null;
 

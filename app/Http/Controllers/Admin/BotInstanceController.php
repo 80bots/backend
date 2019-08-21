@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\AwsAmi;
 use App\AwsRegion;
-use App\Events\InstanceLaunched;
 use App\Helpers\InstanceHelper;
 use App\Http\Controllers\AppController;
 use App\Http\Resources\Admin\UserInstanceCollection;
 use App\Http\Resources\Admin\UserInstanceResource;
 use App\Services\Aws;
 use App\UserInstance;
-use GuzzleHttp\Psr7\LazyOpenStream;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -84,6 +83,22 @@ class BotInstanceController extends AppController
         ]);
     }
 
+    public function amis(Request $request)
+    {
+        $region = $request->query('region');
+
+        if (! empty($region)) {
+            $amis = AwsAmi::where('aws_region_id', '=', $region)
+                ->pluck('name', 'image_id')
+                ->toArray();
+            return $this->success([
+                'amis' => $amis
+            ]);
+        }
+
+        return $this->error(__('admin.server_error'), __('admin.parameters_incorrect'));
+    }
+
     public function syncInstances()
     {
         try {
@@ -135,7 +150,7 @@ class BotInstanceController extends AppController
 
                             if ($this->changeStatus($value, $id)) {
                                 $instance = new UserInstanceResource(UserInstance::withTrashed()
-                                    ->where('id', '=', $id));
+                                    ->where('id', '=', $id)->first());
                                 return $this->success($instance->toArray($request));
                             } else {
                                 return $this->error(__('admin.server_error'), __('admin.instances.not_updated'));

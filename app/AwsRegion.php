@@ -13,11 +13,35 @@ class AwsRegion extends Model
     protected $fillable = [
         'code',
         'name',
-        'type'
+        'type',
+        'limit',
+        'created_instances'
     ];
+
+    /**
+     * Creation of an object for further applying with filters
+     *
+     * @param $query
+     * @return mixed
+     */
+    public function scopeAjax($query)
+    {
+        return $query;
+    }
 
     public function scopeOnlyEc2($query)
     {
         $query->where('type', '=', self::TYPE_EC2);
+    }
+
+    public function scopeOnlyRegion($query, $region = '')
+    {
+        $region = empty($region) ? config('aws.region', 'us-east-2') : $region;
+        $query->where('code', '=', $region);
+    }
+
+    public function amis()
+    {
+        return $this->hasMany(AwsAmi::class,'aws_region_id', 'id');
     }
 }

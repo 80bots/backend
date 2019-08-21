@@ -18,6 +18,8 @@ class CreateAwsRegionsTable extends Migration
             $table->string('code');
             $table->string('name')->nullable();
             $table->string('type')->default('ec2');
+            $table->unsignedInteger('limit')->nullable();
+            $table->unsignedInteger('created_instances')->default(0);
         });
     }
 

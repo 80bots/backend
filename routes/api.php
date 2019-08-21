@@ -68,6 +68,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
 
     Route::group(['prefix' => 'instances', 'as' => 'instances.'], function () {
         Route::get('/regions', 'BotInstanceController@regions')->name('regions');
+        Route::get('/amis', 'BotInstanceController@amis')->name('amis');
         Route::get('/pem', 'BotInstanceController@getInstancePemFile')->name('pem');
         Route::post('/launch', 'BotInstanceController@launchInstance')->name('launch');
         Route::get('/sync', 'BotInstanceController@syncInstances')->name('sync');

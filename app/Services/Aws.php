@@ -863,20 +863,46 @@ HERECONSOLE;
         }
     }
 
-    public function describeImages()
+    /**
+     * @param string $region
+     * @param string $owner
+     * @return Result|null
+     */
+    public function describeImages(string $region, string $owner): ?Result
     {
         if (empty($this->ec2)) {
-            $this->ec2Connection();
+            $this->ec2Connection($region);
         }
 
-        $result = $this->ec2->describeImages([
-            'Filters' => [
-                ['Name' => 'owner-id', 'Values' => ['030500410996']],
-//                ['Name' => 'image-id', 'Values' => ['ami-0de51bde84cbc7049']]
-            ]
-        ]);
+        try {
+            return $this->ec2->describeImages([
+                'Filters' => [
+                    ['Name' => 'owner-id', 'Values' => [$owner]],
+                    //['Name' => 'image-id', 'Values' => ['ami-0de51bde84cbc7049']]
+                ]
+            ]);
+        } catch (Throwable $throwable) {
+            Log::error($throwable->getMessage());
+            return null;
+        }
+    }
 
-        dd($result);
+    /**
+     * @param string $region
+     * @return Result|null
+     */
+    public function getEc2AccountAttributes(string $region): ?Result
+    {
+        if (empty($this->ec2)) {
+            $this->ec2Connection($region);
+        }
+
+        try {
+            return $this->ec2->describeAccountAttributes();
+        } catch (Throwable $throwable) {
+            Log::error($throwable->getMessage());
+            return null;
+        }
     }
 
     protected function getEc2InstanceTypes(): ?array

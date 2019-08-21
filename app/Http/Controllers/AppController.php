@@ -41,8 +41,6 @@ class AppController extends Controller
 
             $region = $request->input('region');
 
-            $region = 'ca-central-1';
-
             $instance = UserInstance::create([
                 'user_id'   => Auth::id(),
                 'bot_id'    => $request->input('bot_id'),
