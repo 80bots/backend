@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
              AddUserSeeder::class,
              AddPlatformsSeeder::class,
              BotsTableSeeder::class,
+             AwsRegionsTableSeeder::class
          ]);
     }
 }

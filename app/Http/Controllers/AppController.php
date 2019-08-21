@@ -13,8 +13,6 @@ use Aws\Result;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Session;
 use Throwable;
 
 class AppController extends Controller
@@ -24,6 +22,11 @@ class AppController extends Controller
     public function __construct()
     {
         $this->credit = CommonHelper::calculateCredit();
+    }
+
+    public function apiEmpty()
+    {
+        return response()->json([]);
     }
 
     /**
@@ -36,13 +39,17 @@ class AppController extends Controller
     {
         try {
 
+            $region = $request->input('region');
+
+            $region = 'ca-central-1';
+
             $instance = UserInstance::create([
                 'user_id'   => Auth::id(),
                 'bot_id'    => $request->input('bot_id'),
             ]);
 
             if (! empty($instance)) {
-                dispatch(new StoreUserInstance($instance->id ?? null, Auth::user()));
+                dispatch(new StoreUserInstance($instance->id ?? null, Auth::user(), $region));
                 return $this->success([
                     'instance_id' => $instance->id ?? null
                 ], __('keywords.instance.launch_success'));
