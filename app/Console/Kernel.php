@@ -8,6 +8,7 @@ use App\Console\Commands\CleanUpUnused;
 use App\Console\Commands\InstanceStartScheduling;
 use App\Console\Commands\InstanceStopScheduling;
 use App\Console\Commands\InstanceSyncScheduling;
+use App\Console\Commands\RefreshDatabase;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -24,7 +25,8 @@ class Kernel extends ConsoleKernel
         InstanceSyncScheduling::class,
         CalculateInstancesUpTime::class,
         CalculateUserCreditScore::class,
-        CleanUpUnused::class
+        CleanUpUnused::class,
+        RefreshDatabase::class
     ];
 
     /**

@@ -13,7 +13,7 @@
         "devdojo/chatter": "dev-master",
         "fideloper/proxy": "^4.0",
         "illuminate/routing": "^5.8",
-        "laravel/cashier": "^9.3",
+        "laravel/cashier": "^10.0",
         "laravel/framework": "5.8.*",
         "laravel/horizon": "^3.2",
         "laravel/passport": "^7.3",
