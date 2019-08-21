@@ -20,10 +20,6 @@ class CreateUsersTable extends Migration
             $table->unsignedInteger('timezone_id')->nullable();
             $table->string('name')->nullable();
             $table->string('email')->unique();
-            $table->string('stripe_id')->nullable();
-            $table->string('card_brand')->nullable();
-            $table->string('card_last_four')->nullable();
-            $table->timestamp('trial_ends_at')->nullable();
             $table->string('verification_token')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');

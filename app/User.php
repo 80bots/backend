@@ -10,6 +10,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Cashier\Billable;
 use Laravel\Passport\HasApiTokens;
+use Stripe\PaymentMethod;
+use Stripe\Stripe;
 
 class User extends Authenticatable
 {
@@ -191,9 +193,9 @@ class User extends Authenticatable
      * @param $credits
      * @return bool
      */
-    public function updateCredit($credits)
+    public function updateCredits($credits)
     {
-        $this->remaining_credits = $this->remaining_credits + $credits;
+        $this->remaining_credits = $credits;
         if ($this->save()){
             return true;
         }
@@ -210,5 +212,16 @@ class User extends Authenticatable
     {
         //$this->notify(new ResetPasswordNotification($token));
         $this->notify(new SaasVerifyEmail($token));
+    }
+
+    public function createPaymentMethod($token) {
+        Stripe::setApiKey(config('services.stripe.key'));
+
+        return PaymentMethod::create([
+            'type' => 'card',
+            'card' => [
+                'token' => $token
+            ]
+        ]);
     }
 }

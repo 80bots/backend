@@ -20,7 +20,8 @@ class UserResource extends JsonResource
             'email'             => $this->email ?? '',
             'role'              => $this->role->name ?? '',
             'remaining_credits' => $this->remaining_credits ?? 0,
-            'timezone'          => $this->timezone->timezone ?? ''
+            'timezone'          => $this->timezone->timezone ?? '',
+            'subscription'      => $this->subscription(config('services.stripe.product')) ?? []
         ];
     }
 }
