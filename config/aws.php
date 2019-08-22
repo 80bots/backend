@@ -26,7 +26,7 @@ return [
     'ua_append' => [
         'L5MOD/' . AwsServiceProvider::VERSION,
     ],
-    'image_id' => env('AWS_IMAGE_ID', 'ami-0de51bde84cbc7049'),
+    'image_id' => env('AWS_IMAGE_ID', 'ami-0ebc3e5e32781b350'),
     'instance_type' => env('AWS_INSTANCE_TYPE', 't3a.small'),
     'volume_size' => env('AWS_VOLUME_SIZE', '16'),
     'instance_metadata' => env('AWS_INSTANCE_METADATA', 'http://169.254.169.254/latest/meta-data/'),
