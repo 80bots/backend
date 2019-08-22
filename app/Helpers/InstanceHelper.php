@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use App\AwsRegion;
 use App\Bot;
 use App\InstanceSessionsHistory;
 use App\SchedulingInstancesDetails;
@@ -9,7 +10,8 @@ use App\User;
 use App\UserInstance;
 use Carbon\Carbon;
 use Carbon\CarbonTimeZone;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
 class InstanceHelper
@@ -73,10 +75,10 @@ class InstanceHelper
     }
 
     /**
-     * @param Collection|null $details
+     * @param EloquentCollection|null $details
      * @return array
      */
-    public static function getSchedulingDetails(?Collection $details): array
+    public static function getSchedulingDetails(?EloquentCollection $details): array
     {
         if (empty($details)) {
             return [];
@@ -96,11 +98,12 @@ class InstanceHelper
     }
 
     /**
-     * @param array $instancesByStatus
+     * @param Collection $instancesByStatus
+     * @param AwsRegion $region
      */
-    public static function syncInstances(array $instancesByStatus): void
+    public static function syncInstances(Collection $instancesByStatus, AwsRegion $region): void
     {
-        $awsInstancesIn = collect($instancesByStatus)->collapse()->map(function ($item, $key) {
+        $awsInstancesIn = $instancesByStatus->collapse()->map(function ($item, $key) {
             return $item['aws_instance_id'];
         })->toArray();
 
@@ -113,7 +116,7 @@ class InstanceHelper
                 }
 
                 if ($status === 'stopped' || $status === 'stopping') {
-                    $status = 'stop';
+                    $status = 'stopped';
                 }
 
                 $userInstance = UserInstance::where('aws_instance_id' , $instance['aws_instance_id'])->first();
@@ -131,28 +134,36 @@ class InstanceHelper
                     }
 
                     $userInstance->fill($fill);
-                    $userInstance->save();
+
+                    if ($userInstance->save() && $status === 'terminated') {
+                        $awsRegion = AwsRegion::find($userInstance->aws_region_id ?? null);
+                        if ($awsRegion->created_instances > 0) {
+                            $awsRegion->decrement('created_instances');
+                        }
+                    }
 
                 } else {
 
-                    Log::info($instance['aws_instance_id'] . ' has not been recorded while launch or manually launched from the aws');
+                    if ($status !== 'terminated') {
 
-                    $admin = User::onlyAdmins()->first();
+                        Log::info($instance['aws_instance_id'] . ' has not been recorded while launch or manually launched from the aws');
 
-                    if (! empty($admin)) {
+                        $admin = User::onlyAdmins()->first();
 
-                        $instance['user_id']      = $admin->id;
-                        $instance['status']       = $status;
-                        if($status == 'running') {
-                            $instance['is_in_queue']  = 0;
+                        if (!empty($admin)) {
+
+                            $instance['user_id'] = $admin->id;
+                            $instance['status'] = $status;
+                            if ($status == 'running') {
+                                $instance['is_in_queue'] = 0;
+                            }
+                            $instance['aws_region_id'] = $region->id ?? null;
+
+                            $userInstance = UserInstance::create($instance);
+
+                        } else {
+                            Log::info($instance['aws_instance_id'] . ' cannot be synced');
                         }
-
-                        $userInstance = UserInstance::updateOrCreate([
-                            'aws_instance_id' => $instance['aws_instance_id']
-                        ], $instance);
-
-                    } else {
-                        Log::info($instance['aws_instance_id'] . ' cannot be synced');
                     }
                 }
             }

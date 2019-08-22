@@ -21,13 +21,11 @@ class AwsRegionsTableSeeder extends Seeder
 
                 $limit = $this->getLimitByRegion($region['code'] ?? null);
 
-                AwsRegion::updateOrInsert(
-                    [
-                        'name'  => $region['name'],
-                        'limit' => $limit
-                    ],
-                    [ 'code' => $region['code'] ]
-                );
+                AwsRegion::create([
+                    'code' => $region['code'],
+                    'name'  => $region['name'],
+                    'limit' => $limit
+                ]);
             }
         }
     }

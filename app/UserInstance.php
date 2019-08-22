@@ -20,6 +20,7 @@ class UserInstance extends BaseModel
         'tag_user_email',
         'user_id',
         'bot_id',
+        'aws_region_id',
         'used_credit',
         'up_time',
         'temp_up_time',
@@ -84,9 +85,9 @@ class UserInstance extends BaseModel
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function getTest()
+    public function region()
     {
-        return "TSET";
+        return $this->belongsTo(AwsRegion::class, 'aws_region_id');
     }
 
     // public function schedulingInstance()

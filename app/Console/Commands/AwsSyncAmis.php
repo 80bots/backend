@@ -54,11 +54,9 @@ class AwsSyncAmis extends Command
                             $images = $result->get('Images');
                             $this->saveImages($region->id ?? null, $images);
                         }
-                        unset($result);
-                        unset($images);
                     }
                 }
-                unset($aws);
+                unset($aws, $result, $images);
             }
         }
     }

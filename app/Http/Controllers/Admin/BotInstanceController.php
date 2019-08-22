@@ -11,6 +11,7 @@ use App\Http\Resources\Admin\UserInstanceResource;
 use App\Services\Aws;
 use App\UserInstance;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -103,20 +104,7 @@ class BotInstanceController extends AppController
     {
         try {
 
-            Log::info('Sync started at ' . date('Y-m-d h:i:s'));
-
-            $aws    = new Aws;
-            $limit  = self::SYNC_LIMIT;
-            $token  = '';
-
-            do
-            {
-                $instancesByStatus = $aws->sync($limit, $token);
-                $token = $instancesByStatus['nextToken'] ?? '';
-
-                InstanceHelper::syncInstances($instancesByStatus['data']);
-
-            } while(! empty($instancesByStatus['nextToken']));
+            Artisan::call('instance:sync');
 
             return $this->success([], __('admin.instances.success_sync'));
 

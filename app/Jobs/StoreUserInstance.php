@@ -2,6 +2,8 @@
 
 namespace App\Jobs;
 
+use App\AwsAmi;
+use App\AwsRegion;
 use App\Bot;
 use App\Events\InstanceLaunched;
 use App\Services\Aws;
@@ -74,7 +76,7 @@ class StoreUserInstance implements ShouldQueue
             $userInstance   = UserInstance::findOrFail($this->id);
             $bot            = Bot::findOrFail($userInstance->bot_id);
 
-            if (empty($bot)) {
+            if (empty($bot) || empty($userInstance)) {
                 return false;
             }
 
@@ -161,5 +163,4 @@ class StoreUserInstance implements ShouldQueue
             return false;
         }
     }
-
 }

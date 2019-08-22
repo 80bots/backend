@@ -20,8 +20,11 @@ class UserInstanceResource extends JsonResource
             ->orderBy('created_at', 'desc')
             ->first();
 
+        $region = $this->region ?? null;
+
         return [
             'id'                => $this->id ?? '',
+            'region'            => $region->name ?? '',
             'name'              => $this->tag_name ?? '',
             'bot_name'          => $this->bots->name ?? '',
             'launched_by'       => $this->tag_user_email ?? '',

@@ -2,15 +2,10 @@
 
 namespace App\Console\Commands;
 
-use App\Bot;
+use App\AwsRegion;
 use App\Helpers\InstanceHelper;
 use App\Services\Aws;
-use App\User;
-use App\UserInstance;
-use Carbon\Carbon;
 use Illuminate\Console\Command;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -51,21 +46,46 @@ class InstanceSyncScheduling extends Command
 
             Log::info('Sync started at ' . date('Y-m-d h:i:s'));
 
-            $aws    = new Aws;
-            $limit  = 5;
-            $token  = '';
+            $regions = AwsRegion::all();
 
-            do
-            {
-                $instancesByStatus = $aws->sync($limit, $token);
-                $token = $instancesByStatus['nextToken'] ?? '';
+            Log::info('Count ' . $regions->count());
 
-                InstanceHelper::syncInstances($instancesByStatus['data']);
+            if (! empty($regions)) {
 
-            } while(! empty($instancesByStatus['nextToken']));
+                Log::info('Regions isset');
+
+                foreach ($regions as $region) {
+
+                    Log::info("Sync region {$region->code}");
+
+                    $aws    = new Aws;
+                    $limit  = 5;
+                    $token  = '';
+
+                    do
+                    {
+                        $instancesByStatus = $aws->sync($region->code ?? '', $limit, $token);
+                        $token = $instancesByStatus['nextToken'] ?? '';
+
+                        $instancesByStatus = collect($instancesByStatus['data']);
+
+                        if ($instancesByStatus->isNotEmpty()) {
+                            InstanceHelper::syncInstances($instancesByStatus, $region);
+                        }
+
+                    } while(! empty($token));
+
+                    unset($aws, $limit, $token);
+                }
+            }
+
+            Log::info('Completed InstanceSyncScheduling');
 
         } catch (Throwable $throwable) {
+            Log::info('ERROR');
             Log::error($throwable->getMessage());
         }
+
+        Log::info('END');
     }
 }

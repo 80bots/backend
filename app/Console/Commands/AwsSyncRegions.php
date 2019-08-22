@@ -86,14 +86,10 @@ class AwsSyncRegions extends Command
                 sort($res);
 
                 $limit = intval($res[0]);
-                unset($res);
             }
-
-            unset($account);
         }
 
-        unset($aws);
-        unset($result);
+        unset($aws, $result, $res, $account);
 
         return $limit;
     }

@@ -20,6 +20,7 @@ class CreateUserInstancesTable extends Migration
             $table->string('tag_user_email')->nullable();
             $table->unsignedInteger('user_id');
             $table->unsignedInteger('bot_id')->nullable();
+            $table->unsignedInteger('aws_region_id')->nullable();
             $table->double('used_credit')->default(0);
             $table->double('up_time')->default(0);
             $table->double('temp_up_time')->default(0);
@@ -54,6 +55,12 @@ class CreateUserInstancesTable extends Migration
                 ->on('bots')
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
+
+            $table->foreign('aws_region_id')
+                ->references('id')
+                ->on('aws_regions')
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
         });
     }
 
@@ -65,7 +72,7 @@ class CreateUserInstancesTable extends Migration
     public function down()
     {
         Schema::table('user_instances', function (Blueprint $table) {
-            $table->dropForeign(['user_id', 'bot_id']);
+            $table->dropForeign(['user_id', 'bot_id', 'aws_region_id']);
         });
 
         Schema::dropIfExists('user_instances');

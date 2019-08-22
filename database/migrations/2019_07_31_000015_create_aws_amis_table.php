@@ -32,6 +32,7 @@ class CreateAwsAmisTable extends Migration
             $table->string('sriov_net_support');
             $table->string('virtualization_type');
             $table->timestamp('creation_date');
+            $table->timestamps();
 
             $table->foreign('aws_region_id')
                 ->references('id')

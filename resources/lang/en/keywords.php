@@ -99,7 +99,8 @@ return [
         'change_not_success'    => 'Instance :status not successfully!',
         'change_success'        => 'Instance :status successfully!',
         'launch_success'        => 'Instance launched successfully!',
-        'launch_error'          => 'Instance launch failed!'
+        'launch_error'          => 'Instance launch failed!',
+        'launch_limit_error'    => 'Limit error!'
     ],
     'aws' => [
         'error' => 'Aws error'

@@ -499,14 +499,15 @@ class Aws
     }
 
     /**
+     * @param string $region
      * @param int $limit This value can be between 5 and 1000.
      * @param string $token
      * @return array|null
      */
-    public function sync(int $limit = 5, string $token = ''): array
+    public function sync(string $region, int $limit = 5, string $token = ''): array
     {
         if (empty($this->ec2)) {
-            $this->ec2Connection();
+            $this->ec2Connection($region);
         }
 
         if (! empty($token)) {

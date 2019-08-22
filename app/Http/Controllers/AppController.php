@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\AwsRegion;
+use App\Bot;
 use App\DeleteSecurityGroup;
 use App\Helpers\CommonHelper;
 use App\Jobs\StoreUserInstance;
@@ -11,6 +13,7 @@ use App\UserInstance;
 use App\UserInstancesDetails;
 use Aws\Result;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
@@ -41,16 +44,35 @@ class AppController extends Controller
 
             $region = $request->input('region');
 
-            $instance = UserInstance::create([
-                'user_id'   => Auth::id(),
-                'bot_id'    => $request->input('bot_id'),
-            ]);
+            $bot = Bot::find($request->input('bot_id'));
 
-            if (! empty($instance)) {
-                dispatch(new StoreUserInstance($instance->id ?? null, Auth::user(), $region));
-                return $this->success([
-                    'instance_id' => $instance->id ?? null
-                ], __('keywords.instance.launch_success'));
+            if (empty($bot)) {
+                return $this->error(__('keywords.error'), __('keywords.bots.not_found'));
+            }
+
+            //
+            $awsRegion = AwsRegion::onlyRegion($region)->first();
+
+            if (!$this->checkLimitInRegion($awsRegion)) {
+                return $this->error(__('keywords.error'), __('keywords.instance.launch_limit_error'));
+            }
+
+            if ($this->issetAmiInRegion($awsRegion, $bot)) {
+                //
+                $awsRegion->increment('created_instances');
+
+                $instance = UserInstance::create([
+                    'user_id' => Auth::id(),
+                    'bot_id' => $bot->id ?? null,
+                    'aws_region_id' => $awsRegion->id ?? null
+                ]);
+
+                if (!empty($instance)) {
+                    dispatch(new StoreUserInstance($instance->id ?? null, Auth::user(), $region));
+                    return $this->success([
+                        'instance_id' => $instance->id ?? null
+                    ], __('keywords.instance.launch_success'));
+                }
             }
 
             return $this->error(__('keywords.error'), __('keywords.instance.launch_error'));
@@ -58,6 +80,33 @@ class AppController extends Controller
         } catch (Throwable $throwable) {
             return $this->error(__('keywords.server_error'), $throwable->getMessage());
         }
+    }
+
+    /**
+     * Limit check whether we can create instance in the region
+     * @param AwsRegion $awsRegion
+     * @return bool
+     */
+    private function checkLimitInRegion(AwsRegion $awsRegion): bool
+    {
+        $limit      = $awsRegion->limit ?? 0;
+        $created    = $awsRegion->created_instances ?? 0;
+
+        return $created < ($limit*AwsRegion::PERCENT_LIMIT);
+    }
+
+    /**
+     * @param AwsRegion $awsRegion
+     * @param Bot $bot
+     * @return bool
+     */
+    private function issetAmiInRegion(AwsRegion $awsRegion, Bot $bot): bool
+    {
+        $count = $awsRegion->whereHas('amis', function (Builder $query) use ($bot) {
+            $query->where('image_id', '=', $bot->aws_ami_image_id ?? null);
+        })->count();
+
+        return $count > 0;
     }
 
     /**
@@ -75,6 +124,12 @@ class AppController extends Controller
             return false;
         }
 
+        $awsRegion = AwsRegion::find($instance->aws_region_id ?? null);
+
+        if (empty($awsRegion)) {
+            return false;
+        }
+
         $currentDate    = Carbon::now()->toDateTimeString();
         $aws            = new Aws;
 
@@ -86,6 +141,10 @@ class AppController extends Controller
 
         if ($this->checkTerminatedStatus($describeInstancesResponse)) {
             $instance->update(['status' => UserInstance::STATUS_TERMINATED]);
+            //
+            if ($awsRegion->created_instances > 0) {
+                $awsRegion->decrement('created_instances');
+            }
             //
             $this->cleanUpTerminatedInstanceData($aws, $instance);
             return false;
@@ -141,7 +200,6 @@ class AppController extends Controller
                 $instance->fill(['status' => UserInstance::STATUS_TERMINATED]);
                 // TODO: Check result
                 $aws->terminateInstance([$instance->aws_instance_id ?? null]);
-
                 $this->cleanUpTerminatedInstanceData($aws, $instance);
 
                 break;
@@ -151,6 +209,10 @@ class AppController extends Controller
 
             if ($instance->status === UserInstance::STATUS_TERMINATED) {
                 $instance->delete();
+                //
+                if ($awsRegion->created_instances > 0) {
+                    $awsRegion->decrement('created_instances');
+                }
             }
 
             return true;

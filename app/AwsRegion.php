@@ -6,9 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class AwsRegion extends Model
 {
-    const TYPE_EC2 = 'ec2';
+    const PERCENT_LIMIT = 0.9;
 
-    protected $table = "aws_regions";
+    const TYPE_EC2      = 'ec2';
+
+    protected $table    = "aws_regions";
 
     protected $fillable = [
         'code',
@@ -43,5 +45,10 @@ class AwsRegion extends Model
     public function amis()
     {
         return $this->hasMany(AwsAmi::class,'aws_region_id', 'id');
+    }
+
+    public function instances()
+    {
+        return $this->hasMany(UserInstance::class,'aws_region_id', 'id');
     }
 }
