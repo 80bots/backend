@@ -11,6 +11,7 @@ use App\Console\Commands\InstanceStartScheduling;
 use App\Console\Commands\InstanceStopScheduling;
 use App\Console\Commands\InstanceSyncScheduling;
 use App\Console\Commands\RefreshDatabase;
+use App\Console\Commands\SyncLocalBots;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -30,7 +31,8 @@ class Kernel extends ConsoleKernel
         CleanUpUnused::class,
         AwsSyncRegions::class,
         RefreshDatabase::class,
-        AwsSyncAmis::class
+        AwsSyncAmis::class,
+        SyncLocalBots::class
     ];
 
     /**
@@ -50,6 +52,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('instance:clean')->hourly();
         $schedule->command('aws:sync-regions')->daily();
         $schedule->command('aws:sync-amis')->everyThirtyMinutes();
+        $schedule->command('bots:sync-local')->daily();
     }
 
     /**
