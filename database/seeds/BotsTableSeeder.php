@@ -28,7 +28,14 @@ class BotsTableSeeder extends Seeder
                     'aws_startup_script'    => '',
                     'aws_custom_script'     => '',
                     'aws_storage_gb'        => 8,
-                    'type'                  => Bot::TYPE_PUBLIC
+                    'type'                  => Bot::TYPE_PUBLIC,
+                    'parameters'            => json_encode([
+                        ['name' => 'username', 'type' => 'String'],
+                        ['name' => 'password', 'type' => 'String'],
+                        ['name' => 'speed', 'type' => 'Number', 'range' => [1, 10]],
+                        ['name' => 'type', 'type' => 'String', 'enum' => ['type1', 'type2'] ],
+                        ['name' => 'public', 'type' => 'Boolean']
+                    ]),
                 ]);
             }
         }

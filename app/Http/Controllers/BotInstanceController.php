@@ -23,7 +23,6 @@ class BotInstanceController extends AppController
     public function index(Request $request)
     {
         try {
-
             $limit = $request->query('limit') ?? self::PAGINATE;
             $search = $request->input('search');
             $sort   = $request->input('sort');

@@ -19,6 +19,7 @@ class CreateBotsTable extends Migration
             $table->unsignedInteger('platform_id')->nullable();
             $table->string('name')->nullable();
             $table->text('description')->nullable();
+            $table->json('parameters')->nullable();
             $table->string('aws_ami_image_id')->nullable();
             $table->string('aws_ami_name')->nullable();
             $table->string('aws_instance_type')->nullable();
