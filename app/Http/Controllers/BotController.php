@@ -16,7 +16,8 @@ class BotController extends Controller
     public function index(Request $request)
     {
         try {
-
+            //BotParser::syncBotsWithDb();
+            dd(BotParser::getBotInfo(base_path('resources/bots/facebook-find-page-add-post.js')));
             $limit      = $request->query('limit') ?? self::PAGINATE;
             $platform   = $request->input('platform');
             $search     = $request->input('search');
