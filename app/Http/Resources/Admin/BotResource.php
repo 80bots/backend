@@ -19,6 +19,7 @@ class BotResource extends JsonResource
             'name'              => $this->name ?? '',
             'platform'          => $this->platform->name ?? '',
             'description'       => $this->description ?? '',
+            'parameters'        => $this->parameters ? (array) json_decode($this->parameters) : array(),
             'ami_id'            => $this->aws_ami_image_id ?? '',
             'ami_name'          => $this->aws_ami_name ?? '',
             'instance_type'     => $this->aws_instance_type ?? '',
