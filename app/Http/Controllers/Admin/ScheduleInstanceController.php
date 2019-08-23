@@ -7,7 +7,7 @@ use App\Http\Resources\Admin\SchedulingInstanceCollection;
 use App\Http\Resources\Admin\SchedulingInstanceResource;
 use App\SchedulingInstance;
 use App\SchedulingInstancesDetails;
-use App\UserInstance;
+use App\BotInstance;
 use Carbon\Carbon;
 use DateTime;
 use DateTimeZone;
@@ -107,7 +107,7 @@ class ScheduleInstanceController extends AppController
                 'instance_id' => 'required|string'
             ]);
 
-            $instance = UserInstance::findByInstanceId($data['instance_id'])->first();
+            $instance = BotInstance::findByInstanceId($data['instance_id'])->first();
 
             if(empty($instance)) return $this->error(__('admin.error'), 'Such bot does not exists');
 

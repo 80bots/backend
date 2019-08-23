@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class UserInstance extends BaseModel
+class BotInstance extends BaseModel
 {
     use SoftDeletes;
 
@@ -13,11 +13,9 @@ class UserInstance extends BaseModel
     const STATUS_RUNNING    = 'running';
     const STATUS_STOPPED    = 'stopped';
 
-    protected $table = "user_instances";
+    protected $table = "bot_instances";
 
     protected $fillable = [
-        'tag_name',
-        'tag_user_email',
         'user_id',
         'bot_id',
         'aws_region_id',
@@ -25,18 +23,9 @@ class UserInstance extends BaseModel
         'up_time',
         'temp_up_time',
         'cron_up_time',
-        'aws_instance_id',
-        'aws_ami_id',
-        'aws_ami_name',
-        'aws_security_group_id',
-        'aws_security_group_name',
-        'aws_public_ip',
-        'aws_public_dns',
-        'aws_pem_file_path',
-        'status',
         'is_in_queue',
-        'created_at',
-        'updated_at'
+        'aws_status',
+        'status'
     ];
 
     /**
@@ -55,27 +44,27 @@ class UserInstance extends BaseModel
         return $query->where('user_id', $userId);
     }
 
-    public static function findByInstanceId($instanceId)
+    public function scopeFindByInstanceId($query, $instanceId)
     {
-        return self::where('aws_instance_id', $instanceId);
+        return $query->where('aws_instance_id', $instanceId);
     }
 
-    public static function findRunningInstanceByUserId($id)
+    public function scopeFindRunningInstanceByUserId($query, $id)
     {
-        return self::where('status', 'running')->where('user_id', $id)->get();
+        return $query->where('aws_status', self::STATUS_RUNNING)->where('user_id', $id)->get();
     }
 
-    public static function findRunningInstance()
+    public function scopeFindRunningInstance($query)
     {
-        return self::where('status', 'running')->get();
+        return $query->where('aws_status', self::STATUS_RUNNING)->get();
     }
 
     public function details()
     {
-        return $this->hasMany(UserInstancesDetails::class, 'user_instance_id', 'id');
+        return $this->hasMany(BotInstancesDetails::class, 'instance_id', 'id');
     }
 
-    public function bots()
+    public function bot()
     {
         return $this->belongsTo(Bot::class,'bot_id');
     }
@@ -89,9 +78,4 @@ class UserInstance extends BaseModel
     {
         return $this->belongsTo(AwsRegion::class, 'aws_region_id');
     }
-
-    // public function schedulingInstance()
-    // {
-    //     return $this->hasMany('App\SchedulingInstance','user_instances_id');
-    // }
 }

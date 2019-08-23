@@ -78,7 +78,7 @@ class User extends Authenticatable
      */
     public function instances()
     {
-        return $this->hasMany(UserInstance::class);
+        return $this->hasMany(BotInstance::class);
     }
 
     /**

@@ -21,6 +21,8 @@ class AwsRegionsTableSeeder extends Seeder
 
                 $limit = $this->getLimitByRegion($region['code'] ?? null);
 
+                echo "Region {$region['name']} / limit {$limit}\n";
+
                 AwsRegion::create([
                     'code' => $region['code'],
                     'name'  => $region['name'],

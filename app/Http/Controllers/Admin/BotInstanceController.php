@@ -6,10 +6,10 @@ use App\AwsAmi;
 use App\AwsRegion;
 use App\Helpers\InstanceHelper;
 use App\Http\Controllers\AppController;
-use App\Http\Resources\Admin\UserInstanceCollection;
-use App\Http\Resources\Admin\UserInstanceResource;
+use App\Http\Resources\Admin\BotInstanceCollection;
+use App\Http\Resources\Admin\BotInstanceResource;
 use App\Services\Aws;
-use App\UserInstance;
+use App\BotInstance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
@@ -24,7 +24,7 @@ class BotInstanceController extends AppController
     /**
      * Display a listing of the resource.
      * @param Request $request
-     * @return UserInstanceCollection|\Illuminate\Http\JsonResponse
+     * @return BotInstanceCollection|\Illuminate\Http\JsonResponse
      */
     public function index(Request $request)
     {
@@ -36,7 +36,7 @@ class BotInstanceController extends AppController
             $sort   = $request->input('sort');
             $order  = $request->input('order') ?? 'asc';
 
-            $resource = UserInstance::withTrashed()->ajax();
+            $resource = BotInstance::withTrashed()->ajax();
 
             // TODO: Add Filters
 
@@ -60,7 +60,7 @@ class BotInstanceController extends AppController
                 $resource->orderBy($sort, $order);
             }
 
-            $instances  = (new UserInstanceCollection($resource->paginate($limit)))->response()->getData();
+            $instances  = (new BotInstanceCollection($resource->paginate($limit)))->response()->getData();
             $meta       = $instances->meta ?? null;
 
             $response = [
@@ -117,15 +117,15 @@ class BotInstanceController extends AppController
     {
         try {
 
-            $instance = UserInstance::find($id);
+            $instance = BotInstance::find($id);
 
             if (empty($instance)) {
                 return $this->notFound(__('admin.not_found'), __('admin.instances.not_found'));
             }
 
-            $running    = UserInstance::STATUS_RUNNING;
-            $stopped    = UserInstance::STATUS_STOPPED;
-            $terminated = UserInstance::STATUS_TERMINATED;
+            $running    = BotInstance::STATUS_RUNNING;
+            $stopped    = BotInstance::STATUS_STOPPED;
+            $terminated = BotInstance::STATUS_TERMINATED;
 
             if (! empty($request->input('update'))) {
                 $updateData = $request->validate([
@@ -137,7 +137,7 @@ class BotInstanceController extends AppController
                         case 'status':
 
                             if ($this->changeStatus($value, $id)) {
-                                $instance = new UserInstanceResource(UserInstance::withTrashed()
+                                $instance = new BotInstanceResource(BotInstance::withTrashed()
                                     ->where('id', '=', $id)->first());
                                 return $this->success($instance->toArray($request));
                             } else {
@@ -169,7 +169,7 @@ class BotInstanceController extends AppController
         if (! empty($instance)) {
 
             try {
-                $instance = UserInstance::find($instance);
+                $instance = BotInstance::find($instance);
 
                 if (!empty($instance)) {
                     $aws = new Aws;

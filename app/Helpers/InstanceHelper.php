@@ -7,7 +7,7 @@ use App\Bot;
 use App\InstanceSessionsHistory;
 use App\SchedulingInstancesDetails;
 use App\User;
-use App\UserInstance;
+use App\BotInstance;
 use Carbon\Carbon;
 use Carbon\CarbonTimeZone;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
@@ -119,7 +119,7 @@ class InstanceHelper
                     $status = 'stopped';
                 }
 
-                $userInstance = UserInstance::where('aws_instance_id' , $instance['aws_instance_id'])->first();
+                $userInstance = BotInstance::where('aws_instance_id' , $instance['aws_instance_id'])->first();
 
                 if (! empty($userInstance)) {
 
@@ -159,7 +159,7 @@ class InstanceHelper
                             }
                             $instance['aws_region_id'] = $region->id ?? null;
 
-                            $userInstance = UserInstance::create($instance);
+                            $userInstance = BotInstance::create($instance);
 
                         } else {
                             Log::info($instance['aws_instance_id'] . ' cannot be synced');
@@ -179,14 +179,14 @@ class InstanceHelper
      */
     public static function deleteUserInstances(array $awsInstancesIn): void
     {
-        UserInstance::where(function($query) use($awsInstancesIn) {
+        BotInstance::where(function($query) use($awsInstancesIn) {
             $query->whereNotIn('aws_instance_id', $awsInstancesIn)
                 ->orWhere('aws_instance_id', null)
                 ->orWhere('status', 'terminated');
         })->whereNotIn('status', ['running', 'stopped'])
             ->delete();
 
-        UserInstance::where(function($query) {
+        BotInstance::where(function($query) {
             $query->where('is_in_queue', 1)
                 ->orWhereIn('status', ['running', 'stopped']);
         })->where('updated_at', '<' , Carbon::now()->subMinutes(10)->toDateTimeString())

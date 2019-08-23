@@ -2,7 +2,10 @@
 
 namespace App\Services;
 
+use App\Bot;
 use App\Helpers\GeneratorID;
+use App\User;
+use App\BotInstance;
 use Aws\Ec2\Ec2Client;
 use Aws\Result;
 use Aws\S3\Exception\S3Exception;
@@ -437,42 +440,37 @@ class Aws
     /**
      * Launch EC2 Instance
      *
-     * @param null $keyPairName
-     * @param null $securityGroupName
-     * @param null $bot
-     * @param null $tagName
-     * @param null $user
+     * @param Bot $bot
+     * @param BotInstance $instance
+     * @param User $user
+     * @param string $keyPairName
+     * @param string $securityGroupName
+     * @param string $tagName
      * @return Result
      */
-    public function launchInstance($keyPairName = null, $securityGroupName = null, $bot = null, $tagName = null, $user = null)
+    public function launchInstance(Bot $bot, BotInstance $instance, User $user, string $keyPairName, string $securityGroupName, string $tagName)
     {
-        if (! empty($bot)) {
-            $imageId            = $bot->aws_ami_image_id ?? config('aws.image_id');
-            $instanceType       = $bot->aws_instance_type ?? config('aws.instance_type');
-            $volumeSize         = $bot->aws_storage_gb ?? config('aws.volume_size');
-            $userData           = $bot->aws_startup_script ?? '';
-            $botScript          = $bot->aws_custom_script ?? '';
-            $_shebang           = '#!/bin/bash';
-            $userData           = "{$_shebang}\n {$userData}\n";
-            $consoleOverrides   = $this->getConsoleOverrides();
+        $imageId            = $bot->aws_ami_image_id ?? config('aws.image_id');
+        $instanceType       = $bot->aws_instance_type ?? config('aws.instance_type');
+        $volumeSize         = $bot->aws_storage_gb ?? config('aws.volume_size');
+        $userData           = $bot->aws_startup_script ?? '';
+        $botScript          = $bot->aws_custom_script ?? '';
 
-            $botScript = "{$consoleOverrides}\n {$botScript}";
+        $_shebang           = '#!/bin/bash';
+        $userData           = "{$_shebang}\n {$userData}\n";
+        $consoleOverrides   = $this->getConsoleOverrides();
 
-            if (! is_null($botScript) || ! empty($botScript)) {
-                $staticBotScript    = $this->getStaticBotScript($botScript);
-                $userData           = "{$userData}\n {$staticBotScript}";
-            }
+        $botScript = "{$consoleOverrides}\n {$botScript}";
 
-            $userData = base64_encode($userData);
-
-        } else {
-            $imageId        = config('aws.image_id');
-            $instanceType   = config('aws.instance_type');
-            $volumeSize     = config('aws.volume_size');
+        if (! is_null($botScript) || ! empty($botScript)) {
+            $staticBotScript    = $this->getStaticBotScript($botScript);
+            $userData           = "{$userData}\n {$staticBotScript}";
         }
 
+        $userData = base64_encode($userData);
+
         if (empty($this->ec2)) {
-            $this->ec2Connection();
+            $this->ec2Connection($instance->region->code);
         }
 
         $tags = [

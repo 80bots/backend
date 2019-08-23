@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\AwsRegion;
-use App\Http\Resources\User\UserInstanceCollection;
-use App\Http\Resources\User\UserInstanceResource;
+use App\Http\Resources\User\BotInstanceCollection;
+use App\Http\Resources\User\BotInstanceResource;
 use App\Services\Aws;
-use App\UserInstance;
+use App\BotInstance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
@@ -18,7 +18,7 @@ class BotInstanceController extends AppController
     /**
      * Display a listing of the resource.
      * @param Request $request
-     * @return UserInstanceCollection
+     * @return BotInstanceCollection
      */
     public function index(Request $request)
     {
@@ -28,7 +28,7 @@ class BotInstanceController extends AppController
             $sort   = $request->input('sort');
             $order  = $request->input('order') ?? 'asc';
 
-            $resource = UserInstance::withTrashed()->findByUserId(Auth::id());
+            $resource = BotInstance::withTrashed()->findByUserId(Auth::id());
 
             // TODO: Add Filters
 
@@ -43,7 +43,7 @@ class BotInstanceController extends AppController
                 $resource->orderBy($sort, $order);
             }
 
-            $bots   = (new UserInstanceCollection($resource->paginate($limit)))->response()->getData();
+            $bots   = (new BotInstanceCollection($resource->paginate($limit)))->response()->getData();
             $meta   = $bots->meta ?? null;
 
             $response = [
@@ -166,10 +166,10 @@ class BotInstanceController extends AppController
     /**
      * Display the specified resource.
      *
-     * @param  \App\UserInstance  $userInstances
+     * @param  \App\BotInstance  $userInstances
      * @return \Illuminate\Http\Response
      */
-    public function show(UserInstance $userInstances)
+    public function show(BotInstance $userInstances)
     {
         //
     }
@@ -177,10 +177,10 @@ class BotInstanceController extends AppController
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\UserInstance  $userInstances
+     * @param  \App\BotInstance  $userInstances
      * @return \Illuminate\Http\Response
      */
-    public function edit(UserInstance $userInstances)
+    public function edit(BotInstance $userInstances)
     {
         //
     }
@@ -196,7 +196,7 @@ class BotInstanceController extends AppController
     {
         try {
 
-            $instance = UserInstance::where([
+            $instance = BotInstance::where([
                 ['id', '=', $id],
                 ['user_id', '=', Auth::id()]
             ])->first();
@@ -205,9 +205,9 @@ class BotInstanceController extends AppController
                 return $this->notFound(__('user.not_found'), __('user.instances.not_found'));
             }
 
-            $running    = UserInstance::STATUS_RUNNING;
-            $stopped    = UserInstance::STATUS_STOPPED;
-            $terminated = UserInstance::STATUS_TERMINATED;
+            $running    = BotInstance::STATUS_RUNNING;
+            $stopped    = BotInstance::STATUS_STOPPED;
+            $terminated = BotInstance::STATUS_TERMINATED;
 
             if (! empty($request->input('update'))) {
                 $updateData = $request->validate([
@@ -219,7 +219,7 @@ class BotInstanceController extends AppController
                         case 'status':
 
                             if ($this->changeStatus($value, $id)) {
-                                $instance = new UserInstanceResource(UserInstance::withTrashed()
+                                $instance = new BotInstanceResource(BotInstance::withTrashed()
                                     ->where('id', '=', $id)->first());
                                 return $this->success($instance->toArray($request));
                             } else {
@@ -245,10 +245,10 @@ class BotInstanceController extends AppController
     /**
      * Remove the specified resource from storage.
      *
-     * @param  UserInstance  $userInstances
+     * @param  BotInstance  $userInstances
      * @return \Illuminate\Http\Response
      */
-    public function destroy(UserInstance $userInstances)
+    public function destroy(BotInstance $userInstances)
     {
         //
     }

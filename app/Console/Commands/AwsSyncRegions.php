@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\AwsRegion;
 use App\Services\Aws;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class AwsSyncRegions extends Command
@@ -41,18 +42,22 @@ class AwsSyncRegions extends Command
     {
         $aws        = new Aws;
         $regions    = $aws->getEc2RegionsWithName();
+        $now        = Carbon::now()->toDateTimeString();
 
         if (! empty($regions)) {
             foreach ($regions as $region) {
 
                 $limit = $this->getLimitByRegion($region['code'] ?? null);
 
+                echo "Region {$region['name']} / limit {$limit}\n";
+
                 AwsRegion::updateOrInsert(
+                    [ 'code' => $region['code'] ],
                     [
-                        'name'  => $region['name'],
-                        'limit' => $limit
-                    ],
-                    [ 'code' => $region['code'] ]
+                        'name'          => $region['name'],
+                        'limit'         => $limit,
+                        'updated_at'    => $now
+                    ]
                 );
             }
         }

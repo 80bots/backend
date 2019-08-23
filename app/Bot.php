@@ -15,15 +15,13 @@ class Bot extends Model
     protected $table = "bots";
 
     protected $fillable = [
-        'name',
         'platform_id',
+        'name',
         'description',
-        'aws_ami_image_id',
-        'aws_ami_name',
-        'aws_instance_type',
+        'parameters',
+        'aws_image_id',
         'aws_startup_script',
         'aws_custom_script',
-        'aws_storage_gb',
         'status',
         'type'
     ];

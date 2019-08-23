@@ -4,14 +4,14 @@ namespace App\Http\Resources\Admin;
 
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
-class UserInstanceCollection extends ResourceCollection
+class BotInstanceCollection extends ResourceCollection
 {
     /**
      * The resource that this resource collects.
      *
      * @var string
      */
-    public $collects = 'App\Http\Resources\Admin\UserInstanceResource';
+    public $collects = 'App\Http\Resources\Admin\BotInstanceResource';
 
     /**
      * Transform the resource collection into an array.

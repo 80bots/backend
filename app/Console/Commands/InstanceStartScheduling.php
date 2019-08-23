@@ -5,8 +5,8 @@ namespace App\Console\Commands;
 use App\Helpers\InstanceHelper;
 use App\SchedulingInstance;
 use App\Services\Aws;
-use App\UserInstance;
-use App\UserInstancesDetails;
+use App\BotInstance;
+use App\BotInstancesDetails;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -86,12 +86,12 @@ class InstanceStartScheduling extends Command
 
                     if ($currentState['Name'] == 'pending' || $currentState['Name'] == 'running') {
 
-                        $userInstance = UserInstance::findByInstanceId($instanceId)->first();
+                        $userInstance = BotInstance::findByInstanceId($instanceId)->first();
                         $userInstance->status = 'running';
 
                         if ($userInstance->save()) {
 
-                            $instanceDetail = UserInstancesDetails::where(
+                            $instanceDetail = BotInstancesDetails::where(
                                 [
                                     'user_instance_id'  => $userInstance->id,
                                     'end_time'          => null
@@ -100,7 +100,7 @@ class InstanceStartScheduling extends Command
                                 ->first();
 
                             if (empty($instanceDetail)) {
-                                UserInstancesDetails::create([
+                                BotInstancesDetails::create([
                                     'user_instance_id'  => $userInstance->id,
                                     'start_time'        => $this->now->toDateTimeString()
                                 ]);

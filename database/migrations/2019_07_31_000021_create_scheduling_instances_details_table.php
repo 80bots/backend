@@ -16,7 +16,7 @@ class CreateSchedulingInstancesDetailsTable extends Migration
     {
         Schema::create('scheduling_instances_details', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('scheduling_instance_id');
+            $table->unsignedBigInteger('scheduling_id');
             $table->string('day');
             $table->string('selected_time');
             $table->string('time_zone');
@@ -27,7 +27,7 @@ class CreateSchedulingInstancesDetailsTable extends Migration
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'));
             $table->softDeletes();
 
-            $table->foreign('scheduling_instance_id')
+            $table->foreign('scheduling_id')
                 ->references('id')->on('scheduling_instances')
                 ->onUpdate('cascade')->onDelete('cascade');
         });

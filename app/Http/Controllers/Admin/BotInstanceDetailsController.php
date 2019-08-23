@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
-use App\UserInstancesDetails;
+use App\Http\Controllers\AppController;
+use App\BotInstancesDetails;
 use Illuminate\Http\Request;
 
-class UserInstanceDetailsController extends AppController
+class BotInstanceDetailsController extends AppController
 {
     /**
      * Display a listing of the resource.
@@ -41,10 +42,10 @@ class UserInstanceDetailsController extends AppController
     /**
      * Display the specified resource.
      *
-     * @param  \App\UserInstancesDetails  $userInstancesDetails
+     * @param  \App\BotInstancesDetails  $userInstancesDetails
      * @return \Illuminate\Http\Response
      */
-    public function show(UserInstancesDetails $userInstancesDetails)
+    public function show(BotInstancesDetails $userInstancesDetails)
     {
         //
     }
@@ -52,10 +53,10 @@ class UserInstanceDetailsController extends AppController
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\UserInstancesDetails  $userInstancesDetails
+     * @param  \App\BotInstancesDetails  $userInstancesDetails
      * @return \Illuminate\Http\Response
      */
-    public function edit(UserInstancesDetails $userInstancesDetails)
+    public function edit(BotInstancesDetails $userInstancesDetails)
     {
         //
     }
@@ -64,10 +65,10 @@ class UserInstanceDetailsController extends AppController
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\UserInstancesDetails  $userInstancesDetails
+     * @param  \App\BotInstancesDetails  $userInstancesDetails
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, UserInstancesDetails $userInstancesDetails)
+    public function update(Request $request, BotInstancesDetails $userInstancesDetails)
     {
         //
     }
@@ -75,10 +76,10 @@ class UserInstanceDetailsController extends AppController
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\UserInstancesDetails  $userInstancesDetails
+     * @param  \App\BotInstancesDetails  $userInstancesDetails
      * @return \Illuminate\Http\Response
      */
-    public function destroy(UserInstancesDetails $userInstancesDetails)
+    public function destroy(BotInstancesDetails $userInstancesDetails)
     {
         //
     }

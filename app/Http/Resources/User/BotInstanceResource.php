@@ -1,17 +1,15 @@
 <?php
 
-namespace App\Http\Resources\Admin;
+namespace App\Http\Resources\User;
 
-use App\UserInstance;
-use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class UserInstanceResource extends JsonResource
+class BotInstanceResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
      *
-     * @param  Request  $request
+     * @param  \Illuminate\Http\Request  $request
      * @return array
      */
     public function toArray($request)
@@ -25,19 +23,18 @@ class UserInstanceResource extends JsonResource
         return [
             'id'                => $this->id ?? '',
             'region'            => $region->name ?? '',
+            'aws_instance_id'   => $this->aws_instance_id ?? null,
             'name'              => $this->tag_name ?? '',
-            'bot_name'          => $this->bots->name ?? '',
-            'launched_by'       => $this->tag_user_email ?? '',
+            'parameters'        => $this->bot->parameters ?? '',
             'launched_at'       => $details->start_time ?? '',
-            'instance_id'       => $this->aws_instance_id ?? '',
             'tag_user_email'    => $this->tag_user_email ?? '',
-            'used_credit'       => $this->used_credit ?? 0,
-            'uptime'            => $this->up_time ?? 0,
+            'credits_used'      => $this->used_credit ?? 0,
+            'up_time'           => $this->up_time ?? 0,
             'temp_up_time'      => $this->temp_up_time ?? 0,
             'cron_up_time'      => $this->cron_up_time ?? 0,
-            'status'            => $this->status ?? UserInstance::STATUS_TERMINATED,
+            'status'            => $this->status ?? 0,
             'ip'                => $this->aws_public_ip ?? '',
-            'pem'               => $this->aws_pem_file_path ?? ''
+            'is_in_queue'       => $this->is_in_queue ?? 0,
         ];
     }
 }

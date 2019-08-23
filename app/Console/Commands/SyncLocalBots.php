@@ -2,6 +2,9 @@
 
 namespace App\Console\Commands;
 
+use App\Bot;
+use App\Platform;
+use App\Services\BotParser;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
@@ -48,15 +51,41 @@ class SyncLocalBots extends Command
 
                     if ($file->getFilename() === 'facebook-find-page-add-post.js') {
 
+                        echo "FILE BOT {$file->getFilename()}\n";
+
                         $content = $file->getContents();
 
-                        dd($content);
-                    }
+                        $result = BotParser::getBotInfo($content);
 
+                        if (! empty($result['about']) && ! empty($result['params'])) {
+
+                            $platform = Platform::where('name', '=', $result['about']['platform'])->first();
+
+                            if (empty($platform)) {
+                                $platform = Platform::create([
+                                    'name',
+                                ]);
+                            }
+
+                            $bot = Bot::where('name', '=', $result['about']['name'])->first();
+
+                            if (! empty($bot)) {
+                                $bot->update([
+                                    'description'   => $result['about']['desc'],
+                                    'parameters'    => json_encode($result['params'])
+                                ]);
+                            } else {
+                                Bot::create([
+                                    'platform_id'   => $platform->id ?? null,
+                                    'name'          => $result['about']['name'],
+                                    'description'   => $result['about']['desc'],
+                                    'parameters'    => json_encode($result['params'])
+                                ]);
+                            }
+                        }
+                    }
                 }
             }
-
-            dd("SyncLocalBots");
 
         } catch (Throwable $throwable) {
             Log::error($throwable->getMessage());

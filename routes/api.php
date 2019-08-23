@@ -61,6 +61,11 @@ Route::group(['middleware' => ['auth:api']], function() {
 
 Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['auth:api', 'api.admin']], function() {
 
+    Route::group(['prefix' => 'aws', 'as' => 'aws.'], function () {
+        Route::get('/', 'AwsSettingController@index')->name('aws');
+        Route::put('/{setting}', 'AwsSettingController@update')->name('update');
+    });
+
     Route::group(['prefix' => 'bots', 'as' => 'bots.'], function () {
         Route::get('/running', 'BotInstanceController@index')->name('running');
         Route::get('/tags', 'BotController@getTags')->name('running');
@@ -76,6 +81,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
     });
 
     Route::resources([
+        'aws'           => 'AwsSettingController',
         'user'          => 'UserController',
         'bots'          => 'BotController',
         'schedule'      => 'ScheduleInstanceController',

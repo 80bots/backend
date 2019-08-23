@@ -8,9 +8,9 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
-use App\UserInstance;
-use App\Http\Resources\Admin\UserInstanceResource as AdminBotInstanceResource;
-use App\Http\Resources\User\UserInstanceResource as UserBotInstanceResource;
+use App\BotInstance;
+use App\Http\Resources\Admin\BotInstanceResource as AdminBotInstanceResource;
+use App\Http\Resources\User\BotInstanceResource as UserBotInstanceResource;
 
 class InstanceLaunched implements ShouldBroadcast
 {
@@ -22,7 +22,7 @@ class InstanceLaunched implements ShouldBroadcast
     /**
      * Create a new event instance.
      *
-     * @param UserInstance $userInstance
+     * @param BotInstance $userInstance
      * @param User $user
      */
     public function __construct($userInstance, $user)

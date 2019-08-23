@@ -20,6 +20,9 @@ class AwsAmisTableSeeder extends Seeder
 
         if ($regions->isNotEmpty()) {
             foreach ($regions as $region) {
+
+                echo "Region {$region->name}\n";
+
                 $aws = new Aws;
                 if (! empty($owners) && is_array($owners)) {
                     foreach ($owners as $owner) {

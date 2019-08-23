@@ -16,13 +16,11 @@ class BotResource extends JsonResource
     {
         return [
             'id'                => $this->id ?? '',
-            'name'              => $this->name ?? '',
             'platform'          => $this->platform->name ?? '',
+            'name'              => $this->name ?? '',
             'description'       => $this->description ?? '',
-            'ami_id'            => $this->aws_ami_image_id ?? '',
-            'ami_name'          => $this->aws_ami_name ?? '',
-            'instance_type'     => $this->aws_instance_type ?? '',
-            'storage'           => $this->aws_storage_gb ?? '',
+            'parameters'        => json_decode($this->parameters ?? ''),
+            'ami_id'            => $this->aws_image_id ?? '',
             'aws_startup_script'=> $this->aws_startup_script ?? '',
             'aws_custom_script' => $this->aws_custom_script ?? '',
             'status'            => $this->status ?? '',

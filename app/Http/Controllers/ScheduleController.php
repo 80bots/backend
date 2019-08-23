@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 use App\Helpers\CommonHelper;
 use App\Http\Resources\User\ScheduleCollection;
 use App\Http\Resources\User\ScheduleResource;
-use App\Http\Resources\User\UserInstanceCollection;
+use App\Http\Resources\User\BotInstanceCollection;
 use App\SchedulingInstance;
 use App\SchedulingInstancesDetails;
-use App\UserInstance;
+use App\BotInstance;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -57,8 +57,8 @@ class ScheduleController extends Controller
     {
         try {
             // TODO: status stop ?????
-            $resource = UserInstance::where(['status' => 'stop','user_id'=> Auth::id()]);
-            return new UserInstanceCollection($resource->paginate(self::PAGINATE));
+            $resource = BotInstance::where(['status' => 'stop','user_id'=> Auth::id()]);
+            return new BotInstanceCollection($resource->paginate(self::PAGINATE));
         } catch (Throwable $throwable) {
             return $this->error(__('user.server_error'), $throwable->getMessage());
         }
@@ -104,7 +104,7 @@ class ScheduleController extends Controller
                'instance_id' => 'required|string'
             ]);
 
-            $instance = UserInstance::findByInstanceId($data['instance_id'])->first();
+            $instance = BotInstance::findByInstanceId($data['instance_id'])->first();
 
             if(empty($instance)) return $this->error(__('user.server_error'), 'Such bot does not exists');
 
@@ -172,7 +172,7 @@ class ScheduleController extends Controller
             try {
 
                 // TODO: ????
-                $instances = UserInstance::where(['status' => 'stop', 'user_id' => Auth::id()])->get();
+                $instances = BotInstance::where(['status' => 'stop', 'user_id' => Auth::id()])->get();
 
                 $instance = SchedulingInstance::with('userInstance')->where('user_id', '=', Auth::id())
                     ->where('id', '=', $id)->first();

@@ -49,6 +49,6 @@ class AwsRegion extends Model
 
     public function instances()
     {
-        return $this->hasMany(UserInstance::class,'aws_region_id', 'id');
+        return $this->hasMany(BotInstance::class,'aws_region_id', 'id');
     }
 }

@@ -12,7 +12,7 @@ use App\Http\Resources\Admin\TagCollection;
 use App\Platform;
 use App\Tag;
 use App\User;
-use App\UserInstance;
+use App\BotInstance;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -285,7 +285,7 @@ class BotController extends AppController
         $userId = Auth::id();
         $instancesId = [];
 
-        $userInstances = UserInstance::findByUserId($userId)->get();
+        $userInstances = BotInstance::findByUserId($userId)->get();
         $bots = Bot::all();
 
         if (! $userInstances->count()) {

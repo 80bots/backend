@@ -3,19 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\AwsRegion;
+use App\AwsSetting;
 use App\Bot;
 use App\DeleteSecurityGroup;
 use App\Helpers\CommonHelper;
 use App\Jobs\StoreUserInstance;
 use App\Services\Aws;
 use App\User;
-use App\UserInstance;
-use App\UserInstancesDetails;
+use App\BotInstance;
+use App\BotInstancesDetails;
 use Aws\Result;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class AppController extends Controller
@@ -47,28 +49,49 @@ class AppController extends Controller
             $bot = Bot::find($request->input('bot_id'));
 
             if (empty($bot)) {
-                return $this->error(__('keywords.error'), __('keywords.bots.not_found'));
+                return $this->notFound(__('keywords.not_found'), __('keywords.bots.not_found'));
             }
+
+            Log::debug("BOT ISSET");
 
             //
             $awsRegion = AwsRegion::onlyRegion($region)->first();
+
+            Log::debug("AwsRegion ISSET");
 
             if (!$this->checkLimitInRegion($awsRegion)) {
                 return $this->error(__('keywords.error'), __('keywords.instance.launch_limit_error'));
             }
 
-            if ($this->issetAmiInRegion($awsRegion, $bot)) {
+            Log::debug("checkLimitInRegion ISSET");
+
+            $awsSetting = AwsSetting::isDefault()->first();
+
+            if ($this->issetAmiInRegion($awsRegion, $awsSetting->image_id)) {
+
+                Log::debug("issetAmiInRegion ISSET");
+
                 //
                 $awsRegion->increment('created_instances');
 
-                $instance = UserInstance::create([
-                    'user_id' => Auth::id(),
-                    'bot_id' => $bot->id ?? null,
+                $instance = BotInstance::create([
+                    'user_id'       => Auth::id(),
+                    'bot_id'        => $bot->id ?? null,
                     'aws_region_id' => $awsRegion->id ?? null
                 ]);
 
-                if (!empty($instance)) {
-                    dispatch(new StoreUserInstance($instance->id ?? null, Auth::user(), $region));
+                $instance->details()->create([
+                    'aws_instance_type' => $awsSetting->type ?? null,
+                    'aws_storage_gb'    => $awsSetting->storage ?? null,
+                    'aws_image_id'      => $awsSetting->image_id ?? null
+                ]);
+
+                if (! empty($instance)) {
+
+                    $user = User::find(Auth::id());
+
+                    dispatch(new StoreUserInstance($bot, $instance, $user));
+
                     return $this->success([
                         'instance_id' => $instance->id ?? null
                     ], __('keywords.instance.launch_success'));
@@ -78,6 +101,7 @@ class AppController extends Controller
             return $this->error(__('keywords.error'), __('keywords.instance.launch_error'));
 
         } catch (Throwable $throwable) {
+            Log::error($throwable->getMessage());
             return $this->error(__('keywords.server_error'), $throwable->getMessage());
         }
     }
@@ -97,13 +121,13 @@ class AppController extends Controller
 
     /**
      * @param AwsRegion $awsRegion
-     * @param Bot $bot
+     * @param string $imageId
      * @return bool
      */
-    private function issetAmiInRegion(AwsRegion $awsRegion, Bot $bot): bool
+    private function issetAmiInRegion(AwsRegion $awsRegion, string $imageId): bool
     {
-        $count = $awsRegion->whereHas('amis', function (Builder $query) use ($bot) {
-            $query->where('image_id', '=', $bot->aws_ami_image_id ?? null);
+        $count = $awsRegion->whereHas('amis', function (Builder $query) use ($imageId) {
+            $query->where('image_id', '=', $imageId);
         })->count();
 
         return $count > 0;
@@ -140,7 +164,7 @@ class AppController extends Controller
         }
 
         if ($this->checkTerminatedStatus($describeInstancesResponse)) {
-            $instance->update(['status' => UserInstance::STATUS_TERMINATED]);
+            $instance->update(['aws_status' => BotInstance::STATUS_TERMINATED]);
             //
             if ($awsRegion->created_instances > 0) {
                 $awsRegion->decrement('created_instances');
@@ -152,52 +176,53 @@ class AppController extends Controller
 
         switch ($status) {
 
-            case UserInstance::STATUS_RUNNING:
+            case BotInstance::STATUS_RUNNING:
 
-                $instance->fill(['status' => UserInstance::STATUS_RUNNING]);
+                $instance->fill(['aws_status' => BotInstance::STATUS_RUNNING]);
 
                 // TODO: Check result
                 $aws->startInstance([$instance->aws_instance_id ?? null]);
 
-                UserInstancesDetails::create([
+                BotInstancesDetails::create([
                     'user_instance_id'  => $instance->id ?? null,
                     'start_time'        => $currentDate
                 ]);
 
                 break;
-            case UserInstance::STATUS_STOPPED:
+            case BotInstance::STATUS_STOPPED:
 
-                $instance->fill(['status' => UserInstance::STATUS_STOPPED]);
+                $instance->fill(['aws_status' => BotInstance::STATUS_STOPPED]);
 
                 // TODO: Check result
                 $aws->stopInstance([$instance->aws_instance_id ?? null]);
 
-                $instanceDetail = UserInstancesDetails::where('user_instance_id', '=', $id)
-                    ->latest()
-                    ->first();
+                $instanceDetail = $instance->details()->latest()->first() ?? null;
 
-                $diffTime = CommonHelper::diffTimeInMinutes($instanceDetail->start_time, $currentDate);
+                if (! empty($instanceDetail)) {
 
-                $instanceDetail->fill([
-                    'end_time'      => $currentDate,
-                    'total_time'    => $diffTime
-                ]);
+                    $diffTime = CommonHelper::diffTimeInMinutes($instanceDetail->start_time ?? null, $currentDate);
 
-                if ($instanceDetail->save()) {
-                    if($diffTime > ($instance->cron_up_time ?? 0)){
-                        $upTime = $diffTime + ($instance->temp_up_time ?? 0);
-                        $instance->fill([
-                            'cron_up_time'  => 0,
-                            'temp_up_time'  => $upTime,
-                            'up_time'       => $upTime,
-                            'used_credit'   => CommonHelper::calculateUsedCredit($upTime)
-                        ]);
+                    $instanceDetail->fill([
+                        'end_time' => $currentDate,
+                        'total_time' => $diffTime
+                    ]);
+
+                    if ($instanceDetail->save()) {
+                        if ($diffTime > ($instance->cron_up_time ?? 0)) {
+                            $upTime = $diffTime + ($instance->temp_up_time ?? 0);
+                            $instance->fill([
+                                'cron_up_time'  => 0,
+                                'temp_up_time'  => $upTime,
+                                'up_time'       => $upTime,
+                                'used_credit'   => CommonHelper::calculateUsedCredit($upTime)
+                            ]);
+                        }
                     }
                 }
 
                 break;
             default:
-                $instance->fill(['status' => UserInstance::STATUS_TERMINATED]);
+                $instance->fill(['aws_status' => BotInstance::STATUS_TERMINATED]);
                 // TODO: Check result
                 $aws->terminateInstance([$instance->aws_instance_id ?? null]);
                 $this->cleanUpTerminatedInstanceData($aws, $instance);
@@ -207,7 +232,7 @@ class AppController extends Controller
 
         if ($instance->save()) {
 
-            if ($instance->status === UserInstance::STATUS_TERMINATED) {
+            if ($instance->aws_status === BotInstance::STATUS_TERMINATED) {
                 $instance->delete();
                 //
                 if ($awsRegion->created_instances > 0) {
@@ -224,9 +249,9 @@ class AppController extends Controller
     /**
      * Clean up unused keys and security groups
      * @param Aws $aws
-     * @param UserInstance $instance
+     * @param BotInstance $instance
      */
-    protected function cleanUpTerminatedInstanceData(Aws $aws, UserInstance $instance): void
+    protected function cleanUpTerminatedInstanceData(Aws $aws, BotInstance $instance): void
     {
         //
         if(preg_match('/^keys\/(.*)\.pem$/s', $instance->aws_pem_file_path ?? '', $matches)) {
@@ -268,14 +293,14 @@ class AppController extends Controller
 
     /**
      * @param string|null $id
-     * @return UserInstance|null
+     * @return BotInstance|null
      */
-    private function getInstanceWithCheckUser(?string $id): ?UserInstance
+    private function getInstanceWithCheckUser(?string $id): ?BotInstance
     {
         if (Auth::user()->isAdmin()) {
-            return UserInstance::find($id);
+            return BotInstance::find($id);
         } elseif (Auth::user()->isUser()) {
-            return UserInstance::where([
+            return BotInstance::where([
                 ['id', '=', $id],
                 ['user_id', '=', Auth::id()]
             ])->first();
