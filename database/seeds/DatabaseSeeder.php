@@ -15,10 +15,10 @@ class DatabaseSeeder extends Seeder
              RolesTableseeder::class,
              SubscriptionPlansTableSeeder::class,
              TimezonesTableSeeder::class,
+             AwsRegionsTableSeeder::class,
              AddUserSeeder::class,
              AddPlatformsSeeder::class,
              BotsTableSeeder::class,
-             AwsRegionsTableSeeder::class,
              AwsAmisTableSeeder::class
          ]);
     }

@@ -18,6 +18,7 @@ class CreateUsersTable extends Migration
             $table->increments('id');
             $table->unsignedTinyInteger('role_id');
             $table->unsignedInteger('timezone_id')->nullable();
+            $table->unsignedInteger('region_id')->nullable();
             $table->string('name')->nullable();
             $table->string('email')->unique();
             $table->string('verification_token')->nullable();
@@ -39,6 +40,9 @@ class CreateUsersTable extends Migration
                 ->onDelete('cascade')->onUpdate('cascade');
             $table->foreign('timezone_id')
                 ->references('id')->on('timezones')
+                ->onDelete('no action')->onUpdate('no action');
+            $table->foreign('region_id')
+                ->references('id')->on('aws_regions')
                 ->onDelete('no action')->onUpdate('no action');
         });
     }

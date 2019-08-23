@@ -31,6 +31,7 @@ class User extends Authenticatable
         'password',
         'role_id',
         'timezone_id',
+        'region_id',
         'verification_token',
         'remaining_credits',
         'temp_remaining_credits',
@@ -92,6 +93,11 @@ class User extends Authenticatable
     public function timezone()
     {
         return $this->belongsTo(Timezone::class);
+    }
+
+    public function region()
+    {
+        return $this->belongsTo(AwsRegion::class);
     }
 
     /**
