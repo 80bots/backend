@@ -41,12 +41,16 @@ class RefreshDatabase extends Command
      */
     public function handle()
     {
+        $this->comment('Refreshing cache...');
+        $this->call('cache:refresh');
         $this->comment('Refreshing database...');
         $this->call('migrate:fresh');
         $this->comment('Seeding database...');
         $this->call('db:seed');
         $this->comment('Installing passport...');
         $this->call('passport:install');
+        $this->comment('Refreshing cache again...');
+        $this->call('cache:refresh');
         $this->info('Completed');
     }
 }

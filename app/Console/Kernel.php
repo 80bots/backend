@@ -4,6 +4,7 @@ namespace App\Console;
 
 use App\Console\Commands\AwsSyncAmis;
 use App\Console\Commands\AwsSyncRegions;
+use App\Console\Commands\CacheRefresh;
 use App\Console\Commands\CalculateInstancesUpTime;
 use App\Console\Commands\CalculateUserCreditScore;
 use App\Console\Commands\CleanUpUnused;
@@ -23,6 +24,7 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
+        CacheRefresh::class,
         InstanceStartScheduling::class,
         InstanceStopScheduling::class,
         InstanceSyncScheduling::class,
