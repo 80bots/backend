@@ -104,8 +104,6 @@ class StoreUserInstance implements ShouldQueue
                 $tagName
             );
 
-            dd($newInstanceResponse);
-
             if ($newInstanceResponse->hasKey('Instances')) {
                 $instanceId = $newInstanceResponse->get('Instances')[0]['InstanceId'] ?? null;
 

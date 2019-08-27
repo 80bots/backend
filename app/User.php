@@ -82,6 +82,13 @@ class User extends Authenticatable
         return $this->hasMany(BotInstance::class);
     }
 
+    public function scopeRunningInstances($query)
+    {
+        return $query->whereHas('instances', function (Builder $query) {
+            $query->where('aws_status', '=', BotInstance::STATUS_RUNNING);
+        })->get();
+    }
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
@@ -150,7 +157,7 @@ class User extends Authenticatable
      */
     public function scopeOnlyUsers($query)
     {
-        $query->whereHas('role', function (Builder $query) {
+        return $query->whereHas('role', function (Builder $query) {
             $query->where('name', '=', self::ROLE_NAME_USER);
         });
     }
@@ -161,7 +168,7 @@ class User extends Authenticatable
      */
     public function scopeOnlyAdmins($query)
     {
-        $query->whereHas('role', function (Builder $query) {
+        return $query->whereHas('role', function (Builder $query) {
             $query->where('name', '=', self::ROLE_NAME_ADMIN);
         });
     }

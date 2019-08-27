@@ -446,13 +446,19 @@ class Aws
      * @param string $keyPairName
      * @param string $securityGroupName
      * @param string $tagName
-     * @return Result
+     * @return Result|null
      */
-    public function launchInstance(Bot $bot, BotInstance $instance, User $user, string $keyPairName, string $securityGroupName, string $tagName)
+    public function launchInstance(Bot $bot, BotInstance $instance, User $user, string $keyPairName, string $securityGroupName, string $tagName): ?Result
     {
-        $imageId            = $bot->aws_ami_image_id ?? config('aws.image_id');
-        $instanceType       = $bot->aws_instance_type ?? config('aws.instance_type');
-        $volumeSize         = $bot->aws_storage_gb ?? config('aws.volume_size');
+        $botDetail = $instance->details()->latest()->first();
+
+        if (empty($botDetail)) {
+            return null;
+        }
+
+        $imageId            = $botDetail->aws_image_id ?? config('aws.image_id');
+        $instanceType       = $botDetail->aws_instance_type ?? config('aws.instance_type');
+        $volumeSize         = $botDetail->aws_storage_gb ?? config('aws.volume_size');
         $userData           = $bot->aws_startup_script ?? '';
         $botScript          = $bot->aws_custom_script ?? '';
 
