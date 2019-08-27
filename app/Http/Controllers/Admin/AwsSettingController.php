@@ -20,8 +20,12 @@ class AwsSettingController extends AppController
         $settings = AwsSetting::find($id);
 
         if (! empty($settings)) {
-            $update = $request->only(['image_id', 'type', 'storage', 'default']);
-            $settings->update($update);
+            $updateData = $request->validate([
+                'update.image_id'           => 'string|required',
+                'update.type'               => 'string|required',
+                'update.storage'            => 'integer|required',
+            ]);
+            $settings->update($updateData['update']);
 
             return $this->success((new AwsSettingResource($settings))->toArray($request));
         }
