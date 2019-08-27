@@ -176,11 +176,14 @@ class BotInstanceController extends AppController
             try {
                 $instance = BotInstance::find($instance);
 
-                if (!empty($instance)) {
+                if (! empty($instance)) {
+
+                    $details    = $instance->details()->latest()->first();
+
                     $aws = new Aws;
                     $aws->s3Connection();
 
-                    $result = $aws->getKeyPairObject($instance->aws_pem_file_path ?? '');
+                    $result = $aws->getKeyPairObject($details->aws_pem_file_path ?? '');
 
                     $body = $result->get('Body');
 

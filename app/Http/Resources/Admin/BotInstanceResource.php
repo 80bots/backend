@@ -16,29 +16,26 @@ class BotInstanceResource extends JsonResource
      */
     public function toArray($request)
     {
-        $details = $this->details()
-            ->orderBy('created_at', 'desc')
-            ->first();
-
-        $region = $this->region ?? null;
+        $details    = $this->details()->latest()->first();
+        $region     = $this->region ?? null;
 
         return [
             'id'                => $this->id ?? '',
             'region'            => $region->name ?? '',
-            'name'              => $this->tag_name ?? '',
+            'name'              => $details->tag_name ?? '',
             'bot_name'          => $this->bot->name ?? '',
             'parameters'        => $this->bot->parameters ?? '',
-            'launched_by'       => $this->tag_user_email ?? '',
+            'launched_by'       => $details->tag_user_email ?? '',
             'launched_at'       => $details->start_time ?? '',
-            'instance_id'       => $this->aws_instance_id ?? '',
-            'tag_user_email'    => $this->tag_user_email ?? '',
+            'instance_id'       => $details->aws_instance_id ?? '',
+            'tag_user_email'    => $details->tag_user_email ?? '',
             'used_credit'       => $this->used_credit ?? 0,
             'uptime'            => $this->up_time ?? 0,
             'temp_up_time'      => $this->temp_up_time ?? 0,
             'cron_up_time'      => $this->cron_up_time ?? 0,
-            'status'            => $this->status ?? BotInstance::STATUS_TERMINATED,
-            'ip'                => $this->aws_public_ip ?? '',
-            'pem'               => $this->aws_pem_file_path ?? ''
+            'status'            => $this->aws_status ?? BotInstance::STATUS_TERMINATED,
+            'ip'                => $details->aws_public_ip ?? '',
+            'pem'               => $details->aws_pem_file_path ?? ''
         ];
     }
 }

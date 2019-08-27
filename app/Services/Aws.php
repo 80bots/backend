@@ -450,54 +450,42 @@ class Aws
      */
     public function launchInstance(Bot $bot, BotInstance $instance, User $user, string $keyPairName, string $securityGroupName, string $tagName): ?Result
     {
-        $botDetail = $instance->details()->latest()->first();
+        $botInstanceDetail = $instance->details()->latest()->first();
 
-        if (empty($botDetail)) {
+        if (empty($botInstanceDetail)) {
             return null;
         }
 
-        $imageId            = $botDetail->aws_image_id ?? config('aws.image_id');
-        $instanceType       = $botDetail->aws_instance_type ?? config('aws.instance_type');
-        $volumeSize         = $botDetail->aws_storage_gb ?? config('aws.volume_size');
-        $userData           = $bot->aws_startup_script ?? '';
-        $botScript          = $bot->aws_custom_script ?? '';
-
-        $_shebang           = '#!/bin/bash';
-        $userData           = "{$_shebang}\n {$userData}\n";
-        $consoleOverrides   = $this->getConsoleOverrides();
-
-        $botScript = "{$consoleOverrides}\n {$botScript}";
-
-        if (! is_null($botScript) || ! empty($botScript)) {
-            $staticBotScript    = $this->getStaticBotScript($botScript);
-            $userData           = "{$userData}\n {$staticBotScript}";
-        }
-
-        $userData = base64_encode($userData);
+        $region         = $instance->region ? $instance->region->code : config('aws.region', 'us-east-2');
+        $imageId        = $botInstanceDetail->aws_image_id ?? config('aws.image_id');
+        $instanceType   = $botInstanceDetail->aws_instance_type ?? config('aws.instance_type');
+        $volumeSize     = $botInstanceDetail->aws_storage_gb ?? config('aws.volume_size');
+        $userData       = $bot->path ? base64_encode($bot->path) : '';
 
         if (empty($this->ec2)) {
-            $this->ec2Connection($instance->region->code);
+            $this->ec2Connection($region);
         }
 
         $tags = [
             [
-                'Key' => 'Name',
+                'Key'   => 'Name',
                 'Value' => $tagName,
             ],
+            [
+                'Key'   => 'User Email',
+                'Value' => $user->email ?? '',
+            ]
         ];
 
-        if (! empty($user)) {
-            array_push($tags, [
-                'Key' => 'User Email',
-                'Value' => $user->email ?? '',
-            ]);
-        }
-
-        $instanceLaunchRequest = $this->getInstanceLaunchRequest($imageId, $volumeSize, $instanceType, $keyPairName, $tags, $securityGroupName);
-
-        if (isset($userData) && !empty($userData)) {
-            $instanceLaunchRequest = Arr::add($instanceLaunchRequest, 'UserData', $userData);
-        }
+        $instanceLaunchRequest = $this->getInstanceLaunchRequest(
+            $imageId,
+            $volumeSize,
+            $instanceType,
+            $keyPairName,
+            $tags,
+            $securityGroupName,
+            $userData
+        );
 
         return $this->ec2->runInstances($instanceLaunchRequest);
     }
@@ -591,16 +579,16 @@ class Aws
     }
 
     /**
-     * @param $instanceId
-     * @return mixed
+     * @param array $instanceIds
+     * @return void
      */
-    public function waitUntil($instanceId)
+    public function waitUntil(array $instanceIds)
     {
         if (empty($this->ec2)) {
             $this->ec2Connection();
         }
 
-        return $this->ec2->waitUntil('InstanceRunning', ['InstanceIds' => $instanceId]);
+        $this->ec2->waitUntil('InstanceRunning', ['InstanceIds' => $instanceIds]);
     }
 
     /**
@@ -811,9 +799,17 @@ HERECONSOLE;
      * @param $keyPairName
      * @param $tags
      * @param $securityGroupName
+     * @param $userData
      * @return array
      */
-    protected function getInstanceLaunchRequest($imageId, $volumeSize, $instanceType, $keyPairName, $tags, $securityGroupName): array
+    protected function getInstanceLaunchRequest(
+        string $imageId,
+        int $volumeSize,
+        string $instanceType,
+        string $keyPairName,
+        array $tags,
+        string $securityGroupName,
+        string $userData): array
     {
         return [
             'ImageId'   => $imageId,
@@ -823,7 +819,7 @@ HERECONSOLE;
                 [
                     'DeviceName' => 'sdh',
                     'Ebs' => [
-                        'VolumeSize' => (int)$volumeSize
+                        'VolumeSize' => $volumeSize
                     ],
                 ],
             ],
@@ -835,7 +831,8 @@ HERECONSOLE;
                     'Tags' => $tags,
                 ],
             ],
-            'SecurityGroups' => [$securityGroupName]
+            'SecurityGroups'    => [$securityGroupName],
+            'UserData'          => $userData
         ];
     }
 

@@ -65,6 +65,17 @@ class BotInstance extends BaseModel
         $this->save();
     }
 
+    public function setAwsStatusRunning()
+    {
+        $this->fill(['aws_status' => self::STATUS_RUNNING]);
+        $this->save();
+    }
+
+    public function isAwsStatusTerminated()
+    {
+        return $this->aws_status === self::STATUS_TERMINATED;
+    }
+
     public function details()
     {
         return $this->hasMany(BotInstancesDetails::class, 'instance_id', 'id');

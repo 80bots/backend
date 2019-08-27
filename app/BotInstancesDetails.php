@@ -22,6 +22,8 @@ class BotInstancesDetails extends Model
         'end_time',
         'total_time',
         'aws_instance_id',
+        'aws_instance_type',
+        'aws_storage_gb',
         'aws_image_id',
         'aws_image_name',
         'aws_security_group_id',

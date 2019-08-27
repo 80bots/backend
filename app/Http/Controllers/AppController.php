@@ -77,7 +77,8 @@ class AppController extends Controller
                 $instance = BotInstance::create([
                     'user_id'       => Auth::id(),
                     'bot_id'        => $bot->id ?? null,
-                    'aws_region_id' => $awsRegion->id ?? null
+                    'aws_region_id' => $awsRegion->id ?? null,
+                    'aws_status'    => BotInstance::STATUS_PENDING
                 ]);
 
                 $instance->details()->create([
@@ -148,6 +149,12 @@ class AppController extends Controller
             return false;
         }
 
+        $instanceDetail = $instance->details()->latest()->first();
+
+        if (empty($instanceDetail)) {
+            return false;
+        }
+
         $awsRegion = AwsRegion::find($instance->aws_region_id ?? null);
 
         if (empty($awsRegion)) {
@@ -157,7 +164,7 @@ class AppController extends Controller
         $currentDate    = Carbon::now()->toDateTimeString();
         $aws            = new Aws;
 
-        $describeInstancesResponse = $aws->describeInstances([$instance->aws_instance_id ?? null]);
+        $describeInstancesResponse = $aws->describeInstances([$instanceDetail->aws_instance_id ?? null]);
 
         if (! $describeInstancesResponse->hasKey('Reservations')) {
             return false;
@@ -170,7 +177,7 @@ class AppController extends Controller
                 $awsRegion->decrement('created_instances');
             }
             //
-            $this->cleanUpTerminatedInstanceData($aws, $instance);
+            $this->cleanUpTerminatedInstanceData($aws, $instanceDetail);
             return false;
         }
 
@@ -178,45 +185,42 @@ class AppController extends Controller
 
             case BotInstance::STATUS_RUNNING:
 
+                // TODO: Check result
+                $aws->startInstance([$instanceDetail->aws_instance_id ?? null]);
+
                 $instance->fill(['aws_status' => BotInstance::STATUS_RUNNING]);
 
-                // TODO: Check result
-                $aws->startInstance([$instance->aws_instance_id ?? null]);
-
-                BotInstancesDetails::create([
-                    'user_instance_id'  => $instance->id ?? null,
-                    'start_time'        => $currentDate
+                $newInstanceDetail = $instanceDetail->replicate([
+                    'end_time', 'total_time'
                 ]);
+                $newInstanceDetail->fill(['start_time' => $currentDate]);
+                $newInstanceDetail->save();
 
                 break;
             case BotInstance::STATUS_STOPPED:
 
+                // TODO: Check result
+                $aws->stopInstance([$instanceDetail->aws_instance_id ?? null]);
+
                 $instance->fill(['aws_status' => BotInstance::STATUS_STOPPED]);
 
-                // TODO: Check result
-                $aws->stopInstance([$instance->aws_instance_id ?? null]);
+                $diffTime = CommonHelper::diffTimeInMinutes($instanceDetail->start_time ?? null, $currentDate);
 
-                $instanceDetail = $instance->details()->latest()->first() ?? null;
+                $instanceDetail->fill([
+                    'end_time'      => $currentDate,
+                    'total_time'    => $diffTime
+                ]);
 
-                if (! empty($instanceDetail)) {
+                if ($instanceDetail->save()) {
+                    if ($diffTime > ($instance->cron_up_time ?? 0)) {
+                        $upTime = $diffTime + ($instance->temp_up_time ?? 0);
 
-                    $diffTime = CommonHelper::diffTimeInMinutes($instanceDetail->start_time ?? null, $currentDate);
-
-                    $instanceDetail->fill([
-                        'end_time' => $currentDate,
-                        'total_time' => $diffTime
-                    ]);
-
-                    if ($instanceDetail->save()) {
-                        if ($diffTime > ($instance->cron_up_time ?? 0)) {
-                            $upTime = $diffTime + ($instance->temp_up_time ?? 0);
-                            $instance->fill([
-                                'cron_up_time'  => 0,
-                                'temp_up_time'  => $upTime,
-                                'up_time'       => $upTime,
-                                'used_credit'   => CommonHelper::calculateUsedCredit($upTime)
-                            ]);
-                        }
+                        $instance->fill([
+                            'cron_up_time'  => 0,
+                            'temp_up_time'  => $upTime,
+                            'up_time'       => $upTime,
+                            'used_credit'   => CommonHelper::calculateUsedCredit($upTime)
+                        ]);
                     }
                 }
 
@@ -224,15 +228,15 @@ class AppController extends Controller
             default:
                 $instance->fill(['aws_status' => BotInstance::STATUS_TERMINATED]);
                 // TODO: Check result
-                $aws->terminateInstance([$instance->aws_instance_id ?? null]);
-                $this->cleanUpTerminatedInstanceData($aws, $instance);
+                $aws->terminateInstance([$instanceDetail->aws_instance_id ?? null]);
+                $this->cleanUpTerminatedInstanceData($aws, $instanceDetail);
 
                 break;
         }
 
         if ($instance->save()) {
 
-            if ($instance->aws_status === BotInstance::STATUS_TERMINATED) {
+            if ($instance->isAwsStatusTerminated()) {
                 $instance->delete();
                 //
                 if ($awsRegion->created_instances > 0) {
@@ -249,18 +253,18 @@ class AppController extends Controller
     /**
      * Clean up unused keys and security groups
      * @param Aws $aws
-     * @param BotInstance $instance
+     * @param $details
      */
-    protected function cleanUpTerminatedInstanceData(Aws $aws, BotInstance $instance): void
+    protected function cleanUpTerminatedInstanceData(Aws $aws, $details): void
     {
         //
-        if(preg_match('/^keys\/(.*)\.pem$/s', $instance->aws_pem_file_path ?? '', $matches)) {
+        if(preg_match('/^keys\/(.*)\.pem$/s', $details->aws_pem_file_path ?? '', $matches)) {
             $aws->deleteKeyPair($matches[1]);
-            $aws->deleteS3KeyPair($instance->aws_pem_file_path ?? '');
+            $aws->deleteS3KeyPair($details->aws_pem_file_path ?? '');
         }
         DeleteSecurityGroup::create([
-            'group_id'      => $instance->aws_security_group_id ?? '',
-            'group_name'    => $instance->aws_security_group_name ?? '',
+            'group_id'      => $details->aws_security_group_id ?? '',
+            'group_name'    => $details->aws_security_group_name ?? '',
         ]);
     }
 
