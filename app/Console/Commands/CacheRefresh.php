@@ -2,13 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Bot;
-use App\Platform;
-use App\Services\BotParser;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Log;
-use Throwable;
 
 class CacheRefresh extends Command
 {
@@ -18,14 +12,12 @@ class CacheRefresh extends Command
      * @var string
      */
     protected $signature = 'cache:refresh';
-
     /**
      * The console command description.
      *
      * @var string
      */
     protected $description = 'Clears caches and doing dump autoload';
-
     /**
      * Create a new command instance.
      *
@@ -35,7 +27,6 @@ class CacheRefresh extends Command
     {
         parent::__construct();
     }
-
     /**
      * Execute the console command.
      *

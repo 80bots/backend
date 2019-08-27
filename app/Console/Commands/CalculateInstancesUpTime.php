@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\BotInstance;
 use App\Helpers\CommonHelper;
 use App\Services\Aws;
 use App\User;
@@ -49,52 +50,51 @@ class CalculateInstancesUpTime extends Command
     public function handle()
     {
         $this->now  = Carbon::now();
-        $aws        = new Aws;
-        $users      = User::findUserInstances();
 
-        foreach ($users as $user) {
+        User::chunkById(100, function ($users) {
+            foreach ($users as $user) {
 
-            if (! empty($user->instances)) {
+                $region = $user->region ? $user->region->code : config('aws.region', 'us-east-2');
 
-                foreach ($user->instances as $instance) {
+                $aws = new Aws;
+                $aws->ec2Connection($region);
 
-                    if ($instance->status === 'running') {
+                $instances = $user->instances()->findRunningInstance();
+
+                if ($instances->isNotEmpty()) {
+
+                    foreach ($instances as $instance) {
 
                         try {
 
-                            $describeInstance = $aws->describeInstances([$instance->aws_instance_id]);
-
-                            if ($describeInstance->hasKey('Reservations')) {
-
-                                $instanceResponse = $describeInstance->get('Reservations')[0]['Instances'][0];
-
-                                $cronUpTime = CommonHelper::diffTimeInMinutes($instanceResponse['LaunchTime']->format('Y-m-d H:i:s'), $this->now->toDateTimeString());
-
-                                $instance->cron_up_time = $cronUpTime;
-
-                                $instance->up_time = $cronUpTime + $instance->temp_up_time ?? 0;
-
-                                $instance->used_credit = CommonHelper::calculateUsedCredit($cronUpTime + $instance->temp_up_time ?? 0);
-
-                                Log::debug('instance id ' . $instance->aws_instance_id . ' Cron Up Time is ' . $cronUpTime);
-
-                            } else {
-                                Log::debug('instance id ' . $instance->aws_instance_id . ' already terminated');
-                                $instance->status = 'terminated';
-                            }
+//                            $describeInstance = $aws->describeInstances([$instance->aws_instance_id]);
+//
+//                            if ($describeInstance->hasKey('Reservations')) {
+//
+//                                $instanceResponse = $describeInstance->get('Reservations')[0]['Instances'][0];
+//
+//                                $cronUpTime = CommonHelper::diffTimeInMinutes($instanceResponse['LaunchTime']->format('Y-m-d H:i:s'), $this->now->toDateTimeString());
+//
+//                                $instance->cron_up_time = $cronUpTime;
+//
+//                                $instance->up_time = $cronUpTime + $instance->temp_up_time ?? 0;
+//
+//                                $instance->used_credit = CommonHelper::calculateUsedCredit($cronUpTime + $instance->temp_up_time ?? 0);
+//
+//                                Log::debug('instance id ' . $instance->aws_instance_id . ' Cron Up Time is ' . $cronUpTime);
+//
+//                            } else {
+//                                Log::debug('instance id ' . $instance->aws_instance_id . ' already terminated');
+//                                $instance->status = 'terminated';
+//                            }
 
                         } catch (Throwable $throwable) {
-                            Log::debug('instance id ' . $instance->aws_instance_id . ' not found');
-                            $instance->status = 'terminated';
+                            Log::error($throwable->getMessage());
                         }
 
-                        $instance->save();
-
-                    } else {
-                        Log::debug('instance id ' . $instance->aws_instance_id . ' is ' . $instance->status);
                     }
                 }
             }
-        }
+        });
     }
 }
