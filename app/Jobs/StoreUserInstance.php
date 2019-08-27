@@ -105,45 +105,47 @@ class StoreUserInstance implements ShouldQueue
             );
 
             if ($newInstanceResponse->hasKey('Instances')) {
+
                 $instanceId = $newInstanceResponse->get('Instances')[0]['InstanceId'] ?? null;
 
                 Log::info('Launched instance ' . $instanceId);
 
-                $waitUntilResponse = $aws->waitUntil([$instanceId]);
+                $aws->waitUntil([$instanceId]);
+
+                Log::info('wait until instance ' . $instanceId);
 
                 $describeInstancesResponse = $aws->describeInstances([$instanceId]);
 
+                Log::info('describe instances ' . $instanceId);
+
                 if ($describeInstancesResponse->hasKey('Reservations')) {
+
+                    Log::debug(print_r($describeInstancesResponse->get('Reservations'), true));
 
                     $instanceArray  = $describeInstancesResponse->get('Reservations')[0]['Instances'][0];
                     $launchTime     = $instanceArray['LaunchTime'] ?? '';
+                    $awsStatus      = $instanceArray['State']['Name'];
 
                     // store instance details in database
-//                    $this->instance->fill([
-//                        'tag_name' => $tagName,
-//                        'aws_ami_name' => $bot->aws_ami_name ?? '',
-//                        'aws_instance_id' => $instanceArray['InstanceId'] ?? '',
-//                        'aws_ami_id' => $instanceArray['ImageId'] ??  '',
-//                        'aws_security_group_id' => $groupId,
-//                        'aws_security_group_name' => $groupName,
-//                        'aws_public_ip' => $instanceArray['PublicIpAddress'] ?? '',
-//                        'status' => 'running',
-//                        'aws_public_dns' => $instanceArray['PublicDnsName'] ?? '',
-//                        'aws_pem_file_path' => $keyPairPath,
-//                        'created_at' => $launchTime->format('Y-m-d H:i:s'),
-//                        'is_in_queue' => 0,
-//                        'tag_user_email' => $this->user ? $this->user->email : null,
-//                    ]);
-//
-//                    if($this->instance->save()){
-//                        $userInstanceDetail = new UserInstancesDetails;
-//                        $userInstanceDetail->fill([
-//                            'user_instance_id'  => $this->instance->id,
-//                            'start_time'        => $launchTime->format('Y-m-d H:i:s')
-//                        ]);
-//                        $userInstanceDetail->save();
-//                        broadcast(new InstanceLaunched($this->instance, $this->user));
-//                    }
+                    $botInstanceDetail = $this->instance->details()->latest()->first();
+                    $botInstanceDetail->update([
+                        'tag_name' => $tagName,
+                        'tag_user_email' => $this->user->email ?? '',
+                        'aws_instance_id' => $instanceArray['InstanceId'] ?? '',
+                        'aws_security_group_id' => $groupId,
+                        'aws_security_group_name' => $groupName,
+                        'aws_public_ip' => $instanceArray['PublicIpAddress'] ?? '',
+                        'aws_public_dns' => $instanceArray['PublicDnsName'] ?? '',
+                        'aws_pem_file_path' => $keyPairPath,
+                        'is_in_queue' => 0,
+                        'start_time' => $launchTime->format('Y-m-d H:i:s'),
+                    ]);
+
+                    if ($awsStatus === BotInstance::STATUS_RUNNING) {
+                        $this->instance->setAwsStatusRunning();
+                    }
+
+                    broadcast(new InstanceLaunched($this->instance, $this->user));
                 }
 
                 return true;
