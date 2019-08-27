@@ -44,14 +44,23 @@ class SyncLocalBots extends Command
     public function handle()
     {
         try {
+
+            $ignore = [
+                'config.js',
+                '.gitignore',
+                'package.json',
+                'package-lock.json'
+            ];
+
             $files = File::allFiles(base_path('resources/puppeteer'));
 
             if (! empty($files)) {
                 foreach ($files as $file) {
 
-                    if ($file->getFilename() === 'facebook-find-page-add-post.js') {
+                    if (! in_array($file->getFilename(), $ignore)) {
 
-                        echo "FILE BOT {$file->getFilename()}\n";
+                        $res = explode('-', $file->getFilename());
+                        $filePlatform = $res[0] ?? 'unknown';
 
                         $content = $file->getContents();
 
@@ -59,27 +68,30 @@ class SyncLocalBots extends Command
 
                         if (! empty($result['about']) && ! empty($result['params'])) {
 
-                            $platform = Platform::where('name', '=', $result['about']['platform'])->first();
+                            if (! empty($result['about']->platform))
+
+                            $platform = Platform::whereRaw('lower(name) like (?)',["%{$filePlatform}%"])->first();
 
                             if (empty($platform)) {
                                 $platform = Platform::create([
-                                    'name',
+                                    'name' => ucfirst($platform),
                                 ]);
                             }
 
-                            $bot = Bot::where('name', '=', $result['about']['name'])->first();
+                            $bot = Bot::where('name', '=', $result['about']->name)->first();
 
                             if (! empty($bot)) {
                                 $bot->update([
-                                    'description'   => $result['about']['desc'],
+                                    'description'   => $result['about']->description,
                                     'parameters'    => json_encode($result['params'])
                                 ]);
                             } else {
                                 Bot::create([
                                     'platform_id'   => $platform->id ?? null,
-                                    'name'          => $result['about']['name'],
-                                    'description'   => $result['about']['desc'],
-                                    'parameters'    => json_encode($result['params'])
+                                    'name'          => $result['about']->name,
+                                    'description'   => $result['about']->description,
+                                    'parameters'    => json_encode($result['params']),
+                                    'path'          => $file->getFilename()
                                 ]);
                             }
                         }

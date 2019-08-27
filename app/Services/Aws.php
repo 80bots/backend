@@ -6,6 +6,8 @@ use App\Bot;
 use App\Helpers\GeneratorID;
 use App\User;
 use App\BotInstance;
+use Aws\AwsClient;
+use Aws\AwsClientInterface;
 use Aws\Ec2\Ec2Client;
 use Aws\Result;
 use Aws\S3\Exception\S3Exception;
@@ -692,29 +694,31 @@ class Aws
     }
 
     /**
-     * @param $StartUpScript
      * @return array
      */
-    public function runStartUpScript($StartUpScript): array
+    public function runStartUpScript(): array
     {
         if (empty($this->ec2)) {
             $this->ec2Connection();
         }
 
-        exec('mkdir -p Shell');
-        chdir('Shell');
-        $returnArr['status'] = [];
+        $client = new AwsClient(config('aws.credentials'));
 
-        foreach ($StartUpScript as $script) {
-            exec($script, $output, $return);
-            if (! $return) {
-                array_push($returnArr['status'], 'Success');
-            } else {
-                array_push($returnArr['status'], 'Fail');
-            }
-        }
-
-        return $returnArr;
+//        exec('mkdir -p Shell');
+//        chdir('Shell');
+//        $returnArr['status'] = [];
+//
+//        foreach ($StartUpScript as $script) {
+//            exec($script, $output, $return);
+//            if (! $return) {
+//                array_push($returnArr['status'], 'Success');
+//            } else {
+//                array_push($returnArr['status'], 'Fail');
+//            }
+//        }
+//
+//        return $returnArr;
+        return [];
     }
 
     /**

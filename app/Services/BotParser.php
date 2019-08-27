@@ -4,104 +4,45 @@ namespace App\Services;
 
 class BotParser
 {
-//    private static $regex = '/(\/\*\s*PARAMS\n((.|\n)*))\*\/\n*(\/\*\s*ABOUT\n((.|\n)*))\*\//';
-
     /** PARAMS
-     * @username String
-     * @speed Integer [1, .., 10]
-     * @type String ['type1', 'type2']
+    {
+        "email": {
+            "type": "String",
+            "title": "Email",
+            "description": "Your Facebook Email",
+            "icon": "fa-email"
+        },
+        "password": {
+            "type": "password",
+            "title": "Password",
+            "description": "Your Facebook Password",
+            "icon": "fa-key"
+        },
+        "speed": {
+            "type": "range",
+            // if no title, Capitalise the key by default
+            "range": "1-9"
+            // should be presented to the user as a slider
+        }
+    }
      */
 
     /** ABOUT
-     * @name Cool bot
-     * @desc To crawl something
+    {
+        "name": "facebook-find-posts-by-keyword bot",
+        "description": "Scrolls through your facebook feed and mails the posts that have the keyword"
+    }
      */
 
-    private static $regex = '/(\/\*\*\s*PARAMS\n((.|\n)*))\*\/\n*(\/\*\*\s*ABOUT\n((.|\n)*))\*\//';
+    private static $regex = '/\/\*\*\s*PARAMS\n(.*)\*\/\s*\/\*\*\sABOUT\n(.*)\*\//s';
 
-    private static function parseParams($paramsString): array
+    private static function removeCommentsAndNewLines(string $text): string
     {
-        $params = [];
-        $unparsedParams = explode("\n", $paramsString);
-        $unparsedParams = array_filter($unparsedParams, function($item) { return !empty($item); });
-
-        foreach ($unparsedParams as $parameter) {
-
-            preg_match('/\*\s@(.*) (.*)\s\[(.*)\]/', $parameter, $data);
-
-            if(empty($data)) preg_match('/\*\s@(.*) (.*)/', $parameter, $data);
-
-            if($data) {
-
-                $param = [
-                    'name' => $data[1],
-                    'type' => $data[2],
-                ];
-
-                if(isset($data[3])) {
-                    $result = self::parseEnumOrRange($data[3]);
-                    $param[$result['type']] = $result['value'];
-                }
-
-                array_push($params, $param);
-            }
-        }
-
-        return $params;
-    }
-
-    private static function parseAbout($aboutString): array
-    {
-        $result = [];
-        $about = [];
-
-        $unparsedParams = explode("\n", $aboutString);
-        $unparsedParams = array_filter($unparsedParams, function($item) { return !empty($item); });
-
-        foreach ($unparsedParams as $parameter) {
-            if(preg_match('/\*\s@(\S*) (.*)/', $parameter, $data)) {
-                array_push($result, [$data[1] => $data[2]]);
-            }
-        }
-
-        if (! empty($result)) {
-            foreach ($result as $item) {
-                foreach ($item as $key => $value) {
-                    $about[$key] = $value;
-                }
-            }
-        }
-
-        return $about;
-    }
-
-    private static function parseEnumOrRange($string): array
-    {
-        $result = [
-          'type' => '',
-          'value' => []
-        ];
-
-        if (preg_match('/\.\./', $string)) {
-
-            $result['type'] = 'range';
-            $string = str_replace('..', '', $string);
-
-            $result['value'] = array_values(
-                array_filter(
-                    explode(',', str_replace(' ', '', $string)),
-                    function ($item) { return !empty($item); }
-                )
-            );
-
-        } else {
-            $result['type'] = 'enum';
-            $result['value'] = array_filter(explode(',', str_replace(' ', '', $string)),
-                function ($item) { return !empty($item); }
-            );
-        }
-
-        return $result;
+        // remove single line comments
+        $source = preg_replace('#^\s*//.+$#m', "", $text);
+        // remove new lines
+        $json = trim(preg_replace('/\s\s+/', ' ', $source));
+        return trim(preg_replace('/\n+/', ' ', $json));
     }
 
     public static function getBotInfo($fileContent)
@@ -112,26 +53,28 @@ class BotParser
         ];
 
         if (preg_match(self::$regex, $fileContent, $matches)) {
-            if (! empty($matches[2])) {
-                $result['params'] = self::parseParams($matches[2]);
+
+            // PARAMS
+            if (! empty($matches[1])) {
+                // Decode to object
+                $decode = json_decode(self::removeCommentsAndNewLines($matches[1]));
+
+                if (! empty($decode)) {
+                    $params = [];
+                    foreach ((array)$decode as $key => $param) {
+                        $params[] = array_merge(['name' => $key], (array)$param);
+                    }
+                    $result['params'] = $params;
+                }
             }
-            if (! empty($matches[5])) {
-                $result['about'] = self::parseAbout($matches[5]);
+
+            // ABOUT
+            if (! empty($matches[2])) {
+                // Decode to object
+                $result['about'] = json_decode(self::removeCommentsAndNewLines($matches[2]));
             }
         }
 
         return $result;
-    }
-
-    public static function syncBotsWithDb()
-    {
-        $files = array_filter(scandir(base_path('resources/puppeteer/')), function($item) {
-            return !is_dir(base_path('resources/puppeteer/') . $item)
-                && !preg_match('/^\.git/', $item);
-        });
-
-        $bots = array_values(array_filter(array_map(function($item) {
-            return self::getBotParams(base_path('resources/puppeteer/') .$item);
-        }, $files), function($item) { return !empty($item); } ));
     }
 }

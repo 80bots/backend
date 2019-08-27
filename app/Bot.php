@@ -19,7 +19,7 @@ class Bot extends Model
         'name',
         'description',
         'parameters',
-        'aws_image_id',
+        'path',
         'aws_startup_script',
         'aws_custom_script',
         'status',
