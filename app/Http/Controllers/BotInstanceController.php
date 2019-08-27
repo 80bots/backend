@@ -60,10 +60,15 @@ class BotInstanceController extends AppController
 
     public function regions(Request $request)
     {
-        $regions = AwsRegion::onlyEc2()->pluck('name', 'code')->toArray();
+        $regions = AwsRegion::onlyEc2()->pluck('id', 'name')->toArray();
+        $result = [];
+
+        foreach ($regions as $name => $id) {
+            array_push($result, ['name' => $name, 'id' => $id]);
+        }
 
         return $this->success([
-            'regions' => $regions
+            'data' => $result
         ]);
     }
 

@@ -21,6 +21,7 @@ class UserResource extends JsonResource
             'role'              => $this->role->name ?? '',
             'remaining_credits' => $this->remaining_credits ?? 0,
             'timezone'          => $this->timezone->timezone ?? '',
+            'region'            => $this->region->name ?? '',
             'subscription'      => $this->subscription(config('services.stripe.product')) ?? []
         ];
     }

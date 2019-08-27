@@ -50,13 +50,17 @@ class UserController extends AppController
         try {
 
             $updateData = $request->validate([
-                'update.timezone_id' => 'integer'
+                'update.timezone_id' => 'integer',
+                'update.region_id'   => 'integer'
             ]);
 
             foreach ($updateData['update'] as $key => $value) {
                 switch ($key) {
                     case 'timezone_id':
                         $request->user()->timezone_id = $value;
+                        break;
+                    case 'region_id':
+                        $request->user()->region_id = $value;
                         break;
                 }
             }
@@ -68,34 +72,6 @@ class UserController extends AppController
             return $this->error('System Error', 'Cannot update profile at this moment');
         } catch (\Exception $exception){
             return $this->error('System Error', $exception->getMessage());
-        }
-    }
-
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     */
-    public function updateTimezone(Request $request): JsonResponse
-    {
-        try {
-
-            if (empty($request->input('timezone'))) {
-                return $this->error(__('user.error'), __('user.parameters_incorrect'));
-            }
-
-            $update = User::where('id', '=', Auth::id())
-                ->update([
-                    'timezone' => $request->input('timezone')
-                ]);
-
-            if (! empty($update)) {
-                return $this->success([], __('user.update_timezone_success'));
-            }
-
-            return $this->error(__('user.error'), __('user.update_timezone_error'));
-
-        } catch (Throwable $throwable) {
-            return $this->error(__('user.server_error'), $throwable->getMessage());
         }
     }
 
