@@ -77,6 +77,13 @@ class BotParser
                 $decode = json_decode($json);
 
                 if (! empty($decode)) {
+
+                    foreach ($decode as $item) {
+                        if (! empty($item->range)) {
+                            $item->range = explode('-', $item->range);
+                        }
+                    }
+
                     $result['params'] = $decode;
                 }
             }

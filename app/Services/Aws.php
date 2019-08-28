@@ -493,10 +493,10 @@ class Aws
 /*echo \"<?php phpinfo(); ?>\" > /var/www/html/phpinfo.php");*/
 
         //$botScript = "#!/bin/bash\n {$this->getConsoleOverrides()}\n {$this->getStaticBotScript()}\n";
-        $botScript = '#!/bin/bash\n cd /home/ubuntu && "test" > test-bash-create.txt\n';
+        $botScript = '#!/bin/bash\n cd /home/ubuntu && echo "This is a test" > test-file.txt\n';
         $userData = base64_encode($botScript);
 
-        $userData = '';
+//        $userData = '';
 
         if (empty($this->ec2)) {
             $this->ec2Connection($region);
