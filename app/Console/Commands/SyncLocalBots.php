@@ -57,7 +57,7 @@ class SyncLocalBots extends Command
             if (! empty($files)) {
                 foreach ($files as $file) {
 
-                    if (! in_array($file->getFilename(), $ignore) && $file->getFilename() === 'google-find-drift.js') {
+                    if (! in_array($file->getFilename(), $ignore)) {
 
                         $res = explode('-', $file->getFilename());
                         $filePlatform = $res[0] ?? 'unknown';
@@ -67,7 +67,6 @@ class SyncLocalBots extends Command
                         $result = BotParser::getBotInfo($content);
 
                         if (! empty($result['about']) && ! empty($result['params'])) {
-
                             $platformName = $result['about']->platform ?? $filePlatform;
 
                             if (! empty($result['about']->platform)) {

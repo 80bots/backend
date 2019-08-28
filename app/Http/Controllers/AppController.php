@@ -91,7 +91,7 @@ class AppController extends Controller
 
                     $user = User::find(Auth::id());
 
-                    dispatch(new StoreUserInstance($bot, $instance, $user));
+                    dispatch(new StoreUserInstance($bot, $instance, $user, $request->input('params')));
 
                     return $this->success([
                         'instance_id' => $instance->id ?? null

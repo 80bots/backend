@@ -464,9 +464,10 @@ class Aws
      * @param string $keyPairName
      * @param string $securityGroupName
      * @param string $tagName
+     * @param array|null $params
      * @return Result|null
      */
-    public function launchInstance(Bot $bot, BotInstance $instance, User $user, string $keyPairName, string $securityGroupName, string $tagName): ?Result
+    public function launchInstance(Bot $bot, BotInstance $instance, User $user, string $keyPairName, string $securityGroupName, string $tagName, ?array $params): ?Result
     {
         $botInstanceDetail = $instance->details()->latest()->first();
 
@@ -478,25 +479,21 @@ class Aws
         $imageId        = $botInstanceDetail->aws_image_id ?? config('aws.image_id');
         $instanceType   = $botInstanceDetail->aws_instance_type ?? config('aws.instance_type');
         $volumeSize     = $botInstanceDetail->aws_storage_gb ?? config('aws.volume_size');
-//        $userData       = $bot->path ? base64_encode($bot->path) : '';
-//        $userData = base64_encode("#!/bin/bash
-//yum update -y
-//amazon-linux-extras install -y lamp-mariadb10.2-php7.2 php7.2
-//yum install -y httpd mariadb-server
-//systemctl start httpd
-//systemctl enable httpd
-//usermod -a -G apache ec2-user
-//chown -R ec2-user:apache /var/www/phpinfo.php
-//chmod 2775 /var/www
-//find /var/www -type d -exec chmod 2775 {} \;
-//find /var/www -type f -exec chmod 0664 {} \;
-/*echo \"<?php phpinfo(); ?>\" > /var/www/html/phpinfo.php");*/
 
-        //$botScript = "#!/bin/bash\n {$this->getConsoleOverrides()}\n {$this->getStaticBotScript()}\n";
-        $botScript = '#!/bin/bash\n cd /home/ubuntu && echo "This is a test" > test-file.txt\n';
-        $userData = base64_encode($botScript);
+        $userData       = '';
 
-//        $userData = '';
+        if (! empty($params)) {
+
+            $formattedParams = [];
+            foreach ($params as $key => $param) {
+                $formattedParams[] = [
+                    'name'  => $key,
+                    'value' => $param
+                ];
+            }
+
+            $userData = base64_encode("#!/bin/bash\n{$this->startupScript(json_encode($formattedParams), $bot->path ?? '')}");
+        }
 
         if (empty($this->ec2)) {
             $this->ec2Connection($region);
@@ -772,13 +769,14 @@ class Aws
     }
 
     /**
-     * @param $botScript
+     * @param string $params
+     * @param string $path
      * @return string
      */
-    protected function getStaticBotScript($botScript = ''): string
+    protected function startupScript(string $params = '', string $path = ''): string
     {
         return <<<HERESHELL
-        file="script.js"
+        file="params/params.json"
         username="kabas"
         cd /home/\$username/
         if [ -f \$file ]
@@ -788,62 +786,10 @@ class Aws
         
         ############## Output variable to script file ###############
         cat > \$file <<EOF
-        {$botScript}
-        EOF
-        apt-get install dos2unix -y
-        dos2unix \$file
-        chown \$username:\$username \$file
-        chmod +x \$file
-        su - \$username -c "DISPLAY=:1 node \$file"
-        changedir() {
-            cd /home/\$username
-            frontail -p 9001 node.access.log
-            frontail -p 9002 node.infos.log
-            frontail -p 9003 node.errors.log
-        }
-        changedir
+{$params}
+EOF
+su - \$username -c 'DISPLAY=:1 node ./{$path}'
 HERESHELL;
-    }
-
-    /**
-     * @return string
-     */
-    protected function getConsoleOverrides(): string
-    {
-        return <<<HERECONSOLE
-        /*
-        const eighty_bots_fs = require('fs')
-        const eighty_bots_logStdOut = process.stdout
-        const eighty_bots_logStdErr = process.stderr
-        const eighty_bots_access = eighty_bots_fs.createWriteStream('~/node.access.log', { mode: 0o755, flags: 'a' })
-        const eighty_bots_errors = eighty_bots_fs.createWriteStream('~/node.errors.log', { mode: 0o755, flags: 'a' })
-        const eighty_bots_infos = eighty_bots_fs.createWriteStream('~/node.infos.log', { mode: 0o755, flags: 'a' })
-        
-        console.log = (d) => {
-            let _pid = process.pid
-            let _date = [new Date().toISOString()];
-            let message = \`[\\\${_date}]:: Process: _\\\${_pid}_ \\\${d} \\n\`
-            eighty_bots_access.write(message)
-            eighty_bots_logStdOut.write(message)
-        };
-        
-        console.error = (d) => {
-            let _pid = process.pid
-            let shell = process.env.SHELL
-            let _date = [new Date().toISOString()];
-            let message = \`[\\\${_date}] Process: _\\\${_pid}_ \\\${shell} {\\\${__filename}}:: \\\${d} \\n\`
-            eighty_bots_errors.write(message)
-            eighty_bots_logStdErr.write(message)
-        };
-        
-        console.info = (d) => {
-            let _date = [new Date().toISOString()];
-            let message = \`[\\\${_date}] {\\\${__filename}}:: \\\${d} \\n\`
-            eighty_bots_infos.write(message)
-            eighty_bots_logStdOut.write(message)
-        };
-        */
-HERECONSOLE;
     }
 
     /**
