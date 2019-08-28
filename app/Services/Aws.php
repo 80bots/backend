@@ -424,17 +424,33 @@ class Aws
                     'FromPort' => 22,
                     'ToPort' => 22,
                     'IpRanges' => [
-                        ['CidrIp' => $serverIp . '/32']
+                        ['CidrIp' => '0.0.0.0/0']
                     ],
                 ],
                 [
                     'IpProtocol' => 'tcp',
-                    'FromPort' => 8080,
-                    'ToPort' => 8080,
+                    'FromPort' => 80,
+                    'ToPort' => 80,
                     'IpRanges' => [
-                        ['CidrIp' => $serverIp . '/32']
+                        ['CidrIp' => '0.0.0.0/0']
                     ],
                 ]
+//                [
+//                    'IpProtocol' => 'tcp',
+//                    'FromPort' => 22,
+//                    'ToPort' => 22,
+//                    'IpRanges' => [
+//                        ['CidrIp' => $serverIp . '/32']
+//                    ],
+//                ],
+//                [
+//                    'IpProtocol' => 'tcp',
+//                    'FromPort' => 8080,
+//                    'ToPort' => 8080,
+//                    'IpRanges' => [
+//                        ['CidrIp' => $serverIp . '/32']
+//                    ],
+//                ]
             ]
         ]);
     }
@@ -462,7 +478,25 @@ class Aws
         $imageId        = $botInstanceDetail->aws_image_id ?? config('aws.image_id');
         $instanceType   = $botInstanceDetail->aws_instance_type ?? config('aws.instance_type');
         $volumeSize     = $botInstanceDetail->aws_storage_gb ?? config('aws.volume_size');
-        $userData       = $bot->path ? base64_encode($bot->path) : '';
+//        $userData       = $bot->path ? base64_encode($bot->path) : '';
+//        $userData = base64_encode("#!/bin/bash
+//yum update -y
+//amazon-linux-extras install -y lamp-mariadb10.2-php7.2 php7.2
+//yum install -y httpd mariadb-server
+//systemctl start httpd
+//systemctl enable httpd
+//usermod -a -G apache ec2-user
+//chown -R ec2-user:apache /var/www/phpinfo.php
+//chmod 2775 /var/www
+//find /var/www -type d -exec chmod 2775 {} \;
+//find /var/www -type f -exec chmod 0664 {} \;
+/*echo \"<?php phpinfo(); ?>\" > /var/www/html/phpinfo.php");*/
+
+        //$botScript = "#!/bin/bash\n {$this->getConsoleOverrides()}\n {$this->getStaticBotScript()}\n";
+        $botScript = '#!/bin/bash\n cd /home/ubuntu && "test" > test-bash-create.txt\n';
+        $userData = base64_encode($botScript);
+
+        $userData = '';
 
         if (empty($this->ec2)) {
             $this->ec2Connection($region);
@@ -698,11 +732,27 @@ class Aws
      */
     public function runStartUpScript(): array
     {
-        if (empty($this->ec2)) {
-            $this->ec2Connection();
-        }
+//        if (empty($this->ec2)) {
+//            $this->ec2Connection();
+//        }
 
-        $client = new AwsClient(config('aws.credentials'));
+//        $cred = [
+//            'credentials' => config('aws.credentials'),
+//            //'service' => 'ec2',
+//            'region'  => config('aws.region', 'us-east-2'),
+//            'version' => config('aws.version', 'latest')
+//        ];
+
+//        $ec2 = new Ec2Client($cred);
+//        //$client = new AwsClient($cred);
+//
+//        $instanceIds = ['i-0554762900be26c9a'];
+//
+//        $result = $ec2->getApi();
+//
+//        Log::debug(print_r($result['operations'], true));
+//
+//        dd($result['operations']);
 
 //        exec('mkdir -p Shell');
 //        chdir('Shell');
@@ -725,7 +775,7 @@ class Aws
      * @param $botScript
      * @return string
      */
-    protected function getStaticBotScript($botScript): string
+    protected function getStaticBotScript($botScript = ''): string
     {
         return <<<HERESHELL
         file="script.js"
@@ -813,7 +863,7 @@ HERECONSOLE;
         string $keyPairName,
         array $tags,
         string $securityGroupName,
-        string $userData): array
+        string $userData = ''): array
     {
         return [
             'ImageId'   => $imageId,

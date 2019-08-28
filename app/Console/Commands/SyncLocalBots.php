@@ -57,7 +57,7 @@ class SyncLocalBots extends Command
             if (! empty($files)) {
                 foreach ($files as $file) {
 
-                    if (! in_array($file->getFilename(), $ignore)) {
+                    if (! in_array($file->getFilename(), $ignore) && $file->getFilename() === 'google-find-drift.js') {
 
                         $res = explode('-', $file->getFilename());
                         $filePlatform = $res[0] ?? 'unknown';
@@ -68,13 +68,17 @@ class SyncLocalBots extends Command
 
                         if (! empty($result['about']) && ! empty($result['params'])) {
 
-                            if (! empty($result['about']->platform))
+                            $platformName = $result['about']->platform ?? $filePlatform;
 
-                            $platform = Platform::whereRaw('lower(name) like (?)',["%{$filePlatform}%"])->first();
+                            if (! empty($result['about']->platform)) {
+                                $platform = Platform::where('name', '=', $platformName)->first();
+                            } else {
+                                $platform = Platform::whereRaw('lower(name) like (?)',["%{$platformName}%"])->first();
+                            }
 
                             if (empty($platform)) {
                                 $platform = Platform::create([
-                                    'name' => ucfirst($platform),
+                                    'name' => ucfirst($platformName),
                                 ]);
                             }
 

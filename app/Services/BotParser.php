@@ -4,37 +4,53 @@ namespace App\Services;
 
 class BotParser
 {
-    /** PARAMS
-    {
-        "email": {
-            "type": "String",
-            "title": "Email",
-            "description": "Your Facebook Email",
-            "icon": "fa-email"
-        },
-        "password": {
-            "type": "password",
-            "title": "Password",
-            "description": "Your Facebook Password",
-            "icon": "fa-key"
-        },
-        "speed": {
-            "type": "range",
-            // if no title, Capitalise the key by default
-            "range": "1-9"
-            // should be presented to the user as a slider
-        }
-    }
-     */
-
     /** ABOUT
     {
-        "name": "facebook-find-posts-by-keyword bot",
-        "description": "Scrolls through your facebook feed and mails the posts that have the keyword"
+        "name": "linkedin-track-companies",
+        "platform": "Linkedin",
+        "description": "maintians a record of no. of employees and jobs posted by companies provided.",
+        "icon": "fa-meh-rolling-eyes"
     }
      */
 
-    private static $regex = '/\/\*\*\s*PARAMS\n(.*)\*\/\s*\/\*\*\sABOUT\n(.*)\*\//s';
+
+    /** PARAMS
+    [
+        {
+            "name": "username",
+            "type": "string",
+            "title": "Username",
+            "description": "Your Linkedin Username",
+            "icon": "fa-user"
+        },
+        {
+            "name": "password",
+            "type": "password",
+            "title": "Password",
+            "description": "Your Linkedin Password",
+            "icon": "fa-key"
+        },
+        {
+            "name": "url",
+            "type": "string",
+            "title": "LinkedinCompanyURL",
+            "description": "Linkedin company URL",
+            "icon": "fa-link"
+        },
+        {
+            "name": "speed",
+            "type": "range",
+            "range": "1-9",
+            "title": "Speed",
+            "description": "How fast the bot operates. Slower is better for staying under the radar.",
+            "icon": "fa-tachometer-alt-slowest"
+        }
+    ]
+     */
+
+    private static $regex       = '/\/\*\*\s*PARAMS\n(.*)\*\/\s*\/\*\*\sABOUT\n(.*)\*\//s';
+    private static $regexParams = '/\/\*\*\s*PARAMS\n(.*)\*\//s';
+    private static $regexAbout  = '/\/\*\*\s*ABOUT\n(.*)\*\/\n+\//s';
 
     private static function removeCommentsAndNewLines(string $text): string
     {
@@ -52,26 +68,26 @@ class BotParser
             'about' => [],
         ];
 
-        if (preg_match(self::$regex, $fileContent, $matches)) {
+        if (preg_match(self::$regexParams, $fileContent, $matches)) {
 
             // PARAMS
             if (! empty($matches[1])) {
                 // Decode to object
-                $decode = json_decode(self::removeCommentsAndNewLines($matches[1]));
+                $json = self::removeCommentsAndNewLines($matches[1]);
+                $decode = json_decode($json);
 
                 if (! empty($decode)) {
-                    $params = [];
-                    foreach ((array)$decode as $key => $param) {
-                        $params[] = array_merge(['name' => $key], (array)$param);
-                    }
-                    $result['params'] = $params;
+                    $result['params'] = $decode;
                 }
             }
+        }
+
+        if (preg_match(self::$regexAbout, $fileContent, $matches)) {
 
             // ABOUT
-            if (! empty($matches[2])) {
+            if (! empty($matches[1])) {
                 // Decode to object
-                $result['about'] = json_decode(self::removeCommentsAndNewLines($matches[2]));
+                $result['about'] = json_decode(self::removeCommentsAndNewLines($matches[1]));
             }
         }
 
