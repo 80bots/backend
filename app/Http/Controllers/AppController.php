@@ -7,6 +7,8 @@ use App\AwsSetting;
 use App\Bot;
 use App\DeleteSecurityGroup;
 use App\Helpers\CommonHelper;
+use App\Helpers\InstanceHelper;
+use App\Jobs\InstanceChangeStatus;
 use App\Jobs\StoreUserInstance;
 use App\Services\Aws;
 use App\User;
@@ -161,111 +163,36 @@ class AppController extends Controller
             return false;
         }
 
-        $currentDate    = Carbon::now()->toDateTimeString();
-        $aws            = new Aws;
+        $user   = User::find(Auth::id());
+        $aws    = new Aws;
 
         $describeInstancesResponse = $aws->describeInstances([$instanceDetail->aws_instance_id ?? null]);
 
         if (! $describeInstancesResponse->hasKey('Reservations')) {
+            // TODO: Remove instance
             return false;
         }
 
-        if ($this->checkTerminatedStatus($describeInstancesResponse)) {
-            $instance->update(['aws_status' => BotInstance::STATUS_TERMINATED]);
+        if (InstanceHelper::checkTerminatedStatus($describeInstancesResponse)) {
+            $instance->setAwsStatusTerminated();
             //
             if ($awsRegion->created_instances > 0) {
                 $awsRegion->decrement('created_instances');
             }
             //
-            $this->cleanUpTerminatedInstanceData($aws, $instanceDetail);
+            InstanceHelper::cleanUpTerminatedInstanceData($aws, $instanceDetail);
             return false;
         }
 
-        switch ($status) {
+        $instance->fill(['aws_status' => BotInstance::STATUS_PENDING]);
 
-            case BotInstance::STATUS_RUNNING:
-
-                // TODO: Check result
-                $aws->startInstance([$instanceDetail->aws_instance_id ?? null]);
-
-                $instance->fill(['aws_status' => BotInstance::STATUS_RUNNING]);
-
-                $newInstanceDetail = $instanceDetail->replicate([
-                    'end_time', 'total_time'
-                ]);
-                $newInstanceDetail->fill(['start_time' => $currentDate]);
-                $newInstanceDetail->save();
-
-                break;
-            case BotInstance::STATUS_STOPPED:
-
-                // TODO: Check result
-                $aws->stopInstance([$instanceDetail->aws_instance_id ?? null]);
-
-                $instance->fill(['aws_status' => BotInstance::STATUS_STOPPED]);
-
-                $diffTime = CommonHelper::diffTimeInMinutes($instanceDetail->start_time ?? null, $currentDate);
-
-                $instanceDetail->fill([
-                    'end_time'      => $currentDate,
-                    'total_time'    => $diffTime
-                ]);
-
-                if ($instanceDetail->save()) {
-                    if ($diffTime > ($instance->cron_up_time ?? 0)) {
-                        $upTime = $diffTime + ($instance->temp_up_time ?? 0);
-
-                        $instance->fill([
-                            'cron_up_time'  => 0,
-                            'temp_up_time'  => $upTime,
-                            'up_time'       => $upTime,
-                            'used_credit'   => CommonHelper::calculateUsedCredit($upTime)
-                        ]);
-                    }
-                }
-
-                break;
-            default:
-                $instance->fill(['aws_status' => BotInstance::STATUS_TERMINATED]);
-                // TODO: Check result
-                $aws->terminateInstance([$instanceDetail->aws_instance_id ?? null]);
-                $this->cleanUpTerminatedInstanceData($aws, $instanceDetail);
-
-                break;
-        }
+        dispatch(new InstanceChangeStatus($instance, $user, $status));
 
         if ($instance->save()) {
-
-            if ($instance->isAwsStatusTerminated()) {
-                $instance->delete();
-                //
-                if ($awsRegion->created_instances > 0) {
-                    $awsRegion->decrement('created_instances');
-                }
-            }
-
             return true;
         }
 
         return false;
-    }
-
-    /**
-     * Clean up unused keys and security groups
-     * @param Aws $aws
-     * @param $details
-     */
-    protected function cleanUpTerminatedInstanceData(Aws $aws, $details): void
-    {
-        //
-        if(preg_match('/^keys\/(.*)\.pem$/s', $details->aws_pem_file_path ?? '', $matches)) {
-            $aws->deleteKeyPair($matches[1]);
-            $aws->deleteS3KeyPair($details->aws_pem_file_path ?? '');
-        }
-        DeleteSecurityGroup::create([
-            'group_id'      => $details->aws_security_group_id ?? '',
-            'group_name'    => $details->aws_security_group_name ?? '',
-        ]);
     }
 
     public function UserActivation($id)
@@ -283,16 +210,6 @@ class AppController extends Controller
         } else {
             return redirect(route('login'))->with('error', 'Unauthorized');
         }
-    }
-
-    /**
-     * @param Result $describeInstancesResponse
-     * @return bool
-     */
-    private function checkTerminatedStatus(Result $describeInstancesResponse): bool
-    {
-        $reservationObj = $describeInstancesResponse->get('Reservations');
-        return empty($reservationObj) || $reservationObj[0]['Instances'][0]['State']['Name'] === 'terminated';
     }
 
     /**

@@ -61,8 +61,7 @@ class BotInstance extends BaseModel
 
     public function setAwsStatusTerminated()
     {
-        $this->fill(['aws_status' => self::STATUS_TERMINATED]);
-        $this->save();
+        $this->update(['aws_status' => BotInstance::STATUS_TERMINATED]);
     }
 
     public function setAwsStatusRunning()

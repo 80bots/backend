@@ -484,13 +484,16 @@ class Aws
 
         if (! empty($params)) {
 
-            $formattedParams = [];
-            foreach ($params as $key => $param) {
-                $formattedParams[] = [
-                    'name'  => $key,
-                    'value' => $param
-                ];
-            }
+            $path = explode('.', $bot->path);
+            $formattedParams[$path[0]] = $params;
+
+//            $formattedParams = [];
+//
+//            foreach ($params as $key => $param) {
+//                $formattedParams[] = [
+//                    $key => $param
+//                ];
+//            }
 
             $userData = base64_encode("#!/bin/bash\n{$this->startupScript(json_encode($formattedParams), $bot->path ?? '')}");
         }
@@ -628,7 +631,7 @@ class Aws
      * @param $instanceIds
      * @return Result
      */
-    public function describeInstances($instanceIds): Result
+    public function describeInstances(array $instanceIds): Result
     {
         if (empty($this->ec2)) {
             $this->ec2Connection();
@@ -776,16 +779,25 @@ class Aws
     protected function startupScript(string $params = '', string $path = ''): string
     {
         return <<<HERESHELL
-        file="params/params.json"
-        username="kabas"
-        cd /home/\$username/
-        if [ -f \$file ]
-            then
-            rm -rf \$file
-        fi
-        
-        ############## Output variable to script file ###############
-        cat > \$file <<EOF
+file="params/params.json"
+username="kabas"
+cd /home/\$username/
+if [ -f \$file ]
+    then
+    rm -rf \$file
+fi
+
+su - \$username -c 'git config user.name "John Doe"'
+su - \$username -c 'git config user.email johndoe@example.com'
+
+su - \$username -c 'git stash'
+su - \$username -c 'git pull origin master'
+
+su - \$username -c 'mkdir logs'
+su - \$username -c 'npm i puppeteer'
+
+############## Output user params to params.json file ###############
+cat > \$file <<EOF
 {$params}
 EOF
 su - \$username -c 'DISPLAY=:1 node ./{$path}'
