@@ -93,7 +93,7 @@ class AppController extends Controller
 
                     $user = User::find(Auth::id());
 
-                    dispatch(new StoreUserInstance($bot, $instance, $user, $request->input('params')));
+                    $dispatch = dispatch(new StoreUserInstance($bot, $instance, $user, $request->input('params')));
 
                     return $this->success([
                         'instance_id' => $instance->id ?? null
@@ -184,15 +184,10 @@ class AppController extends Controller
             return false;
         }
 
-        $instance->fill(['aws_status' => BotInstance::STATUS_PENDING]);
+        $instance->setAwsStatusPending();
+        dispatch(new InstanceChangeStatus($instance, $user, $awsRegion, $status));
 
-        dispatch(new InstanceChangeStatus($instance, $user, $status));
-
-        if ($instance->save()) {
-            return true;
-        }
-
-        return false;
+        return true;
     }
 
     public function UserActivation($id)

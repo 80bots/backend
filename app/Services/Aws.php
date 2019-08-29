@@ -627,6 +627,23 @@ class Aws
         $this->ec2->waitUntil('InstanceRunning', ['InstanceIds' => $instanceIds]);
     }
 
+    public function describeOneInstanceStatus(string $instanceId): Result
+    {
+        if (empty($this->ec2)) {
+            $this->ec2Connection();
+        }
+
+        return $this->ec2->describeInstanceStatus([
+            'Filters' => [
+                [
+                    'Name' => 'instance-status.status',
+                    'Values' => ['impaired'],
+                ],
+            ],
+            'InstanceIds' => [$instanceId]
+        ]);
+    }
+
     /**
      * @param $instanceIds
      * @return Result
