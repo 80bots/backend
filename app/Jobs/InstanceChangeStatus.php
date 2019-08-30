@@ -78,7 +78,7 @@ class InstanceChangeStatus implements ShouldQueue
      */
     public function handle()
     {
-        Log::info('Starting ChangeStatusToRunning for ' . $this->instance->id ?? '');
+        Log::info('Starting InstanceChangeStatus for ' . $this->instance->id ?? '');
 
         $aws = new Aws;
         $aws->ec2Connection($this->region->code);
@@ -95,9 +95,7 @@ class InstanceChangeStatus implements ShouldQueue
                 break;
         }
 
-        Log::info('Completed ChangeStatusToRunning for ' . $this->instance->id ?? '');
-
-        broadcast(new InstanceLaunched($this->instance, $this->user));
+        Log::info('Completed InstanceChangeStatus for ' . $this->instance->id ?? '');
     }
 
     /**
@@ -140,20 +138,32 @@ class InstanceChangeStatus implements ShouldQueue
                     $newInstanceDetail = $this->details->replicate([
                         'end_time', 'total_time'
                     ]);
+
                     $newInstanceDetail->fill([
                         'start_time'        => $this->currentDate,
                         'aws_public_ip'     => $info['ip'],
                         'aws_public_dns'    => $info['dns']
                     ]);
+
                     $newInstanceDetail->save();
                 }
+
+                broadcast(new InstanceLaunched($this->instance, $this->user));
             }
 
         } else {
-            //dd($current);
+            dispatch(new InstanceChangeStatus(
+                $this->instance,
+                $this->user,
+                $this->region,
+                $this->status)
+            )->delay(30);
         }
     }
 
+    /**
+     * @param Aws $aws
+     */
     private function setStatusStopped(Aws $aws)
     {
         $current = $this->getCurrentInstanceStatus($aws);
@@ -166,35 +176,32 @@ class InstanceChangeStatus implements ShouldQueue
 
                 $this->instance->setAwsStatusStopped();
 
-                $diffTime = CommonHelper::diffTimeInMinutes($this->details->start_time ?? null, $this->currentDate);
+                $this->updateUpTime();
 
-                $this->details->update([
-                    'end_time'      => $this->currentDate,
-                    'total_time'    => $diffTime
-                ]);
-
-                if ($diffTime > ($this->instance->cron_up_time ?? 0)) {
-
-                    $upTime = $diffTime + ($this->instance->temp_up_time ?? 0);
-
-                    $this->instance->update([
-                        'cron_up_time'  => 0,
-                        'temp_up_time'  => $upTime,
-                        'up_time'       => $upTime,
-                        'used_credit'   => CommonHelper::calculateUsedCredit($upTime)
-                    ]);
-                }
+                broadcast(new InstanceLaunched($this->instance, $this->user));
             }
+
         } else {
-            //dd($current);
+            dispatch(new InstanceChangeStatus(
+                    $this->instance,
+                    $this->user,
+                    $this->region,
+                    $this->status)
+            )->delay(30);
         }
     }
 
+    /**
+     * @param Aws $aws
+     * @throws \Exception
+     */
     private function setStatusTerminated(Aws $aws)
     {
         $result = $aws->terminateInstance([$this->details->aws_instance_id]);
 
         if ($result->hasKey('TerminatingInstances')) {
+
+            $this->updateUpTime();
 
             $this->instance->setAwsStatusTerminated();
             $this->instance->delete();
@@ -204,9 +211,15 @@ class InstanceChangeStatus implements ShouldQueue
             if ($this->region->created_instances > 0) {
                 $this->region->decrement('created_instances');
             }
+
+            broadcast(new InstanceLaunched($this->instance, $this->user));
         }
     }
 
+    /**
+     * @param Aws $aws
+     * @return Collection
+     */
     private function getPublicIpAddressAndDns(Aws $aws): Collection
     {
         $result = $aws->describeInstances([$this->details->aws_instance_id]);
@@ -224,5 +237,24 @@ class InstanceChangeStatus implements ShouldQueue
         }
 
         return collect([]);
+    }
+
+    private function updateUpTime(): void
+    {
+        $diffTime = CommonHelper::diffTimeInMinutes($this->details->start_time, $this->currentDate);
+
+        $this->details->update([
+            'end_time'      => $this->currentDate,
+            'total_time'    => $diffTime
+        ]);
+
+        $upTime = $diffTime + $this->instance->total_up_time;
+
+        $this->instance->update([
+            'cron_up_time'  => 0,
+            'total_up_time' => $upTime,
+            'up_time'       => $upTime,
+            'used_credit'   => CommonHelper::calculateUsedCredit($upTime)
+        ]);
     }
 }

@@ -151,9 +151,9 @@ class CalculateUserCreditScore extends Command
 
                             if ($instanceDetail->save() && $diffTime > $UserInstance->cron_up_time) {
 
-                                $tempUpTime = $UserInstance->temp_up_time ?? 0;
+                                $tempUpTime = $UserInstance->total_up_time ?? 0;
                                 $upTime = $diffTime + $tempUpTime;
-                                $UserInstance->temp_up_time = $upTime;
+                                $UserInstance->total_up_time = $upTime;
                                 $UserInstance->up_time = $upTime;
                                 $UserInstance->cron_up_time = 0;
                             }

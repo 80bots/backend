@@ -48,7 +48,7 @@ class InstanceLaunched implements ShouldBroadcast
      */
     public function broadcastWith()
     {
-        $instanceResource = $this->user->role->name === 'Admin'
+        $instanceResource = $this->user->isAdmin()
             ? (new AdminBotInstanceResource($this->data))->toArray(null)
             : (new UserBotInstanceResource($this->data))->toArray(null);
 

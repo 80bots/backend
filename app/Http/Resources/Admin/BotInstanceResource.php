@@ -31,7 +31,7 @@ class BotInstanceResource extends JsonResource
             'tag_user_email'    => $details->tag_user_email ?? '',
             'used_credit'       => $this->used_credit ?? 0,
             'uptime'            => $this->up_time ?? 0,
-            'temp_up_time'      => $this->temp_up_time ?? 0,
+            'total_up_time'     => $this->total_up_time ?? 0,
             'cron_up_time'      => $this->cron_up_time ?? 0,
             'status'            => $this->aws_status ?? BotInstance::STATUS_TERMINATED,
             'ip'                => $details->aws_public_ip ?? '',

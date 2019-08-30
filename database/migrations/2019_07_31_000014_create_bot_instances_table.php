@@ -20,7 +20,7 @@ class CreateBotInstancesTable extends Migration
             $table->unsignedInteger('aws_region_id')->nullable();
             $table->double('used_credit')->default(0);
             $table->double('up_time')->default(0);
-            $table->double('temp_up_time')->default(0);
+            $table->double('total_up_time')->default(0);
             $table->double('cron_up_time')->default(0);
             $table->boolean('is_in_queue')->default(1);
             $table->enum('aws_status', [

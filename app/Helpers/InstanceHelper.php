@@ -3,16 +3,17 @@
 namespace App\Helpers;
 
 use App\AwsRegion;
-use App\Bot;
+use App\BotInstance;
+use App\BotInstancesDetails;
 use App\DeleteSecurityGroup;
 use App\InstanceSessionsHistory;
 use App\SchedulingInstancesDetails;
 use App\Services\Aws;
 use App\User;
-use App\BotInstance;
 use Aws\Result;
 use Carbon\Carbon;
 use Carbon\CarbonTimeZone;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -106,94 +107,96 @@ class InstanceHelper
      */
     public static function syncInstances(Collection $instancesByStatus, AwsRegion $region): void
     {
-        $awsInstancesIn = $instancesByStatus->collapse()->map(function ($item, $key) {
-            return $item['aws_instance_id'];
-        })->toArray();
+        $currentDate = Carbon::now()->toDateTimeString();
 
-        foreach ($instancesByStatus as $status => $instances) {
+        foreach ($instancesByStatus as $statusKey => $instances) {
+
             foreach ($instances as $key => $instance) {
-                $bot = Bot::where('aws_ami_image_id', $instance['aws_ami_id'])->first();
 
-                if (! empty($bot)) {
-                    $instance['bot_id'] = $bot->id;
-                }
+                $user = User::where('email', '=', $instance['tag_user_email'])->first();
 
-                if ($status === 'stopped' || $status === 'stopping') {
-                    $status = 'stopped';
-                }
+                if (! empty($user)) {
 
-                $userInstance = BotInstance::where('aws_instance_id' , $instance['aws_instance_id'])->first();
+                    $status = $statusKey === 'stopping' ? BotInstance::STATUS_STOPPED : $statusKey;
 
-                if (! empty($userInstance)) {
+                    $instanceId = $instance['aws_instance_id'] ?? null;
 
-                    $fill = [
-                        'status'            => $status,
-                        'tag_name'          => $instance['tag_name'] ?? '',
-                        'tag_user_email'    => $instance['tag_user_email'] ?? '',
-                    ];
+                    $botInstance = $user->instances()->whereHas('details', function (Builder $query) use ($instanceId) {
+                        $query->where('aws_instance_id', '=', $instanceId);
+                    })->first();
 
-                    if($status === 'running') {
-                        $fill['is_in_queue'] = 0;
-                    }
+                    if (! empty($botInstance)) {
 
-                    $userInstance->fill($fill);
+                        switch ($status) {
+                            case BotInstance::STATUS_RUNNING:
+                            case BotInstance::STATUS_STOPPED:
+                            case BotInstance::STATUS_TERMINATED:
 
-                    if ($userInstance->save() && $status === 'terminated') {
-                        $awsRegion = AwsRegion::find($userInstance->aws_region_id ?? null);
-                        if ($awsRegion->created_instances > 0) {
-                            $awsRegion->decrement('created_instances');
+                                $botInstance->update(['aws_status' => $status]);
+
+                                if ($status === BotInstance::STATUS_TERMINATED) {
+
+                                    if ($botInstance->region->created_instances > 0) {
+                                        $botInstance->region->decrement('created_instances');
+                                    }
+
+                                    $detail = $botInstance->details()->latest()->first();
+
+                                    self::updateUpTime($botInstance, $detail, $currentDate);
+
+                                    $botInstance->delete();
+                                }
+
+                                break;
                         }
-                    }
+                    } else {
 
-                } else {
-
-                    if ($status !== 'terminated') {
-
-                        Log::info($instance['aws_instance_id'] . ' has not been recorded while launch or manually launched from the aws');
-
-                        $admin = User::onlyAdmins()->first();
-
-                        if (!empty($admin)) {
-
-                            $instance['user_id'] = $admin->id;
-                            $instance['status'] = $status;
-                            if ($status == 'running') {
-                                $instance['is_in_queue'] = 0;
-                            }
-                            $instance['aws_region_id'] = $region->id ?? null;
-
-                            $userInstance = BotInstance::create($instance);
-
-                        } else {
-                            Log::info($instance['aws_instance_id'] . ' cannot be synced');
-                        }
+                        // TODO: add new bot instance
+//                        $describeVolumes = $this->ec2->describeVolumes([
+//                            'VolumeIds' => $instance['aws_volumes_params']
+//                        ]);
+//
+//                        $region->increment('created_instances');
+//
+//                        $instance = BotInstance::create([
+//                            'user_id'       => $user->id,
+//                            'bot_id'        => $bot->id ?? null,
+//                            'aws_region_id' => $region->id ?? null,
+//                            'aws_status'    => $status
+//                        ]);
+//
+//                        $instance->details()->create([
+//                            'aws_instance_type' => $instance['aws_instance_type'],
+//                            'aws_storage_gb'    => $awsSetting->storage ?? null,
+//                            'aws_image_id'      => $awsSetting->image_id ?? null
+//                        ]);
                     }
                 }
+
+                unset($user);
             }
         }
-
-        self::deleteUserInstances($awsInstancesIn);
 
         Log::info('Synced completed at ' . date('Y-m-d h:i:s'));
     }
 
-    /**
-     * @param array $awsInstancesIn
-     */
-    public static function deleteUserInstances(array $awsInstancesIn): void
+    private static function updateUpTime(BotInstance $instance, BotInstancesDetails $detail, string $currentDate): void
     {
-        BotInstance::where(function($query) use($awsInstancesIn) {
-            $query->whereNotIn('aws_instance_id', $awsInstancesIn)
-                ->orWhere('aws_instance_id', null)
-                ->orWhere('status', 'terminated');
-        })->whereNotIn('status', ['running', 'stopped'])
-            ->delete();
+        $diffTime = CommonHelper::diffTimeInMinutes($detail->start_time, $currentDate);
 
-        BotInstance::where(function($query) {
-            $query->where('is_in_queue', 1)
-                ->orWhereIn('status', ['running', 'stopped']);
-        })->where('updated_at', '<' , Carbon::now()->subMinutes(10)->toDateTimeString())
-            ->delete();
+        $detail->update([
+            'end_time'      => $currentDate,
+            'total_time'    => $diffTime
+        ]);
+
+        $upTime = $diffTime + $instance->total_up_time;
+
+        $instance->update([
+            'cron_up_time'  => 0,
+            'total_up_time' => $upTime,
+            'up_time'       => $upTime,
+            'used_credit'   => CommonHelper::calculateUsedCredit($upTime)
+        ]);
     }
 
     /**
