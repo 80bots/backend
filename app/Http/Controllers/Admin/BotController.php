@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Bot;
-use App\Helpers\CommonHelper;
 use App\Http\Controllers\AppController;
 use App\Http\Resources\Admin\BotCollection;
 use App\Http\Resources\Admin\BotResource;
 use App\Http\Resources\Admin\PlatformCollection;
 use App\Http\Resources\Admin\TagCollection;
+use App\Jobs\SyncLocalBots;
 use App\Platform;
 use App\Tag;
 use App\User;
@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
+use Illuminate\Support\Facades\Artisan;
 
 class BotController extends AppController
 {
@@ -213,12 +214,7 @@ class BotController extends AppController
                 $updateData = $request->validate([
                     'update.status'             => "in:{$active},{$inactive}",
                     'update.name'               => 'string',
-                    'update.aws_ami_name'       => 'string',
-                    'update.aws_ami_image_id'   => 'string',
-                    'update.aws_custom_script'  => 'string',
-                    'update.aws_instance_type'  => 'string',
-                    'update.aws_startup_script' => 'string',
-                    'update.aws_storage_gb'     => 'integer',
+                    'update.aws_custom_script'  => 'string|nullable',
                     'update.description'        => 'string',
                     'update.platform'           => 'string',
                     'update.tags'               => 'array',
@@ -226,11 +222,13 @@ class BotController extends AppController
                     'update.users'              => 'array',
                 ]);
 
-                $bot->fill($updateData['update']);
+                $updateData = $updateData['update'];
+
+                $bot->fill($updateData);
 
                 if ($bot->save()) {
-                    if(!empty($updateData['tags'])) $this->addTagsToBot($bot, $updateData['update']['tags']);
-                    if(!empty($updateData['users'])) $this->addUsersToBot($bot, $updateData['update']['users']);
+                    if(!empty($updateData['tags'])) $this->addTagsToBot($bot, $updateData['tags']);
+                    if(!empty($updateData['users'])) $this->addUsersToBot($bot, $updateData['users']);
                     return $this->success((new BotResource($bot))->toArray($request));
                 }
             }
@@ -329,6 +327,20 @@ class BotController extends AppController
 
         } catch (Throwable $throwable) {
             return $this->error(__('keywords.server_error'), $throwable->getMessage());
+        }
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function syncBots(Request $request)
+    {
+        try {
+            dispatch(new SyncLocalBots($request->user()));
+            return $this->success([], __('admin.instances.success_sync'));
+        } catch (Throwable $throwable) {
+            return $this->error(__('admin.server_error'), $throwable->getMessage());
         }
     }
 

@@ -18,6 +18,10 @@ Broadcast::channel('running.{user_id}', function ($user, $user_id) {
     return true;
 });
 
+Broadcast::channel('bots.{user_id}', function ($user, $user_id) {
+    return true;
+});
+
 Broadcast::channel('instance-live', function ($user) {
     return $user->role->name === 'Admin';
 });

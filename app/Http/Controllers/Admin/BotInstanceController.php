@@ -4,16 +4,15 @@ namespace App\Http\Controllers\Admin;
 
 use App\AwsAmi;
 use App\AwsRegion;
-use App\Helpers\InstanceHelper;
 use App\Http\Controllers\AppController;
 use App\Http\Resources\Admin\BotInstanceCollection;
 use App\Http\Resources\Admin\BotInstanceResource;
+use App\Jobs\SyncBotInstances;
 use App\Services\Aws;
 use App\BotInstance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class BotInstanceController extends AppController
@@ -97,22 +96,27 @@ class BotInstanceController extends AppController
             $amis = AwsAmi::where('aws_region_id', '=', $region)
                 ->pluck('name', 'image_id')
                 ->toArray();
+            $result = [];
+            foreach ($amis as $id => $name) {
+                $result[] = ['id' => $id, 'name' => $name];
+            }
             return $this->success([
-                'amis' => $amis
+                'data' => $result
             ]);
         }
 
         return $this->error(__('admin.server_error'), __('admin.parameters_incorrect'));
     }
 
-    public function syncInstances()
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function syncInstances(Request $request)
     {
         try {
-
-            Artisan::call('instance:sync');
-
+            dispatch(new SyncBotInstances($request->user()));
             return $this->success([], __('admin.instances.success_sync'));
-
         } catch (Throwable $throwable) {
             return $this->error(__('admin.server_error'), $throwable->getMessage());
         }
