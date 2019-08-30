@@ -13,10 +13,10 @@ class AwsSettingsTableSeeder extends Seeder
     public function run()
     {
         AwsSetting::create([
-            'image_id' => config('aws.image_id'),
-            'type' => config('aws.instance_type'),
-            'storage' => config('aws.volume_size'),
-            'default' => true
+            'image_id'  => config('aws.image_id', 'ami-0ebc3e5e32781b350'),
+            'type'      => config('aws.instance_type', 't3.small'),
+            'storage'   => config('aws.volume_size', 32),
+            'default'   => true
         ]);
     }
 }

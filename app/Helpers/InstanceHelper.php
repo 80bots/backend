@@ -4,10 +4,13 @@ namespace App\Helpers;
 
 use App\AwsRegion;
 use App\Bot;
+use App\DeleteSecurityGroup;
 use App\InstanceSessionsHistory;
 use App\SchedulingInstancesDetails;
+use App\Services\Aws;
 use App\User;
 use App\BotInstance;
+use Aws\Result;
 use Carbon\Carbon;
 use Carbon\CarbonTimeZone;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
@@ -191,5 +194,33 @@ class InstanceHelper
                 ->orWhereIn('status', ['running', 'stopped']);
         })->where('updated_at', '<' , Carbon::now()->subMinutes(10)->toDateTimeString())
             ->delete();
+    }
+
+    /**
+     * Clean up unused keys and security groups
+     * @param Aws $aws
+     * @param $details
+     */
+    public static function cleanUpTerminatedInstanceData(Aws $aws, $details): void
+    {
+        //
+        if(preg_match('/^keys\/(.*)\.pem$/s', $details->aws_pem_file_path ?? '', $matches)) {
+            $aws->deleteKeyPair($matches[1]);
+            $aws->deleteS3KeyPair($details->aws_pem_file_path ?? '');
+        }
+        DeleteSecurityGroup::create([
+            'group_id'      => $details->aws_security_group_id ?? '',
+            'group_name'    => $details->aws_security_group_name ?? '',
+        ]);
+    }
+
+    /**
+     * @param Result $describeInstancesResponse
+     * @return bool
+     */
+    public static function checkTerminatedStatus(Result $describeInstancesResponse): bool
+    {
+        $reservationObj = $describeInstancesResponse->get('Reservations');
+        return empty($reservationObj) || $reservationObj[0]['Instances'][0]['State']['Name'] === 'terminated';
     }
 }

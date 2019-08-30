@@ -59,16 +59,24 @@ class BotInstance extends BaseModel
         return $query->where('aws_status', self::STATUS_RUNNING)->get();
     }
 
+    public function setAwsStatusPending()
+    {
+        $this->update(['aws_status' => BotInstance::STATUS_PENDING]);
+    }
+
     public function setAwsStatusTerminated()
     {
-        $this->fill(['aws_status' => self::STATUS_TERMINATED]);
-        $this->save();
+        $this->update(['aws_status' => BotInstance::STATUS_TERMINATED]);
     }
 
     public function setAwsStatusRunning()
     {
-        $this->fill(['aws_status' => self::STATUS_RUNNING]);
-        $this->save();
+        $this->update(['aws_status' => BotInstance::STATUS_RUNNING]);
+    }
+
+    public function setAwsStatusStopped()
+    {
+        $this->update(['aws_status' => BotInstance::STATUS_STOPPED]);
     }
 
     public function isAwsStatusTerminated()
