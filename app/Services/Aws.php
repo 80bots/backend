@@ -556,7 +556,7 @@ class Aws
 
                 $instances = $reservation['Instances'];
 
-                if ($instances) {
+                if (! empty($instances)) {
 
                     foreach ($instances as $instance) {
 
@@ -567,28 +567,38 @@ class Aws
 
                             if( isset($instance['Tags']) && count($instance['Tags'])) {
                                 foreach ($instance['Tags'] as $key => $tag) {
-                                    if(isset($tag['Key']) && $tag['Key'] == 'Name') {
+                                    if(isset($tag['Key']) && $tag['Key'] === 'Name') {
                                         $name = $tag['Value'];
                                     }
-                                    if(isset($tag['Key']) && $tag['Key'] == 'User Email') {
+                                    if(isset($tag['Key']) && $tag['Key'] === 'User Email') {
                                         $email = $tag['Value'];
                                     }
                                 }
                             }
 
-                            if(! empty($name) && in_array($name, $this->ignore)) {
+                            if (empty($email) || in_array($name, $this->ignore)) {
                                 continue;
+                            }
+
+                            $paramsDescribeVolumes = [];
+
+                            foreach ($instance['BlockDeviceMappings'] as $blockDeviceMapping) {
+                                $paramsDescribeVolumes[] = $blockDeviceMapping['Ebs']['VolumeId'];
                             }
 
                             $instancesByStatus['data'][$instance['State']['Name']][] = [
                                 'tag_name'                => $name,
                                 'tag_user_email'          => $email,
                                 'aws_instance_id'         => $instance['InstanceId'],
-                                'aws_ami_id'              => $instance['ImageId'],
+                                'aws_image_id'            => $instance['ImageId'],
+                                'aws_instance_type'       => $instance['InstanceType'],
+                                'aws_key_name'            => $instance['KeyName'],
+                                'aws_launch_time'         => $instance['LaunchTime'],
                                 'aws_security_group_id'   => isset($instance['SecurityGroups']) && count($instance['SecurityGroups']) ? $instance['SecurityGroups'][0]['GroupId'] : null,
                                 'aws_security_group_name' => isset($instance['SecurityGroups']) && count($instance['SecurityGroups']) ? $instance['SecurityGroups'][0]['GroupName'] : null,
                                 'aws_public_ip'           => $instance['PublicIpAddress'] ?? null,
                                 'aws_public_dns'          => $instance['PublicDnsName'] ?? null,
+                                'aws_volumes_params'      => $paramsDescribeVolumes,
                                 'created_at'              => date('Y-m-d H:i:s', strtotime($instance['LaunchTime']))
                             ];
 
