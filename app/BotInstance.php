@@ -21,7 +21,7 @@ class BotInstance extends BaseModel
         'aws_region_id',
         'used_credit',
         'up_time',
-        'temp_up_time',
+        'total_up_time',
         'cron_up_time',
         'is_in_queue',
         'aws_status',

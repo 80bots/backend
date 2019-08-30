@@ -487,14 +487,6 @@ class Aws
             $path = explode('.', $bot->path);
             $formattedParams[$path[0]] = $params;
 
-//            $formattedParams = [];
-//
-//            foreach ($params as $key => $param) {
-//                $formattedParams[] = [
-//                    $key => $param
-//                ];
-//            }
-
             $userData = base64_encode("#!/bin/bash\n{$this->startupScript(json_encode($formattedParams), $bot->path ?? '')}");
         }
 
