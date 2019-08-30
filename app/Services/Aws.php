@@ -484,8 +484,13 @@ class Aws
 
         if (! empty($params)) {
 
-            $path = explode('.', $bot->path);
-            $formattedParams[$path[0]] = $params;
+            $formattedParams = [];
+
+            foreach ($params as $key => $param) {
+                $formattedParams[$key] = [
+                     'value' => $param
+                ];
+            }
 
             $userData = base64_encode("#!/bin/bash\n{$this->startupScript(json_encode($formattedParams), $bot->path ?? '')}");
         }
@@ -798,28 +803,18 @@ class Aws
     protected function startupScript(string $params = '', string $path = ''): string
     {
         return <<<HERESHELL
-file="params/params.json"
+file="puppeteer/params/params.json"
 username="kabas"
 cd /home/\$username/
-if [ -f \$file ]
-    then
-    rm -rf \$file
-fi
 
-su - \$username -c 'git config user.name "John Doe"'
-su - \$username -c 'git config user.email johndoe@example.com'
-
-su - \$username -c 'git stash'
-su - \$username -c 'git pull origin master'
-
-su - \$username -c 'mkdir logs'
-su - \$username -c 'npm i puppeteer'
+su - \$username -c 'git clone -b master https://14b12de18e2199b2d584d3f6cf9492f3353f9b3e@github.com/80bots/puppeteer.git ./puppeteer'
+su - \$username -c 'cd ./puppeteer && npm i'
 
 ############## Output user params to params.json file ###############
 cat > \$file <<EOF
 {$params}
 EOF
-su - \$username -c 'DISPLAY=:1 node ./{$path}'
+su - \$username -c 'DISPLAY=:1 node /home/kabas/puppeteer/{$path}'
 HERESHELL;
     }
 

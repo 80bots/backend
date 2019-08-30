@@ -67,6 +67,7 @@ class SyncLocalBots extends Command
                         $result = BotParser::getBotInfo($content);
 
                         if (! empty($result['about']) && ! empty($result['params'])) {
+
                             $platformName = $result['about']->platform ?? $filePlatform;
 
                             if (! empty($result['about']->platform)) {
