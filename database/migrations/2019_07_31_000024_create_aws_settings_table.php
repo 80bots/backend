@@ -18,6 +18,7 @@ class CreateAwsSettingsTable extends Migration
             $table->string('image_id');
             $table->string('type');
             $table->integer('storage');
+            $table->text('script');
             $table->boolean('default')->default(false);
             $table->timestamps();
         });

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\AwsSetting;
 use App\Bot;
 use App\Helpers\GeneratorID;
 use App\User;
@@ -494,7 +495,6 @@ class Aws
 //                    $key => $param
 //                ];
 //            }
-
             $userData = base64_encode("#!/bin/bash\n{$this->startupScript(json_encode($formattedParams), $bot->path ?? '')}");
         }
 
@@ -795,24 +795,9 @@ class Aws
      */
     protected function startupScript(string $params = '', string $path = ''): string
     {
+        $settings = AwsSetting::isDefault()->first();
         return <<<HERESHELL
-file="params/params.json"
-username="kabas"
-cd /home/\$username/
-if [ -f \$file ]
-    then
-    rm -rf \$file
-fi
-
-su - \$username -c 'git config user.name "John Doe"'
-su - \$username -c 'git config user.email johndoe@example.com'
-
-su - \$username -c 'git stash'
-su - \$username -c 'git pull origin master'
-
-su - \$username -c 'mkdir logs'
-su - \$username -c 'npm i puppeteer'
-
+{$settings->script}
 ############## Output user params to params.json file ###############
 cat > \$file <<EOF
 {$params}

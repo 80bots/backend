@@ -19,6 +19,7 @@ class AwsSettingResource extends JsonResource
             'image_id'  => $this->image_id ?? '',
             'type'      => $this->type ?? '',
             'storage'   => $this->storage ?? '',
+            'script'    => $this->script ?? '',
             'default'   => $this->default ?? '',
         ];
     }

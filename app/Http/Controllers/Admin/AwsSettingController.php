@@ -24,6 +24,7 @@ class AwsSettingController extends AppController
                 'update.image_id'           => 'string|required',
                 'update.type'               => 'string|required',
                 'update.storage'            => 'integer|required',
+                'update.script'             => 'string|required',
             ]);
             $settings->update($updateData['update']);
 
