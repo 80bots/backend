@@ -69,6 +69,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
     Route::group(['prefix' => 'bots', 'as' => 'bots.'], function () {
         Route::get('/running', 'BotInstanceController@index')->name('running');
         Route::get('/tags', 'BotController@getTags')->name('running');
+        Route::get('/sync', 'BotController@syncBots')->name('sync');
     });
 
     Route::group(['prefix' => 'instances', 'as' => 'instances.'], function () {
