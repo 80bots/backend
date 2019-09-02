@@ -809,7 +809,7 @@ class Aws
 cat > \$file <<EOF
 {$params}
 EOF
-su - \$username -c 'DISPLAY=:1 node /home/kabas/puppeteer/{$path}'
+su - \$username -c 'DISPLAY=:1 node puppeteer/{$path}'
 HERESHELL;
     }
 

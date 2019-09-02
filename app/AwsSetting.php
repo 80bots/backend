@@ -12,6 +12,7 @@ class AwsSetting extends Model
         'image_id',
         'type',
         'storage',
+        'script',
         'default'
     ];
 
