@@ -26,8 +26,8 @@ return [
     'ua_append' => [
         'L5MOD/' . AwsServiceProvider::VERSION,
     ],
-    'image_id' => env('AWS_IMAGE_ID', 'ami-0ebc3e5e32781b350'),
-    'instance_type' => env('AWS_INSTANCE_TYPE', 't3.small'),
+    'image_id' => env('AWS_IMAGE_ID', 'ami-0a15d2bfc04351315'),
+    'instance_type' => env('AWS_INSTANCE_TYPE', 't3a.small'),
     'volume_size' => env('AWS_VOLUME_SIZE', '32'),
     'instance_metadata' => env('AWS_INSTANCE_METADATA', 'http://169.254.169.254/latest/meta-data/'),
     'instance_ignore' =>  ['SaaS', 'kabas', 'kabas2'],

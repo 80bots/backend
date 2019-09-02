@@ -24,8 +24,8 @@ su - \$username -c 'mkdir params'
 HERESHELL;
 
         AwsSetting::create([
-            'image_id'  => config('aws.image_id', 'ami-0ebc3e5e32781b350'),
-            'type'      => config('aws.instance_type', 't3.small'),
+            'image_id'  => config('aws.image_id', 'ami-0a15d2bfc04351315'),
+            'type'      => config('aws.instance_type', 't3a.small'),
             'storage'   => config('aws.volume_size', 32),
             'script'    => $script,
             'default'   => true
