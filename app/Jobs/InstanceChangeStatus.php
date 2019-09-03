@@ -197,12 +197,20 @@ class InstanceChangeStatus implements ShouldQueue
      */
     private function setStatusTerminated(Aws $aws)
     {
-        $result = $aws->terminateInstance([$this->details->aws_instance_id]);
+        $terminateInstance = $aws->terminateInstance([$this->details->aws_instance_id]);
 
-        if ($result->hasKey('TerminatingInstances')) {
+        if ($terminateInstance->hasKey('TerminatingInstances')) {
 
-            // TODO: Check whether old status was 'running'
-            $this->updateUpTime();
+            $result = collect($terminateInstance->get('TerminatingInstances'));
+
+            $previousState = $result->map(function ($item, $key) {
+                return $item['PreviousState']['Name'] ?? null;
+            })->first();
+
+            // Check whether old status was 'running'
+            if ($previousState === BotInstance::STATUS_RUNNING) {
+                $this->updateUpTime();
+            }
 
             $this->instance->setAwsStatusTerminated();
             $this->instance->delete();
