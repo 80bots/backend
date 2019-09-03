@@ -127,8 +127,6 @@ class StoreUserInstance implements ShouldQueue
 
                 if ($describeInstancesResponse->hasKey('Reservations')) {
 
-                    Log::debug(print_r($describeInstancesResponse->get('Reservations'), true));
-
                     $instanceArray  = $describeInstancesResponse->get('Reservations')[0]['Instances'][0];
                     $launchTime     = $instanceArray['LaunchTime'] ?? '';
                     $awsStatus      = $instanceArray['State']['Name'];

@@ -10,9 +10,11 @@ use App\Http\Resources\Admin\BotInstanceResource;
 use App\Jobs\SyncBotInstances;
 use App\Services\Aws;
 use App\BotInstance;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class BotInstanceController extends AppController
@@ -55,9 +57,11 @@ class BotInstanceController extends AppController
             }
 
             //
-            if (! empty($sort)) {
-                $resource->orderBy($sort, $order);
+            if (empty($sort)) {
+                $sort   = 'created_at';
+                $order  = 'desc';
             }
+            $resource->orderBy($sort, $order);
 
             $instances  = (new BotInstanceCollection($resource->paginate($limit)))->response()->getData();
             $meta       = $instances->meta ?? null;

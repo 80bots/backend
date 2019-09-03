@@ -142,6 +142,7 @@ class InstanceHelper
 
                                     $detail = $botInstance->details()->latest()->first();
 
+                                    // TODO: Check whether old status was 'running'
                                     self::updateUpTime($botInstance, $detail, $currentDate);
 
                                     $botInstance->delete();
@@ -151,31 +152,59 @@ class InstanceHelper
                         }
                     } else {
 
-                        // TODO: add new bot instance
-//                        $describeVolumes = $this->ec2->describeVolumes([
-//                            'VolumeIds' => $instance['aws_volumes_params']
-//                        ]);
-//
-//                        $region->increment('created_instances');
-//
-//                        $instance = BotInstance::create([
-//                            'user_id'       => $user->id,
-//                            'bot_id'        => $bot->id ?? null,
-//                            'aws_region_id' => $region->id ?? null,
-//                            'aws_status'    => $status
-//                        ]);
-//
-//                        $instance->details()->create([
-//                            'aws_instance_type' => $instance['aws_instance_type'],
-//                            'aws_storage_gb'    => $awsSetting->storage ?? null,
-//                            'aws_image_id'      => $awsSetting->image_id ?? null
-//                        ]);
+                        if ($status !== BotInstance::STATUS_TERMINATED) {
+
+                            $aws                = new Aws;
+                            $describeVolumes    = $aws->describeVolumes($region->code ?? null, $instance['aws_volumes_params']);
+
+                            if ($describeVolumes->hasKey('Volumes')) {
+
+                                $volumes = collect($describeVolumes->get('Volumes'));
+
+                                if ($volumes->isNotEmpty()) {
+
+                                    $volumeSize = $volumes->filter(function ($value, $key) {
+                                        return $value['Attachments'][0]['Device'] === '/dev/sda1';
+                                    })->map(function ($item, $key) {
+                                        return $item['Size'] ?? 0;
+                                    })->first();
+
+                                    if ($volumeSize > 0) {
+
+                                        $newInstance = BotInstance::create([
+                                            'user_id' => $user->id,
+                                            'bot_id' => null,
+                                            'aws_region_id' => $region->id ?? null,
+                                            'aws_status' => $status
+                                        ]);
+
+                                        $newInstance->details()->create([
+                                            'aws_instance_type' => $instance['aws_instance_type'],
+                                            'aws_storage_gb' => $volumeSize,
+                                            'aws_image_id' => $instance['aws_image_id'],
+                                            'tag_name' => $instance['tag_name'],
+                                            'tag_user_email' => $instance['tag_user_email'],
+                                            'aws_instance_id' => $instance['aws_instance_id'],
+                                            'aws_security_group_id' => $instance['aws_security_group_id'],
+                                            'aws_security_group_name' => $instance['aws_security_group_name'],
+                                            'aws_public_ip' => $instance['aws_public_ip'],
+                                            'aws_public_dns' => $instance['aws_public_dns'],
+                                            'aws_pem_file_path' => "keys/{$instance['aws_key_name']}.pem",
+                                            'is_in_queue' => 0,
+                                            'start_time' => $instance['created_at']
+                                        ]);
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
 
-                unset($user);
+                unset($user, $botInstance, $describeVolumes, $volumes, $newInstance);
             }
         }
+
+        unset($instancesByStatus);
 
         Log::info('Synced completed at ' . date('Y-m-d h:i:s'));
     }

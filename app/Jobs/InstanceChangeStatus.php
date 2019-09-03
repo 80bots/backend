@@ -201,6 +201,7 @@ class InstanceChangeStatus implements ShouldQueue
 
         if ($result->hasKey('TerminatingInstances')) {
 
+            // TODO: Check whether old status was 'running'
             $this->updateUpTime();
 
             $this->instance->setAwsStatusTerminated();

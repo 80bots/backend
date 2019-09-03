@@ -622,6 +622,22 @@ class Aws
     }
 
     /**
+     * @param string $region
+     * @param array $volumes
+     * @return Result
+     */
+    public function describeVolumes(string $region, array $volumes): Result
+    {
+        if (empty($this->ec2)) {
+            $this->ec2Connection($region);
+        }
+
+        return $this->ec2->describeVolumes([
+            'VolumeIds' => $volumes
+        ]);
+    }
+
+    /**
      * @param array $instanceIds
      * @return void
      */
@@ -802,9 +818,20 @@ class Aws
      */
     protected function startupScript(string $params = '', string $path = ''): string
     {
+        $shell = <<<HERESHELL
+############## Output to test.sh file ###############
+shellFile="test.sh"
+cat > \$shellFile <<EOF
+#!/bin/bash
+su - \$username -c 'DISPLAY=:1 node puppeteer/{$path}'
+EOF
+HERESHELL;
+
         $settings = AwsSetting::isDefault()->first();
+
         return <<<HERESHELL
 {$settings->script}
+{$shell}
 ############## Output user params to params.json file ###############
 cat > \$file <<EOF
 {$params}

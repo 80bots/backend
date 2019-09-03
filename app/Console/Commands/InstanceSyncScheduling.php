@@ -23,7 +23,7 @@ class InstanceSyncScheduling extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Instances synchronization on AWS with the local base';
 
     /**
      * Create a new command instance.
@@ -48,11 +48,7 @@ class InstanceSyncScheduling extends Command
 
             $regions = AwsRegion::all();
 
-            Log::info('Count ' . $regions->count());
-
             if (! empty($regions)) {
-
-                Log::info('Regions isset');
 
                 foreach ($regions as $region) {
 
@@ -79,13 +75,11 @@ class InstanceSyncScheduling extends Command
                 }
             }
 
-            Log::info('Completed InstanceSyncScheduling');
+            Log::info('Sync completed at ' . date('Y-m-d h:i:s'));
 
         } catch (Throwable $throwable) {
             Log::info('ERROR');
             Log::error($throwable->getMessage());
         }
-
-        Log::info('END');
     }
 }

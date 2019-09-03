@@ -15,6 +15,7 @@ use App\Console\Commands\RefreshDatabase;
 use App\Console\Commands\SyncLocalBots;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use Illuminate\Support\Facades\Log;
 
 class Kernel extends ConsoleKernel
 {

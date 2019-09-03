@@ -39,9 +39,11 @@ class BotInstanceController extends AppController
             }
 
             //
-            if (! empty($sort)) {
-                $resource->orderBy($sort, $order);
+            if (empty($sort)) {
+                $sort   = 'created_at';
+                $order  = 'desc';
             }
+            $resource->orderBy($sort, $order);
 
             $bots   = (new BotInstanceCollection($resource->paginate($limit)))->response()->getData();
             $meta   = $bots->meta ?? null;
