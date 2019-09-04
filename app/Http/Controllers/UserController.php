@@ -35,7 +35,7 @@ class UserController extends AppController
 
             return $this->success([
                 'user'          => $user,
-                'used_credit'   => $user->instances->sum('used_credit'),
+                'credits_used'  => $user->instances->sum('credits_used'),
                 'plan'          => $plan,
                 'timezones'     => (new TimezoneCollection(Timezone::get()))->response()->getData()
             ]);

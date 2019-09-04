@@ -78,9 +78,9 @@ class CalculateInstancesUpTime extends Command
                                     $cronUpTime = CommonHelper::diffTimeInMinutes($awsInstance['LaunchTime']->format('Y-m-d H:i:s'), $this->now->toDateTimeString());
 
                                     $instance->update([
-                                        'cron_up_time'  => $cronUpTime,
-                                        'up_time'       => $cronUpTime + $instance->total_up_time ?? 0,
-                                        'used_credit'   => CommonHelper::calculateUsedCredit($cronUpTime + $instance->total_up_time ?? 0)
+                                        'cron_uptime'   => $cronUpTime,
+                                        'uptime'        => $cronUpTime + $instance->total_uptime ?? 0,
+                                        'credits_used'  => CommonHelper::calculateCreditsUsed($cronUpTime + $instance->total_uptime ?? 0)
                                     ]);
 
                                     Log::debug('instance id ' . $instanceDetail->aws_instance_id . ' Cron Up Time is ' . $cronUpTime);

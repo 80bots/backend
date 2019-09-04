@@ -14,6 +14,17 @@ class BotResource extends JsonResource
      */
     public function toArray($request)
     {
+        $params = json_decode($this->parameters ?? '');
+        $formattedParameters = [];
+
+        if (! empty($params)) {
+            foreach ($params as $key => $param) {
+                $formattedParameters[] = array_merge([
+                    'name' => $key
+                ], (array) $param);
+            }
+        }
+
         $tags = $this->tags->isNotEmpty() ? $this->tags : collect([]);
 
         $tags = $tags->map(function ($item, $key) {
@@ -28,7 +39,7 @@ class BotResource extends JsonResource
             'name'              => $this->name ?? '',
             'platform'          => $this->platform->name ?? '',
             'description'       => $this->description ?? '',
-            'parameters'        => $this->parameters ? (array) json_decode($this->parameters) : array(),
+            'parameters'        => $formattedParameters,
             'aws_ami_image_id'  => $this->aws_ami_image_id ?? '',
             'aws_ami_name'      => $this->aws_ami_name ?? '',
             'aws_instance_type' => $this->aws_instance_type ?? '',

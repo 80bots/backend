@@ -105,13 +105,13 @@ class InstanceStopScheduling extends Command
                             $instanceDetail->total_time = $diffTime;
 
                             if ($instanceDetail->save()) {
-                                if ($diffTime > $userInstance->cron_up_time) {
-                                    $userInstance->cron_up_time = 0;
-                                    $tempUpTime = $userInstance->total_up_time ?? 0;
+                                if ($diffTime > $userInstance->cron_uptime) {
+                                    $userInstance->cron_uptime = 0;
+                                    $tempUpTime = $userInstance->total_uptime ?? 0;
                                     $upTime = $diffTime + $tempUpTime;
-                                    $userInstance->total_up_time = $upTime;
-                                    $userInstance->up_time = $upTime;
-                                    $userInstance->used_credit = CommonHelper::calculateUsedCredit($upTime);
+                                    $userInstance->total_uptime = $upTime;
+                                    $userInstance->uptime = $upTime;
+                                    $userInstance->credits_used = CommonHelper::calculateCreditsUsed($upTime);
                                 }
                             }
                         }

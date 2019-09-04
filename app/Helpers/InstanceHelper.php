@@ -218,13 +218,13 @@ class InstanceHelper
             'total_time'    => $diffTime
         ]);
 
-        $upTime = $diffTime + $instance->total_up_time;
+        $upTime = $diffTime + $instance->total_uptime;
 
         $instance->update([
-            'cron_up_time'  => 0,
-            'total_up_time' => $upTime,
-            'up_time'       => $upTime,
-            'used_credit'   => CommonHelper::calculateUsedCredit($upTime)
+            'cron_uptime'   => 0,
+            'total_uptime'  => $upTime,
+            'uptime'        => $upTime,
+            'credits_used'  => CommonHelper::calculateCreditsUsed($upTime)
         ]);
     }
 

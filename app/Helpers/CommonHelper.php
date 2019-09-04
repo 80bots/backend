@@ -19,7 +19,7 @@ class CommonHelper
      */
     public static function calculateCredit()
     {
-        return round((config('app.credit') * 10) / config('app.up_time'),2);
+        return round((config('app.credit') * 10) / config('app.uptime'),2);
     }
 
     /**
@@ -40,9 +40,9 @@ class CommonHelper
      * @param $upTime
      * @return float|int
      */
-    public static function calculateUsedCredit($upTime)
+    public static function calculateCreditsUsed($upTime)
     {
-        return $upTime > 0 ? round($upTime * (float)config('app.credit') / (float)config('app.up_time'), 2) : 0;
+        return $upTime > 0 ? round($upTime * (float)config('app.credit') / (float)config('app.uptime'), 2) : 0;
     }
 
     /**

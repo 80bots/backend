@@ -127,9 +127,9 @@ return [
 
     'cipher' => 'AES-256-CBC',
 
-    'up_time' => env('UP_TIME_MINUTES', '60'),
+    'uptime' => env('UPTIME_MINUTES', '60'),
 
-    'credit' => env('CREDIT_UP_TIME', '1'),
+    'credit' => env('CREDIT_UPTIME', '1'),
 
     'currency_code' => env('APP_CURRENCY_CODE', 'USD'),
 

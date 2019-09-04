@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\CreditPercentage;
 use App\Helpers\CommonHelper;
 use App\Helpers\MailHelper;
 use App\Services\Aws;
@@ -53,8 +52,8 @@ class CalculateUserCreditScore extends Command
     {
         $this->now      = Carbon::now();
         $users          = User::findUserInstances();
-        // Get Low creditPercentage
-        $lowPercentage  = CreditPercentage::pluck('percentage')->toArray();
+        // Get Low Credit Percentage
+        $lowPercentage = [];
 
         foreach ($users as $user) {
 
@@ -63,7 +62,7 @@ class CalculateUserCreditScore extends Command
             if (! empty($instances)) {
 
                 $usedCreditArray = $instances->map(function ($item, $key) {
-                    return $item->used_credit ?? 0;
+                    return $item->credits_used ?? 0;
                 })->toArray();
 
                 $creditScore = (float)$user->temp_remaining_credits - (float)array_sum($usedCreditArray);
@@ -149,13 +148,13 @@ class CalculateUserCreditScore extends Command
                             $diffTime = CommonHelper::diffTimeInMinutes($instanceDetail->start_time, $instanceDetail->end_date);
                             $instanceDetail->total_time = $diffTime;
 
-                            if ($instanceDetail->save() && $diffTime > $UserInstance->cron_up_time) {
+                            if ($instanceDetail->save() && $diffTime > $UserInstance->cron_uptime) {
 
-                                $tempUpTime = $UserInstance->total_up_time ?? 0;
+                                $tempUpTime = $UserInstance->total_uptime ?? 0;
                                 $upTime = $diffTime + $tempUpTime;
-                                $UserInstance->total_up_time = $upTime;
-                                $UserInstance->up_time = $upTime;
-                                $UserInstance->cron_up_time = 0;
+                                $UserInstance->total_uptime = $upTime;
+                                $UserInstance->uptime = $upTime;
+                                $UserInstance->cron_uptime = 0;
                             }
                         }
 
