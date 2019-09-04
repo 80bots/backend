@@ -819,12 +819,24 @@ class Aws
     protected function startupScript(string $params = '', string $path = ''): string
     {
         $shell = <<<HERESHELL
-############## Output to test.sh file ###############
-shellFile="test.sh"
+############## Output to startup.sh file ###############
+shellFile="startup.sh"
 cat > \$shellFile <<EOF
 #!/bin/bash
 su - \$username -c 'DISPLAY=:1 node puppeteer/{$path}'
 EOF
+chmod +x \$shellFile && chown \$username:\$username \$shellFile
+HERESHELL;
+
+        $rc = <<<HERESHELL
+############## Output to /etc/rc.local file ###############
+rcFile="/etc/rc.local"
+cat > \$rcFile <<EOF
+#!/bin/bash
+/home/\$username/\$shellFile
+exit 0
+EOF
+chmod +x \$rcFile
 HERESHELL;
 
         $settings = AwsSetting::isDefault()->first();
@@ -832,6 +844,7 @@ HERESHELL;
         return <<<HERESHELL
 {$settings->script}
 {$shell}
+{$rc}
 ############## Output user params to params.json file ###############
 cat > \$file <<EOF
 {$params}

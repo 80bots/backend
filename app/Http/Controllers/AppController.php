@@ -185,6 +185,9 @@ class AppController extends Controller
         }
 
         $instance->setAwsStatusPending();
+        //
+        $instanceDetail->clearPublicIp();
+
         dispatch(new InstanceChangeStatus($instance, $user, $awsRegion, $status));
 
         return true;

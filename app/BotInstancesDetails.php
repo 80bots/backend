@@ -37,4 +37,9 @@ class BotInstancesDetails extends Model
     {
         return $this->belongsTo(BotInstance::class, 'instance_id', 'id');
     }
+
+    public function clearPublicIp()
+    {
+        $this->update(['aws_public_ip' => null]);
+    }
 }
