@@ -2,12 +2,13 @@
 
 namespace App;
 
+use App\Helpers\CreditUsageHelper;
 use App\Notifications\SaasVerifyEmail;
-use Illuminate\Auth\Notifications\ResetPassword as ResetPasswordNotification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Log;
 use Laravel\Cashier\Billable;
 use Laravel\Passport\HasApiTokens;
 use Stripe\PaymentMethod;
@@ -208,11 +209,10 @@ class User extends Authenticatable
      */
     public function updateCredits($credits)
     {
-        $this->remaining_credits = $credits;
-        if ($this->save()){
-            return true;
-        }
-        return false;
+        $update = $this->increment('remaining_credits', $credits);
+        CreditUsageHelper::receivedBySubscription($this, $credits);
+
+        return $update === 1;
     }
 
     /**

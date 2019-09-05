@@ -51,6 +51,10 @@ Route::group(['middleware' => ['auth:api']], function() {
        Route::get('/types', 'PlatformController@getInstanceTypes');
     });
 
+    Route::group(['prefix' => 'history', 'as' => 'history.'], function() {
+       Route::get('/credits', 'HistoryController@getCreditUsage');
+    });
+
     Route::resources([
         'bots'     => 'BotController',
         'schedule' => 'ScheduleController',

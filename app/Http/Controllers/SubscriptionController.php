@@ -47,7 +47,8 @@ class SubscriptionController extends Controller
         return $this->success($response);
     }
 
-    public function subscribe(Request $request) {
+    public function subscribe(Request $request)
+    {
         $data = $request->validate([
             'plan_id'   => 'integer|required',
             'token_id' => 'string|required'
@@ -55,7 +56,7 @@ class SubscriptionController extends Controller
 
         $user = $request->user();
 
-        if(!$user->hasStripeId()) {
+        if (!$user->hasStripeId()) {
             $user->createAsStripeCustomer([
                 'description' => $user->name
             ]);

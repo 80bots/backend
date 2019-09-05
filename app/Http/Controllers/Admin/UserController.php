@@ -148,10 +148,12 @@ class UserController extends AppController
                         //
                         CreditUsageHelper::adminAddCredit($user, $value);
 
-                        $user->remaining_credits = $value;
-                        $user->temp_remaining_credits = $value;
+                        $update = $user->update([
+                            'remaining_credits'         => $value,
+                            'temp_remaining_credits'    => $value
+                        ]);
 
-                        if ($user->save()) {
+                        if ($update) {
                             MailHelper::updateUserCreditSendEmail($user);
                             return $this->success(
                                 (new UserResource($user))->toArray($request),

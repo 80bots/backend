@@ -75,6 +75,7 @@ class InstanceChangeStatus implements ShouldQueue
      * Execute the job.
      *
      * @return void
+     * @throws \Exception
      */
     public function handle()
     {
@@ -259,11 +260,15 @@ class InstanceChangeStatus implements ShouldQueue
 
         $upTime = $diffTime + $this->instance->total_up_time;
 
+        $calculateUsedCredit = CommonHelper::calculateUsedCredit($upTime);
+
         $this->instance->update([
             'cron_up_time'  => 0,
             'total_up_time' => $upTime,
             'up_time'       => $upTime,
-            'used_credit'   => CommonHelper::calculateUsedCredit($upTime)
+            'used_credit'   => $calculateUsedCredit
         ]);
+
+
     }
 }

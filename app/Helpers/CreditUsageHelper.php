@@ -18,13 +18,13 @@ class CreditUsageHelper
         ]);
     }
 
-    public static function receivedBySubscription(User $user, int $credits, string $order)
+    public static function receivedBySubscription(User $user, int $credits)
     {
         CreditUsage::create([
             'user_id'   => $user->id,
             'credit'    => $credits,
             'action'    => CreditUsage::ACTION_ADDED,
-            'subject'   => "Credits have been received by subscription (Order #123)"
+            'subject'   => "Credits have been received by subscription"
         ]);
     }
 
@@ -34,7 +34,7 @@ class CreditUsageHelper
             'user_id'   => $user->id,
             'credit'    => $credits,
             'action'    => CreditUsage::ACTION_USED,
-            'subject'   => "Credits charging for using the bot (bot's name)"
+            'subject'   => "Credits charging for using the bot ({$bot->name})"
         ]);
     }
 }

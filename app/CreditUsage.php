@@ -28,4 +28,22 @@ class CreditUsage extends Model
     {
         return $query;
     }
+
+    /**
+     * Return only added action
+     * @param $query
+     */
+    public function scopeOnlyAdded($query)
+    {
+        $query->where('action', '=', self::ACTION_ADDED);
+    }
+
+    /**
+     * Return only used action
+     * @param $query
+     */
+    public function scopeOnlyUsed($query)
+    {
+        $query->where('action', '=', self::ACTION_USED);
+    }
 }
