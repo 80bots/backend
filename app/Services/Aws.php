@@ -350,7 +350,7 @@ class Aws
             new VideoGameName()
         ]);
 
-        return strtolower(str_replace(' ', '', $generator->getName())) . rand(10,99);
+        return strtolower(preg_replace('/[^a-z\d]/ui', '', $generator->getName())) . rand(100,999);
     }
 
     /**
