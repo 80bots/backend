@@ -10,11 +10,8 @@ use App\Http\Resources\Admin\BotInstanceResource;
 use App\Jobs\SyncBotInstances;
 use App\Services\Aws;
 use App\BotInstance;
-use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class BotInstanceController extends AppController
@@ -75,6 +72,20 @@ class BotInstanceController extends AppController
 
         } catch (Throwable $throwable) {
             return $this->error(__('admin.server_error'), $throwable->getMessage());
+        }
+    }
+
+    /**
+     * @param Request $request
+     * @param $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function show(Request $request, $id) {
+        $resource = BotInstance::withTrashed()->find($id);
+        if(!empty($resource)) {
+            return $this->success((new BotInstanceResource($resource))->toArray($request));
+        } else {
+            $this->error('Not found', __('admin.bots.not_found'));
         }
     }
 

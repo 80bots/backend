@@ -24,7 +24,7 @@ class BotInstanceResource extends JsonResource
         return [
             'id'                => $this->id ?? '',
             'region'            => $region->name ?? '',
-            'aws_instance_id'   => $this->aws_instance_id ?? null,
+            'instance_id'       => $details->aws_instance_id ?? '',
             'name'              => $details->tag_name ?? '',
             'parameters'        => $this->bot->parameters ?? '',
             'launched_at'       => $details->start_time ?? '',
