@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\CreditUsage;
+use App\Helpers\CreditUsageHelper;
 use App\Helpers\MailHelper;
 use App\Http\Controllers\AppController;
 use App\Http\Resources\Admin\UserCollection;
@@ -143,8 +145,12 @@ class UserController extends AppController
                         }
                         break;
                     case 'remaining_credits':
+                        //
+                        CreditUsageHelper::adminAddCredit($user, $value);
+
                         $user->remaining_credits = $value;
                         $user->temp_remaining_credits = $value;
+
                         if ($user->save()) {
                             MailHelper::updateUserCreditSendEmail($user);
                             return $this->success(
