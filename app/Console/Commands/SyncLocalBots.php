@@ -45,7 +45,9 @@ class SyncLocalBots extends Command
     {
         try {
 
-            File::deleteDirectory(base_path('resources/puppeteer'));
+            if (File::isDirectory(base_path('resources/puppeteer'))) {
+                File::deleteDirectory(base_path('resources/puppeteer'));
+            }
 
             shell_exec('git clone -b master https://14b12de18e2199b2d584d3f6cf9492f3353f9b3e@github.com/80bots/puppeteer.git ./resources/puppeteer');
 
