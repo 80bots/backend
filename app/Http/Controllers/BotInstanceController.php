@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use App\AwsRegion;
 use App\Http\Resources\User\BotInstanceCollection;
 use App\Http\Resources\User\BotInstanceResource;
-use App\Services\Aws;
 use App\BotInstance;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
 
@@ -77,7 +77,7 @@ class BotInstanceController extends AppController
     /**
      * Show the form for creating a new resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function create()
     {
@@ -91,8 +91,8 @@ class BotInstanceController extends AppController
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @return Response
      */
     public function store(Request $request)
     {
@@ -173,19 +173,24 @@ class BotInstanceController extends AppController
     /**
      * Display the specified resource.
      *
-     * @param  \App\BotInstance  $userInstances
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @param $id
+     * @return Response
      */
-    public function show(BotInstance $userInstances)
-    {
-        //
+    public function show(Request $request, $id) {
+        $resource = BotInstance::withTrashed()->find($id);
+        if(!empty($resource)) {
+            return $this->success((new BotInstanceResource($resource))->toArray($request));
+        } else {
+            $this->error('Not found', __('admin.bots.not_found'));
+        }
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\BotInstance  $userInstances
-     * @return \Illuminate\Http\Response
+     * @param BotInstance $userInstances
+     * @return Response
      */
     public function edit(BotInstance $userInstances)
     {
@@ -253,7 +258,7 @@ class BotInstanceController extends AppController
      * Remove the specified resource from storage.
      *
      * @param  BotInstance  $userInstances
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function destroy(BotInstance $userInstances)
     {

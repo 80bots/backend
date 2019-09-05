@@ -414,6 +414,14 @@ class Aws
             'IpPermissions' => [
                 [
                     'IpProtocol' => 'tcp',
+                    'FromPort' => 6002,
+                    'ToPort' => 6002,
+                    'IpRanges' => [
+                        ['CidrIp' => '0.0.0.0/0']
+                    ],
+                ],
+                [
+                    'IpProtocol' => 'tcp',
                     'FromPort' => 6080,
                     'ToPort' => 6080,
                     'IpRanges' => [
@@ -849,6 +857,9 @@ HERESHELL;
 cat > \$file <<EOF
 {$params}
 EOF
+npm i -g pm2
+su - \$username -c 'git clone -b master https://14b12de18e2199b2d584d3f6cf9492f3353f9b3e@github.com/80bots/data-streamer.git ./data-streamer'
+su - \$username -c 'cd ./data-streamer && cp .env.example .env && npm i && pm2 start --name "data-streamer" npm -- run dev'
 su - \$username -c 'DISPLAY=:1 node puppeteer/{$path}'
 HERESHELL;
     }
@@ -906,7 +917,7 @@ HERESHELL;
     protected function getServerIp(): ?string
     {
         if(config('app.env') === 'local') {
-            return '127.0.0.1';
+            return '0.0.0.0';
         } else {
             // To view all categories of instance metadata from within a running instance, use the following URI:
             $client = new Client(['base_uri' => config('aws.instance_metadata')]);
