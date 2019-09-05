@@ -45,11 +45,13 @@ class SyncLocalBots extends Command
     {
         try {
 
-            if (File::isDirectory(base_path('resources/puppeteer'))) {
-                File::deleteDirectory(base_path('resources/puppeteer'));
+            $path = base_path('resources/puppeteer');
+
+            if (File::isDirectory($path)) {
+                File::deleteDirectory($path);
             }
 
-            shell_exec('git clone -b master https://14b12de18e2199b2d584d3f6cf9492f3353f9b3e@github.com/80bots/puppeteer.git ./resources/puppeteer');
+            shell_exec("git clone -b master https://14b12de18e2199b2d584d3f6cf9492f3353f9b3e@github.com/80bots/puppeteer.git {$path}");
 
             $ignore = [
                 'config.js',
@@ -58,51 +60,54 @@ class SyncLocalBots extends Command
                 'package-lock.json'
             ];
 
-            $files = File::allFiles(base_path('resources/puppeteer'));
+            if (File::isDirectory($path)) {
 
-            if (! empty($files)) {
-                foreach ($files as $file) {
+                $files = File::allFiles($path);
 
-                    if (! in_array($file->getFilename(), $ignore)) {
+                if (!empty($files)) {
+                    foreach ($files as $file) {
 
-                        $res = explode('-', $file->getFilename());
-                        $filePlatform = $res[0] ?? 'unknown';
+                        if (!in_array($file->getFilename(), $ignore)) {
 
-                        $content = $file->getContents();
+                            $res = explode('-', $file->getFilename());
+                            $filePlatform = $res[0] ?? 'unknown';
 
-                        $result = BotParser::getBotInfo($content);
+                            $content = $file->getContents();
 
-                        if (! empty($result['about']) && ! empty($result['params'])) {
+                            $result = BotParser::getBotInfo($content);
 
-                            $platformName = $result['about']->platform ?? $filePlatform;
+                            if (!empty($result['about']) && !empty($result['params'])) {
 
-                            if (! empty($result['about']->platform)) {
-                                $platform = Platform::where('name', '=', $platformName)->first();
-                            } else {
-                                $platform = Platform::whereRaw('lower(name) like (?)',["%{$platformName}%"])->first();
-                            }
+                                $platformName = $result['about']->platform ?? $filePlatform;
 
-                            if (empty($platform)) {
-                                $platform = Platform::create([
-                                    'name' => ucfirst($platformName),
-                                ]);
-                            }
+                                if (!empty($result['about']->platform)) {
+                                    $platform = Platform::where('name', '=', $platformName)->first();
+                                } else {
+                                    $platform = Platform::whereRaw('lower(name) like (?)', ["%{$platformName}%"])->first();
+                                }
 
-                            $bot = Bot::where('name', '=', $result['about']->name)->first();
+                                if (empty($platform)) {
+                                    $platform = Platform::create([
+                                        'name' => ucfirst($platformName),
+                                    ]);
+                                }
 
-                            if (! empty($bot)) {
-                                $bot->update([
-                                    'description'   => $result['about']->description,
-                                    'parameters'    => json_encode($result['params'])
-                                ]);
-                            } else {
-                                Bot::create([
-                                    'platform_id'   => $platform->id ?? null,
-                                    'name'          => $result['about']->name,
-                                    'description'   => $result['about']->description,
-                                    'parameters'    => json_encode($result['params']),
-                                    'path'          => $file->getFilename()
-                                ]);
+                                $bot = Bot::where('name', '=', $result['about']->name)->first();
+
+                                if (!empty($bot)) {
+                                    $bot->update([
+                                        'description' => $result['about']->description,
+                                        'parameters' => json_encode($result['params'])
+                                    ]);
+                                } else {
+                                    Bot::create([
+                                        'platform_id' => $platform->id ?? null,
+                                        'name' => $result['about']->name,
+                                        'description' => $result['about']->description,
+                                        'parameters' => json_encode($result['params']),
+                                        'path' => $file->getFilename()
+                                    ]);
+                                }
                             }
                         }
                     }
