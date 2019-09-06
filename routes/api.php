@@ -34,6 +34,7 @@ Route::group(['middleware' => ['auth:api']], function() {
         Route::get('/regions', 'BotInstanceController@regions')->name('regions');
         Route::post('/launch', 'BotInstanceController@launchInstance')->name('launch');
         Route::put('/{id}', 'BotInstanceController@update')->name('update');
+        Route::get('/{id}', 'BotInstanceController@show')->name('get');
     });
 
     // User schedules
@@ -83,6 +84,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
         Route::post('/launch', 'BotInstanceController@launchInstance')->name('launch');
         Route::get('/sync', 'BotInstanceController@syncInstances')->name('sync');
         Route::put('/{id}', 'BotInstanceController@update')->name('update');
+        Route::get('/{id}', 'BotInstanceController@show')->name('show');
     });
 
     Route::resources([
