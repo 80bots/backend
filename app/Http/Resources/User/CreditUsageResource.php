@@ -15,7 +15,7 @@ class CreditUsageResource extends JsonResource
      */
     public function toArray($request)
     {
-        $credit = ($this->action === CreditUsage::ACTION_ADDED) ? ('+' . $this->credit ?? 0) : ('-' . $this->credit ?? 0);
+        $credit = ($this->action === CreditUsage::ACTION_ADDED) ? ('+' . $this->credit ?? 0) : ($this->credit ?? 0);
 
         return [
             'id'        => $this->id ?? '-',

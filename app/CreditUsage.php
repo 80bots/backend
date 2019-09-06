@@ -14,6 +14,7 @@ class CreditUsage extends Model
     protected $fillable = [
         'user_id',
         'credit',
+        'total',
         'action',
         'subject'
     ];

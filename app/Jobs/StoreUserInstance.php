@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Bot;
 use App\Events\InstanceLaunched;
+use App\Helpers\CreditUsageHelper;
 use App\Services\Aws;
 use App\User;
 use App\BotInstance;
@@ -21,6 +22,8 @@ use Throwable;
 class StoreUserInstance implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    const START_INSTANCE_CREDIT = 1;
 
     /**
      * @var Bot
@@ -114,6 +117,13 @@ class StoreUserInstance implements ShouldQueue
             if ($newInstanceResponse->hasKey('Instances')) {
 
                 $instanceId = $newInstanceResponse->get('Instances')[0]['InstanceId'] ?? null;
+
+                CreditUsageHelper::startInstance(
+                    $this->user,
+                    self::START_INSTANCE_CREDIT,
+                    $instanceId,
+                    $tagName
+                );
 
                 Log::info('Launched instance ' . $instanceId);
 

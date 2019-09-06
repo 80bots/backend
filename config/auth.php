@@ -101,6 +101,6 @@ return [
     ],
 
     'register' => [
-        'remaining_credits' => env('REMAINING_CREDITS', 8)
+        'credits' => env('REGISTER_CREDITS', 8)
     ]
 ];

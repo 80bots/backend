@@ -130,7 +130,7 @@ class UserController extends AppController
         try {
             $updateData = $request->validate([
                'update.status' => 'in:active,inactive',
-               'update.remaining_credits' => 'integer'
+               'update.credits' => 'integer'
             ]);
 
             $user = User::find($id);
@@ -144,13 +144,12 @@ class UserController extends AppController
                             return $this->success((new UserResource($user))->toArray($request));
                         }
                         break;
-                    case 'remaining_credits':
+                    case 'credits':
                         //
                         CreditUsageHelper::adminAddCredit($user, $value);
 
                         $update = $user->update([
-                            'remaining_credits'         => $value,
-                            'temp_remaining_credits'    => $value
+                            'credits' => $value
                         ]);
 
                         if ($update) {
@@ -192,8 +191,7 @@ class UserController extends AppController
             if (! empty($request->input('credits')) && ! empty($request->input('id'))) {
                 $update = User::where('id', '=', $request->input('id'))
                     ->update([
-                        'remaining_credits'         => $request->input('credits'),
-                        'temp_remaining_credits'    => $request->input('credits'),
+                        'credits' => $request->input('credits')
                     ]);
 
                 if (! empty($update)) {

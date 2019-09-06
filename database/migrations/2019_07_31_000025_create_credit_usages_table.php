@@ -17,6 +17,7 @@ class CreateCreditUsagesTable extends Migration
             $table->bigIncrements('id');
             $table->unsignedInteger('user_id');
             $table->integer('credit');
+            $table->integer('total');
             $table->enum('action', ['added', 'used']);
             $table->string('subject')->nullable();
             $table->timestamps();

@@ -2,13 +2,11 @@
 
 namespace App;
 
-use App\Helpers\CreditUsageHelper;
 use App\Notifications\SaasVerifyEmail;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Log;
 use Laravel\Cashier\Billable;
 use Laravel\Passport\HasApiTokens;
 use Stripe\PaymentMethod;
@@ -34,8 +32,7 @@ class User extends Authenticatable
         'timezone_id',
         'region_id',
         'verification_token',
-        'remaining_credits',
-        'temp_remaining_credits',
+        'credits',
         'stripe_id',
         'card_brand',
         'card_last_four',
@@ -204,18 +201,6 @@ class User extends Authenticatable
     }
 
     /**
-     * @param $credits
-     * @return bool
-     */
-    public function updateCredits($credits)
-    {
-        $update = $this->increment('remaining_credits', $credits);
-        CreditUsageHelper::receivedBySubscription($this, $credits);
-
-        return $update === 1;
-    }
-
-    /**
      * Send the email verification notification.
      *
      * @param $token
@@ -227,7 +212,8 @@ class User extends Authenticatable
         $this->notify(new SaasVerifyEmail($token));
     }
 
-    public function createPaymentMethod($token) {
+    public function createPaymentMethod($token)
+    {
         Stripe::setApiKey(config('services.stripe.key'));
 
         return PaymentMethod::create([

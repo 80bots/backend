@@ -66,14 +66,13 @@ class RegisterController extends Controller
         $name = ! empty($data['name']) ? $data['name'] : $data['email'];
 
         $user = User::create([
-            'name'                      => $name,
-            'email'                     => $data['email'],
-            'password'                  => bcrypt($data['password']),
-            'timezone_id'               => $timezone->id ?? null,
-            'verification_token'        => Str::random(16),
-            'role_id'                   => Role::getUserRole()->id ?? null,
-            'remaining_credits'         => config('auth.register.remaining_credits'),
-            'temp_remaining_credits'    => config('auth.register.remaining_credits'),
+            'name'                  => $name,
+            'email'                 => $data['email'],
+            'password'              => bcrypt($data['password']),
+            'timezone_id'           => $timezone->id ?? null,
+            'verification_token'    => Str::random(16),
+            'role_id'               => Role::getUserRole()->id ?? null,
+            'credits'               => config('auth.register.credits'),
         ]);
 
         if (! empty($user)) {

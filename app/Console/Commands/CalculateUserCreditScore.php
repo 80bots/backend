@@ -52,26 +52,19 @@ class CalculateUserCreditScore extends Command
     public function handle()
     {
         $this->now      = Carbon::now();
-        $users          = User::findUserInstances();
         // Get Low creditPercentage
         $lowPercentage  = CreditPercentage::pluck('percentage')->toArray();
 
-        foreach ($users as $user) {
+        User::whereHas('instances')->chunkById(100, function ($users) use ($lowPercentage) {
+            foreach ($users as $user) {
 
-            $instances = $user->instances ?? '';
-
-            if (! empty($instances)) {
-
-                $usedCreditArray = $instances->map(function ($item, $key) {
+                $usedCreditArray = $user->instances->map(function ($item, $key) {
                     return $item->used_credit ?? 0;
                 })->toArray();
 
-                $creditScore = (float)$user->temp_remaining_credits - (float)array_sum($usedCreditArray);
-                $user->remaining_credits = $creditScore;
+                $creditScore = (float)$user->credits - (float)array_sum($usedCreditArray);
 
-                if (empty($user->temp_remaining_credits) || $user->temp_remaining_credits == 0) {
-                    $user->temp_remaining_credits = $user->remaining_credits;
-                }
+                $user->decrement('credits', array_sum($usedCreditArray));
 
                 // User relation to get packages amount what package buy.
                 if($user->UserSubscriptionPlan->count()){
@@ -99,7 +92,7 @@ class CalculateUserCreditScore extends Command
                 // user credits score is 0 then we will they user all instance will stop
                 if ($creditScore <= 0 && $user->hasRole('User')) {
 
-                    $instancesIds = $instances->map(function ($item, $key) {
+                    $instancesIds = $user->instances->map(function ($item, $key) {
                         return $item->aws_instance_id;
                     })->toArray();
 
@@ -107,9 +100,10 @@ class CalculateUserCreditScore extends Command
                     $this->stopUserAllInstances($instancesIds);
                 }
 
-                Log::info('Credits of email: ' . $user->email . ' is ' . $user->remaining_credits);
+                Log::info('Credits of email: ' . $user->email . ' is ' . $user->credits);
+
             }
-        }
+        });
     }
 
     private function stopUserAllInstances(array $instancesIds)

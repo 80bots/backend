@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\CreditUsageHelper;
 use App\Http\Resources\User\SubscriptionPlanCollection;
 use App\Http\Resources\User\SubscriptionPlanResource;
 use App\Http\Resources\User\UserResource;
-use App\User;
 use App\SubscriptionPlan;
+use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -35,7 +36,7 @@ class SubscriptionController extends Controller
             )->toArray(null);
         }
 
-        $user = (new UserResource(User::find(Auth::id())))->response()->getData();
+        $user = (new UserResource(User::find($user->id)))->response()->getData();
 
         $response = [
             'user'              => $user->data ?? null,
@@ -54,32 +55,81 @@ class SubscriptionController extends Controller
             'token_id' => 'string|required'
         ]);
 
-        $user = $request->user();
+        $plan = SubscriptionPlan::find($data['plan_id']);
 
-        if (!$user->hasStripeId()) {
+        if (empty($plan)) {
+            return $this->error('Not Found', 'Such subscription plan not found');
+        }
+
+        $user = Auth::user();
+
+        if (! $user->hasStripeId()) {
             $user->createAsStripeCustomer([
                 'description' => $user->name
             ]);
+        }
+
+        $credits        = 0;
+        $oldPlanCredits = 0;
+
+        $stripePlan = CreditUsageHelper::retrieveStripePlan($user);
+        if (! empty($stripePlan)) {
+            $oldPlanCredits = intval($stripePlan->metadata->credits ?? 0);
         }
 
         $user->deletePaymentMethods();
         $paymentMethod = $user->createPaymentMethod($data['token_id']);
         $user->updateDefaultPaymentMethod($paymentMethod);
 
-        $plan = SubscriptionPlan::find($data['plan_id']);
-
-        if (!$plan) return $this->error('Not Found', 'Such subscription plan not found');
-
-        if(!$user->subscription(config('services.stripe.product'))) {
-            if(!$user->subscribedToPlan(config('services.stripe.product'), $plan->stripe_plan)) {
-                $request->user()->newSubscription(config('services.stripe.product'), $plan->stripe_plan)->create();
-                $user->updateCredits($plan->credit);
-            }
-        } else if(!$user->subscribed(config('services.stripe.product'), $plan->stripe_plan)) {
-            $user->subscription(config('services.stripe.product'))->swapAndInvoice($plan->stripe_plan);
-            $user->updateCredits($plan->credit);
-        } else {
+        // If we have a subscription and the user selected the same plan
+        if ($user->subscription(config('services.stripe.product')) && $user->subscribed(config('services.stripe.product'), $plan->stripe_plan)) {
             return $this->error('Bad Request', 'You are already at this plan');
         }
+
+        // If the user doesn't have a subscription in the plan's list
+        if (! $user->subscription(config('services.stripe.product'))) {
+
+            if (! $user->subscribedToPlan(config('services.stripe.product'), $plan->stripe_plan)) {
+                $user->newSubscription(config('services.stripe.product'), $plan->stripe_plan)->create();
+                $credits = $plan->credit ?? 0;
+            } else {
+                return $this->error('Bad Request', 'Bad Request');
+            }
+
+        } else if (! $user->subscribed(config('services.stripe.product'), $plan->stripe_plan)) {
+            // If the user has a subscription, but for another plan,
+            // we change to the selected one (Upgrading and Downgrading Plans)
+
+            if ($plan->credit > $oldPlanCredits) {
+                $user->subscription(config('services.stripe.product'))
+                    ->swapAndInvoice($plan->stripe_plan);
+                $credits = $plan->credit - $oldPlanCredits;
+            } else {
+
+                $difference = $oldPlanCredits - $plan->credit;
+
+                if ($difference > 0 && ($user->credits - $difference) > 0) {
+                    $user->subscription(config('services.stripe.product'))
+                        ->swapAndInvoice($plan->stripe_plan);
+
+                    $credits = 0 - $difference;
+
+                } else {
+                    //
+                    return $this->error('Bad Request', 'You cannot change the plan. There are not enough credits in your account');
+                }
+            }
+
+        } else {
+            return $this->error('Bad Request', 'Bad Request');
+        }
+
+        CreditUsageHelper::receivedBySubscription($user, $credits);
+
+        $resource = (new UserResource($user))->response()->getData();
+
+        return $this->success([
+            'user' => $resource->data ?? null
+        ]);
     }
 }
