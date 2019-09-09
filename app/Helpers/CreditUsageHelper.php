@@ -17,6 +17,7 @@ class CreditUsageHelper
         CreditUsage::create([
             'user_id'   => $user->id,
             'credit'    => $credits - $user->credits ?? 0,
+            'total'     => $user->credits ?? 0,
             'action'    => CreditUsage::ACTION_ADDED,
             'subject'   => "Credits have been added by the site's admin"
         ]);
@@ -24,6 +25,12 @@ class CreditUsageHelper
 
     public static function receivedBySubscription(User $user, int $credits)
     {
+        if($credits > 0) {
+            $user->increment('credits', $credits);
+        } else {
+            $user->decrement('credits', abs($credits));
+        }
+
         $subject = $credits > 0
             ? "Credits have been received by subscription"
             : "Credits have been removed due to changing the subscription";
@@ -34,39 +41,36 @@ class CreditUsageHelper
         CreditUsage::create([
             'user_id'   => $user->id,
             'credit'    => $credits,
+            'total'     => $user->credits ?? 0,
             'action'    => $action,
             'subject'   => $subject
         ]);
-
-        if($credits > 0) {
-            $user->increment('credits', $credits);
-        } else {
-            $user->decrement('credits', abs($credits));
-        }
     }
 
     public static function usingTheBot(User $user, Bot $bot, int $credits)
     {
+        $user->decrement('credits', $credits);
+
         CreditUsage::create([
             'user_id'   => $user->id,
             'credit'    => $credits,
+            'total'     => $user->credits ?? 0,
             'action'    => CreditUsage::ACTION_USED,
             'subject'   => "Credits charging for using the bot ({$bot->name})"
         ]);
-
-        $user->decrement('credits', $credits);
     }
 
     public static function startInstance(User $user, int $credits, string $instanceId, string $name)
     {
+        $user->decrement('credits', $credits);
+
         CreditUsage::create([
             'user_id'   => $user->id,
             'credit'    => $credits,
+            'total'     => $user->credits ?? 0,
             'action'    => CreditUsage::ACTION_USED,
             'subject'   => "Funds charging for the first hour of instance work (Instance name: {$name} / Instance ID: {$instanceId})"
         ]);
-
-        $user->decrement('credits', $credits);
     }
 
     /**

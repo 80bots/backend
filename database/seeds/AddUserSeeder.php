@@ -24,6 +24,7 @@ class AddUserSeeder extends Seeder
           ['name' => 'Francis', 'passwords' => ['q<jS\9EwtT9h(U`m', 'u&z!#d-RB]w]nX6@']],
           ['name' => 'Mishra', 'passwords' => ['z8Gjhp4!v@#3Wxm', 'q6.USnjSSt,::9UG']],
           ['name' => 'Kumar', 'passwords' => ['?9d8%?Pm(g3~2qS)', 'ht3!Q#u7w_?Pr9D3']],
+          ['name' => 'Mike', 'passwords' => ['B8J]+Ridb#YP=F', 'xJY+d/c[ks3M']],
         ];
 
         foreach ($users as $user) {

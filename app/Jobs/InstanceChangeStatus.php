@@ -120,6 +120,11 @@ class InstanceChangeStatus implements ShouldQueue
 
     private function setStatusRunning(Aws $aws)
     {
+        if ($this->user->credits < 1) {
+            // TODO: Add a message notifying the user about credits lack for changing the status
+            broadcast(new InstanceLaunched($this->instance, $this->user));
+        }
+
         $current = $this->getCurrentInstanceStatus($aws);
 
         if ($current === BotInstance::STATUS_STOPPED) {

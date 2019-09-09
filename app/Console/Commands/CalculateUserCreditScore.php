@@ -58,47 +58,42 @@ class CalculateUserCreditScore extends Command
         User::whereHas('instances')->chunkById(100, function ($users) use ($lowPercentage) {
             foreach ($users as $user) {
 
-                $usedCreditArray = $user->instances->map(function ($item, $key) {
+                $usedCredits = $user->instances->map(function ($item, $key) {
                     return $item->used_credit ?? 0;
-                })->toArray();
+                })->sum();
 
-                $creditScore = (float)$user->credits - (float)array_sum($usedCreditArray);
-
-                $user->decrement('credits', array_sum($usedCreditArray));
-
-                // User relation to get packages amount what package buy.
-                if($user->UserSubscriptionPlan->count()){
-
-                    $packageAmount = $user->UserSubscriptionPlan->first()->credit ?? 0;
-
-                    // Find  Percentage by current credit and user package amount
-                    // Percentage get on round and then match
-                    $creditScorePercentage = round(($creditScore * 100) / $packageAmount);
-
-                    // Check low percentge and if match then sent mail user credit is low please add credit.
-                    if (in_array($creditScorePercentage, $lowPercentage)) {
-                        // Check last mail Percentage sent and current creditScorePercentage if not match then send mail
-                        if ($user->sent_email_status != $creditScorePercentage) {
-                            // if send mail then save on users table on
-                            $user->sent_email_status = $creditScorePercentage;
-
-                            MailHelper::userCreditSendEmail($user);
-                        }
-                    }
-                }
-
-                $user->save();
-
-                // user credits score is 0 then we will they user all instance will stop
-                if ($creditScore <= 0 && $user->hasRole('User')) {
-
+                if ($usedCredits >= $user->credits && $user->hasRole('User')) {
                     $instancesIds = $user->instances->map(function ($item, $key) {
-                        return $item->aws_instance_id;
+                        return $item->details()->latest()->first()->aws_instance_id;
                     })->toArray();
 
                     // Stop Instance for the user
                     $this->stopUserAllInstances($instancesIds);
                 }
+
+                $user->decrement('credits', $usedCredits);
+
+                // TODO: Need to add check for remaining credits and send message to the user about credits lack
+                // User relation to get packages amount what package buy.
+//                if($user->UserSubscriptionPlan->count()){
+//
+//                    $packageAmount = $user->UserSubscriptionPlan->first()->credit ?? 0;
+//
+//                    // Find  Percentage by current credit and user package amount
+//                    // Percentage get on round and then match
+//                    $creditScorePercentage = round(($creditScore * 100) / $packageAmount);
+//
+//                    // Check low percentge and if match then sent mail user credit is low please add credit.
+//                    if (in_array($creditScorePercentage, $lowPercentage)) {
+//                        // Check last mail Percentage sent and current creditScorePercentage if not match then send mail
+//                        if ($user->sent_email_status != $creditScorePercentage) {
+//                            // if send mail then save on users table on
+//                            $user->sent_email_status = $creditScorePercentage;
+//
+//                            MailHelper::userCreditSendEmail($user);
+//                        }
+//                    }
+//                }
 
                 Log::info('Credits of email: ' . $user->email . ' is ' . $user->credits);
 
@@ -125,35 +120,34 @@ class CalculateUserCreditScore extends Command
                 $stopInstances = $result->get('StoppingInstances');
 
                 // Update instance  on user instance table
-                foreach ($stopInstances as $instanceDetail) {
+                foreach ($stopInstances as $stopInstance) {
 
-                    $CurrentState   = $instanceDetail['CurrentState'];
-                    $instanceId     = $instanceDetail['InstanceId'];
+                    $CurrentState   = $stopInstance['CurrentState'];
+                    $instanceId     = $stopInstance['InstanceId'];
 
                     if ($CurrentState['Name'] == 'stopped' || $CurrentState['Name'] == 'stopping') {
 
-                        $UserInstance = BotInstance::findByInstanceId($instanceId)->first();
-                        $UserInstance->status = 'stop';
+                        $instance = BotInstance::findByInstanceId($instanceId)->first();
+                        $instance->aws_status = BotInstance::STATUS_STOPPED;
 
-                        $instanceDetail = BotInstancesDetails::where(['user_instance_id' => $UserInstance->id, 'end_time' => null])->latest()->first();
+                        $stopInstance = BotInstancesDetails::where(['instance_id' => $instance->id, 'end_time' => null])->latest()->first();
 
-                        if (! empty($instanceDetail)) {
+                        if (! empty($stopInstance)) {
 
-                            $instanceDetail->end_time = $this->now->toDateTimeString();
-                            $diffTime = CommonHelper::diffTimeInMinutes($instanceDetail->start_time, $instanceDetail->end_date);
-                            $instanceDetail->total_time = $diffTime;
+                            $stopInstance->end_time = $this->now->toDateTimeString();
+                            $diffTime = CommonHelper::diffTimeInMinutes($stopInstance->start_time, $stopInstance->end_date);
+                            $stopInstance->total_time = $diffTime;
 
-                            if ($instanceDetail->save() && $diffTime > $UserInstance->cron_up_time) {
-
-                                $tempUpTime = $UserInstance->total_up_time ?? 0;
+                            if ($stopInstance->save() && $diffTime > $instance->cron_up_time) {
+                                $tempUpTime = $instance->total_up_time ?? 0;
                                 $upTime = $diffTime + $tempUpTime;
-                                $UserInstance->total_up_time = $upTime;
-                                $UserInstance->up_time = $upTime;
-                                $UserInstance->cron_up_time = 0;
+                                $instance->total_up_time = $upTime;
+                                $instance->up_time = $upTime;
+                                $instance->cron_up_time = 0;
                             }
                         }
 
-                        if ($UserInstance->save()) {
+                        if ($instance->save()) {
                             Log::info('Instance Id ' . $instanceId . ' Stopped');
                         }
 

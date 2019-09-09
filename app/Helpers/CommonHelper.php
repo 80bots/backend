@@ -36,13 +36,36 @@ class CommonHelper
         return $end->diffInMinutes($start);
     }
 
+    public static function diffTimeInHours($startTime, $endTime)
+    {
+        $start  = Carbon::parse($startTime);
+        $end    = Carbon::parse($endTime);
+        return $end->diffInHours($start);
+    }
+
     /**
      * @param $upTime
-     * @return float|int
+     * @return int
      */
-    public static function calculateUsedCredit($upTime)
+    public static function calculateUsedCredit($upTime): int
     {
-        return $upTime > 0 ? round($upTime * (float)config('app.credit') / (float)config('app.up_time'), 2) : 0;
+        if ($upTime >= 0 && $upTime <= 60) {
+            return 1;
+        } elseif ($upTime > 60) {
+
+            $now  = Carbon::now();
+            $realHours = $now->diffInRealHours($now->copy()->addMinutes($upTime));
+            $floatHours = $now->floatDiffInHours($now->copy()->addMinutes($upTime));
+
+            if ($floatHours > $realHours) {
+                return ($realHours+1) * intval(config('app.credit'));
+            } else {
+                return $realHours * intval(config('app.credit'));
+            }
+
+        } else {
+            return 0;
+        }
     }
 
     /**

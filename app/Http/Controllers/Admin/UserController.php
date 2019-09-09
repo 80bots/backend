@@ -145,14 +145,15 @@ class UserController extends AppController
                         }
                         break;
                     case 'credits':
-                        //
-                        CreditUsageHelper::adminAddCredit($user, $value);
 
                         $update = $user->update([
                             'credits' => $value
                         ]);
 
                         if ($update) {
+                            //
+                            CreditUsageHelper::adminAddCredit($user, $value);
+                            //
                             MailHelper::updateUserCreditSendEmail($user);
                             return $this->success(
                                 (new UserResource($user))->toArray($request),

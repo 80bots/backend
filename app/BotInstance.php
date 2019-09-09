@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class BotInstance extends BaseModel
@@ -46,7 +47,9 @@ class BotInstance extends BaseModel
 
     public function scopeFindByInstanceId($query, $instanceId)
     {
-        return $query->where('aws_instance_id', $instanceId);
+        return $query->whereHas('details', function (Builder $query) use ($instanceId) {
+            $query->where('aws_instance_id', '=', $instanceId);
+        });
     }
 
     public function scopeFindRunningInstanceByUserId($query, $id)

@@ -46,6 +46,13 @@ class AppController extends Controller
     {
         try {
 
+            // TODO: CHECK USER CREDITS
+            $user = Auth::user();
+
+            if ($user->credits < 1) {
+                return $this->error(__('keywords.error'), __('keywords.instance.credits_error'));
+            }
+
             $region = $request->input('region');
 
             $bot = Bot::find($request->input('bot_id'));
@@ -93,7 +100,7 @@ class AppController extends Controller
 
                     $user = User::find(Auth::id());
 
-                    $dispatch = dispatch(new StoreUserInstance($bot, $instance, $user, $request->input('params')));
+                    dispatch(new StoreUserInstance($bot, $instance, $user, $request->input('params')));
 
                     return $this->success([
                         'instance_id' => $instance->id ?? null
