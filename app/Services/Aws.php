@@ -854,9 +854,10 @@ cat > \$file <<EOF
 {$params}
 EOF
 npm i -g pm2
+su - \$username -c 'cd ~/ && mkdir .logs'
 su - \$username -c 'git clone -b master https://14b12de18e2199b2d584d3f6cf9492f3353f9b3e@github.com/80bots/data-streamer.git ./data-streamer'
 su - \$username -c 'cd ./data-streamer && cp .env.example .env && npm i && pm2 start --name "data-streamer" npm -- run dev'
-su - \$username -c 'DISPLAY=:1 node puppeteer/{$path}'
+su - \$username -c 'DISPLAY=:1 node puppeteer/{$path} > ~/.logs/log.txt'
 HERESHELL;
     }
 
