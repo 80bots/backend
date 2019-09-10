@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\CreditPercentage;
 use App\Helpers\CommonHelper;
 use App\Helpers\MailHelper;
+use App\Order;
 use App\Services\Aws;
 use App\User;
 use App\BotInstance;
@@ -58,20 +59,27 @@ class CalculateUserCreditScore extends Command
         User::whereHas('instances')->chunkById(100, function ($users) use ($lowPercentage) {
             foreach ($users as $user) {
 
-                $usedCredits = $user->instances->map(function ($item, $key) {
-                    return $item->used_credit ?? 0;
-                })->sum();
+                foreach ($user->instances as $instance) {
 
-                if ($usedCredits >= $user->credits && $user->hasRole('User')) {
-                    $instancesIds = $user->instances->map(function ($item, $key) {
-                        return $item->details()->latest()->first()->aws_instance_id;
-                    })->toArray();
+                    $order = $instance->order ?? null;
 
-                    // Stop Instance for the user
-                    $this->stopUserAllInstances($instancesIds);
+                    if (empty($order)) {
+                        $order = Order::create([
+                            'user_id' => $user->id,
+                            'instance_id' => $instance->id
+                        ]);
+                    }
+
+                    $used = $instance->used_credit - $order->credits;
+
+                    if ($used >= $user->credits && $user->hasRole('User')) {
+                        $instancesId = $instance->details()->latest()->first()->aws_instance_id ?? null;
+                        $this->stopUserAllInstances([$instancesId]);
+                    }
+
+                    $order->increment('credits', $used);
+                    $user->decrement('credits', $used);
                 }
-
-                $user->decrement('credits', $usedCredits);
 
                 // TODO: Need to add check for remaining credits and send message to the user about credits lack
                 // User relation to get packages amount what package buy.

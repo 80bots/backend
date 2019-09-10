@@ -27,7 +27,7 @@ class CreateUsersTable extends Migration
             $table->string('password_reset_token')->nullable();
             $table->string('auth_token')->nullable();
             $table->rememberToken();
-            $table->unsignedInteger('credits')->default(0);
+            $table->integer('credits')->default(0);
             $table->enum('status', ['pending', 'active', 'inactive'])->default('pending');
             $table->double('sent_email_status')->default(0);
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));

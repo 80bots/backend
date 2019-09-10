@@ -80,6 +80,11 @@ class User extends Authenticatable
         return $this->hasMany(BotInstance::class);
     }
 
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
     public function scopeRunningInstances($query)
     {
         return $query->whereHas('instances', function (Builder $query) {
