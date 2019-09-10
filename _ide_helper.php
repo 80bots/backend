@@ -3,7 +3,7 @@
 
 /**
  * A helper file for Laravel 5, to provide autocomplete information to your IDE
- * Generated for Laravel 5.8.33 on 2019-09-10 06:59:15.
+ * Generated for Laravel 5.8.35 on 2019-09-10 07:58:18.
  *
  * This file should not be included in your code, only analyzed by your IDE!
  *
@@ -9148,10 +9148,14 @@ namespace Illuminate\Support\Facades {
          * header value is a comma+space separated list of IP addresses, the left-most
          * being the original client, and each successive proxy that passed the request
          * adding the IP address where it received the request from.
+         * 
+         * If your reverse proxy uses a different header name than "X-Forwarded-For",
+         * ("Client-Ip" for instance), configure it via the $trustedHeaderSet
+         * argument of the Request::setTrustedProxies() method instead.
          *
          * @return string|null The client IP address
          * @see getClientIps()
-         * @see http://en.wikipedia.org/wiki/X-Forwarded-For
+         * @see https://wikipedia.org/wiki/X-Forwarded-For
          * @static 
          */ 
         public static function getClientIp()
@@ -9845,7 +9849,7 @@ namespace Illuminate\Support\Facades {
          * It works if your JavaScript library sets an X-Requested-With HTTP header.
          * It is known to work with common JavaScript frameworks:
          *
-         * @see http://en.wikipedia.org/wiki/List_of_Ajax_frameworks#JavaScript
+         * @see https://wikipedia.org/wiki/List_of_Ajax_frameworks#JavaScript
          * @return bool true if the request is an XMLHttpRequest, false otherwise
          * @static 
          */ 
@@ -14738,18 +14742,6 @@ namespace Aws\Laravel {
  
 }
 
-namespace Laravel\Horizon { 
-
-    /**
-     * 
-     *
-     */ 
-    class Horizon {
-         
-    }
- 
-}
-
 namespace Sentry\Laravel { 
 
     /**
@@ -14957,40 +14949,13 @@ namespace Sentry\Laravel {
  
 }
 
-namespace LukeTowers\Purifier\Facades { 
+namespace Laravel\Horizon { 
 
     /**
      * 
      *
-     * @see \LukeTowers\Purifier
      */ 
-    class Purifier {
-        
-        /**
-         * 
-         *
-         * @param $dirty
-         * @param null $config
-         * @return mixed 
-         * @static 
-         */ 
-        public static function clean($dirty, $config = null)
-        {
-                        /** @var \LukeTowers\Purifier\Purifier $instance */
-                        return $instance->clean($dirty, $config);
-        }
-        
-        /**
-         * Get HTMLPurifier instance.
-         *
-         * @return \HTMLPurifier 
-         * @static 
-         */ 
-        public static function getInstance()
-        {
-                        /** @var \LukeTowers\Purifier\Purifier $instance */
-                        return $instance->getInstance();
-        }
+    class Horizon {
          
     }
  
@@ -17794,11 +17759,9 @@ namespace  {
 
     class AWS extends \Aws\Laravel\AwsFacade {}
 
-    class Horizon extends \Laravel\Horizon\Horizon {}
-
     class Sentry extends \Sentry\Laravel\Facade {}
 
-    class Purifier extends \LukeTowers\Purifier\Facades\Purifier {}
+    class Horizon extends \Laravel\Horizon\Horizon {}
  
 }
 
