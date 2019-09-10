@@ -16,7 +16,7 @@ class checkUser
      */
     public function handle($request, Closure $next)
     {
-        if (Auth::check() && Auth::user()->role->name == 'User') {
+        if (Auth::check() && Auth::user()->isUser()) {
             if(Auth::user()->status == 'active'){
                 return $next($request);
             } else {
