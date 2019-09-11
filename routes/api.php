@@ -87,6 +87,10 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
         Route::get('/{id}', 'BotInstanceController@show')->name('show');
     });
 
+    Route::group(['prefix' => 'history', 'as' => 'history.'], function() {
+        Route::get('/credits', 'HistoryController@getCreditUsage');
+    });
+
     Route::resources([
         'aws'           => 'AwsSettingController',
         'user'          => 'UserController',

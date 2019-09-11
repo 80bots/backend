@@ -1,26 +1,27 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
 use App\CreditUsage;
-use App\Http\Resources\User\CreditUsageCollection;
+use App\Http\Controllers\AppController;
+use App\Http\Resources\Admin\CreditUsageCollection;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Throwable;
 
-class HistoryController extends Controller
+class HistoryController extends AppController
 {
     const PAGINATE = 1;
 
     public function getCreditUsage(Request $request)
     {
         try {
-            $limit = $request->query('limit') ?? self::PAGINATE;
-            $action = $request->input('action');
-            $sort = $request->input('sort');
-            $order = $request->input('order') ?? 'asc';
 
-            $resource = CreditUsage::with('user')->findByUserId(Auth::id());
+            $limit  = $request->query('limit') ?? self::PAGINATE;
+            $action = $request->input('action');
+            $sort   = $request->input('sort');
+            $order  = $request->input('order') ?? 'asc';
+
+            $resource = CreditUsage::with('user')->findByUserId($request->input('user'));
 
             // TODO: Add Filters
 

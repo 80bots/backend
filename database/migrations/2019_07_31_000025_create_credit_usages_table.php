@@ -16,7 +16,7 @@ class CreateCreditUsagesTable extends Migration
         Schema::create('credit_usages', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedInteger('user_id');
-            $table->integer('credit');
+            $table->integer('credits');
             $table->integer('total');
             $table->enum('action', ['added', 'used']);
             $table->string('subject')->nullable();

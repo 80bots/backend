@@ -9,11 +9,14 @@ class CreditUsage extends Model
     const ACTION_ADDED  = 'added';
     const ACTION_USED   = 'used';
 
+    const FILTER_ALL    = 'all';
+    const FILTER_MY     = 'my';
+
     protected $table = "credit_usages";
 
     protected $fillable = [
         'user_id',
-        'credit',
+        'credits',
         'total',
         'action',
         'subject'
@@ -28,6 +31,16 @@ class CreditUsage extends Model
     public function scopeAjax($query)
     {
         return $query;
+    }
+
+    /**
+     * @param $query
+     * @param $userId
+     * @return mixed
+     */
+    public function scopeFindByUserId($query, $userId)
+    {
+        return $query->where('user_id', $userId);
     }
 
     /**
@@ -46,5 +59,10 @@ class CreditUsage extends Model
     public function scopeOnlyUsed($query)
     {
         $query->where('action', '=', self::ACTION_USED);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 }
