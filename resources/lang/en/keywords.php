@@ -101,7 +101,8 @@ return [
         'launch_success'        => 'Instance launched successfully!',
         'launch_error'          => 'Instance launch failed!',
         'launch_limit_error'    => 'Limit error!',
-        'credits_error'         => "You don't have enough credits in your account to run the new bot"
+        'credits_error'         => "You don't have enough credits in your account to run the new bot",
+        'parameters_incorrect'  => 'Passed parameters are incorrect',
     ],
     'aws' => [
         'error' => 'Aws error'

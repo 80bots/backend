@@ -511,6 +511,10 @@ class Aws
             [
                 'Key'   => 'User Email',
                 'Value' => $user->email ?? '',
+            ],
+            [
+                'Key'   => 'Bot',
+                'Value' => $bot->name ?? '',
             ]
         ];
 
@@ -571,16 +575,18 @@ class Aws
 
                         try {
 
-                            $name  = null;
-                            $email = null;
+                            $name   = null;
+                            $email  = null;
+                            $bot    = null;
 
                             if( isset($instance['Tags']) && count($instance['Tags'])) {
                                 foreach ($instance['Tags'] as $key => $tag) {
-                                    if(isset($tag['Key']) && $tag['Key'] === 'Name') {
+                                    if($tag['Key'] === 'Name') {
                                         $name = $tag['Value'];
-                                    }
-                                    if(isset($tag['Key']) && $tag['Key'] === 'User Email') {
+                                    } elseif ($tag['Key'] === 'User Email') {
                                         $email = $tag['Value'];
+                                    } elseif ($tag['Key'] === 'Bot') {
+                                        $bot = $tag['Value'];
                                     }
                                 }
                             }
@@ -598,6 +604,7 @@ class Aws
                             $instancesByStatus['data'][$instance['State']['Name']][] = [
                                 'tag_name'                => $name,
                                 'tag_user_email'          => $email,
+                                'tag_bot_name'            => $bot,
                                 'aws_instance_id'         => $instance['InstanceId'],
                                 'aws_image_id'            => $instance['ImageId'],
                                 'aws_instance_type'       => $instance['InstanceType'],

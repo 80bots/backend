@@ -32,7 +32,7 @@ Route::group(['middleware' => ['auth:api', 'api.sentry']], function() {
 
     Route::group(['prefix' => 'instances', 'as' => 'instances.'], function () {
         Route::get('/regions', 'BotInstanceController@regions')->name('regions');
-        Route::post('/launch', 'BotInstanceController@launchInstance')->name('launch');
+        Route::post('/launch', 'BotInstanceController@launchInstances')->name('launch');
         Route::put('/{id}', 'BotInstanceController@update')->name('update');
         Route::get('/{id}', 'BotInstanceController@show')->name('get');
     });
@@ -81,7 +81,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
         Route::get('/regions', 'BotInstanceController@regions')->name('regions');
         Route::get('/amis', 'BotInstanceController@amis')->name('amis');
         Route::get('/pem', 'BotInstanceController@getInstancePemFile')->name('pem');
-        Route::post('/launch', 'BotInstanceController@launchInstance')->name('launch');
+        Route::post('/launch', 'BotInstanceController@launchInstances')->name('launch');
         Route::get('/sync', 'BotInstanceController@syncInstances')->name('sync');
         Route::put('/{id}', 'BotInstanceController@update')->name('update');
         Route::get('/{id}', 'BotInstanceController@show')->name('show');

@@ -3,6 +3,7 @@
 namespace App\Helpers;
 
 use App\AwsRegion;
+use App\Bot;
 use App\BotInstance;
 use App\BotInstancesDetails;
 use App\DeleteSecurityGroup;
@@ -113,7 +114,8 @@ class InstanceHelper
 
             foreach ($instances as $key => $instance) {
 
-                $user = User::where('email', '=', $instance['tag_user_email'])->first();
+                $user   = User::where('email', '=', $instance['tag_user_email'])->first();
+                $bot    = Bot::where('name', '=', $instance['tag_bot_name'])->first();
 
                 if (! empty($user)) {
 
@@ -173,7 +175,7 @@ class InstanceHelper
 
                                         $newInstance = BotInstance::create([
                                             'user_id' => $user->id,
-                                            'bot_id' => null,
+                                            'bot_id' => $bot->id ?? null,
                                             'aws_region_id' => $region->id ?? null,
                                             'aws_status' => $status
                                         ]);

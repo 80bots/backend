@@ -37,25 +37,60 @@ class AppController extends Controller
     }
 
     /**
-     * Launch EC2 Instance
+     * Launch EC2 Instances
      *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    protected function launchInstance(Request $request)
+    protected function launchInstances(Request $request)
     {
         try {
 
-            // TODO: CHECK USER CREDITS
-            $user = Auth::user();
+            $botId = $request->input('bot_id');
+            $params = collect($request->input('params'));
 
-            if ($user->credits < 1) {
+//            $botId = 2;
+//            $params = collect([
+//                [
+//                    'speed' => 1,
+//                    'maxPage' => 1,
+//                    'searchKeyword' => 'sport cars'
+//                ],
+//                [
+//                    'speed' => 1,
+//                    'maxPage' => 1,
+//                    'searchKeyword' => 'dogs and cats'
+//                ],
+//            ]);
+
+            $credit = config('app.credit');
+
+            if ($params->isEmpty()) {
+                return $this->error(__('keywords.error'), __('keywords.instance.parameters_incorrect'));
+            }
+
+            /**
+             * Check whether the user has enough credits in order
+             * to run the selected number of instances
+             */
+            $user = User::find(Auth::id()); // Get "App\User" object
+
+            if ($user->credits < ($credit*$params->count())) {
                 return $this->error(__('keywords.error'), __('keywords.instance.credits_error'));
             }
 
-            $region = $request->input('region');
+            //
+            $region = $user->region ?? null;
 
-            $bot = Bot::find($request->input('bot_id'));
+            Log::debug("AwsRegion ISSET");
+
+            if (!$this->checkLimitInRegion($region, $params->count())) {
+                return $this->error(__('keywords.error'), __('keywords.instance.launch_limit_error'));
+            }
+
+            Log::debug("checkLimitInRegion ISSET");
+
+            $bot = Bot::find($botId);
 
             if (empty($bot)) {
                 return $this->notFound(__('keywords.not_found'), __('keywords.bots.not_found'));
@@ -63,49 +98,36 @@ class AppController extends Controller
 
             Log::debug("BOT ISSET");
 
-            //
-            $awsRegion = AwsRegion::onlyRegion($region)->first();
-
-            Log::debug("AwsRegion ISSET");
-
-            if (!$this->checkLimitInRegion($awsRegion)) {
-                return $this->error(__('keywords.error'), __('keywords.instance.launch_limit_error'));
-            }
-
-            Log::debug("checkLimitInRegion ISSET");
-
             $awsSetting = AwsSetting::isDefault()->first();
 
-            if ($this->issetAmiInRegion($awsRegion, $awsSetting->image_id)) {
+            if ($this->issetAmiInRegion($region, $awsSetting->image_id)) {
 
                 Log::debug("issetAmiInRegion ISSET");
 
-                //
-                $awsRegion->increment('created_instances');
+                foreach ($params as $param) {
+                    $instance = BotInstance::create([
+                        'user_id'       => Auth::id(),
+                        'bot_id'        => $bot->id ?? null,
+                        'aws_region_id' => $region->id ?? null,
+                        'aws_status'    => BotInstance::STATUS_PENDING
+                    ]);
 
-                $instance = BotInstance::create([
-                    'user_id'       => Auth::id(),
-                    'bot_id'        => $bot->id ?? null,
-                    'aws_region_id' => $awsRegion->id ?? null,
-                    'aws_status'    => BotInstance::STATUS_PENDING
-                ]);
+                    $instance->details()->create([
+                        'aws_instance_type' => $awsSetting->type ?? null,
+                        'aws_storage_gb'    => $awsSetting->storage ?? null,
+                        'aws_image_id'      => $awsSetting->image_id ?? null
+                    ]);
 
-                $instance->details()->create([
-                    'aws_instance_type' => $awsSetting->type ?? null,
-                    'aws_storage_gb'    => $awsSetting->storage ?? null,
-                    'aws_image_id'      => $awsSetting->image_id ?? null
-                ]);
-
-                if (! empty($instance)) {
-
-                    $user = User::find(Auth::id());
-
-                    dispatch(new StoreUserInstance($bot, $instance, $user, $request->input('params')));
-
-                    return $this->success([
-                        'instance_id' => $instance->id ?? null
-                    ], __('keywords.instance.launch_success'));
+                    if (! empty($instance)) {
+                        dispatch(new StoreUserInstance($bot, $instance, $user, $param));
+                    }
                 }
+
+                $region->increment('created_instances', $params->count());
+
+                return $this->success([
+                    'instance_id' => $instance->id ?? null
+                ], __('keywords.instance.launch_success'));
             }
 
             return $this->error(__('keywords.error'), __('keywords.instance.launch_error'));
@@ -119,9 +141,10 @@ class AppController extends Controller
     /**
      * Limit check whether we can create instance in the region
      * @param AwsRegion $awsRegion
+     * @param int $countInstances
      * @return bool
      */
-    private function checkLimitInRegion(AwsRegion $awsRegion): bool
+    private function checkLimitInRegion(AwsRegion $awsRegion, int $countInstances): bool
     {
         $limit      = $awsRegion->limit ?? 0;
         $created    = $awsRegion->created_instances ?? 0;
