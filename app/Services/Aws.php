@@ -496,6 +496,15 @@ class Aws
                      'value' => $param
                 ];
             }
+
+            $formattedParams['userEmail'] = [
+                'value' => $user->email ?? ''
+            ];
+
+            $formattedParams['instanceId'] = [
+                'value' => $instance->id ?? ''
+            ];
+
             $userData = base64_encode("#!/bin/bash\n{$this->startupScript(json_encode($formattedParams), $bot->path ?? '')}");
         }
 
