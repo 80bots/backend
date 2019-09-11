@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\CreditPercentage;
 use App\Helpers\CommonHelper;
+use App\Helpers\CreditUsageHelper;
 use App\Helpers\MailHelper;
 use App\Order;
 use App\Services\Aws;
@@ -75,6 +76,10 @@ class CalculateUserCreditScore extends Command
                     if ($used >= $user->credits && $user->hasRole('User')) {
                         $instancesId = $instance->details()->latest()->first()->aws_instance_id ?? null;
                         $this->stopUserAllInstances([$instancesId]);
+                    }
+
+                    if ($used > 0) {
+                        CreditUsageHelper::usingTheBot($user, $instance->bot, $used);
                     }
 
                     $order->increment('credits', $used);
