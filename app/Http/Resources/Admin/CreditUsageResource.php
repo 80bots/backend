@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources\User;
+namespace App\Http\Resources\Admin;
 
 use App\CreditUsage;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -19,6 +19,7 @@ class CreditUsageResource extends JsonResource
 
         return [
             'id'        => $this->id ?? '-',
+            'user'      => $this->user->email ?? '',
             'credits'   => $credits,
             'total'     => $this->total ?? 0,
             'action'    => ucfirst($this->action ?? ''),

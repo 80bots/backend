@@ -14,13 +14,17 @@ class CreditUsageHelper
 {
     public static function adminAddCredit(User $user, int $credits)
     {
-        CreditUsage::create([
-            'user_id'   => $user->id,
-            'credit'    => $credits - $user->credits ?? 0,
-            'total'     => $user->credits ?? 0,
-            'action'    => CreditUsage::ACTION_ADDED,
-            'subject'   => "Credits have been added by the site's admin"
-        ]);
+        try {
+            CreditUsage::create([
+                'user_id'   => $user->id,
+                'credits'   => $credits,
+                'total'     => $user->credits ?? 0,
+                'action'    => CreditUsage::ACTION_ADDED,
+                'subject'   => "Credits have been added by the site's admin"
+            ]);
+        } catch (Throwable $throwable) {
+            Log::error($throwable->getMessage());
+        }
     }
 
     public static function receivedBySubscription(User $user, int $credits)
@@ -40,7 +44,7 @@ class CreditUsageHelper
         // TODO:
         CreditUsage::create([
             'user_id'   => $user->id,
-            'credit'    => $credits,
+            'credits'   => $credits,
             'total'     => $user->credits ?? 0,
             'action'    => $action,
             'subject'   => $subject
@@ -53,7 +57,7 @@ class CreditUsageHelper
 
         CreditUsage::create([
             'user_id'   => $user->id,
-            'credit'    => $credits,
+            'credits'   => $credits,
             'total'     => $user->credits ?? 0,
             'action'    => CreditUsage::ACTION_USED,
             'subject'   => "Credits charging for using the bot ({$bot->name})"
@@ -66,7 +70,7 @@ class CreditUsageHelper
 
         CreditUsage::create([
             'user_id'   => $user->id,
-            'credit'    => $credits,
+            'credits'   => $credits,
             'total'     => $user->credits ?? 0,
             'action'    => CreditUsage::ACTION_USED,
             'subject'   => "Funds charging for the first hour of instance work (Instance name: {$name} / Instance ID: {$instanceId})"

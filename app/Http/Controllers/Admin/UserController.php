@@ -11,6 +11,7 @@ use App\Http\Resources\Admin\UserResource;
 use App\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
@@ -146,13 +147,16 @@ class UserController extends AppController
                         break;
                     case 'credits':
 
+                        $addCredits = $value - $user->credits;
+
                         $update = $user->update([
                             'credits' => $value
                         ]);
 
                         if ($update) {
                             //
-                            CreditUsageHelper::adminAddCredit($user, $value);
+                            Log::debug("adminAddCredit");
+                            CreditUsageHelper::adminAddCredit($user, $addCredits);
                             //
                             MailHelper::updateUserCreditSendEmail($user);
                             return $this->success(
