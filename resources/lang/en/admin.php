@@ -27,6 +27,11 @@ return [
         'not_found' => '',
         'not_updated' => ''
     ],
+    'regions' => [
+        'not_found' => 'Region not found',
+        'update_success' => 'AMI for a region was successfully installed',
+        'update_error' => 'Cannot update AMI at this moment',
+    ],
     'scheduling' => [
         'title' => 'Scheduling List',
         'not_found' => 'No scheduling found!',

@@ -17,7 +17,8 @@ class AwsRegion extends Model
         'name',
         'type',
         'limit',
-        'created_instances'
+        'created_instances',
+        'default_image_id'
     ];
 
     /**
