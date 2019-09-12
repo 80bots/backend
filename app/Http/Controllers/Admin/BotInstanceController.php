@@ -6,6 +6,7 @@ use App\AwsAmi;
 use App\AwsRegion;
 use App\Http\Controllers\AppController;
 use App\Http\Resources\Admin\BotInstanceCollection;
+use App\Http\Resources\Admin\RegionCollection;
 use App\Http\Resources\Admin\BotInstanceResource;
 use App\Jobs\SyncBotInstances;
 use App\Services\Aws;
@@ -91,16 +92,36 @@ class BotInstanceController extends AppController
 
     public function regions(Request $request)
     {
-        $regions = AwsRegion::onlyEc2()->pluck('id', 'name')->toArray();
-        $result = [];
+        $limit  = $request->query('limit') ?? self::PAGINATE;
+        $search = $request->input('search');
+        $sort   = $request->input('sort');
+        $order  = $request->input('order') ?? 'asc';
 
-        foreach ($regions as $name => $id) {
-            array_push($result, ['name' => $name, 'id' => $id]);
+        $resource = AwsRegion::onlyEc2()->ajax();
+
+        //
+        if (! empty($search)) {
+            $resource->where('code', 'like', "%{$search}%")
+                ->orWhere('name', 'like', "%{$search}%");
         }
 
-        return $this->success([
-            'data' => $result
-        ]);
+        //
+        if (empty($sort)) {
+            $sort   = 'created_at';
+            $order  = 'desc';
+        }
+
+        $resource->orderBy($sort, $order);
+
+        $instances  = (new RegionCollection($resource->paginate($limit)))->response()->getData();
+        $meta       = $instances->meta ?? null;
+
+        $response = [
+            'data'  => $instances->data ?? [],
+            'total' => $meta->total ?? 0
+        ];
+
+        return $this->success($response);
     }
 
     public function amis(Request $request)
