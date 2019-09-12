@@ -20,6 +20,7 @@ class CreateAwsRegionsTable extends Migration
             $table->string('type')->default('ec2');
             $table->unsignedInteger('limit')->nullable();
             $table->unsignedInteger('created_instances')->default(0);
+            $table->string('default_image_id')->nullable();
             $table->timestamps();
         });
     }

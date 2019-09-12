@@ -8,6 +8,7 @@ use App\Http\Controllers\AppController;
 use App\Http\Resources\Admin\BotInstanceCollection;
 use App\Http\Resources\Admin\RegionCollection;
 use App\Http\Resources\Admin\BotInstanceResource;
+use App\Http\Resources\Admin\RegionResource;
 use App\Jobs\SyncBotInstances;
 use App\Services\Aws;
 use App\BotInstance;
@@ -81,12 +82,13 @@ class BotInstanceController extends AppController
      * @param $id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function show(Request $request, $id) {
+    public function show(Request $request, $id)
+    {
         $resource = BotInstance::withTrashed()->find($id);
         if(!empty($resource)) {
             return $this->success((new BotInstanceResource($resource))->toArray($request));
         } else {
-            $this->error('Not found', __('admin.bots.not_found'));
+            return $this->error('Not found', __('admin.bots.not_found'));
         }
     }
 
@@ -113,15 +115,42 @@ class BotInstanceController extends AppController
 
         $resource->orderBy($sort, $order);
 
-        $instances  = (new RegionCollection($resource->paginate($limit)))->response()->getData();
-        $meta       = $instances->meta ?? null;
+        $regions    = (new RegionCollection($resource->paginate($limit)))->response()->getData();
+        $meta       = $regions->meta ?? null;
 
         $response = [
-            'data'  => $instances->data ?? [],
+            'data'  => $regions->data ?? [],
             'total' => $meta->total ?? 0
         ];
 
         return $this->success($response);
+    }
+
+    public function updateRegion(Request $request, $id)
+    {
+        try {
+            $update = $request->input('update');
+            $region = AwsRegion::find($id);
+
+            if (empty($region)) {
+                return $this->notFound(__('admin.not_found'), __('admin.regions.not_found'));
+            }
+
+            $update = $region->update([
+                'default_image_id' => $update['default_ami'] ?? ''
+            ]);
+
+            if ($update) {
+                return $this->success(
+                    (new RegionResource($region))->toArray($request),
+                    __('admin.regions.update_success')
+                );
+            } else {
+                return $this->error(__('admin.error'), __('admin.regions.update_error'));
+            }
+        } catch (Throwable $throwable) {
+            return $this->error(__('admin.server_error'), $throwable->getMessage());
+        }
     }
 
     public function amis(Request $request)

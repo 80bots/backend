@@ -100,7 +100,9 @@ class AppController extends Controller
 
             $awsSetting = AwsSetting::isDefault()->first();
 
-            if ($this->issetAmiInRegion($region, $awsSetting->image_id)) {
+            $imageId = $awsRegion->default_image_id ?? $awsSetting->image_id;
+
+            if ($this->issetAmiInRegion($awsRegion, $imageId)) {
 
                 Log::debug("issetAmiInRegion ISSET");
 
@@ -115,7 +117,7 @@ class AppController extends Controller
                     $instance->details()->create([
                         'aws_instance_type' => $awsSetting->type ?? null,
                         'aws_storage_gb'    => $awsSetting->storage ?? null,
-                        'aws_image_id'      => $awsSetting->image_id ?? null
+                        'aws_image_id'      => $imageId ?? null
                     ]);
 
                     if (! empty($instance)) {
