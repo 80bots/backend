@@ -5,17 +5,13 @@ namespace App\Http\Controllers;
 use App\AwsRegion;
 use App\AwsSetting;
 use App\Bot;
-use App\DeleteSecurityGroup;
+use App\BotInstance;
 use App\Helpers\CommonHelper;
 use App\Helpers\InstanceHelper;
 use App\Jobs\InstanceChangeStatus;
 use App\Jobs\StoreUserInstance;
 use App\Services\Aws;
 use App\User;
-use App\BotInstance;
-use App\BotInstancesDetails;
-use Aws\Result;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -48,20 +44,6 @@ class AppController extends Controller
 
             $botId = $request->input('bot_id');
             $params = collect($request->input('params'));
-
-//            $botId = 2;
-//            $params = collect([
-//                [
-//                    'speed' => 1,
-//                    'maxPage' => 1,
-//                    'searchKeyword' => 'sport cars'
-//                ],
-//                [
-//                    'speed' => 1,
-//                    'maxPage' => 1,
-//                    'searchKeyword' => 'dogs and cats'
-//                ],
-//            ]);
 
             $credit = config('app.credit');
 
@@ -100,13 +82,14 @@ class AppController extends Controller
 
             $awsSetting = AwsSetting::isDefault()->first();
 
-            $imageId = $awsRegion->default_image_id ?? $awsSetting->image_id;
+            $imageId = $region->default_image_id ?? $awsSetting->image_id;
 
-            if ($this->issetAmiInRegion($awsRegion, $imageId)) {
+            if ($this->issetAmiInRegion($region, $imageId)) {
 
                 Log::debug("issetAmiInRegion ISSET");
 
                 foreach ($params as $param) {
+
                     $instance = BotInstance::create([
                         'user_id'       => Auth::id(),
                         'bot_id'        => $bot->id ?? null,
@@ -155,17 +138,17 @@ class AppController extends Controller
     }
 
     /**
-     * @param AwsRegion $awsRegion
+     * @param AwsRegion $region
      * @param string $imageId
      * @return bool
      */
-    private function issetAmiInRegion(AwsRegion $awsRegion, string $imageId): bool
+    private function issetAmiInRegion(AwsRegion $region, string $imageId): bool
     {
-        $count = $awsRegion->whereHas('amis', function (Builder $query) use ($imageId) {
+        $result = AwsRegion::whereHas('amis', function (Builder $query) use ($imageId) {
             $query->where('image_id', '=', $imageId);
-        })->count();
+        })->first();
 
-        return $count > 0;
+        return !empty($result) ? $result->id === $region->id : false;
     }
 
     /**
