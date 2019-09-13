@@ -16,6 +16,10 @@ class User extends Authenticatable
 {
     use Billable, Notifiable, SoftDeletes, HasApiTokens;
 
+    const STATUS_PENDING    = 'pending';
+    const STATUS_ACTIVE     = 'active';
+    const STATUS_INACTIVE   = 'inactive';
+
     const ROLE_NAME_USER    = 'User';
     const ROLE_NAME_ADMIN   = 'Admin';
 

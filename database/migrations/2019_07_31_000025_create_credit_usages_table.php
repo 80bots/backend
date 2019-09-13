@@ -1,5 +1,6 @@
 <?php
 
+use App\CreditUsage;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
@@ -18,7 +19,12 @@ class CreateCreditUsagesTable extends Migration
             $table->unsignedInteger('user_id');
             $table->integer('credits');
             $table->integer('total');
-            $table->enum('action', ['added', 'used']);
+
+            $table->enum('action', [
+                CreditUsage::ACTION_ADDED,
+                CreditUsage::ACTION_USED
+            ]);
+
             $table->string('subject')->nullable();
             $table->timestamps();
 

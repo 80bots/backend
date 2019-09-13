@@ -1,5 +1,6 @@
 <?php
 
+use App\AwsRegion;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
@@ -17,7 +18,7 @@ class CreateAwsRegionsTable extends Migration
             $table->increments('id');
             $table->string('code');
             $table->string('name')->nullable();
-            $table->string('type')->default('ec2');
+            $table->string('type')->default(AwsRegion::TYPE_EC2);
             $table->unsignedInteger('limit')->nullable();
             $table->unsignedInteger('created_instances')->default(0);
             $table->string('default_image_id')->nullable();

@@ -66,6 +66,13 @@ Route::group(['middleware' => ['auth:api', 'api.sentry']], function() {
 
 Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['auth:api', 'api.admin', 'api.sentry']], function() {
 
+    Route::group(['prefix' => 'posts', 'as' => 'posts.'], function () {
+        Route::get('/', 'PostController@index')->name('posts');
+        Route::post('/', 'PostController@store')->name('store');
+        Route::get('/{id}', 'PostController@show')->name('show');
+        Route::put('/{id}', 'PostController@update')->name('update');
+    });
+
     Route::group(['prefix' => 'aws', 'as' => 'aws.'], function () {
         Route::get('/', 'AwsSettingController@index')->name('aws');
         Route::put('/{setting}', 'AwsSettingController@update')->name('update');
@@ -101,4 +108,9 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
         'subscription'  => 'SubscriptionController',
         'session'       => 'InstanceSessionController'
     ]);
+});
+
+
+Route::group(['prefix' => 'blog', 'as' => 'blog.', 'namespace' => 'Blog'], function() {
+    Route::get('posts', 'PostController@index')->name('posts');
 });

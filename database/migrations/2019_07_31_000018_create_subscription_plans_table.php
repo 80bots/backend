@@ -1,9 +1,9 @@
 <?php
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
+use App\SubscriptionPlan;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateSubscriptionPlansTable extends Migration
 {
@@ -21,9 +21,13 @@ class CreateSubscriptionPlansTable extends Migration
             $table->integer('credit');
             $table->string('slug')->unique();
             $table->string('stripe_plan');
-            $table->enum('status', ['active', 'inactive'])->default('active');
-            $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
-            $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'));
+
+            $table->enum('status', [
+                SubscriptionPlan::STATUS_ACTIVE,
+                SubscriptionPlan::STATUS_INACTIVE
+            ])->default(SubscriptionPlan::STATUS_ACTIVE);
+
+            $table->timestamps();
             $table->softDeletes();
         });
     }

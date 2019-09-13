@@ -4,7 +4,7 @@ namespace App\Http\Resources\Admin;
 
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
-class BotCollection extends ResourceCollection
+class PostCollection extends ResourceCollection
 {
     /**
      * The resource that this resource collects.

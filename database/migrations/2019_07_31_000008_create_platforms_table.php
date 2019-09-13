@@ -1,9 +1,9 @@
 <?php
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
+use App\Platform;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreatePlatformsTable extends Migration
 {
@@ -17,9 +17,13 @@ class CreatePlatformsTable extends Migration
         Schema::create('platforms', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
-            $table->enum('status', ['active', 'inactive'])->default('active');
-            $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
-            $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'));
+
+            $table->enum('status', [
+                Platform::STATUS_ACTIVE,
+                Platform::STATUS_INACTIVE
+            ])->default(Platform::STATUS_ACTIVE);
+
+            $table->timestamps();
         });
     }
 

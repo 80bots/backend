@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Tag extends Model
 {
+    const STATUS_ACTIVE     = 'active';
+    const STATUS_INACTIVE   = 'inactive';
+
     protected $table = "tags";
 
     protected $fillable = [

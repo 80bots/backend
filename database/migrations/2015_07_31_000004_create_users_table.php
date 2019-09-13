@@ -1,9 +1,9 @@
 <?php
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
+use App\User;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateUsersTable extends Migration
 {
@@ -28,18 +28,25 @@ class CreateUsersTable extends Migration
             $table->string('auth_token')->nullable();
             $table->rememberToken();
             $table->integer('credits')->default(0);
-            $table->enum('status', ['pending', 'active', 'inactive'])->default('pending');
-            $table->double('sent_email_status')->default(0);
-            $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
-            $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'));
+
+            $table->enum('status', [
+                User::STATUS_PENDING,
+                User::STATUS_ACTIVE,
+                User::STATUS_INACTIVE
+            ])->default(User::STATUS_PENDING);
+
+            $table->boolean('sent_email_status')->default(false);
+            $table->timestamps();
             $table->softDeletes();
 
             $table->foreign('role_id')
                 ->references('id')->on('roles')
                 ->onDelete('cascade')->onUpdate('cascade');
+
             $table->foreign('timezone_id')
                 ->references('id')->on('timezones')
                 ->onDelete('no action')->onUpdate('no action');
+
             $table->foreign('region_id')
                 ->references('id')->on('aws_regions')
                 ->onDelete('no action')->onUpdate('no action');
@@ -54,7 +61,7 @@ class CreateUsersTable extends Migration
     public function down()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropForeign(['role_id', 'timezone_id']);
+            $table->dropForeign(['role_id', 'timezone_id', 'region_id']);
         });
 
         Schema::dropIfExists('users');

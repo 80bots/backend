@@ -1,9 +1,9 @@
 <?php
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
+use App\InstanceSessionsHistory;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateInstanceSessionsHistoryTable extends Migration
 {
@@ -18,13 +18,22 @@ class CreateInstanceSessionsHistoryTable extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('scheduling_instances_id');
             $table->unsignedInteger('user_id');
-            $table->enum('schedule_type', ['start', 'stop']);
+
+            $table->enum('schedule_type', [
+                InstanceSessionsHistory::TYPE_START,
+                InstanceSessionsHistory::TYPE_STOP
+            ]);
+
             $table->string('selected_time');
             $table->text('cron_data')->nullable();
             $table->text('current_time_zone')->nullable();
-            $table->enum('status', ['failed', 'succeed'])->default('succeed');
-            $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
-            $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'));
+
+            $table->enum('status', [
+                InstanceSessionsHistory::STATUS_SUCCEED,
+                InstanceSessionsHistory::STATUS_FAILED
+            ])->default(InstanceSessionsHistory::STATUS_SUCCEED);
+
+            $table->timestamps();
 
             $table->foreign('scheduling_instances_id')
                 ->references('id')

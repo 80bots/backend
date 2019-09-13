@@ -1,6 +1,6 @@
 <?php
 
-use Illuminate\Support\Facades\DB;
+use App\Notification as SaaSNotification;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
@@ -22,12 +22,27 @@ class CreateNotificationsTable extends Migration
             $table->string('message');
             $table->string('icon')->nullable();
             $table->text('payload');
-            $table->enum('push_status', ['queued','sent','not-required'])->default('queued');
-            $table->enum('email_status', ['queued','sent','not-required'])->default('queued');
-            $table->enum('sms_status', ['queued','sent','not-required'])->default('queued');
+
+            $table->enum('push_status', [
+                SaaSNotification::STATUS_QUEUED,
+                SaaSNotification::STATUS_SENT,
+                SaaSNotification::STATUS_NOT_REQUIRED
+            ])->default(SaaSNotification::STATUS_QUEUED);
+
+            $table->enum('email_status', [
+                SaaSNotification::STATUS_QUEUED,
+                SaaSNotification::STATUS_SENT,
+                SaaSNotification::STATUS_NOT_REQUIRED
+            ])->default(SaaSNotification::STATUS_QUEUED);
+
+            $table->enum('sms_status', [
+                SaaSNotification::STATUS_QUEUED,
+                SaaSNotification::STATUS_SENT,
+                SaaSNotification::STATUS_NOT_REQUIRED
+            ])->default(SaaSNotification::STATUS_QUEUED);
+
             $table->timestamp('instance_stop_time')->nullable();
-            $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
-            $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'));
+            $table->timestamps();
 
             $table->foreign('to_id')
                 ->references('id')

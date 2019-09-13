@@ -1,5 +1,6 @@
 <?php
 
+use App\BotInstance;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -23,13 +24,18 @@ class CreateBotInstancesTable extends Migration
             $table->unsignedInteger('total_up_time')->default(0);
             $table->unsignedInteger('cron_up_time')->default(0);
             $table->boolean('is_in_queue')->default(1);
+
             $table->enum('aws_status', [
-                'pending',
-                'running',
-                'stopped',
-                'terminated'
-            ])->default('pending');
-            $table->enum('status', ['active','inactive'])->default('active');
+                BotInstance::STATUS_PENDING,
+                BotInstance::STATUS_RUNNING,
+                BotInstance::STATUS_STOPPED,
+                BotInstance::STATUS_TERMINATED
+            ])->default(BotInstance::STATUS_PENDING);
+
+            $table->enum('status', [
+                'active', 'inactive'
+            ])->default('active');
+
             $table->timestamps();
             $table->softDeletes();
 

@@ -6,8 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Role extends Model
 {
-    const ROLE_USER    = 'User';
-    const ROLE_ADMIN   = 'Admin';
+    const STATUS_ACTIVE     = 'active';
+    const STATUS_INACTIVE   = 'inactive';
+
+    const ROLE_USER         = 'User';
+    const ROLE_ADMIN        = 'Admin';
 
     public function scopeGetUserRole($query)
     {

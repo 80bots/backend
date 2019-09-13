@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Bot;
 use App\Platform;
+use App\Post;
 use App\Services\BotParser;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
@@ -100,7 +101,7 @@ class SyncLocalBots extends Command
                                         'parameters' => json_encode($result['params'])
                                     ]);
                                 } else {
-                                    Bot::create([
+                                    $bot = Bot::create([
                                         'platform_id' => $platform->id ?? null,
                                         'name' => $result['about']->name,
                                         'description' => $result['about']->description,
@@ -108,6 +109,9 @@ class SyncLocalBots extends Command
                                         'path' => $file->getFilename()
                                     ]);
                                 }
+
+                                // Create post
+                                $this->createPost($bot);
                             }
                         }
                     }
@@ -117,5 +121,15 @@ class SyncLocalBots extends Command
         } catch (Throwable $throwable) {
             Log::error($throwable->getMessage());
         }
+    }
+
+    private function createPost(Bot $bot): void
+    {
+        Post::create([
+            'bot_id' => $bot->id ?? null,
+            'title' => $bot->description ?? '',
+            'slug' => $bot->name ?? '',
+            'type' => Post::TYPE_BOT
+        ]);
     }
 }

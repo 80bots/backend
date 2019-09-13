@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Auth;
 
 class Platform extends Model
 {
+    const STATUS_ACTIVE     = 'active';
+    const STATUS_INACTIVE   = 'inactive';
+
     protected $table = 'platforms';
 
     protected $fillable = [

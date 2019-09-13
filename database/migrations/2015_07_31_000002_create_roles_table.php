@@ -1,9 +1,9 @@
 <?php
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
+use App\Role;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateRolesTable extends Migration
 {
@@ -17,9 +17,11 @@ class CreateRolesTable extends Migration
         Schema::create('roles', function (Blueprint $table) {
             $table->tinyIncrements('id');
             $table->string('name');
-            $table->enum('status', ['active', 'inactive'])->default('active');
-            $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
-            $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'));
+            $table->enum('status', [
+                Role::STATUS_ACTIVE,
+                Role::STATUS_INACTIVE
+            ])->default(Role::STATUS_ACTIVE);
+            $table->timestamps();
         });
     }
 

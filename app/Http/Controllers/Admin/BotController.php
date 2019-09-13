@@ -17,7 +17,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
-use Illuminate\Support\Facades\Artisan;
 
 class BotController extends AppController
 {

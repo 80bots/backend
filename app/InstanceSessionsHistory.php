@@ -6,6 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class InstanceSessionsHistory extends Model
 {
+    const STATUS_FAILED     = 'failed';
+    const STATUS_SUCCEED    = 'succeed';
+
+    const TYPE_START        = 'start';
+    const TYPE_STOP         = 'stop';
+
     protected $table = 'instance_sessions_history';
 
     protected $fillable = [

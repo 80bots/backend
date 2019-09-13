@@ -1,5 +1,6 @@
 <?php
 
+use App\AwsAmi;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
@@ -23,7 +24,12 @@ class CreateAwsAmisTable extends Migration
             $table->string('source');
             $table->string('image_type');
             $table->string('owner');
-            $table->enum('visibility', ['public', 'private'])->default('private');
+
+            $table->enum('visibility', [
+                AwsAmi::VISIBILITY_PUBLIC,
+                AwsAmi::VISIBILITY_PRIVATE
+            ])->default(AwsAmi::VISIBILITY_PRIVATE);
+
             $table->string('status');
             $table->boolean('ena_support')->default(true);
             $table->string('hypervisor');

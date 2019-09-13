@@ -1,9 +1,9 @@
 <?php
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
+use App\SchedulingInstancesDetails;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateSchedulingInstancesDetailsTable extends Migration
 {
@@ -21,15 +21,25 @@ class CreateSchedulingInstancesDetailsTable extends Migration
             $table->string('selected_time');
             $table->string('time_zone');
             $table->string('cron_data');
-            $table->enum('schedule_type', ['start', 'stop']);
-            $table->enum('status', ['active', 'inactive']);
-            $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
-            $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'));
+
+            $table->enum('schedule_type', [
+                SchedulingInstancesDetails::TYPE_START,
+                SchedulingInstancesDetails::TYPE_STOP
+            ])->default(SchedulingInstancesDetails::TYPE_START);
+
+            $table->enum('status', [
+                SchedulingInstancesDetails::STATUS_ACTIVE,
+                SchedulingInstancesDetails::STATUS_INACTIVE
+            ])->default(SchedulingInstancesDetails::STATUS_ACTIVE);
+
+            $table->timestamps();
             $table->softDeletes();
 
             $table->foreign('scheduling_id')
-                ->references('id')->on('scheduling_instances')
-                ->onUpdate('cascade')->onDelete('cascade');
+                ->references('id')
+                ->on('scheduling_instances')
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
         });
     }
 
@@ -41,7 +51,7 @@ class CreateSchedulingInstancesDetailsTable extends Migration
     public function down()
     {
         Schema::table('scheduling_instances_details', function (Blueprint $table) {
-            $table->dropForeign(['scheduling_instance_id']);
+            $table->dropForeign(['scheduling_id']);
         });
 
         Schema::dropIfExists('scheduling_instances_details');

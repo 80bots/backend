@@ -1,9 +1,9 @@
 <?php
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
+use App\SchedulingInstance;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateSchedulingInstanceTable extends Migration
 {
@@ -18,18 +18,26 @@ class CreateSchedulingInstanceTable extends Migration
             $table->bigIncrements('id');
             $table->unsignedInteger('user_id');
             $table->unsignedBigInteger('instance_id');
-            $table->enum('status', ['active', 'inactive']);
-            $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
-            $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'));
+
+            $table->enum('status', [
+                SchedulingInstance::STATUS_ACTIVE,
+                SchedulingInstance::STATUS_INACTIVE
+            ])->default(SchedulingInstance::STATUS_ACTIVE);
+
+            $table->timestamps();
             $table->softDeletes();
 
             $table->foreign('user_id')
-                ->references('id')->on('users')
-                ->onUpdate('cascade')->onDelete('cascade');
+                ->references('id')
+                ->on('users')
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
 
             $table->foreign('instance_id')
-                ->references('id')->on('bot_instances')
-                ->onUpdate('cascade')->onDelete('cascade');
+                ->references('id')
+                ->on('bot_instances')
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
         });
     }
 

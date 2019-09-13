@@ -1,9 +1,9 @@
 <?php
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
+use App\Bot;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateBotsTable extends Migration
 {
@@ -23,8 +23,17 @@ class CreateBotsTable extends Migration
             $table->text('path')->nullable();
             $table->text('aws_startup_script')->nullable();
             $table->text('aws_custom_script')->nullable();
-            $table->enum('status', ['active', 'inactive'])->default('active');
-            $table->enum('type', ['public', 'private'])->default('public');
+
+            $table->enum('status', [
+                Bot::STATUS_ACTIVE,
+                Bot::STATUS_INACTIVE
+            ])->default(Bot::STATUS_ACTIVE);
+
+            $table->enum('type', [
+                Bot::TYPE_PUBLIC,
+                Bot::TYPE_PRIVATE
+            ])->default(Bot::TYPE_PUBLIC);
+
             $table->timestamps();
 
             $table->foreign('platform_id')
