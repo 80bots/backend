@@ -23,7 +23,8 @@
         "nubs/random-name-generator": "^2.1",
         "predis/predis": "^1.1",
         "sentry/sentry-laravel": "^1.2",
-        "stripe/stripe-php": "^6.41"
+        "stripe/stripe-php": "^6.41",
+        "ext-mbstring": "*"
     },
     "repositories": [
         {

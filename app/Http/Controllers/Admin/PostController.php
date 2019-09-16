@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Resources\Admin\PostCollection;
+use App\Http\Resources\Admin\PostResource;
 use App\Post;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Throwable;
 
 class PostController extends Controller
@@ -46,6 +48,92 @@ class PostController extends Controller
             ];
 
             return $this->success($response);
+
+        } catch (Throwable $throwable) {
+            return $this->error(__('admin.server_error'), $throwable->getMessage());
+        }
+    }
+
+    public function store(Request $request)
+    {
+        try {
+
+            switch ($request->input('status')) {
+                case Post::STATUS_DRAFT:
+                case Post::STATUS_ACTIVE:
+                case Post::STATUS_INACTIVE:
+                    $status = $request->input('status');
+                    break;
+                default:
+                    $status = Post::STATUS_DRAFT;
+                    break;
+            }
+
+            switch ($request->input('type')) {
+                case Post::TYPE_BOT:
+                case Post::TYPE_POST:
+                    $type = $request->input('type');
+                    break;
+                default:
+                    $type = Post::TYPE_BOT;
+                    break;
+            }
+
+            $post = Post::create([
+                'author_id' => Auth::id(),
+                'title'     => $request->input('title') ?? 'Without title',
+                'bot_id'    => $request->input('bot_id'),
+                'slug'      => '',
+                'content'   => $request->input('content'),
+                'status'    => $status,
+                'type'      => $type
+            ]);
+
+            return $this->success();
+
+        } catch (Throwable $throwable) {
+            return $this->error(__('admin.server_error'), $throwable->getMessage());
+        }
+    }
+
+    public function update(Request $request, $id)
+    {
+        try {
+
+            $post = Post::find($id);
+
+            if (empty($post)) {
+                return $this->notFound(__('admin.not_found'), __('admin.bots.not_found'));
+            }
+
+            $update = $post->update($request->input('update'));
+
+            if ($update) {
+                return $this->success((new PostResource($post))->toArray($request));
+            }
+
+            return $this->error(__('admin.server_error'), __('admin.server_error'));
+
+        } catch (Throwable $throwable) {
+            return $this->error(__('admin.server_error'), $throwable->getMessage());
+        }
+    }
+
+    public function delete(Request $request, $id)
+    {
+        try {
+
+            $post = Post::find($id);
+
+            if (empty($post)) {
+                return $this->notFound(__('admin.not_found'), __('admin.bots.not_found'));
+            }
+
+            if ($post->delete()) {
+                return $this->success();
+            }
+
+            return $this->error(__('admin.server_error'), __('admin.server_error'));
 
         } catch (Throwable $throwable) {
             return $this->error(__('admin.server_error'), $throwable->getMessage());

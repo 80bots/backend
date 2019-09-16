@@ -109,18 +109,23 @@ class ScheduleInstanceController extends AppController
 
             $instance = BotInstance::findByInstanceId($data['instance_id'])->first();
 
-            if(empty($instance)) return $this->error(__('admin.error'), 'Such bot does not exists');
+            if (empty($instance)) {
+                return $this->error(__('admin.error'), 'Such bot does not exists');
+            }
 
             $schedule = SchedulingInstance::findByUserInstanceId($instance->id, Auth::id())
                 ->first();
 
             if (empty($schedule)) {
+
                 $schedule = SchedulingInstance::create([
                     'user_id'           => Auth::id(),
                     'user_instance_id'  => $instance->id,
                 ]);
 
-                if($schedule) return $this->success();
+                if ($schedule) {
+                    return $this->success();
+                }
             }
 
             return $this->error(__('admin.error'), __('admin.parameters_incorrect'));

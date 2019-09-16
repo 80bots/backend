@@ -69,8 +69,8 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
     Route::group(['prefix' => 'posts', 'as' => 'posts.'], function () {
         Route::get('/', 'PostController@index')->name('posts');
         Route::post('/', 'PostController@store')->name('store');
-        Route::get('/{id}', 'PostController@show')->name('show');
         Route::put('/{id}', 'PostController@update')->name('update');
+        Route::delete('/{id}', 'PostController@delete')->name('delete');
     });
 
     Route::group(['prefix' => 'aws', 'as' => 'aws.'], function () {

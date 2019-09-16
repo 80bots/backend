@@ -125,10 +125,11 @@ class SyncLocalBots extends Command
 
     private function createPost(Bot $bot): void
     {
-        Post::create([
+        Post::updateOrInsert([
+            'slug' => $bot->name ?? '',
+        ], [
             'bot_id' => $bot->id ?? null,
             'title' => $bot->description ?? '',
-            'slug' => $bot->name ?? '',
             'type' => Post::TYPE_BOT
         ]);
     }
