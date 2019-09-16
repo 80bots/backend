@@ -21,7 +21,6 @@ class AwsSettingController extends AppController
 
         if (! empty($settings)) {
             $updateData = $request->validate([
-                'update.image_id'           => 'string|required',
                 'update.type'               => 'string|required',
                 'update.storage'            => 'integer|required',
                 'update.script'             => 'string|required',
