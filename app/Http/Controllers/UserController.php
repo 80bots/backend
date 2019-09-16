@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\User\TimezoneCollection;
+use App\Mail\Support;
 use App\Services\Aws;
 use App\SubscriptionPlan;
 use App\Timezone;
@@ -13,6 +14,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
+use Illuminate\Support\Facades\Mail;
 
 class UserController extends AppController
 {
@@ -85,6 +87,27 @@ class UserController extends AppController
             return $this->success((new TimezoneCollection(Timezone::all()))->response()->getData());
         } catch (Throwable $throwable) {
             return $this->error(__('user.server_error'), $throwable->getMessage());
+        }
+    }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function feedback(Request $request)
+    {
+        try {
+            $data = $request->validate([
+                'type'       => 'string|required',
+                'category'   => 'string|required',
+                'message'    => 'string|required'
+            ]);
+
+            Mail::to('support@80bots.com')->send(new Support($request->user(), $data));
+
+            return $this->success();
+        } catch (Throwable $throwable) {
+            return $this->error(__('user.server_error'), $throwable->getMessage(), 500);
         }
     }
 }
