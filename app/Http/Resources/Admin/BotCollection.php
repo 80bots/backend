@@ -11,7 +11,7 @@ class BotCollection extends ResourceCollection
      *
      * @var string
      */
-    public $collects = 'App\Http\Resources\Admin\PostResource';
+    public $collects = 'App\Http\Resources\Admin\BotResource';
 
     /**
      * Transform the resource collection into an array.
