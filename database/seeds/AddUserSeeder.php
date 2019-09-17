@@ -39,7 +39,8 @@ class AddUserSeeder extends Seeder
                 'name'          => "$name Admin",
                 'email'         => "$emailName+admin@inforca.com",
                 'password'      => bcrypt($user['passwords'][0]),
-                'status'        => 'active'
+                'status'        => 'active',
+                'credits'       => 100
             ]);
 
             DB::table('users')->insert([
@@ -49,7 +50,8 @@ class AddUserSeeder extends Seeder
                 'name'          => "$name User",
                 'email'         => "$emailName+user@inforca.com",
                 'password'      => bcrypt($user['passwords'][1]),
-                'status'        => 'active'
+                'status'        => 'active',
+                'credits'       => 100
             ]);
         }
     }
