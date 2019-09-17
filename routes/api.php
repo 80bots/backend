@@ -57,6 +57,10 @@ Route::group(['middleware' => ['auth:api', 'api.sentry']], function() {
        Route::get('/credits', 'HistoryController@getCreditUsage');
     });
 
+    Route::group(['prefix' => 'blog', 'as' => 'blog.', 'namespace' => 'Blog'], function() {
+        Route::post('messages', 'MessageController@store')->name('store');
+    });
+
     Route::resources([
         'bots'     => 'BotController',
         'schedule' => 'ScheduleController',

@@ -87,6 +87,9 @@ return [
         'title' => 'Dashboard',
         'logged_in' => 'Admin You are logged in!'
     ],
+    'posts' => [
+        'not_found' => 'Not found',
+    ],
     'not_found' => 'Not found',
     'active' => 'Active',
     'inactive' => 'Inactive',

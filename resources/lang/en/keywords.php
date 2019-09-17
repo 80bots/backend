@@ -107,6 +107,9 @@ return [
     'aws' => [
         'error' => 'Aws error'
     ],
+    'posts' => [
+        'not_found' => 'Not found',
+    ],
     'not_found'     => 'Not found!',
     'server_error'  => 'Server error',
     'error'         => 'Error',

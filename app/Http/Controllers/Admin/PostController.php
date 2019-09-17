@@ -89,7 +89,11 @@ class PostController extends Controller
                 'type'      => $type
             ]);
 
-            return $this->success();
+            if (! empty($post)) {
+                return $this->success();
+            }
+
+            return $this->error(__('admin.server_error'), __('admin.server_error'));
 
         } catch (Throwable $throwable) {
             return $this->error(__('admin.server_error'), $throwable->getMessage());
@@ -103,7 +107,7 @@ class PostController extends Controller
             $post = Post::find($id);
 
             if (empty($post)) {
-                return $this->notFound(__('admin.not_found'), __('admin.bots.not_found'));
+                return $this->notFound(__('admin.not_found'), __('admin.posts.not_found'));
             }
 
             $update = $post->update($request->input('update'));
