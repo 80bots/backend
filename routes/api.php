@@ -22,6 +22,7 @@ Route::group(['middleware' => ['auth:api', 'api.sentry']], function() {
         Route::put('/profile', 'UserController@update')->name('update.profile');
         Route::get('/timezone', 'UserController@getTimezones')->name('timezones');
         Route::post('/profile/timezone', 'UserController@updateTimezone')->name('profile.timezone');
+        Route::post('/feedback', 'UserController@feedback')->name('feedback');
     });
 
     // User bots

@@ -48,9 +48,8 @@ class BotParser
     ]
      */
 
-    private static $regex       = '/\/\*\*\s*PARAMS\n(.*)\*\/\s*\/\*\*\sABOUT\n(.*)\*\//s';
-    private static $regexParams = '/\/\*\*\s*PARAMS\n(.*)\*\//s';
-    private static $regexAbout  = '/\/\*\*\s*ABOUT\n(.*)\*\/\n+\//s';
+    private static $regexParams = '/\/\*\*\s*PARAMS[\r\n|\r|\n](.*)\*\//s';
+    private static $regexAbout  = '/\/\*\*\s*ABOUT[\r\n|\r|\n](.*)\*\/[\r\n|\r|\n]+\//s';
 
     private static function removeCommentsAndNewLines(string $text): string
     {
@@ -58,7 +57,7 @@ class BotParser
         $source = preg_replace('#^\s*//.+$#m', "", $text);
         // remove new lines
         $json = trim(preg_replace('/\s\s+/', ' ', $source));
-        return trim(preg_replace('/\n+/', ' ', $json));
+        return trim(preg_replace('/[\r\n|\r|\n]+/', ' ', $json));
     }
 
     public static function getBotInfo($fileContent)
