@@ -31,6 +31,16 @@ class Message extends Model
         return $query;
     }
 
+    public function scopeIsModerated($query)
+    {
+        return $query->where('moderation', true);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'author_id');
+    }
+
     public function likes()
     {
         return $this->belongsToMany(Like::class, 'like_message');

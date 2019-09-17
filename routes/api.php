@@ -113,4 +113,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
 
 Route::group(['prefix' => 'blog', 'as' => 'blog.', 'namespace' => 'Blog'], function() {
     Route::get('posts', 'PostController@index')->name('posts');
+    Route::get('posts/{id}', 'PostController@show')->name('posts.show');
+
+    Route::get('messages/{id}', 'MessageController@postMessages')->name('messages.show');
 });
