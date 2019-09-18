@@ -13,14 +13,12 @@ class AwsSettingsTableSeeder extends Seeder
     public function run()
     {
         $script = <<<HERESHELL
-file="params/params.json"
+file="puppeteer/params/params.json"
 username="kabas"
 cd /home/\$username/
 
 su - \$username -c 'git clone -b master https://14b12de18e2199b2d584d3f6cf9492f3353f9b3e@github.com/80bots/puppeteer.git ./puppeteer'
 su - \$username -c 'cd ./puppeteer && npm i'
-
-su - \$username -c 'mkdir params'
 HERESHELL;
 
         AwsSetting::create([
