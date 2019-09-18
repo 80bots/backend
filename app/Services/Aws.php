@@ -900,14 +900,6 @@ HERESHELL;
             'ImageId'   => $imageId,
             'MinCount'  => 1,
             'MaxCount'  => 1,
-            'BlockDeviceMappings' => [
-                [
-                    'DeviceName' => 'sdh',
-                    'Ebs' => [
-                        'VolumeSize' => $volumeSize
-                    ],
-                ],
-            ],
             'InstanceType'  => $instanceType,
             'KeyName'       => $keyPairName,
             'TagSpecifications' => [
