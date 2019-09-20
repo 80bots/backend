@@ -97,6 +97,7 @@ class SyncLocalBots extends Command
                                 if (!empty($bot)) {
                                     $bot->update([
                                         'description' => $result['about']->description,
+                                        'name' => $result['about']->name,
                                         'parameters' => json_encode($result['params'])
                                     ]);
                                 } else {
