@@ -92,7 +92,7 @@ class SyncLocalBots extends Command
                                     ]);
                                 }
 
-                                $bot = Bot::where('name', '=', $result['about']->name)->first();
+                                $bot = Bot::where('path', '=', $file->getFilename())->first();
 
                                 if (!empty($bot)) {
                                     $bot->update([
