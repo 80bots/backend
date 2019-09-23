@@ -3,7 +3,7 @@
 
 /**
  * A helper file for Laravel 5, to provide autocomplete information to your IDE
- * Generated for Laravel 5.8.35 on 2019-09-23 10:15:48.
+ * Generated for Laravel 5.8.35 on 2019-09-23 14:47:19.
  *
  * This file should not be included in your code, only analyzed by your IDE!
  *
@@ -8292,6 +8292,8 @@ namespace Illuminate\Support\Facades {
     /**
      * 
      *
+     * @see \Illuminate\Redis\RedisManager
+     * @see \Illuminate\Contracts\Redis\Factory
      */ 
     class Redis {
         
@@ -15045,6 +15047,156 @@ namespace Sentry\Laravel {
  
 }
 
+namespace GrahamCampbell\GitHub\Facades { 
+
+    /**
+     * This is the github facade class.
+     *
+     * @author Graham Campbell <graham@alt-three.com>
+     */ 
+    class GitHub {
+        
+        /**
+         * Get the factory instance.
+         *
+         * @return \GrahamCampbell\GitHub\GitHubFactory 
+         * @static 
+         */ 
+        public static function getFactory()
+        {
+                        /** @var \GrahamCampbell\GitHub\GitHubManager $instance */
+                        return $instance->getFactory();
+        }
+        
+        /**
+         * Get a connection instance.
+         *
+         * @param string|null $name
+         * @return object 
+         * @static 
+         */ 
+        public static function connection($name = null)
+        {
+            //Method inherited from \GrahamCampbell\Manager\AbstractManager            
+                        /** @var \GrahamCampbell\GitHub\GitHubManager $instance */
+                        return $instance->connection($name);
+        }
+        
+        /**
+         * Reconnect to the given connection.
+         *
+         * @param string|null $name
+         * @return object 
+         * @static 
+         */ 
+        public static function reconnect($name = null)
+        {
+            //Method inherited from \GrahamCampbell\Manager\AbstractManager            
+                        /** @var \GrahamCampbell\GitHub\GitHubManager $instance */
+                        return $instance->reconnect($name);
+        }
+        
+        /**
+         * Disconnect from the given connection.
+         *
+         * @param string|null $name
+         * @return void 
+         * @static 
+         */ 
+        public static function disconnect($name = null)
+        {
+            //Method inherited from \GrahamCampbell\Manager\AbstractManager            
+                        /** @var \GrahamCampbell\GitHub\GitHubManager $instance */
+                        $instance->disconnect($name);
+        }
+        
+        /**
+         * Get the configuration for a connection.
+         *
+         * @param string|null $name
+         * @throws \InvalidArgumentException
+         * @return array 
+         * @static 
+         */ 
+        public static function getConnectionConfig($name = null)
+        {
+            //Method inherited from \GrahamCampbell\Manager\AbstractManager            
+                        /** @var \GrahamCampbell\GitHub\GitHubManager $instance */
+                        return $instance->getConnectionConfig($name);
+        }
+        
+        /**
+         * Get the default connection name.
+         *
+         * @return string 
+         * @static 
+         */ 
+        public static function getDefaultConnection()
+        {
+            //Method inherited from \GrahamCampbell\Manager\AbstractManager            
+                        /** @var \GrahamCampbell\GitHub\GitHubManager $instance */
+                        return $instance->getDefaultConnection();
+        }
+        
+        /**
+         * Set the default connection name.
+         *
+         * @param string $name
+         * @return void 
+         * @static 
+         */ 
+        public static function setDefaultConnection($name)
+        {
+            //Method inherited from \GrahamCampbell\Manager\AbstractManager            
+                        /** @var \GrahamCampbell\GitHub\GitHubManager $instance */
+                        $instance->setDefaultConnection($name);
+        }
+        
+        /**
+         * Register an extension connection resolver.
+         *
+         * @param string $name
+         * @param callable $resolver
+         * @return void 
+         * @static 
+         */ 
+        public static function extend($name, $resolver)
+        {
+            //Method inherited from \GrahamCampbell\Manager\AbstractManager            
+                        /** @var \GrahamCampbell\GitHub\GitHubManager $instance */
+                        $instance->extend($name, $resolver);
+        }
+        
+        /**
+         * Return all of the created connections.
+         *
+         * @return object[] 
+         * @static 
+         */ 
+        public static function getConnections()
+        {
+            //Method inherited from \GrahamCampbell\Manager\AbstractManager            
+                        /** @var \GrahamCampbell\GitHub\GitHubManager $instance */
+                        return $instance->getConnections();
+        }
+        
+        /**
+         * Get the config instance.
+         *
+         * @return \Illuminate\Contracts\Config\Repository 
+         * @static 
+         */ 
+        public static function getConfig()
+        {
+            //Method inherited from \GrahamCampbell\Manager\AbstractManager            
+                        /** @var \GrahamCampbell\GitHub\GitHubManager $instance */
+                        return $instance->getConfig();
+        }
+         
+    }
+ 
+}
+
 namespace Laravel\Horizon { 
 
     /**
@@ -17856,6 +18008,8 @@ namespace  {
     class AWS extends \Aws\Laravel\AwsFacade {}
 
     class Sentry extends \Sentry\Laravel\Facade {}
+
+    class GitHub extends \GrahamCampbell\GitHub\Facades\GitHub {}
 
     class Horizon extends \Laravel\Horizon\Horizon {}
  
