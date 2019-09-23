@@ -26,7 +26,7 @@ return [
 
     'default'      => 'main',
     'organization' => '80bots',
-    'repo'         => 'saas-laravel',
+    'repo'         => 'puppeteer',
 
     /*
     |--------------------------------------------------------------------------
