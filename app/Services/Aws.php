@@ -997,7 +997,7 @@ HERESHELL;
         $result = [];
 
         if(empty($this->s3)) {
-            $this->s3Connection('', null,'80bots-issued-screenshots');
+            $this->s3Connection('us-east-2', null,'80bots-issued-screenshots');
         }
 
         foreach ($images as $image) {
