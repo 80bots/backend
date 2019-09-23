@@ -3,13 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\AwsRegion;
+use App\Helpers\ApiResponse;
 use App\Http\Resources\User\BotInstanceCollection;
 use App\Http\Resources\User\BotInstanceResource;
+use App\Http\Resources\Admin\BotInstanceResource as AdminBotInstanceResource;
 use App\BotInstance;
+use App\Services\Aws;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
+use App\Services\GitHub;
 
 class BotInstanceController extends AppController
 {
@@ -263,5 +267,39 @@ class BotInstanceController extends AppController
     public function destroy(BotInstance $userInstances)
     {
         //
+    }
+
+    /**
+     * @param Request $request
+     * @param $id
+     * @return ApiResponse
+     */
+    public function reportIssue(Request $request, $id) {
+        $instance = BotInstance::withTrashed()->find($id);
+        $aws = new Aws();
+        if(!empty($instance)) {
+            $resource = new AdminBotInstanceResource($instance);
+            if(!empty($request->screenshots)) {
+                $instanceId = $resource->toArray($request)['instance_id'];
+                $botName = $resource->toArray($request)['bot_name'];
+                $urls = $aws->uploadScreenshots($instanceId, $request->screenshots);
+
+                $body = "User: {$request->user()->email}\nInstance ID: {$instanceId}\nBot Name: {$botName}
+                \nMessage: {$request->message}";
+
+                if(!empty($urls)) {
+                    $screenshots = '';
+                    for($i = 0; $i < count($urls); $i++) {
+                        $screenshots = $screenshots . " ![{$request->screenshots[$i]->getClientOriginalName()}]({$urls[$i]})";
+                    }
+                    $body = $body . "\n{$screenshots}";
+                }
+
+                GitHub::createIssue('Issue Report', $body);
+                return $this->success([]);
+            }
+        } else {
+            $this->error('Not found', __('admin.bots.not_found'));
+        }
     }
 }

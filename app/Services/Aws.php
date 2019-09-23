@@ -992,4 +992,28 @@ HERESHELL;
         }
         // TODO: need to get available instance types here via pricing API
     }
+
+    public function uploadScreenshots($instanceId, $images): ?array {
+        $result = [];
+
+        if(empty($this->s3)) {
+            $this->s3Connection('', null,'80bots-issued-screenshots');
+        }
+
+        foreach ($images as $image) {
+            $saveKeyLocation = "screenshots/{$instanceId}/{$image->getClientOriginalName()}";
+            $bucket = empty($bucket) ? $this->s3Bucket : $bucket;
+
+            // Save the private key
+            $res = $this->s3->putObject([
+                'Bucket'      => $bucket,
+                'Key'         => $saveKeyLocation,
+                'Body'        => $image->get(),
+                'ContentType' => $image->getClientMimeType()
+            ]);
+
+            $result[] = $res['ObjectURL'];
+        }
+        return $result;
+    }
 }
