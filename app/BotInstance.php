@@ -26,7 +26,8 @@ class BotInstance extends BaseModel
         'cron_up_time',
         'is_in_queue',
         'aws_status',
-        'status'
+        'status',
+        'start_time'
     ];
 
     /**
@@ -90,6 +91,11 @@ class BotInstance extends BaseModel
     public function details()
     {
         return $this->hasMany(BotInstancesDetails::class, 'instance_id', 'id');
+    }
+
+    public function oneDetail()
+    {
+        return $this->hasOne(BotInstancesDetails::class, 'instance_id', 'id')->latest();
     }
 
     public function bot()

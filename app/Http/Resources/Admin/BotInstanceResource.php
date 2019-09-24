@@ -16,8 +16,9 @@ class BotInstanceResource extends JsonResource
      */
     public function toArray($request)
     {
-        $details    = $this->details()->latest()->first();
+//      $details    = $this->details()->latest()->first();
         $region     = $this->region ?? null;
+        $details    = $this->oneDetail ?? null;
 
         return [
             'id'                => $this->id ?? '',

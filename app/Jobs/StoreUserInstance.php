@@ -158,6 +158,10 @@ class StoreUserInstance implements ShouldQueue
                         'start_time' => $launchTime->format('Y-m-d H:i:s'),
                     ]);
 
+                    $this->instance->update([
+                        'start_time' => $launchTime->format('Y-m-d H:i:s'),
+                    ]);
+
                     if ($awsStatus === BotInstance::STATUS_RUNNING) {
                         $this->instance->setAwsStatusRunning();
                     }

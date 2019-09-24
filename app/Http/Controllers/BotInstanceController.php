@@ -42,12 +42,11 @@ class BotInstanceController extends AppController
                     ->orWhere('aws_instance_id', 'like', "%{$search}%");
             }
 
-            //
-            if (empty($sort)) {
-                $sort   = 'created_at';
-                $order  = 'desc';
-            }
-            $resource->orderBy($sort, $order);
+            $resource->when($sort, function ($query, $sort) use ($order) {
+                return $query->orderBy($sort, $order);
+            }, function ($query) {
+                return $query->orderBy('aws_status', 'asc')->orderBy('start_time', 'desc');
+            });
 
             $bots   = (new BotInstanceCollection($resource->paginate($limit)))->response()->getData();
             $meta   = $bots->meta ?? null;

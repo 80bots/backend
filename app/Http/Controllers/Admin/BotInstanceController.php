@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\AwsAmi;
 use App\AwsRegion;
+use App\Events\InstanceStatusUpdated;
 use App\Http\Controllers\AppController;
 use App\Http\Resources\Admin\BotInstanceCollection;
 use App\Http\Resources\Admin\RegionCollection;
@@ -36,16 +37,15 @@ class BotInstanceController extends AppController
             $sort   = $request->input('sort');
             $order  = $request->input('order') ?? 'asc';
 
-            $resource = BotInstance::withTrashed()->ajax();
+            $resource = BotInstance::withTrashed()->with(['oneDetail', 'user'])->ajax();
 
             // TODO: Add Filters
 
             switch ($list) {
                 case 'my':
-                    $resource->with('user')->findByUserId(Auth::id());
+                    $resource->findByUserId(Auth::id());
                     break;
                 default:
-                    $resource->with('user');
                     break;
             }
 
@@ -56,11 +56,11 @@ class BotInstanceController extends AppController
             }
 
             //
-            if (empty($sort)) {
-                $sort   = 'created_at';
-                $order  = 'desc';
-            }
-            $resource->orderBy($sort, $order);
+            $resource->when($sort, function ($query, $sort) use ($order) {
+                return $query->orderBy($sort, $order);
+            }, function ($query) {
+                return $query->orderBy('aws_status', 'asc')->orderBy('start_time', 'desc');
+            });
 
             $instances  = (new BotInstanceCollection($resource->paginate($limit)))->response()->getData();
             $meta       = $instances->meta ?? null;
@@ -213,6 +213,9 @@ class BotInstanceController extends AppController
                             if ($this->changeStatus($value, $id)) {
                                 $instance = new BotInstanceResource(BotInstance::withTrashed()
                                     ->where('id', '=', $id)->first());
+
+                                broadcast(new InstanceStatusUpdated(Auth::id()));
+
                                 return $this->success($instance->toArray($request));
                             } else {
                                 return $this->error(__('admin.server_error'), __('admin.instances.not_updated'));

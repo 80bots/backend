@@ -105,7 +105,7 @@ class InstanceChangeStatus implements ShouldQueue
      */
     private function getCurrentInstanceStatus(Aws $aws): ?string
     {
-        $result = $aws->describeInstances([$this->details->aws_instance_id]);
+        $result = $aws->describeInstances([$this->details->aws_instance_id], $this->region->code);
 
         if ($result->hasKey('Reservations')) {
             $reservations = collect($result->get('Reservations'));
@@ -152,6 +152,10 @@ class InstanceChangeStatus implements ShouldQueue
                     ]);
 
                     $newInstanceDetail->save();
+
+                    $this->instance->update([
+                        'start_time' => $this->currentDate,
+                    ]);
                 }
 
                 broadcast(new InstanceLaunched($this->instance, $this->user));
@@ -237,7 +241,7 @@ class InstanceChangeStatus implements ShouldQueue
      */
     private function getPublicIpAddressAndDns(Aws $aws): Collection
     {
-        $result = $aws->describeInstances([$this->details->aws_instance_id]);
+        $result = $aws->describeInstances([$this->details->aws_instance_id], $this->region->code);
 
         if ($result->hasKey('Reservations')) {
             $reservations = collect($result->get('Reservations'));

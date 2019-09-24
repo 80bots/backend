@@ -67,7 +67,7 @@ class CalculateInstancesUpTime extends Command
 
                             $instanceDetail = $instance->details()->latest()->first();
 
-                            $describeInstance = $aws->describeInstances([$instanceDetail->aws_instance_id]);
+                            $describeInstance = $aws->describeInstances([$instanceDetail->aws_instance_id], $instance->region->code);
 
                             if ($describeInstance->hasKey('Reservations')) {
                                 $reservations = collect($describeInstance->get('Reservations'));

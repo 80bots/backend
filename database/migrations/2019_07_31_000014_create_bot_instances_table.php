@@ -24,12 +24,13 @@ class CreateBotInstancesTable extends Migration
             $table->unsignedInteger('cron_up_time')->default(0);
             $table->boolean('is_in_queue')->default(1);
             $table->enum('aws_status', [
-                'pending',
                 'running',
+                'pending',
                 'stopped',
                 'terminated'
             ])->default('pending');
             $table->enum('status', ['active','inactive'])->default('active');
+            $table->timestamp('start_time')->nullable();
             $table->timestamps();
             $table->softDeletes();
 
