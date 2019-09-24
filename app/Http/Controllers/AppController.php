@@ -181,7 +181,8 @@ class AppController extends Controller
         $user   = User::find(Auth::id());
         $aws    = new Aws;
 
-        $describeInstancesResponse = $aws->describeInstances([$instanceDetail->aws_instance_id ?? null]);
+        $describeInstancesResponse = $aws->describeInstances([$instanceDetail->aws_instance_id ?? null],
+            $awsRegion->code);
 
         if (! $describeInstancesResponse->hasKey('Reservations')) {
             // TODO: Remove instance

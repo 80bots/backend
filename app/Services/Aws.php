@@ -691,10 +691,10 @@ class Aws
      * @param $instanceIds
      * @return Result
      */
-    public function describeInstances(array $instanceIds): Result
+    public function describeInstances(array $instanceIds, $region): Result
     {
         if (empty($this->ec2)) {
-            $this->ec2Connection();
+            $this->ec2Connection($region);
         }
 
         // Describe the now-running instance to get the public URL
