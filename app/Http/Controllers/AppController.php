@@ -108,14 +108,17 @@ class AppController extends Controller
                     }
                 }
 
+                Log::debug("COUNT PARAMS: {$params->count()}");
+
                 $region->increment('created_instances', $params->count());
 
                 return $this->success([
                     'instance_id' => $instance->id ?? null
                 ], __('keywords.instance.launch_success'));
-            }
 
-            return $this->error(__('keywords.error'), __('keywords.instance.launch_error'));
+            } else {
+                return $this->error(__('keywords.error'), __('keywords.instance.not_exist_ami'));
+            }
 
         } catch (Throwable $throwable) {
             Log::error($throwable->getMessage());

@@ -474,13 +474,15 @@ class Aws
      */
     public function launchInstance(Bot $bot, BotInstance $instance, User $user, string $keyPairName, string $securityGroupName, string $tagName, ?array $params): ?Result
     {
+        Log::debug("AWS: start launch instance");
+
         $botInstanceDetail = $instance->details()->latest()->first();
 
         if (empty($botInstanceDetail)) {
             return null;
         }
 
-        $region         = $instance->region ? $instance->region->code : config('aws.region', 'us-east-2');
+        $region         = ! empty($instance->region) ? $instance->region->code : config('aws.region', 'us-east-2');
         $imageId        = $botInstanceDetail->aws_image_id ?? config('aws.image_id');
         $instanceType   = $botInstanceDetail->aws_instance_type ?? config('aws.instance_type');
         $volumeSize     = $botInstanceDetail->aws_storage_gb ?? config('aws.volume_size');
@@ -536,6 +538,9 @@ class Aws
             $securityGroupName,
             $userData
         );
+
+        Log::debug("Instance Launch Request");
+        Log::debug(print_r($instanceLaunchRequest, true));
 
         return $this->ec2->runInstances($instanceLaunchRequest);
     }
@@ -688,10 +693,11 @@ class Aws
     }
 
     /**
-     * @param $instanceIds
+     * @param array $instanceIds
+     * @param string $region
      * @return Result
      */
-    public function describeInstances(array $instanceIds, $region): Result
+    public function describeInstances(array $instanceIds, string $region): Result
     {
         if (empty($this->ec2)) {
             $this->ec2Connection($region);

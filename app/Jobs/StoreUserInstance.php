@@ -75,7 +75,7 @@ class StoreUserInstance implements ShouldQueue
     /**
      * Execute the job.
      *
-     * @return bool
+     * @return void
      */
     public function handle()
     {
@@ -87,15 +87,17 @@ class StoreUserInstance implements ShouldQueue
             $aws = new Aws;
             $aws->ec2Connection($this->region);
 
+            Log::debug("Connect to region: {$this->region}");
+
             $keyPair        = $aws->createKeyPair();
-            Log::info('Created Key pair');
+            Log::debug("Created Key pair: {$keyPair['keyName']}");
             $tagName        = $aws->createTagName();
-            Log::info('Created tag name');
+            Log::debug("Created tag name: {$tagName}");
             $securityGroup  = $aws->createSecretGroup();
-            Log::info('Created SecurityGroups');
+            Log::debug("Created SecurityGroups: {$securityGroup['securityGroupName']}");
 
             if (empty($keyPair) || empty($tagName) || empty($securityGroup)) {
-                return false;
+                return;
             }
 
             $keyPairName    = $keyPair['keyName'];
@@ -118,6 +120,8 @@ class StoreUserInstance implements ShouldQueue
 
                 $instanceId = $newInstanceResponse->get('Instances')[0]['InstanceId'] ?? null;
 
+                Log::info('Launched instance ' . $instanceId);
+
                 CreditUsageHelper::startInstance(
                     $this->user,
                     self::START_INSTANCE_CREDIT,
@@ -125,13 +129,11 @@ class StoreUserInstance implements ShouldQueue
                     $tagName
                 );
 
-                Log::info('Launched instance ' . $instanceId);
-
                 $aws->waitUntil([$instanceId]);
 
                 Log::info('wait until instance ' . $instanceId);
 
-                $describeInstancesResponse = $aws->describeInstances([$instanceId]);
+                $describeInstancesResponse = $aws->describeInstances([$instanceId], $this->region);
 
                 Log::info('describe instances ' . $instanceId);
 
@@ -162,18 +164,17 @@ class StoreUserInstance implements ShouldQueue
 
                     broadcast(new InstanceLaunched($this->instance, $this->user));
                 }
-
-                return true;
             }
 
-            return false;
+            Log::debug("Launch Instance Error:");
+            Log::debug(print_r($newInstanceResponse, true));
 
+        } catch (GuzzleException $exception) {
+            $message = preg_replace('/^(.*)<\?xml version="1\.0" encoding="UTF-8"\?>/s', '', $exception->getMessage());
+            Log::debug("Error on catch GuzzleException : {$message}");
         } catch (Throwable $throwable) {
-            Log::debug("Error on catch : {$throwable->getMessage()}");
-            return false;
-        } catch (GuzzleException $expression) {
-            Log::debug("Error on catch : {$expression->getMessage()}");
-            return false;
+            $message = preg_replace('/^(.*)<\?xml version="1\.0" encoding="UTF-8"\?>/s', '', $throwable->getMessage());
+            Log::debug("Error on catch Throwable : {$message}");
         }
     }
 }

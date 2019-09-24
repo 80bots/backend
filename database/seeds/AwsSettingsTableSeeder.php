@@ -25,7 +25,7 @@ HERESHELL;
 
         AwsSetting::create([
             'image_id'  => config('aws.image_id', 'ami-0a15d2bfc04351315'),
-            'type'      => config('aws.instance_type', 't3a.small'),
+            'type'      => config('aws.instance_type', 't3.medium'),
             'storage'   => config('aws.volume_size', 32),
             'script'    => $script,
             'default'   => true
