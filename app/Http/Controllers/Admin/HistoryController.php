@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\CreditUsage;
+use App\Helpers\QueryHelper;
 use App\Http\Controllers\AppController;
 use App\Http\Resources\Admin\CreditUsageCollection;
 use Illuminate\Http\Request;
@@ -36,12 +37,15 @@ class HistoryController extends AppController
                     break;
             }
 
-            //
-            if (empty($sort)) {
-                $sort = 'created_at';
-                $order = 'desc';
-            }
-            $resource->orderBy($sort, $order);
+            $resource->when($sort, function ($query, $sort) use ($order) {
+                if (! empty(CreditUsage::ORDER_FIELDS[$sort])) {
+                    return QueryHelper::orderCreditHistory($query, CreditUsage::ORDER_FIELDS[$sort], $order);
+                } else {
+                    return $query->orderBy('created_at', 'desc');
+                }
+            }, function ($query) {
+                return $query->orderBy('created_at', 'desc');
+            });
 
             $history    = (new CreditUsageCollection($resource->paginate($limit)))->response()->getData();
             $meta       = $history->meta ?? null;

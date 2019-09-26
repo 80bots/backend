@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\AwsRegion;
+use App\Events\InstanceStatusUpdated;
 use App\Helpers\ApiResponse;
+use App\Helpers\QueryHelper;
 use App\Http\Resources\User\BotInstanceCollection;
 use App\Http\Resources\User\BotInstanceResource;
 use App\Http\Resources\Admin\BotInstanceResource as AdminBotInstanceResource;
@@ -38,12 +40,16 @@ class BotInstanceController extends AppController
 
             //
             if (! empty($search)) {
-                $resource->where('tag_name', 'like', "%{$search}%")
-                    ->orWhere('aws_instance_id', 'like', "%{$search}%");
+                $resource->where('bot_instances.tag_name', 'like', "%{$search}%")
+                    ->orWhere('bot_instances.tag_user_email', 'like', "%{$search}%");
             }
 
             $resource->when($sort, function ($query, $sort) use ($order) {
-                return $query->orderBy($sort, $order);
+                if (! empty(BotInstance::ORDER_FIELDS[$sort])) {
+                    return QueryHelper::orderBotInstance($query, BotInstance::ORDER_FIELDS[$sort], $order);
+                } else {
+                    return $query->orderBy('aws_status', 'asc')->orderBy('start_time', 'desc');
+                }
             }, function ($query) {
                 return $query->orderBy('aws_status', 'asc')->orderBy('start_time', 'desc');
             });
@@ -234,8 +240,12 @@ class BotInstanceController extends AppController
                         case 'status':
 
                             if ($this->changeStatus($value, $id)) {
+
                                 $instance = new BotInstanceResource(BotInstance::withTrashed()
                                     ->where('id', '=', $id)->first());
+
+                                broadcast(new InstanceStatusUpdated(Auth::id()));
+
                                 return $this->success($instance->toArray($request));
                             } else {
                                 return $this->error(__('user.server_error'), __('user.instances.not_updated'));

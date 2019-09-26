@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\CreditUsage;
 use App\Helpers\CreditUsageHelper;
 use App\Helpers\MailHelper;
+use App\Helpers\QueryHelper;
 use App\Http\Controllers\AppController;
 use App\Http\Resources\Admin\UserCollection;
 use App\Http\Resources\Admin\UserResource;
@@ -48,18 +49,22 @@ class UserController extends AppController
                     break;
             }
 
-            $resource->where('id', '!=', $request->user()->id);
-
             //
             if (! empty($search)) {
-                $resource->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
+                $resource->where('users.name', 'like', "%{$search}%")
+                    ->orWhere('users.email', 'like', "%{$search}%");
             }
 
-            //
-            if (! empty($sort)) {
-                $resource->orderBy($sort, $order);
-            }
+            $resource->when($sort, function ($query, $sort) use ($order) {
+                if (! empty(User::ORDER_FIELDS[$sort])) {
+                    $result = QueryHelper::orderUser($query, User::ORDER_FIELDS[$sort], $order);
+                    return $result->where('users.id', '!=', Auth::id());
+                } else {
+                    return $query->where('id', '!=', Auth::id())->orderBy('created_at', 'desc');
+                }
+            }, function ($query) {
+                return $query->where('id', '!=', Auth::id())->orderBy('created_at', 'desc');
+            });
 
             $users  = (new UserCollection($resource->paginate($limit)))->response()->getData();
             $meta   = $users->meta ?? null;

@@ -72,6 +72,10 @@ class AwsSyncRegions extends Command
         $limit = 0;
 
         $aws    = new Aws;
+
+        // TODO: NEW Quotas Limit
+        //$result = $aws->getServiceQuotas($region);
+
         $result = $aws->getEc2AccountAttributes($region);
 
         if ($result->hasKey('AccountAttributes')) {

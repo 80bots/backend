@@ -32,5 +32,13 @@ return [
     'volume_size' => env('AWS_VOLUME_SIZE', '32'),
     'instance_metadata' => env('AWS_INSTANCE_METADATA', 'http://169.254.169.254/latest/meta-data/'),
     'instance_ignore' =>  ['SaaS', 'kabas', 'kabas2'],
-    'owners' => ['030500410996']
+    'owners' => ['030500410996'],
+    'quota' => [
+        'code_t3_medium' => 'L-D54D8763'
+    ],
+    'services' => [
+        'ec2' => [
+            'code' => 'ec2'
+        ]
+    ]
 ];

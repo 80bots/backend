@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\AwsAmi;
 use App\AwsRegion;
 use App\Events\InstanceStatusUpdated;
+use App\Helpers\QueryHelper;
 use App\Http\Controllers\AppController;
 use App\Http\Resources\Admin\BotInstanceCollection;
 use App\Http\Resources\Admin\RegionCollection;
@@ -37,30 +38,33 @@ class BotInstanceController extends AppController
             $sort   = $request->input('sort');
             $order  = $request->input('order') ?? 'asc';
 
-            $resource = BotInstance::withTrashed()->with(['oneDetail', 'user'])->ajax();
+            //$resource = BotInstance::withTrashed()->with(['oneDetail', 'user', 'region'])->ajax();
+            $resource = BotInstance::withTrashed()->ajax();
 
             // TODO: Add Filters
 
-            switch ($list) {
-                case 'my':
-                    $resource->findByUserId(Auth::id());
-                    break;
-                default:
-                    break;
+            if ($list === 'my') {
+                $resource->findByUserId(Auth::id());
             }
 
             //
             if (! empty($search)) {
-                $resource->where('tag_name', 'like', "%{$search}%")
-                    ->orWhere('aws_instance_id', 'like', "%{$search}%");
+                $resource->where('bot_instances.tag_name', 'like', "%{$search}%")
+                    ->orWhere('bot_instances.tag_user_email', 'like', "%{$search}%");
             }
 
             //
             $resource->when($sort, function ($query, $sort) use ($order) {
-                return $query->orderBy($sort, $order);
+                if (! empty(BotInstance::ORDER_FIELDS[$sort])) {
+                    return QueryHelper::orderBotInstance($query, BotInstance::ORDER_FIELDS[$sort], $order);
+                } else {
+                    return $query->orderBy('aws_status', 'asc')->orderBy('start_time', 'desc');
+                }
             }, function ($query) {
                 return $query->orderBy('aws_status', 'asc')->orderBy('start_time', 'desc');
             });
+
+            //$resource->dd();
 
             $instances  = (new BotInstanceCollection($resource->paginate($limit)))->response()->getData();
             $meta       = $instances->meta ?? null;
@@ -108,12 +112,15 @@ class BotInstanceController extends AppController
         }
 
         //
-        if (empty($sort)) {
-            $sort   = 'created_at';
-            $order  = 'desc';
-        }
-
-        $resource->orderBy($sort, $order);
+        $resource->when($sort, function ($query, $sort) use ($order) {
+            if (! empty(AwsRegion::ORDER_FIELDS[$sort])) {
+                return QueryHelper::orderAwsRegion($query, AwsRegion::ORDER_FIELDS[$sort], $order);
+            } else {
+                return $query->orderBy('name', 'asc');
+            }
+        }, function ($query) {
+            return $query->orderBy('name', 'asc');
+        });
 
         $regions    = (new RegionCollection($resource->paginate($limit)))->response()->getData();
         $meta       = $regions->meta ?? null;

@@ -123,9 +123,7 @@ class InstanceHelper
 
                     $instanceId = $instance['aws_instance_id'] ?? null;
 
-                    $botInstance = $user->instances()->whereHas('details', function (Builder $query) use ($instanceId) {
-                        $query->where('aws_instance_id', '=', $instanceId);
-                    })->first();
+                    $botInstance = $user->instances()->where('aws_instance_id', '=', $instanceId)->first();
 
                     if (! empty($botInstance)) {
 
@@ -174,26 +172,27 @@ class InstanceHelper
                                     if ($volumeSize > 0) {
 
                                         $newInstance = BotInstance::create([
-                                            'user_id' => $user->id,
-                                            'bot_id' => $bot->id ?? null,
-                                            'aws_region_id' => $region->id ?? null,
-                                            'aws_status' => $status
+                                            'user_id'           => $user->id,
+                                            'bot_id'            => $bot->id ?? null,
+                                            'tag_name'          => $instance['tag_name'],
+                                            'tag_user_email'    => $instance['tag_user_email'],
+                                            'aws_instance_id'   => $instance['aws_instance_id'],
+                                            'aws_public_ip'     => $instance['aws_public_ip'],
+                                            'aws_region_id'     => $region->id ?? null,
+                                            'aws_status'        => $status,
+                                            'start_time'        => $instance['created_at']
                                         ]);
 
                                         $newInstance->details()->create([
-                                            'aws_instance_type' => $instance['aws_instance_type'],
-                                            'aws_storage_gb' => $volumeSize,
-                                            'aws_image_id' => $instance['aws_image_id'],
-                                            'tag_name' => $instance['tag_name'],
-                                            'tag_user_email' => $instance['tag_user_email'],
-                                            'aws_instance_id' => $instance['aws_instance_id'],
-                                            'aws_security_group_id' => $instance['aws_security_group_id'],
-                                            'aws_security_group_name' => $instance['aws_security_group_name'],
-                                            'aws_public_ip' => $instance['aws_public_ip'],
-                                            'aws_public_dns' => $instance['aws_public_dns'],
-                                            'aws_pem_file_path' => "keys/{$instance['aws_key_name']}.pem",
-                                            'is_in_queue' => 0,
-                                            'start_time' => $instance['created_at']
+                                            'aws_instance_type'         => $instance['aws_instance_type'],
+                                            'aws_storage_gb'            => $volumeSize,
+                                            'aws_image_id'              => $instance['aws_image_id'],
+                                            'aws_security_group_id'     => $instance['aws_security_group_id'],
+                                            'aws_security_group_name'   => $instance['aws_security_group_name'],
+                                            'aws_public_dns'            => $instance['aws_public_dns'],
+                                            'aws_pem_file_path'         => "keys/{$instance['aws_key_name']}.pem",
+                                            'is_in_queue'               => 0,
+                                            'start_time'                => $instance['created_at']
                                         ]);
                                     }
                                 }

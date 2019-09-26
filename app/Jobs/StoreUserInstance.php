@@ -146,20 +146,20 @@ class StoreUserInstance implements ShouldQueue
                     // store instance details in database
                     $botInstanceDetail = $this->instance->details()->latest()->first();
                     $botInstanceDetail->update([
-                        'tag_name' => $tagName,
-                        'tag_user_email' => $this->user->email ?? '',
-                        'aws_instance_id' => $instanceArray['InstanceId'] ?? '',
-                        'aws_security_group_id' => $groupId,
-                        'aws_security_group_name' => $groupName,
-                        'aws_public_ip' => $instanceArray['PublicIpAddress'] ?? '',
-                        'aws_public_dns' => $instanceArray['PublicDnsName'] ?? '',
-                        'aws_pem_file_path' => $keyPairPath,
-                        'is_in_queue' => 0,
-                        'start_time' => $launchTime->format('Y-m-d H:i:s'),
+                        'aws_security_group_id'     => $groupId,
+                        'aws_security_group_name'   => $groupName,
+                        'aws_public_dns'            => $instanceArray['PublicDnsName'] ?? '',
+                        'aws_pem_file_path'         => $keyPairPath,
+                        'is_in_queue'               => 0,
+                        'start_time'                => $launchTime->format('Y-m-d H:i:s'),
                     ]);
 
                     $this->instance->update([
-                        'start_time' => $launchTime->format('Y-m-d H:i:s'),
+                        'tag_name'          => $tagName,
+                        'tag_user_email'    => $this->user->email ?? '',
+                        'aws_instance_id'   => $instanceArray['InstanceId'] ?? '',
+                        'aws_public_ip'     => $instanceArray['PublicIpAddress'] ?? '',
+                        'start_time'        => $launchTime->format('Y-m-d H:i:s'),
                     ]);
 
                     if ($awsStatus === BotInstance::STATUS_RUNNING) {

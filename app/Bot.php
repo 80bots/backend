@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Helpers\QueryHelper;
 use Illuminate\Database\Eloquent\Model;
 
 class Bot extends Model
@@ -11,6 +12,29 @@ class Bot extends Model
 
     const TYPE_PUBLIC       = 'public';
     const TYPE_PRIVATE      = 'private';
+
+    const ORDER_FIELDS      = [
+        'platform' => [
+            'entity'    => QueryHelper::ENTITY_PLATFORM,
+            'field'     => 'name'
+        ],
+        'name' => [
+            'entity'    => QueryHelper::ENTITY_BOT,
+            'field'     => 'name'
+        ],
+        'description' => [
+            'entity'    => QueryHelper::ENTITY_BOT,
+            'field'     => 'description'
+        ],
+        'status' => [
+            'entity'    => QueryHelper::ENTITY_BOT,
+            'field'     => 'status'
+        ],
+        'type' => [
+            'entity'    => QueryHelper::ENTITY_BOT,
+            'field'     => 'type'
+        ],
+    ];
 
     protected $table = "bots";
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\CommonHelper;
+use App\Helpers\QueryHelper;
 use App\Http\Resources\User\ScheduleCollection;
 use App\Http\Resources\User\ScheduleResource;
 use App\Http\Resources\User\BotInstanceCollection;
@@ -33,10 +34,22 @@ class ScheduleController extends Controller
 
             // TODO: Add Filters
 
-            //
-            if (! empty($sort)) {
-                $resource->orderBy($sort, $order);
+            if (! empty($search)) {
+                $resource->whereHas('instance', function (Builder $query) use ($search) {
+                    $query->where('tag_name', 'like', "%{$search}%");
+                });
             }
+
+            //
+            $resource->when($sort, function ($query, $sort) use ($order) {
+                if (! empty(SchedulingInstance::ORDER_FIELDS[$sort])) {
+                    return QueryHelper::orderBotScheduling($query, SchedulingInstance::ORDER_FIELDS[$sort], $order);
+                } else {
+                    return $query->orderBy('created_at', 'desc');
+                }
+            }, function ($query) {
+                return $query->orderBy('created_at', 'desc');
+            });
 
             $schedules  = (new ScheduleCollection($resource->paginate($limit)))->response()->getData();
             $meta       = $schedules->meta ?? null;

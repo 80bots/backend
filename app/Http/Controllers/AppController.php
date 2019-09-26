@@ -185,7 +185,7 @@ class AppController extends Controller
         $aws    = new Aws;
 
         $describeInstancesResponse = $aws->describeInstances(
-            [$instanceDetail->aws_instance_id ?? null],
+            [$instance->aws_instance_id ?? null],
             $awsRegion->code
         );
 
@@ -207,7 +207,7 @@ class AppController extends Controller
 
         $instance->setAwsStatusPending();
         //
-        $instanceDetail->clearPublicIp();
+        $instance->clearPublicIp();
 
         dispatch(new InstanceChangeStatus($instance, $user, $awsRegion, $status));
 

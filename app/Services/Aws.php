@@ -11,6 +11,7 @@ use Aws\Ec2\Ec2Client;
 use Aws\Result;
 use Aws\S3\Exception\S3Exception;
 use Aws\S3\S3Client;
+use Aws\ServiceQuotas\ServiceQuotasClient;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Support\Facades\Log;
@@ -989,6 +990,26 @@ HERESHELL;
             Log::error($throwable->getMessage());
             return null;
         }
+    }
+
+    public function getServiceQuotas(string $region, array $credentials = null): Result
+    {
+        $sqc = new ServiceQuotasClient([
+            'region'        => empty($region) ? config('aws.region', 'us-east-2') : $region,
+            'version'       => config('aws.version', 'latest'),
+            'credentials'   => empty($credentials) ? config('aws.credentials') : $credentials
+        ]);
+
+//        $result = $sqc->listAWSDefaultServiceQuotas([
+//            "ServiceCode" => "ec2",
+//            "MaxResults" => 50,
+//            "NextToken" => "UFQBfttjykTBt8p8ZSctmbosO5+VDXB3Hrm/UKOZuG/RlugekE3ve27ghkdaocue4xPslzdIJcN7XdsFAWtgMbEF04jzNdYbAcSVKjlKn2qKW6IN5Q6qn3lYKrp8zNuR/6+GmJiZ+QuRVs4riPvYjmcVso032FTar2ou1ZMKRSZNTLYC9XCsVSdRyXMVisJ0eDUGV84Y35XsbWHDnTW0a43WD7+TUsusNb4qB5LsUkbaowXwqrluH84TN+edVqOJTE4IZBxlTlOCl5UpKWLLIxLdlOvN5DQ5bY2KARvh8bkcuRt55npGfW9OXNfhaLR45AlP4d0RdsuQ/q8Yn5Mbh6IVa7qFhJsK+JytIE6X5Uz/h/knGj/TE9WBFddyZkk1JT9FHnguRtgWSN7Xnux5p2gm21QzLCko80Hhv3UOjTohUHHvnns1OxYhXj1DFYjUqv5w12weHYZdXIRNUYvJ+b73O1c0I90n4OktVNSZfsEXkf5tOgaZ9uNoaLF8043aTUSrZLs2Ybio7Y2y7sFLh3y+5kTg9Oi6N6TXwAmRp4Bn2p5GjWVxIniCl/NQWkAFSJLjEyg32JPHf4po58GIqnXweCMqQDiMvqU6qr3hF38gpebFXJRbH3czizvRVncVca1Dcoyw61WzOC8iR83sdp5jG7sZqvU7sMh4fBB9c9c0JIVne5AfyI1QsL6+lv67tnF28kuHaIozAQlc7O0Y3HglGk2d23dCdgumWfWzU3W0DPiYlmM9SBG5F7/5xliXkvw3wR3zOCbUdsqtAaM+6ehG2lZTrQlPxrVWtkcCd8eSGOE="
+//        ]);
+
+        return $sqc->getServiceQuota([
+            "QuotaCode"     => config('aws.quota.code_t3_medium'),
+            "ServiceCode"   => config('aws.services.ec2.code'),
+        ]);
     }
 
     protected function getEc2InstanceTypes(): ?array

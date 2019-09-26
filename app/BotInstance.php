@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Helpers\QueryHelper;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -14,11 +15,50 @@ class BotInstance extends BaseModel
     const STATUS_RUNNING    = 'running';
     const STATUS_STOPPED    = 'stopped';
 
+    const ORDER_FIELDS      = [
+        'region' => [
+            'entity'    => QueryHelper::ENTITY_AWS_REGION,
+            'field'     => 'name'
+        ],
+        'launched_by' => [
+            'entity'    => QueryHelper::ENTITY_BOT_INSTANCES,
+            'field'     => 'tag_user_email'
+        ],
+        'name' => [
+            'entity'    => QueryHelper::ENTITY_BOT_INSTANCES,
+            'field'     => 'tag_name'
+        ],
+        'uptime' => [
+            'entity'    => QueryHelper::ENTITY_BOT_INSTANCES,
+            'field'     => 'total_up_time'
+        ],
+        'status' => [
+            'entity'    => QueryHelper::ENTITY_BOT_INSTANCES,
+            'field'     => 'aws_status'
+        ],
+        'launched_at' => [
+            'entity'    => QueryHelper::ENTITY_BOT_INSTANCES,
+            'field'     => 'start_time'
+        ],
+        'ip' => [
+            'entity'    => QueryHelper::ENTITY_BOT_INSTANCES,
+            'field'     => 'aws_public_ip'
+        ],
+        'bot_name' => [
+            'entity'    => QueryHelper::ENTITY_BOT,
+            'field'     => 'name'
+        ],
+    ];
+
     protected $table = "bot_instances";
 
     protected $fillable = [
         'user_id',
         'bot_id',
+        'tag_name',
+        'tag_user_email',
+        'aws_instance_id',
+        'aws_public_ip',
         'aws_region_id',
         'used_credit',
         'up_time',
@@ -48,9 +88,7 @@ class BotInstance extends BaseModel
 
     public function scopeFindByInstanceId($query, $instanceId)
     {
-        return $query->whereHas('details', function (Builder $query) use ($instanceId) {
-            $query->where('aws_instance_id', '=', $instanceId);
-        });
+        return $query->where('aws_instance_id', '=', $instanceId);
     }
 
     public function scopeFindRunningInstanceByUserId($query, $id)
@@ -116,5 +154,10 @@ class BotInstance extends BaseModel
     public function order()
     {
         return $this->hasOne(Order::class,'instance_id', 'id');
+    }
+
+    public function clearPublicIp()
+    {
+        $this->update(['aws_public_ip' => null]);
     }
 }
