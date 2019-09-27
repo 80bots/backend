@@ -12,6 +12,7 @@ use App\Http\Resources\Admin\RegionCollection;
 use App\Http\Resources\Admin\BotInstanceResource;
 use App\Http\Resources\Admin\RegionResource;
 use App\Jobs\SyncBotInstances;
+use App\Jobs\SyncRegions;
 use App\Services\Aws;
 use App\BotInstance;
 use Illuminate\Http\Request;
@@ -155,6 +156,16 @@ class BotInstanceController extends AppController
             } else {
                 return $this->error(__('admin.error'), __('admin.regions.update_error'));
             }
+        } catch (Throwable $throwable) {
+            return $this->error(__('admin.server_error'), $throwable->getMessage());
+        }
+    }
+
+    public function syncRegions(Request $request)
+    {
+        try {
+            dispatch(new SyncRegions(Auth::user()));
+            return $this->success([], __('admin.regions.success_sync'));
         } catch (Throwable $throwable) {
             return $this->error(__('admin.server_error'), $throwable->getMessage());
         }

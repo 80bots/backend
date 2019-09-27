@@ -4,8 +4,11 @@ namespace App\Console\Commands;
 
 use App\AwsRegion;
 use App\Services\Aws;
+use Aws\ServiceQuotas\Exception\ServiceQuotasException;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class AwsSyncRegions extends Command
 {
@@ -69,37 +72,69 @@ class AwsSyncRegions extends Command
      */
     private function getLimitByRegion(string $region): int
     {
-        $limit = 0;
-
+        $limit  = 0;
         $aws    = new Aws;
 
-        // TODO: NEW Quotas Limit
-        //$result = $aws->getServiceQuotas($region);
+        try {
 
-        $result = $aws->getEc2AccountAttributes($region);
+            // TODO: NEW Quotas Limit
+            $result = $aws->getServiceQuotasT3MediumInstance($region);
 
-        if ($result->hasKey('AccountAttributes')) {
-
-            $account = $result->get('AccountAttributes');
-
-            if (! empty($account) && is_array($account)) {
-
-                $account = collect($account);
-
-                $res = $account->filter(function ($value, $key) {
-                    return $value['AttributeName'] === "max-instances";
-                })->map(function ($item, $key) {
-                    return $item['AttributeValues'][0]['AttributeValue'];
-                })->toArray();
-
-                sort($res);
-
-                $limit = intval($res[0]);
+            if ($result->hasKey('Quota')) {
+                $quota = $result->get('Quota');
+                $limit = intval($quota['Value']);
             }
+
+        } catch (ServiceQuotasException $exception) {
+            Log::error("GetServiceQuota : not fount region : {$region}");
+            $limit = $this->getEc2AccountLimitByRegion($aws, $region);
         }
 
-        unset($aws, $result, $res, $account);
+        unset($aws, $result, $quota);
 
         return $limit;
+    }
+
+    /**
+     * @param Aws $aws
+     * @param string $region
+     * @return int
+     */
+    private function getEc2AccountLimitByRegion(Aws $aws, string $region): int
+    {
+        try {
+
+            $limit = 0;
+
+            $result = $aws->getEc2AccountAttributes($region);
+
+            if ($result->hasKey('AccountAttributes')) {
+
+                $account = $result->get('AccountAttributes');
+
+                if (! empty($account) && is_array($account)) {
+
+                    $account = collect($account);
+
+                    $res = $account->filter(function ($value, $key) {
+                        return $value['AttributeName'] === "max-instances";
+                    })->map(function ($item, $key) {
+                        return $item['AttributeValues'][0]['AttributeValue'];
+                    })->toArray();
+
+                    sort($res);
+
+                    $limit = intval($res[0]);
+                }
+            }
+
+            unset($aws, $result, $res, $account);
+
+            return $limit;
+
+        } catch (Throwable $throwable) {
+            Log::error($throwable->getMessage());
+            return 0;
+        }
     }
 }
