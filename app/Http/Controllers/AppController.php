@@ -57,7 +57,7 @@ class AppController extends Controller
              */
             $user = User::find(Auth::id()); // Get "App\User" object
 
-            if ($user->credits < ($credit*$params->count())) {
+            if ($user->isUser() && $user->credits < ($credit*$params->count())) {
                 return $this->error(__('keywords.error'), __('keywords.instance.credits_error'));
             }
 

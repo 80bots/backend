@@ -73,7 +73,7 @@ class CalculateUserCreditScore extends Command
 
                     $used = $instance->used_credit - $order->credits;
 
-                    if ($used >= $user->credits && $user->hasRole('User')) {
+                    if ($user->isUser() && $used >= $user->credits) {
                         $instancesId = $instance->aws_instance_id ?? null;
                         $this->stopUserAllInstances([$instancesId], $instance->region->code);
                     }

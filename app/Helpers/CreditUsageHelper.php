@@ -53,7 +53,9 @@ class CreditUsageHelper
 
     public static function usingTheBot(User $user, Bot $bot, int $credits)
     {
-        $user->decrement('credits', $credits);
+        if ($user->isUser()) {
+            $user->decrement('credits', $credits);
+        }
 
         CreditUsage::create([
             'user_id'   => $user->id,
@@ -66,7 +68,9 @@ class CreditUsageHelper
 
     public static function startInstance(User $user, int $credits, string $instanceId, string $name)
     {
-        $user->decrement('credits', $credits);
+        if ($user->isUser()) {
+            $user->decrement('credits', $credits);
+        }
 
         CreditUsage::create([
             'user_id'   => $user->id,
