@@ -125,7 +125,7 @@ class StoreUserInstance implements ShouldQueue
                 CreditUsageHelper::startInstance(
                     $this->user,
                     self::START_INSTANCE_CREDIT,
-                    $instanceId,
+                    $this->instance->id,
                     $tagName
                 );
 

@@ -51,33 +51,35 @@ class CreditUsageHelper
         ]);
     }
 
-    public static function usingTheBot(User $user, Bot $bot, int $credits)
+    public static function usingTheBot(User $user, Bot $bot, int $instanceId, int $credits)
     {
         if ($user->isUser()) {
             $user->decrement('credits', $credits);
         }
 
         CreditUsage::create([
-            'user_id'   => $user->id,
-            'credits'   => $credits,
-            'total'     => $user->credits ?? 0,
-            'action'    => CreditUsage::ACTION_USED,
-            'subject'   => "Credits charging for using the bot ({$bot->name})"
+            'instance_id'   => $instanceId,
+            'user_id'       => $user->id,
+            'credits'       => $credits,
+            'total'         => $user->credits ?? 0,
+            'action'        => CreditUsage::ACTION_USED,
+            'subject'       => "Credits charging for using the bot ({$bot->name})"
         ]);
     }
 
-    public static function startInstance(User $user, int $credits, string $instanceId, string $name)
+    public static function startInstance(User $user, int $credits, int $instanceId, string $name)
     {
         if ($user->isUser()) {
             $user->decrement('credits', $credits);
         }
 
         CreditUsage::create([
-            'user_id'   => $user->id,
-            'credits'   => $credits,
-            'total'     => $user->credits ?? 0,
-            'action'    => CreditUsage::ACTION_USED,
-            'subject'   => "Funds charging for the first hour of instance work (Instance name: {$name} / Instance ID: {$instanceId})"
+            'instance_id'   => $instanceId,
+            'user_id'       => $user->id,
+            'credits'       => $credits,
+            'total'         => $user->credits ?? 0,
+            'action'        => CreditUsage::ACTION_USED,
+            'subject'       => "Funds charging for the first hour of instance work (Instance name: {$name} / Instance ID: {$instanceId})"
         ]);
     }
 

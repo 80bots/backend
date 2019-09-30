@@ -59,11 +59,14 @@ class UserController extends AppController
                 if (! empty(User::ORDER_FIELDS[$sort])) {
                     $result = QueryHelper::orderUser($query, User::ORDER_FIELDS[$sort], $order);
                     return $result->where('users.id', '!=', Auth::id());
+                    //return $result;
                 } else {
                     return $query->where('id', '!=', Auth::id())->orderBy('created_at', 'desc');
+                    //return $query->orderBy('created_at', 'desc');
                 }
             }, function ($query) {
                 return $query->where('id', '!=', Auth::id())->orderBy('created_at', 'desc');
+                //return $query->orderBy('created_at', 'desc');
             });
 
             $users  = (new UserCollection($resource->paginate($limit)))->response()->getData();

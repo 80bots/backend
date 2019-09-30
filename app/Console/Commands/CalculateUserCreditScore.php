@@ -79,7 +79,7 @@ class CalculateUserCreditScore extends Command
                     }
 
                     if ($used > 0) {
-                        CreditUsageHelper::usingTheBot($user, $instance->bot, $used);
+                        CreditUsageHelper::usingTheBot($user, $instance->bot, $instance->id, $used);
                     }
 
                     $order->increment('credits', $used);

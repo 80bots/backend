@@ -6,6 +6,7 @@ use App\CreditUsage;
 use App\Helpers\QueryHelper;
 use App\Http\Controllers\AppController;
 use App\Http\Resources\Admin\CreditUsageCollection;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Throwable;
 
@@ -17,14 +18,21 @@ class HistoryController extends AppController
     {
         try {
 
-            $limit  = $request->query('limit') ?? self::PAGINATE;
-            $action = $request->input('action');
-            $sort   = $request->input('sort');
-            $order  = $request->input('order') ?? 'asc';
+            $limit      = $request->query('limit') ?? self::PAGINATE;
+            $action     = $request->input('action');
+            $sort       = $request->input('sort');
+            $order      = $request->input('order') ?? 'asc';
+            $instanceId = $request->input('instanceId');
 
-            $resource = CreditUsage::with('user')->findByUserId($request->input('user'));
+            $resource = CreditUsage::findByUserId($request->input('user'));
 
             // TODO: Add Filters
+
+            if (! empty($instanceId)) {
+                $resource->whereHas('instance', function (Builder $query) use ($instanceId) {
+                    $query->where('aws_instance_id', '=', $instanceId);
+                });
+            }
 
             switch ($action) {
                 case CreditUsage::ACTION_ADDED:

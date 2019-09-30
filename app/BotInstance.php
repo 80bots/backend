@@ -156,6 +156,11 @@ class BotInstance extends BaseModel
         return $this->hasOne(Order::class,'instance_id', 'id');
     }
 
+    public function creditsUsage()
+    {
+        return $this->hasMany(CreditUsage::class, 'instance_id', 'id');
+    }
+
     public function clearPublicIp()
     {
         $this->update(['aws_public_ip' => null]);

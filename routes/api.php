@@ -27,6 +27,7 @@ Route::group(['middleware' => ['auth:api', 'api.sentry']], function() {
 
     // User bots
     Route::group(['prefix' => 'bots', 'as' => 'bots.'], function () {
+        Route::get('/', 'BotController@index')->name('running');
         Route::get('/running', 'BotInstanceController@index')->name('running');
         Route::put('/running/status', 'BotInstanceController@changeStatus')->name('running.update.status');
     });
@@ -59,7 +60,6 @@ Route::group(['middleware' => ['auth:api', 'api.sentry']], function() {
     });
 
     Route::resources([
-        'bots'     => 'BotController',
         'schedule' => 'ScheduleController',
         'platform' => 'PlatformController'
     ]);

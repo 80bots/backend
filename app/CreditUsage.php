@@ -39,6 +39,7 @@ class CreditUsage extends Model
     protected $table = "credit_usages";
 
     protected $fillable = [
+        'instance_id',
         'user_id',
         'credits',
         'total',
@@ -83,6 +84,11 @@ class CreditUsage extends Model
     public function scopeOnlyUsed($query)
     {
         $query->where('action', '=', self::ACTION_USED);
+    }
+
+    public function instance()
+    {
+        return $this->belongsTo(BotInstance::class, 'instance_id');
     }
 
     public function user()
