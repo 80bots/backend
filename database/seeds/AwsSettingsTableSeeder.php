@@ -16,11 +16,7 @@ class AwsSettingsTableSeeder extends Seeder
 file="puppeteer/params/params.json"
 username="kabas"
 cd /home/\$username/
-
-su - \$username -c 'git clone -b master https://14b12de18e2199b2d584d3f6cf9492f3353f9b3e@github.com/80bots/puppeteer.git ./puppeteer'
-su - \$username -c 'cd ./puppeteer && npm i'
-
-su - \$username -c 'mkdir params'
+su - \$username -c 'cd ~/data-streamer && git pull && cp .env.example .env && yarn && yarn build && pm2 start --name "data-streamer" yarn -- start'
 HERESHELL;
 
         AwsSetting::create([
