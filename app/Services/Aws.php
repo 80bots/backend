@@ -8,6 +8,7 @@ use App\BotInstance;
 use App\Helpers\GeneratorID;
 use App\User;
 use Aws\Ec2\Ec2Client;
+use Aws\Iam\IamClient;
 use Aws\Result;
 use Aws\S3\Exception\S3Exception;
 use Aws\S3\S3Client;
@@ -73,6 +74,17 @@ class Aws
         ]);
 
         $this->s3Bucket = empty($bucket) ? config('aws.bucket') : $bucket;
+    }
+
+    public function iamConnection(string $region = '', array $credentials = null)
+    {
+        $iam = new IamClient([
+            'region'        => empty($region) ? config('aws.region', 'us-east-2') : $region,
+            'version'       => config('aws.version', 'latest'),
+            'credentials'   => empty($credentials) ? config('aws.credentials') : $credentials
+        ]);
+
+        dd($iam->ListGroups());
     }
 
     /**
