@@ -170,7 +170,7 @@ class StoreUserInstance implements ShouldQueue
                 }
             }
 
-            Log::debug("Launch Instance Error:");
+            Log::debug("Launch Instance Response:");
             Log::debug(print_r($newInstanceResponse, true));
 
         } catch (GuzzleException $exception) {
