@@ -17,6 +17,7 @@ class BotInstanceResource extends JsonResource
     {
         $details    = $this->oneDetail ?? null;
         $region     = $this->region ?? null;
+        $uptime     = ($this->total_up_time ?? 0) + ($this->cron_up_time ?? 0);
 
         return [
             'id'                => $this->id ?? '',
@@ -26,7 +27,7 @@ class BotInstanceResource extends JsonResource
             'parameters'        => $this->bot->parameters ?? '',
             'launched_at'       => $details->start_time ?? '',
             'credits_used'      => $this->used_credit ?? 0,
-            'up_time'           => $this->up_time ?? 0,
+            'up_time'           => $uptime,
             'total_up_time'     => $this->total_up_time ?? 0,
             'cron_up_time'      => $this->cron_up_time ?? 0,
             'status'            => $this->aws_status ?? BotInstance::STATUS_TERMINATED,

@@ -19,6 +19,7 @@ class BotInstanceResource extends JsonResource
       //$details    = $this->details()->latest()->first();
         $region     = $this->region ?? null;
         $details    = $this->oneDetail ?? null;
+        $uptime     = ($this->total_up_time ?? 0) + ($this->cron_up_time ?? 0);
 
         return [
             'id'                => $this->id ?? '',
@@ -30,7 +31,7 @@ class BotInstanceResource extends JsonResource
             'launched_at'       => $details->start_time ?? '',
             'instance_id'       => $this->aws_instance_id ?? '',
             'used_credit'       => $this->used_credit ?? 0,
-            'uptime'            => $this->total_up_time ?? 0,
+            'uptime'            => $uptime,
             'status'            => $this->aws_status ?? BotInstance::STATUS_TERMINATED,
             'ip'                => $this->aws_public_ip ?? '',
             'pem'               => $details->aws_pem_file_path ?? ''

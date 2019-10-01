@@ -80,7 +80,6 @@ class CalculateInstancesUpTime extends Command
                                     $instance->update([
                                         'cron_up_time'  => $cronUpTime,
                                         'up_time'       => $cronUpTime + $instance->total_up_time ?? 0,
-                                        'total_up_time' => $cronUpTime + $instance->total_up_time ?? 0,
                                         'used_credit'   => CommonHelper::calculateUsedCredit($cronUpTime + $instance->total_up_time ?? 0)
                                     ]);
 
