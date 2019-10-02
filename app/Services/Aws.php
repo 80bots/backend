@@ -8,6 +8,7 @@ use App\BotInstance;
 use App\Helpers\GeneratorID;
 use App\User;
 use Aws\Ec2\Ec2Client;
+use Aws\Iam\Exception\IamException;
 use Aws\Iam\IamClient;
 use Aws\Result;
 use Aws\S3\Exception\S3Exception;
@@ -32,6 +33,11 @@ class Aws
      * @var S3Client
      */
     protected $s3;
+
+    /**
+     * @var IamClient
+     */
+    protected $iam;
 
     /**
      * @var string
@@ -76,15 +82,17 @@ class Aws
         $this->s3Bucket = empty($bucket) ? config('aws.bucket') : $bucket;
     }
 
+    /**
+     * @param string $region
+     * @param array|null $credentials
+     */
     public function iamConnection(string $region = '', array $credentials = null)
     {
-        $iam = new IamClient([
+        $this->iam = new IamClient([
             'region'        => empty($region) ? config('aws.region', 'us-east-2') : $region,
             'version'       => config('aws.version', 'latest'),
             'credentials'   => empty($credentials) ? config('aws.credentials') : $credentials
         ]);
-
-        dd($iam->ListGroups());
     }
 
     /**
@@ -118,6 +126,7 @@ class Aws
 
     /**
      * @return array
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function getEc2RegionsWithName(): array
     {
@@ -164,6 +173,65 @@ class Aws
         }
 
         return [];
+    }
+
+    /**
+     * @param string $name
+     * @param string $email
+     * @return array|null
+     */
+    public function createIamUser(string $name, string $email): ?array
+    {
+        if (empty($this->iam)) {
+            $this->iamConnection();
+        }
+
+        $access = null;
+        $user = null;
+
+        try {
+
+            $getUser = $this->iam->getUser([
+                'UserName' => $name,
+            ]);
+
+            if ($getUser->hasKey('User')) {
+                $user = $getUser->get('User');
+            }
+        } catch (IamException $exception) {
+            Log::error("User {$name} Not Found");
+        }
+
+        if (empty($user)) {
+
+            try {
+                $result = $this->iam->CreateUser([
+                    'UserName' => $name
+                ]);
+
+                $this->iam->addUserToGroup([
+                    'GroupName' => config('aws.iam.group', 'saas-s3'),
+                    'UserName' => $name,
+                ]);
+
+                $result = $this->iam->createAccessKey([
+                    'UserName' => $name,
+                ]);
+
+                if ($result->hasKey('AccessKey')) {
+                    $accessKey = $result->get('AccessKey');
+
+                    $access = [
+                        'key' => $accessKey['AccessKeyId'] ?? '',
+                        'secret' => $accessKey['SecretAccessKey'] ?? '',
+                    ];
+                }
+            } catch (Throwable $throwable) {
+                Log::error($throwable->getMessage());
+            }
+        }
+
+        return $access;
     }
 
     /**
@@ -878,12 +946,28 @@ EOF
 chmod +x \$rcFile
 HERESHELL;
 
+        $accessKey = config('aws.iam.access_key');
+        $secretKey = config('aws.iam.secret_key');
+
+        $credentials = <<<HERESHELL
+############## Output to credentials.json file ###############
+credentialsFile="credentials.json"
+cat > \$credentialsFile <<EOF
+{
+    "access": "{$accessKey}",
+    "secret": "{$secretKey}",
+}
+EOF
+chown \$username:\$username \$credentialsFile
+HERESHELL;
+
         $settings = AwsSetting::isDefault()->first();
 
         return <<<HERESHELL
 {$settings->script}
 {$shell}
 {$rc}
+{$credentials}
 ############## Output user params to params.json file ###############
 cat > \$file <<EOF
 {$params}
