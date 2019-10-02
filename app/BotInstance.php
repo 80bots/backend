@@ -29,7 +29,7 @@ class BotInstance extends BaseModel
             'field'     => 'tag_name'
         ],
         'uptime' => [
-            'entity'    => QueryHelper::ENTITY_BOT_INSTANCES,
+            'entity'    => QueryHelper::ENTITY_BOT_INSTANCES_UPTIME,
             'field'     => 'total_up_time'
         ],
         'status' => [
