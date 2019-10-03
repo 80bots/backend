@@ -935,16 +935,18 @@ EOF
 chmod +x \$shellFile && chown \$username:\$username \$shellFile
 HERESHELL;
 
-        $rc = <<<HERESHELL
-############## Output to /etc/rc.local file ###############
-rcFile="/etc/rc.local"
-cat > \$rcFile <<EOF
-#!/bin/bash
-/home/\$username/\$shellFile
-exit 0
-EOF
-chmod +x \$rcFile
-HERESHELL;
+        $rc = '';
+
+//        $rc = <<<HERESHELL
+//############## Output to /etc/rc.local file ###############
+//rcFile="/etc/rc.local"
+//cat > \$rcFile <<EOF
+//#!/bin/bash
+///home/\$username/\$shellFile
+//exit 0
+//EOF
+//chmod +x \$rcFile
+//HERESHELL;
 
         $accessKey = config('aws.iam.access_key');
         $secretKey = config('aws.iam.secret_key');

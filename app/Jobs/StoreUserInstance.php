@@ -90,15 +90,16 @@ class StoreUserInstance implements ShouldQueue
             Log::debug("Connect to region: {$this->region}");
 
             $keyPair        = $aws->createKeyPair();
-            Log::debug("Created Key pair: {$keyPair['keyName']}");
             $tagName        = $aws->createTagName();
-            Log::debug("Created tag name: {$tagName}");
             $securityGroup  = $aws->createSecretGroup();
-            Log::debug("Created SecurityGroups: {$securityGroup['securityGroupName']}");
 
             if (empty($keyPair) || empty($tagName) || empty($securityGroup)) {
                 return;
             }
+
+            Log::debug("Created Key pair: {$keyPair['keyName']}");
+            Log::debug("Created tag name: {$tagName}");
+            Log::debug("Created SecurityGroups: {$securityGroup['securityGroupName']}");
 
             $keyPairName    = $keyPair['keyName'];
             $keyPairPath    = $keyPair['path'];
@@ -115,6 +116,10 @@ class StoreUserInstance implements ShouldQueue
                 $tagName,
                 $this->params
             );
+
+            if (empty($newInstanceResponse)) {
+                return;
+            }
 
             if ($newInstanceResponse->hasKey('Instances')) {
 
@@ -165,20 +170,47 @@ class StoreUserInstance implements ShouldQueue
                     if ($awsStatus === BotInstance::STATUS_RUNNING) {
                         $this->instance->setAwsStatusRunning();
                     }
-
-                    broadcast(new InstanceLaunched($this->instance, $this->user));
                 }
             }
 
-            Log::debug("Launch Instance Response:");
-            Log::debug(print_r($newInstanceResponse, true));
-
         } catch (GuzzleException $exception) {
-            $message = preg_replace('/^(.*)<\?xml version="1\.0" encoding="UTF-8"\?>/s', '', $exception->getMessage());
-            Log::debug("Error on catch GuzzleException : {$message}");
+
+            $pos = strpos($exception->getMessage(), '<?xml version="1.0" encoding="UTF-8"?>');
+
+            if ($pos === false) {
+                Log::debug("Error on catch Throwable : {$exception->getMessage()}");
+            } else {
+                $message = preg_replace('/^(.*)<\?xml version="1\.0" encoding="UTF-8"\?>/s', '', $exception->getMessage());
+                Log::debug("Error on catch GuzzleException : {$message}");
+            }
+
+            $this->removeInstance();
+
         } catch (Throwable $throwable) {
-            $message = preg_replace('/^(.*)<\?xml version="1\.0" encoding="UTF-8"\?>/s', '', $throwable->getMessage());
-            Log::debug("Error on catch Throwable : {$message}");
+
+            $pos = strpos($throwable->getMessage(), '<?xml version="1.0" encoding="UTF-8"?>');
+
+            if ($pos === false) {
+                Log::debug("Error on catch Throwable : {$throwable->getMessage()}");
+            } else {
+                $message = preg_replace('/^(.*)<\?xml version="1\.0" encoding="UTF-8"\?>/s', '', $throwable->getMessage());
+                Log::debug("Error on catch Throwable : {$message}");
+            }
+
+            $this->removeInstance();
+        }
+
+        broadcast(new InstanceLaunched($this->instance, $this->user));
+    }
+
+    private function removeInstance()
+    {
+        Log::debug("removeInstance");
+        Log::debug(print_r($this->instance, true));
+
+        if (! empty($this->instance)) {
+            $this->instance->setAwsStatusTerminated();
+            $this->instance->delete();
         }
     }
 }

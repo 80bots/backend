@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class InstanceHelper
 {
@@ -26,11 +27,16 @@ class InstanceHelper
      * @param int $currentTime
      * @return bool
      */
-    public static function isScheduleInstance(SchedulingInstancesDetails $detail, int $currentTime)
+    public static function isScheduleInstance(SchedulingInstancesDetails $detail, int $currentTime): bool
     {
-        $tz = CarbonTimeZone::create($detail->time_zone);
-        $ct = Carbon::createFromFormat('D h:i A', "{$detail->day} {$detail->selected_time}", $tz);
-        return $currentTime === $ct->getTimestamp();
+        try {
+            $tz = CarbonTimeZone::create($detail->time_zone);
+            $ct = Carbon::createFromFormat('D h:i A', "{$detail->day} {$detail->selected_time}", $tz);
+            return $currentTime === $ct->getTimestamp();
+        } catch (Throwable $throwable) {
+            Log::error("Throwable isScheduleInstance: {$throwable->getMessage()}");
+            return false;
+        }
     }
 
     /**
@@ -40,13 +46,12 @@ class InstanceHelper
      */
     public static function getScheduleInstancesIds($schedulers, $now): array
     {
-        $instancesIds = [];
+        $instancesIds   = [];
+        $insertHistory  = [];
 
         foreach ($schedulers as $scheduler) {
 
-            $userInstance = $scheduler->userInstances ?? null;
-
-            if (! empty($userInstance) && ! empty($scheduler->details)) {
+            if (! empty($scheduler->instance) && ! empty($scheduler->details)) {
 
                 foreach ($scheduler->details as $detail) {
 
@@ -56,24 +61,29 @@ class InstanceHelper
 
                     if (self::isScheduleInstance($detail, $currentTime)) {
 
-                        $tz = CarbonTimeZone::create($detail->time_zone);
+                        if (! empty($scheduler->instance->aws_instance_id)) {
 
-                        //Save the session history
-                        InstanceSessionsHistory::create([
-                            'scheduling_instances_id'   => $scheduler->id,
-                            'user_id'                   => $scheduler->user_id,
-                            'schedule_type'             => $detail->schedule_type,
-                            'cron_data'                 => $detail->cron_data,
-                            'current_time_zone'         => $tz->toRegionName(),
-                            'selected_time'             => $detail->selected_time,
-                        ]);
+                            $tz = CarbonTimeZone::create($detail->time_zone);
 
-                        if (! empty($userInstance->aws_instance_id)) {
-                            array_push($instancesIds, $userInstance->aws_instance_id);
+                            array_push($insertHistory, [
+                                'scheduling_instances_id'   => $scheduler->id,
+                                'user_id'                   => $scheduler->user_id,
+                                'schedule_type'             => $detail->schedule_type,
+                                'cron_data'                 => $detail->cron_data,
+                                'current_time_zone'         => $tz->toRegionName(),
+                                'selected_time'             => $detail->selected_time,
+                            ]);
+
+                            array_push($instancesIds, $scheduler->instance->aws_instance_id);
                         }
                     }
                 }
             }
+        }
+
+        if (! empty($insertHistory)) {
+            //Save the session history
+            InstanceSessionsHistory::insert($insertHistory);
         }
 
         return $instancesIds;

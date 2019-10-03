@@ -310,7 +310,7 @@ class ScheduleController extends Controller
         // Delete all
         SchedulingInstancesDetails::whereHas('schedulingInstance', function(Builder $query) {
             $query->where('user_id', '=', Auth::id());
-        })->where('scheduling_instance_id', '=', $instance->id ?? null)->delete();
+        })->where('scheduling_id', '=', $instance->id ?? null)->delete();
 
         /**
          * details[0][type] = stop | start
@@ -333,13 +333,13 @@ class ScheduleController extends Controller
             $selectedTime = Carbon::parse("{$detail['day']} {$detail['time']}");
 
             SchedulingInstancesDetails::create([
-                'scheduling_instance_id'    => $instance->id ?? null,
-                'day'                       => $detail['day'] ?? '',
-                'selected_time'             => $selectedTime->format('h:i A'),
-                'time_zone'                 => $timezone,
-                'cron_data'                 => "{$selectedTime->format('D h:i A')} {$timezone}",
-                'schedule_type'             => $type,
-                'status'                    => SchedulingInstancesDetails::STATUS_ACTIVE
+                'scheduling_id' => $instance->id ?? null,
+                'day'           => $detail['day'] ?? '',
+                'selected_time' => $selectedTime->format('h:i A'),
+                'time_zone'     => $timezone,
+                'cron_data'     => "{$selectedTime->format('D h:i A')} {$timezone}",
+                'schedule_type' => $type,
+                'status'        => SchedulingInstancesDetails::STATUS_ACTIVE
             ]);
         }
     }

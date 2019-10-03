@@ -41,7 +41,7 @@ class CreateSchedulingInstancesDetailsTable extends Migration
     public function down()
     {
         Schema::table('scheduling_instances_details', function (Blueprint $table) {
-            $table->dropForeign(['scheduling_instance_id']);
+            $table->dropForeign(['scheduling_id']);
         });
 
         Schema::dropIfExists('scheduling_instances_details');

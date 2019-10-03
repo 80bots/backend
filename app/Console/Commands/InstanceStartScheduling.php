@@ -56,12 +56,14 @@ class InstanceStartScheduling extends Command
 
         try {
 
-            $instancesIds = InstanceHelper::getScheduleInstancesIds(
-                SchedulingInstance::scheduling('start')->get(),
-                $this->now
-            );
+            SchedulingInstance::scheduling('start')->chunk(100, function ($schedulers) {
+                $instancesIds = InstanceHelper::getScheduleInstancesIds(
+                    $schedulers,
+                    $this->now
+                );
 
-            $this->startInstances($instancesIds);
+                $this->startInstances($instancesIds);
+            });
 
         } catch (Throwable $throwable) {
             Log::info('InstanceStartScheduling Catch Error Message ' . $throwable->getMessage());
@@ -84,35 +86,42 @@ class InstanceStartScheduling extends Command
                     $currentState   = $instanceDetail['CurrentState'];
                     $instanceId     = $instanceDetail['InstanceId'];
 
-                    if ($currentState['Name'] == 'pending' || $currentState['Name'] == 'running') {
+                    if ($currentState['Name'] == BotInstance::STATUS_PENDING || $currentState['Name'] == BotInstance::STATUS_RUNNING) {
 
-                        $userInstance = BotInstance::findByInstanceId($instanceId)->first();
-                        $userInstance->status = 'running';
+                        $instance = BotInstance::findByInstanceId($instanceId)->first();
 
-                        if ($userInstance->save()) {
+                        $instanceDetail = BotInstancesDetails::where(
+                            [
+                                'instance_id'   => $instance->id,
+                                'end_time'      => null
+                            ])
+                            ->latest()
+                            ->first();
 
-                            $instanceDetail = BotInstancesDetails::where(
-                                [
-                                    'user_instance_id'  => $userInstance->id,
-                                    'end_time'          => null
-                                ])
-                                ->latest()
-                                ->first();
-
-                            if (empty($instanceDetail)) {
-                                BotInstancesDetails::create([
-                                    'user_instance_id'  => $userInstance->id,
-                                    'start_time'        => $this->now->toDateTimeString()
-                                ]);
-                            }
-                            Log::info('Instance Id ' . $instanceId . ' Started');
+                        if (empty($instanceDetail)) {
+                            BotInstancesDetails::create([
+                                'instance_id'   => $instance->id,
+                                'start_time'    => $this->now->toDateTimeString()
+                            ]);
+                            $instance->update([
+                                'aws_status'    => BotInstance::STATUS_RUNNING,
+                                'start_time'    => $this->now->toDateTimeString()
+                            ]);
+                        } else {
+                            $instance->update([
+                                'aws_status' => BotInstance::STATUS_RUNNING
+                            ]);
                         }
+
+                        Log::info('Instance Id ' . $instanceId . ' Started');
+
                     } else {
                         Log::info('Instance Id ' . $instanceId . ' Not Started Successfully');
                     }
                 }
             } else {
-                Log::info('Instances are not Started [' . $instancesIds . ']');
+                Log::info('Instances are not Started');
+                Log::info(print_r($instancesIds, true));
             }
         } else {
             Log::info('No Instances Are there to Start');
