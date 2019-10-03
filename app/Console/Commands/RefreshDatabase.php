@@ -44,10 +44,6 @@ class RefreshDatabase extends Command
     {
         $this->comment('Refreshing cache...');
         $this->call('cache:refresh');
-        shell_exec('chmod -R 0777 storage/logs');
-
-        Log::debug("Refreshing database...");
-
         $this->comment('Refreshing database...');
         $this->call('migrate:fresh');
         $this->comment('Seeding database...');
@@ -57,9 +53,6 @@ class RefreshDatabase extends Command
         $this->comment('Refreshing cache again...');
         $this->call('cache:refresh');
         $this->comment('chmod storage/logs...');
-        shell_exec('chmod -R 0777 storage/logs');
         $this->info('Completed');
-
-        Log::debug("Completed refreshing database...");
     }
 }
