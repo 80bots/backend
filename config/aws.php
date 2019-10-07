@@ -46,5 +46,14 @@ return [
         'group' => 'saas-s3',
         'access_key' => env('AWS_IAM_S3_ACCESS_KEY', 'AKIAQOGPXKZ2F3RBT65W'),
         'secret_key' => env('AWS_IAM_S3_SECRET_KEY', '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'),
+    ],
+    'ports' => [
+        'access_user' => [
+            6080
+        ],
+        'access_admin' => [
+            6002,
+            22
+        ],
     ]
 ];

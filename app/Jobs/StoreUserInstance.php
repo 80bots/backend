@@ -51,19 +51,26 @@ class StoreUserInstance implements ShouldQueue
     protected $params;
 
     /**
+     * @var string|null
+     */
+    protected $ip;
+
+    /**
      * Create a new job instance.
      * @param Bot $bot
      * @param BotInstance $instance
      * @param User $user
      * @param array|null $params
+     * @param string|null $ip
      */
-    public function __construct(Bot $bot, BotInstance $instance, User $user, ?array $params)
+    public function __construct(Bot $bot, BotInstance $instance, User $user, ?array $params, ?string $ip)
     {
         $this->bot      = $bot;
         $this->instance = $instance;
         $this->user     = $user;
         $regions        = Aws::getEc2Regions();
         $this->params   = $params;
+        $this->ip       = $ip;
 
         if (! empty($regions) && in_array($instance->region->code, $regions)) {
             $this->region = $instance->region->code;
@@ -91,7 +98,7 @@ class StoreUserInstance implements ShouldQueue
 
             $keyPair        = $aws->createKeyPair();
             $tagName        = $aws->createTagName();
-            $securityGroup  = $aws->createSecretGroup();
+            $securityGroup  = $aws->createSecretGroup($this->ip);
 
             if (empty($keyPair) || empty($tagName) || empty($securityGroup)) {
                 return;

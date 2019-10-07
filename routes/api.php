@@ -13,7 +13,7 @@ Route::group(['prefix' => 'auth', 'as' => 'auth.', 'namespace' => 'Auth'], funct
     Route::post('password/reset', 'ResetPasswordController@reset')->name('password.reset');
 });
 
-Route::group(['middleware' => ['auth:api', 'api.sentry']], function() {
+Route::group(['middleware' => ['auth:api', 'api.sentry', 'api.instance']], function() {
 
     Route::get('/auth/login', 'CheckController@apiCheckLogin')->name('check');
 
@@ -66,7 +66,16 @@ Route::group(['middleware' => ['auth:api', 'api.sentry']], function() {
 
 });
 
-Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['auth:api', 'api.admin', 'api.sentry']], function() {
+Route::group([
+    'prefix' => 'admin',
+    'namespace' => 'Admin',
+    'middleware' => [
+        'auth:api',
+        'api.admin',
+        'api.sentry',
+        'api.instance'
+    ]
+], function() {
 
     Route::group(['prefix' => 'aws', 'as' => 'aws.'], function () {
         Route::get('/', 'AwsSettingController@index')->name('aws');

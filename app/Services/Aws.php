@@ -433,10 +433,11 @@ class Aws
     /**
      * Create a Security Group
      *
+     * @param string|null $ip
      * @return array|null
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function createSecretGroup(): ?array
+    public function createSecretGroup(?string $ip): ?array
     {
         if (empty($this->ec2)) {
             $this->ec2Connection();
@@ -454,7 +455,7 @@ class Aws
             ]);
 
             if ($result->hasKey('GroupId')) {
-                $this->setSecretGroupIngress($securityGroupName);
+                $this->setSecretGroupIngress($ip, $securityGroupName);
                 // Get the security group ID (optional)
                 return [
                     'securityGroupId'   => $result->get('GroupId'),
@@ -471,73 +472,95 @@ class Aws
     }
 
     /**
-     * Add an Ingress Rule
-     *
-     * @param null $securityGroupName
+     * @param string $securityGroupId
      * @return Result
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function setSecretGroupIngress($securityGroupName = null): Result
+    public function describeSecurityGroups(string $securityGroupId): Result
     {
         if (empty($this->ec2)) {
             $this->ec2Connection();
         }
 
-        $serverIp = $this->getServerIp();
+        return $this->ec2->describeSecurityGroups([
+            'GroupIds' => [$securityGroupId],
+        ]);
+    }
+
+    /**
+     * @param int $port
+     * @param string $ip
+     * @param string $ipProtocol
+     * @param null $securityGroupId
+     * @return Result
+     */
+    public function updateSecretGroupIngress(int $port, string $ip, string $ipProtocol = 'tcp', $securityGroupId = null): Result
+    {
+        if (empty($this->ec2)) {
+            $this->ec2Connection();
+        }
+
+        return $this->ec2->authorizeSecurityGroupIngress([
+            'GroupId' => $securityGroupId,
+            'IpPermissions' => [
+                [
+                    'IpProtocol' => $ipProtocol,
+                    'FromPort' => $port,
+                    'ToPort' => $port,
+                    'IpRanges' => [
+                        ['CidrIp' => "{$ip}/32"]
+                    ],
+                ],
+            ]
+        ]);
+    }
+
+    /**
+     * Add an Ingress Rule
+     *
+     * @param string|null $ip
+     * @param null $securityGroupName     *
+     * @return Result
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function setSecretGroupIngress(?string $ip, $securityGroupName = null): Result
+    {
+        if (empty($this->ec2)) {
+            $this->ec2Connection();
+        }
+
+        $serverIp = config('app.env') === 'local' ? '0.0.0.0/0' : "{$ip}/32";
+
+        $userPorts = config('aws.ports.access_user');
+        $adminPorts = config('aws.ports.access_admin');
+
+        $ipPermissions = [];
+
+        foreach ($userPorts as $port) {
+            array_push($ipPermissions, [
+                'IpProtocol' => 'tcp',
+                'FromPort' => $port,
+                'ToPort' => $port,
+                'IpRanges' => [
+                    ['CidrIp' => $serverIp]
+                ],
+            ]);
+        }
+
+        foreach ($adminPorts as $adminPort) {
+            array_push($ipPermissions, [
+                'IpProtocol' => 'tcp',
+                'FromPort' => $adminPort,
+                'ToPort' => $adminPort,
+                'IpRanges' => [
+                    ['CidrIp' => '0.0.0.0/0'] // TODO: add admin IP
+                ],
+            ]);
+        }
 
         // Set ingress rules for the security group
         return $this->ec2->authorizeSecurityGroupIngress([
             'GroupName' => $securityGroupName,
-            'IpPermissions' => [
-                [
-                    'IpProtocol' => 'tcp',
-                    'FromPort' => 6002,
-                    'ToPort' => 6002,
-                    'IpRanges' => [
-                        ['CidrIp' => '0.0.0.0/0']
-                    ],
-                ],
-                [
-                    'IpProtocol' => 'tcp',
-                    'FromPort' => 6080,
-                    'ToPort' => 6080,
-                    'IpRanges' => [
-                       ['CidrIp' => '0.0.0.0/0']
-                    ],
-                ],
-                [
-                    'IpProtocol' => 'tcp',
-                    'FromPort' => 22,
-                    'ToPort' => 22,
-                    'IpRanges' => [
-                        ['CidrIp' => '0.0.0.0/0']
-                    ],
-                ],
-                [
-                    'IpProtocol' => 'tcp',
-                    'FromPort' => 80,
-                    'ToPort' => 80,
-                    'IpRanges' => [
-                        ['CidrIp' => '0.0.0.0/0']
-                    ],
-                ]
-//                [
-//                    'IpProtocol' => 'tcp',
-//                    'FromPort' => 22,
-//                    'ToPort' => 22,
-//                    'IpRanges' => [
-//                        ['CidrIp' => $serverIp . '/32']
-//                    ],
-//                ],
-//                [
-//                    'IpProtocol' => 'tcp',
-//                    'FromPort' => 8080,
-//                    'ToPort' => 8080,
-//                    'IpRanges' => [
-//                        ['CidrIp' => $serverIp . '/32']
-//                    ],
-//                ]
-            ]
+            'IpPermissions' => $ipPermissions
         ]);
     }
 
@@ -1109,7 +1132,8 @@ HERESHELL;
         // TODO: need to get available instance types here via pricing API
     }
 
-    public function uploadScreenshots($instanceId, $images): ?array {
+    public function uploadScreenshots($instanceId, $images): ?array
+    {
         $result = [];
 
         if(empty($this->s3)) {
@@ -1131,5 +1155,25 @@ HERESHELL;
             $result[] = $res['ObjectURL'];
         }
         return $result;
+    }
+
+    /**
+     * @param string $bucket
+     * @param string $key
+     * @param string $saveAs
+     * @return Result
+     */
+    public function getS3Object(string $bucket, string $key, string $saveAs = ''): Result
+    {
+        $params = [
+            'Bucket'    => $bucket,
+            'Key'       => $key
+        ];
+
+        if (! empty($saveAs)) {
+            $params['SaveAs'] = $saveAs;
+        }
+
+        return $this->s3->getObject($params);
     }
 }

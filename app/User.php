@@ -55,6 +55,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'visitor',
         'password',
         'role_id',
         'timezone_id',
@@ -106,6 +107,14 @@ class User extends Authenticatable
     public function instances()
     {
         return $this->hasMany(BotInstance::class);
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function visitors()
+    {
+        return $this->hasMany(Visitor::class);
     }
 
     public function orders()

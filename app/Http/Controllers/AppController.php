@@ -104,7 +104,7 @@ class AppController extends Controller
                     ]);
 
                     if (! empty($instance)) {
-                        dispatch(new StoreUserInstance($bot, $instance, $user, $param));
+                        dispatch(new StoreUserInstance($bot, $instance, $user, $param, $request->ip()));
                     }
                 }
 

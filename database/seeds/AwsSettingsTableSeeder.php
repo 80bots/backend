@@ -12,11 +12,13 @@ class AwsSettingsTableSeeder extends Seeder
      */
     public function run()
     {
+        // moved to /etc/rc.local file
+        //cd /home/\$username/
+        //su - \$username -c 'cd ~/data-streamer && git pull && cp .env.example .env && yarn && yarn build && pm2 start --name "data-streamer" yarn -- start'
+
         $script = <<<HERESHELL
 file="puppeteer/params/params.json"
 username="kabas"
-cd /home/\$username/
-su - \$username -c 'cd ~/data-streamer && git pull && cp .env.example .env && yarn && yarn build && pm2 start --name "data-streamer" yarn -- start'
 HERESHELL;
 
         AwsSetting::create([
