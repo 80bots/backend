@@ -184,30 +184,33 @@ class AppController extends Controller
         $user   = User::find(Auth::id());
         $aws    = new Aws;
 
-        $describeInstancesResponse = $aws->describeInstances(
-            [$instance->aws_instance_id ?? null],
-            $awsRegion->code
-        );
+        //
+        $instance->clearPublicIp();
 
-        if (! $describeInstancesResponse->hasKey('Reservations')) {
-            // TODO: Remove instance
-            return false;
-        }
+        try {
 
-        if (InstanceHelper::checkTerminatedStatus($describeInstancesResponse)) {
-            $instance->setAwsStatusTerminated();
-            //
-            if ($awsRegion->created_instances > 0) {
-                $awsRegion->decrement('created_instances');
+            $describeInstancesResponse = $aws->describeInstances(
+                [$instance->aws_instance_id ?? null],
+                $awsRegion->code
+            );
+
+            if (! $describeInstancesResponse->hasKey('Reservations') || InstanceHelper::checkTerminatedStatus($describeInstancesResponse)) {
+                $instance->setAwsStatusTerminated();
+
+                if ($awsRegion->created_instances > 0) {
+                    $awsRegion->decrement('created_instances');
+                }
+
+                InstanceHelper::cleanUpTerminatedInstanceData($aws, $instanceDetail);
+                return true;
             }
-            //
-            InstanceHelper::cleanUpTerminatedInstanceData($aws, $instanceDetail);
+
+        } catch (Throwable $throwable) {
+            Log::error($throwable->getMessage());
             return false;
         }
 
         $instance->setAwsStatusPending();
-        //
-        $instance->clearPublicIp();
 
         dispatch(new InstanceChangeStatus($instance, $user, $awsRegion, $status));
 
