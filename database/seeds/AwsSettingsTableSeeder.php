@@ -19,6 +19,8 @@ class AwsSettingsTableSeeder extends Seeder
         $script = <<<HERESHELL
 file="puppeteer/params/params.json"
 username="kabas"
+cd /home/\$username/
+su - \$username -c 'cd ~/data-streamer && git pull && cp .env.example .env && yarn && yarn build && pm2 start --name "data-streamer" yarn -- start'
 HERESHELL;
 
         AwsSetting::create([

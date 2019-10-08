@@ -14,6 +14,7 @@ use Aws\Result;
 use Aws\S3\Exception\S3Exception;
 use Aws\S3\S3Client;
 use Aws\ServiceQuotas\ServiceQuotasClient;
+use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Support\Facades\Log;
@@ -999,7 +1000,7 @@ cat > \$file <<EOF
 EOF
 su - \$username -c 'echo "starting script {$path}"'
 su - \$username -c 'rm -rf ~/.screenshots/*'
-su - \$username -c 'cd ~/puppeteer && git pull && yarn && mkdir logs && DISPLAY=:1 node {$path}'
+su - \$username -c 'cd ~/puppeteer && git pull && yarn && mkdir logs && DISPLAY=:1 node {$path} > /dev/null'
 HERESHELL;
     }
 
@@ -1175,5 +1176,30 @@ HERESHELL;
         }
 
         return $this->s3->getObject($params);
+    }
+
+    /**
+     * @param string $bucket
+     * @param int $limit
+     * @param string|null $prefix ('streamer-data/2019-10-06')
+     * @param string|null $next
+     * @return Result
+     */
+    public function getS3ListObjects(string $bucket, int $limit, string $prefix = null, string $next = null): Result
+    {
+        $params = [
+            'Bucket'  => $bucket,
+            'MaxKeys' => $limit
+        ];
+
+        if (! empty($prefix)) {
+            $params['Prefix'] = $prefix;
+        }
+
+        if (! empty($next)) {
+            $params['ContinuationToken'] = $next;
+        }
+
+        return $this->s3->listObjectsV2($params);
     }
 }

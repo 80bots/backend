@@ -86,6 +86,7 @@ Route::group([
         Route::get('/running', 'BotInstanceController@index')->name('running');
         Route::get('/tags', 'BotController@getTags')->name('running');
         Route::get('/sync', 'BotController@syncBots')->name('sync');
+        Route::get('/screenshots', 'BotController@getScreenshots')->name('screenshots');
     });
 
     Route::group(['prefix' => 'instances', 'as' => 'instances.'], function () {

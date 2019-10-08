@@ -11,6 +11,8 @@ use App\Http\Resources\Admin\PlatformCollection;
 use App\Http\Resources\Admin\TagCollection;
 use App\Jobs\SyncLocalBots;
 use App\Platform;
+use App\Services\Aws;
+use App\Services\MyS3Client;
 use App\Tag;
 use App\User;
 use App\BotInstance;
@@ -400,5 +402,26 @@ class BotController extends AppController
         }
 
         return $platform->id ?? null;
+    }
+
+    public function getScreenshots(Request $request)
+    {
+        return $this->success([]);
+
+        $instance = BotInstance::find(9);
+
+        $aws = new Aws;
+
+        $aws->s3Connection();
+
+        $result = $aws->getS3ListObjects('80bots', 2, 'streamer-data/test_name/screenshots/2019-09-26', '1w7yFV7R8rT9IuBrhb1fPzqtS80jpoXvauq6ORSvhI+RKePBBGZ0z79AseE9V8eUojhSj7A1s0C+qbCFg/jhQ9WfhgWvOHtcXUK7ax1e5jM716oviDKXD2A==');
+
+        $aws->getObjects($result);
+
+        dd($result);
+
+        return $this->success([
+            'test' => $result
+        ]);
     }
 }
