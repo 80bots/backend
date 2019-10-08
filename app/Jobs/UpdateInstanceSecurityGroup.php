@@ -64,8 +64,6 @@ class UpdateInstanceSecurityGroup implements ShouldQueue
 
                     $securityGroup = $instance->oneDetail->aws_security_group_id;
 
-                    echo "Security Group: {$securityGroup}\n";
-
                     $result = $aws->describeSecurityGroups($securityGroup);
 
                     if ($result->hasKey('SecurityGroups')) {

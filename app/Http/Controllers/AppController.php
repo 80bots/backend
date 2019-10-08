@@ -175,9 +175,7 @@ class AppController extends Controller
             return false;
         }
 
-        $awsRegion = AwsRegion::find($instance->aws_region_id ?? null);
-
-        if (empty($awsRegion)) {
+        if (empty($instance->aws_region_id)) {
             return false;
         }
 
@@ -191,14 +189,14 @@ class AppController extends Controller
 
             $describeInstancesResponse = $aws->describeInstances(
                 [$instance->aws_instance_id ?? null],
-                $awsRegion->code
+                $instance->region->code
             );
 
             if (! $describeInstancesResponse->hasKey('Reservations') || InstanceHelper::checkTerminatedStatus($describeInstancesResponse)) {
                 $instance->setAwsStatusTerminated();
 
-                if ($awsRegion->created_instances > 0) {
-                    $awsRegion->decrement('created_instances');
+                if ($instance->region->created_instances > 0) {
+                    $instance->region->decrement('created_instances');
                 }
 
                 InstanceHelper::cleanUpTerminatedInstanceData($aws, $instanceDetail);
@@ -212,7 +210,7 @@ class AppController extends Controller
 
         $instance->setAwsStatusPending();
 
-        dispatch(new InstanceChangeStatus($instance, $user, $awsRegion, $status));
+        dispatch(new InstanceChangeStatus($instance, $user, $instance->region, $status));
 
         return true;
     }

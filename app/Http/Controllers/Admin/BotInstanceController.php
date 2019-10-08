@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\AwsAmi;
 use App\AwsRegion;
 use App\Events\InstanceStatusUpdated;
+use App\Helpers\InstanceHelper;
 use App\Helpers\QueryHelper;
 use App\Http\Controllers\AppController;
 use App\Http\Resources\Admin\BotInstanceCollection;
@@ -264,25 +265,47 @@ class BotInstanceController extends AppController
         if (! empty($instance)) {
 
             try {
+
                 $instance = BotInstance::find($instance);
 
                 if (! empty($instance)) {
 
                     $details    = $instance->details()->latest()->first();
+                    $aws        = new Aws;
 
-                    $aws = new Aws;
-                    $aws->s3Connection();
+                    $describeInstancesResponse = $aws->describeInstances(
+                        [$instance->aws_instance_id ?? null],
+                        $instance->region->code
+                    );
 
-                    $result = $aws->getKeyPairObject($details->aws_pem_file_path ?? '');
+                    if (! $describeInstancesResponse->hasKey('Reservations') || InstanceHelper::checkTerminatedStatus($describeInstancesResponse)) {
 
-                    $body = $result->get('Body');
+                        $instance->setAwsStatusTerminated();
 
-                    if (! empty($body)) {
-                        return response($body)->header('Content-Type', $result->get('ContentType'));
+                        if ($instance->region->created_instances > 0) {
+                            $instance->region->decrement('created_instances');
+                        }
+
+                        InstanceHelper::cleanUpTerminatedInstanceData($aws, $details);
+
+                        return $this->error(__('admin.error'), __('admin.instances.key_pair_not_found'));
+
+                    } else {
+
+                        $aws->s3Connection();
+
+                        $result = $aws->getKeyPairObject($details->aws_pem_file_path ?? '');
+
+                        $body = $result->get('Body');
+
+                        if (! empty($body)) {
+                            return response($body)->header('Content-Type', $result->get('ContentType'));
+                        }
+
+                        return $this->error(__('admin.error'), __('admin.error'));
                     }
-
-                    return $this->error(__('admin.error'), __('admin.error'));
                 }
+
             } catch (Throwable $throwable){
                 return $this->error(__('admin.server_error'), $throwable->getMessage());
             }

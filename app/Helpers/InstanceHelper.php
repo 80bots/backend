@@ -264,6 +264,13 @@ class InstanceHelper
     public static function checkTerminatedStatus(Result $describeInstancesResponse): bool
     {
         $reservationObj = $describeInstancesResponse->get('Reservations');
-        return empty($reservationObj) || $reservationObj[0]['Instances'][0]['State']['Name'] === 'terminated';
+
+        if (empty($reservationObj) || empty($reservationObj[0])) {
+            return false;
+        }
+
+        $state = $reservationObj[0]['Instances'][0]['State']['Name'];
+
+        return $state === 'terminated';
     }
 }
