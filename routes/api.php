@@ -33,6 +33,11 @@ Route::group(['middleware' => ['auth:api', 'api.sentry', 'api.instance']], funct
     });
 
     Route::group(['prefix' => 'instances', 'as' => 'instances.'], function () {
+
+        Route::get('/dates', 'BotInstanceController@getInstanceDates')->name('dates');
+        Route::get('/objects', 'BotInstanceController@getS3Objects')->name('objects');
+        Route::get('/logs', 'BotInstanceController@getS3Logs')->name('logs');
+
         Route::get('/regions', 'BotInstanceController@regions')->name('regions');
         Route::post('/launch', 'BotInstanceController@launchInstances')->name('launch');
         Route::put('/{id}', 'BotInstanceController@update')->name('update');
@@ -86,10 +91,14 @@ Route::group([
         Route::get('/running', 'BotInstanceController@index')->name('running');
         Route::get('/tags', 'BotController@getTags')->name('running');
         Route::get('/sync', 'BotController@syncBots')->name('sync');
-        Route::get('/screenshots', 'BotController@getScreenshots')->name('screenshots');
     });
 
     Route::group(['prefix' => 'instances', 'as' => 'instances.'], function () {
+
+        Route::get('/dates', 'BotInstanceController@getInstanceDates')->name('dates');
+        Route::get('/objects', 'BotInstanceController@getS3Objects')->name('objects');
+        Route::get('/logs', 'BotInstanceController@getS3Logs')->name('logs');
+
         Route::get('/regions', 'BotInstanceController@regions')->name('regions');
         Route::put('/regions/{id}', 'BotInstanceController@updateRegion')->name('update.region');
         Route::get('/regions/sync', 'BotInstanceController@syncRegions')->name('sync.regions');

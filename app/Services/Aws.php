@@ -8,15 +8,18 @@ use App\BotInstance;
 use App\Helpers\GeneratorID;
 use App\User;
 use Aws\Ec2\Ec2Client;
+use Aws\Exception\AwsException;
 use Aws\Iam\Exception\IamException;
 use Aws\Iam\IamClient;
 use Aws\Result;
 use Aws\S3\Exception\S3Exception;
 use Aws\S3\S3Client;
+use Aws\S3\Transfer;
 use Aws\ServiceQuotas\ServiceQuotasClient;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Nubs\RandomNameGenerator\All as AllRandomName;
 use Nubs\RandomNameGenerator\Alliteration as AlliterationName;
@@ -81,6 +84,14 @@ class Aws
         ]);
 
         $this->s3Bucket = empty($bucket) ? config('aws.bucket') : $bucket;
+    }
+
+    /**
+     * @return string
+     */
+    public function getS3Bucket()
+    {
+        return $this->s3Bucket;
     }
 
     /**
@@ -334,6 +345,10 @@ class Aws
         }
     }
 
+    /**
+     * @param string $path
+     * @param string $bucket
+     */
     public function deleteS3KeyPair(string $path, string $bucket = ''): void
     {
         if (empty($this->s3)) {
@@ -780,6 +795,10 @@ class Aws
         $this->ec2->waitUntil('InstanceRunning', ['InstanceIds' => $instanceIds]);
     }
 
+    /**
+     * @param string $instanceId
+     * @return Result
+     */
     public function describeOneInstanceStatus(string $instanceId): Result
     {
         if (empty($this->ec2)) {
@@ -1111,6 +1130,11 @@ HERESHELL;
         }
     }
 
+    /**
+     * @param string $region
+     * @param array|null $credentials
+     * @return Result
+     */
     public function getServiceQuotasT3MediumInstance(string $region, array $credentials = null): Result
     {
         $sqc = new ServiceQuotasClient([
@@ -1125,14 +1149,24 @@ HERESHELL;
         ]);
     }
 
+    /**
+     * @return array|null
+     */
     protected function getEc2InstanceTypes(): ?array
     {
         if (empty($this->ec2)) {
             $this->ec2Connection();
         }
         // TODO: need to get available instance types here via pricing API
+
+        return null;
     }
 
+    /**
+     * @param $instanceId
+     * @param $images
+     * @return array|null
+     */
     public function uploadScreenshots($instanceId, $images): ?array
     {
         $result = [];
@@ -1201,5 +1235,66 @@ HERESHELL;
         }
 
         return $this->s3->listObjectsV2($params);
+    }
+
+    /**
+     * @param Collection $keys
+     * @return array
+     */
+    public function getS3Objects(Collection $keys): array
+    {
+        $data = [];
+
+        foreach ($keys as $key) {
+
+            $promise = $this->s3->getObjectAsync([
+                'Bucket' => '80bots',
+                'Key' => $key,
+            ]);
+
+            try {
+
+                $result = $promise->wait();
+                array_push($data, [
+                    'type' => $result->get('ContentType'),
+                    'body'  => $result->get('Body')
+                ]);
+
+            } catch (AwsException $exception) {
+                // Handle the error
+                Log::error($exception->getMessage());
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * @param string $bucket
+     * @param string $path
+     */
+    public function s3TransferFolder(string $bucket, string $path)
+    {
+        $source = "s3://{$bucket}/{$path}";
+        $dest = storage_path('logs/transfer');
+        $manager = new Transfer($this->s3, $source, $dest);
+        $manager->transfer();
+    }
+
+    /**
+     * @param string $bucket
+     * @param string $key
+     * @return string
+     */
+    public function getPresignedLink(string $bucket, string $key): string
+    {
+        $cmd = $this->s3->getCommand('GetObject', [
+            'Bucket'    => $bucket,
+            'Key'       => $key
+        ]);
+
+        $request = $this->s3->createPresignedRequest($cmd, '+60 minutes');
+
+        return (string)$request->getUri();
     }
 }

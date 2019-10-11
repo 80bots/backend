@@ -3,7 +3,6 @@
 namespace App;
 
 use App\Helpers\QueryHelper;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class BotInstance extends BaseModel
@@ -159,6 +158,11 @@ class BotInstance extends BaseModel
     public function creditsUsage()
     {
         return $this->hasMany(CreditUsage::class, 'instance_id', 'id');
+    }
+
+    public function s3Objects()
+    {
+        return $this->hasMany(S3Object::class, 'instance_id', 'id');
     }
 
     public function clearPublicIp()

@@ -25,7 +25,7 @@ return [
         'success_sync' => 'Instances sync was successfully',
         'error_sync' => 'Instances sync failed',
         'key_pair_not_found' => 'File is unavailable as the current instance was removed',
-        'not_found' => '',
+        'not_found' => 'Instance Not Found',
         'not_updated' => ''
     ],
     'regions' => [

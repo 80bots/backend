@@ -233,6 +233,52 @@ class AppController extends Controller
     }
 
     /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    protected function getInstanceDates(Request $request)
+    {
+        $instance = $this->getInstanceWithCheckUser($request->query('instance_id'));
+
+        if (empty($instance)) {
+            return $this->notFound(__('admin.not_found'), __('admin.instances.not_found'));
+        }
+
+        $type = InstanceHelper::getTypeS3Object($request->query('type'));
+
+        $isset = [];
+
+        $dates = InstanceHelper::getListInstancesDates($instance);
+
+        if (! empty($dates)) {
+
+            $credentials = [
+                'key'    => config('aws.iam.access_key'),
+                'secret' => config('aws.iam.secret_key')
+            ];
+
+            $aws = new Aws;
+            $aws->s3Connection('', $credentials);
+
+            $folder = config('aws.streamer.folder');
+
+            foreach ($dates as $date) {
+
+                $prefix = "{$folder}/{$instance->tag_name}/{$type}/{$date}";
+                $result = $aws->getS3ListObjects($aws->getS3Bucket(), 1, $prefix);
+
+                if ($result->hasKey('Contents')) {
+                    array_push($isset, $date);
+                }
+            }
+        }
+
+        return $this->success([
+            'dates' => $isset
+        ]);
+    }
+
+    /**
      * @param string|null $id
      * @return BotInstance|null
      */

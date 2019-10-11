@@ -8,13 +8,13 @@ use App\BotInstance;
 use App\BotInstancesDetails;
 use App\DeleteSecurityGroup;
 use App\InstanceSessionsHistory;
+use App\S3Object;
 use App\SchedulingInstancesDetails;
 use App\Services\Aws;
 use App\User;
 use Aws\Result;
 use Carbon\Carbon;
 use Carbon\CarbonTimeZone;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -220,6 +220,11 @@ class InstanceHelper
         Log::info('Synced completed at ' . date('Y-m-d h:i:s'));
     }
 
+    /**
+     * @param BotInstance $instance
+     * @param BotInstancesDetails $detail
+     * @param string $currentDate
+     */
     private static function updateUpTime(BotInstance $instance, BotInstancesDetails $detail, string $currentDate): void
     {
         $diffTime = CommonHelper::diffTimeInMinutes($detail->start_time, $currentDate);
@@ -272,5 +277,183 @@ class InstanceHelper
         $state = $reservationObj[0]['Instances'][0]['State']['Name'];
 
         return $state === 'terminated';
+    }
+
+    /**
+     * @param BotInstance $instance
+     * @return array
+     */
+    public static function getListInstancesDates(BotInstance $instance): array
+    {
+        $dates = [];
+
+        if (! empty($instance->created_at)) {
+            $created    = Carbon::parse($instance->created_at);
+            $now        = Carbon::now();
+
+            $diffTime = $created->diffInDays($now);
+
+            for ($i = 0; $i <= ($diffTime+1); $i++) {
+                if ($i==0) {
+                    array_push($dates, $created->toDateString());
+                } else {
+                    array_push($dates, $created->copy()->addDays($i)->toDateString());
+                }
+            }
+
+            unset($created, $now, $diffTime);
+        }
+
+        return $dates;
+    }
+
+    /**
+     * @param Aws $aws
+     * @param array $keys
+     * @return array
+     */
+    public static function getListLinksToS3Objects(Aws $aws, array $keys): array
+    {
+        $result = [];
+
+        foreach ($keys as $key) {
+            array_push($result, $aws->getPresignedLink($aws->getS3Bucket(), $key));
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param $type
+     * @return string
+     */
+    public static function getTypeS3Object($type): string
+    {
+        switch ($type) {
+            case S3Object::TYPE_SCREENSHOTS:
+            case S3Object::TYPE_IMAGES:
+            case S3Object::TYPE_LOGS:
+            case S3Object::TYPE_JSON:
+                return $type;
+            default:
+                return S3Object::TYPE_SCREENSHOTS;
+        }
+    }
+
+    /**
+     * @param BotInstance $instance
+     * @param string $type
+     * @param string $date
+     */
+    public static function saveS3Objects(BotInstance $instance, string $type, string $date)
+    {
+        $credentials = [
+            'key'    => config('aws.iam.access_key'),
+            'secret' => config('aws.iam.secret_key')
+        ];
+
+        $aws = new Aws;
+        $aws->s3Connection('', $credentials);
+
+        $next   = '';
+
+        $folder = config('aws.streamer.folder');
+
+        $prefix = "{$folder}/{$instance->tag_name}/{$type}/{$date}";
+
+        $links  = [];
+
+        do {
+
+            $result = $aws->getS3ListObjects($aws->getS3Bucket(), 100, $prefix, $next);
+
+            if ($result->hasKey('IsTruncated') && $result->get('IsTruncated')) {
+                if ($result->hasKey('NextContinuationToken')) {
+                    $next = $result->get('NextContinuationToken');
+                }
+            } else {
+                $next = '';
+            }
+
+            if ($result->hasKey('Contents')) {
+
+                $contents = collect($result->get('Contents'))->map(function ($item, $key) {
+                    return $item['Key'];
+                });
+
+                if ($contents->isNotEmpty()) {
+                    $links = array_merge(
+                        $links,
+                        InstanceHelper::getListLinksToS3Objects($aws, $contents->toArray())
+                    );
+                }
+            }
+
+        } while (! empty($next));
+
+        if (! empty($links)) {
+
+            $objects = [];
+
+            foreach ($links as $link) {
+
+                $data = [
+                    'instance_id'   => $instance->id ?? null,
+                    'folder'        => $date,
+                    'link'          => $link,
+                    'expires'       => Carbon::now()->addHour()->toDateTimeString(),
+                    'type'          => $type
+                ];
+
+                array_push($objects, $data);
+            }
+
+            S3Object::insert($objects);
+        }
+    }
+
+    /**
+     * @param BotInstance $instance
+     */
+    public static function saveS3Logs(BotInstance $instance)
+    {
+        $credentials = [
+            'key'    => config('aws.iam.access_key'),
+            'secret' => config('aws.iam.secret_key')
+        ];
+
+        $aws = new Aws;
+        $aws->s3Connection('', $credentials);
+
+        try {
+
+            $folder = config('aws.streamer.folder');
+
+            $init = $aws->getPresignedLink($aws->getS3Bucket(), "{$folder}/{$instance->tag_name}/logs/INIT.log");
+            $work = $aws->getPresignedLink($aws->getS3Bucket(), "{$folder}/{$instance->tag_name}/logs/WORK.log");
+
+            if (!empty($init) && !empty($work)) {
+
+                $objects = [
+                    [
+                        'instance_id'   => $instance->id ?? null,
+                        'link'          => $init,
+                        'expires'       => Carbon::now()->addHour()->toDateTimeString(),
+                        'type'          => S3Object::TYPE_LOGS
+                    ],
+                    [
+                        'instance_id'   => $instance->id ?? null,
+                        'link'          => $work,
+                        'expires'       => Carbon::now()->addHour()->toDateTimeString(),
+                        'type'          => S3Object::TYPE_LOGS
+                    ]
+                ];
+
+                S3Object::insert($objects);
+            }
+
+        } catch (Throwable $throwable) {
+            Log::error($throwable->getMessage());
+        }
     }
 }

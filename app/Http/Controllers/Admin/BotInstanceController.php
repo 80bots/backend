@@ -12,8 +12,10 @@ use App\Http\Resources\Admin\BotInstanceCollection;
 use App\Http\Resources\Admin\RegionCollection;
 use App\Http\Resources\Admin\BotInstanceResource;
 use App\Http\Resources\Admin\RegionResource;
+use App\Http\Resources\Admin\S3ObjectCollection;
 use App\Jobs\SyncBotInstances;
 use App\Jobs\SyncRegions;
+use App\S3Object;
 use App\Services\Aws;
 use App\BotInstance;
 use Illuminate\Http\Request;
@@ -312,5 +314,70 @@ class BotInstanceController extends AppController
         }
 
         return $this->error(__('admin.error'), __('admin.parameters_incorrect'));
+    }
+
+    public function getS3Objects(Request $request)
+    {
+        $instance = BotInstance::find($request->query('instance_id'));
+
+        if (empty($instance)) {
+            return $this->notFound(__('admin.not_found'), __('admin.instances.not_found'));
+        }
+
+        // Remove links from DB, which will be expired soon
+        S3Object::removeOldLinks($instance->id);
+
+        $limit  = $request->query('limit') ?? self::PAGINATE;
+        $type   = InstanceHelper::getTypeS3Object($request->query('type'));
+        $date   = $request->query('date');
+
+        $resource = $instance->s3Objects()
+            ->where('folder', '=', $date)
+            ->where('type', '=', $type);
+
+        if ($resource->count() === 0) {
+            InstanceHelper::saveS3Objects($instance, $type, $date);
+        }
+
+        $instances  = (new S3ObjectCollection($resource->paginate($limit)))->response()->getData();
+        $meta       = $instances->meta ?? null;
+
+        $response = [
+            'data'  => $instances->data ?? [],
+            'total' => $meta->total ?? 0
+        ];
+
+        return $this->success($response);
+    }
+
+    public function getS3Logs(Request $request)
+    {
+        $instance = BotInstance::find($request->query('instance_id'));
+
+        if (empty($instance)) {
+            return $this->notFound(__('admin.not_found'), __('admin.instances.not_found'));
+        }
+
+        // Remove links from DB, which will be expired soon
+        S3Object::removeOldLinks($instance->id);
+
+        $limit  = $request->query('limit') ?? self::PAGINATE;
+
+        $resource = $instance->s3Objects()
+            ->where('type', '=', S3Object::TYPE_LOGS);
+
+        if ($resource->count() === 0) {
+            InstanceHelper::saveS3Logs($instance);
+        }
+
+        $instances  = (new S3ObjectCollection($resource->paginate($limit)))->response()->getData();
+        $meta       = $instances->meta ?? null;
+
+        $response = [
+            'data'  => $instances->data ?? [],
+            'total' => $meta->total ?? 0
+        ];
+
+        return $this->success($response);
     }
 }

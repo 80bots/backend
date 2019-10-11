@@ -55,5 +55,8 @@ return [
             6002,
             22
         ],
+    ],
+    'streamer' => [
+        'folder' => 'streamer-data'
     ]
 ];
