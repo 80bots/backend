@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\CommonHelper;
 use App\Http\Resources\Admin\PostCollection;
 use App\Http\Resources\Admin\PostResource;
 use App\Post;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -37,6 +37,8 @@ class PostController extends Controller
             //
             if (! empty($sort)) {
                 $resource->orderBy($sort, $order);
+            } else {
+                $resource->orderBy('created_at', 'desc');
             }
 
             $bots   = (new PostCollection($resource->paginate($limit)))->response()->getData();
@@ -50,6 +52,22 @@ class PostController extends Controller
             return $this->success($response);
 
         } catch (Throwable $throwable) {
+            return $this->error(__('admin.server_error'), $throwable->getMessage());
+        }
+    }
+
+    public function show(Request $request, $id)
+    {
+        try{
+            $post = Post::find($id);
+
+            if (empty($post)) {
+                return $this->notFound(__('admin.not_found'), __('admin.posts.not_found'));
+            }
+
+            return new PostResource($post);
+
+        } catch (Throwable $throwable){
             return $this->error(__('admin.server_error'), $throwable->getMessage());
         }
     }
@@ -83,7 +101,7 @@ class PostController extends Controller
                 'author_id' => Auth::id(),
                 'title'     => $request->input('title') ?? 'Without title',
                 'bot_id'    => $request->input('bot_id'),
-                'slug'      => '',
+                'slug'      => CommonHelper::slugify($request->input('title')),
                 'content'   => $request->input('content'),
                 'status'    => $status,
                 'type'      => $type
@@ -110,7 +128,10 @@ class PostController extends Controller
                 return $this->notFound(__('admin.not_found'), __('admin.posts.not_found'));
             }
 
-            $update = $post->update($request->input('update'));
+            $data = $request->input('update');
+            $data['slug'] = CommonHelper::slugify($data['title'] ?? '');
+
+            $update = $post->update($data);
 
             if ($update) {
                 return $this->success((new PostResource($post))->toArray($request));

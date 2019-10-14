@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Admin;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use function Zend\Diactoros\normalizeUploadedFiles;
 
 class PostResource extends JsonResource
 {
@@ -24,6 +25,7 @@ class PostResource extends JsonResource
             'id'        => $this->id ?? '',
             'title'     => $this->title ?? '',
             'slug'      => $this->slug ?? '',
+            'bot'       => $this->bot->name ?? null,
             'content'   => $content,
             'status'    => $this->status ?? '',
         ];
