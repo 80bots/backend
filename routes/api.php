@@ -13,7 +13,7 @@ Route::group(['prefix' => 'auth', 'as' => 'auth.', 'namespace' => 'Auth'], funct
     Route::post('password/reset', 'ResetPasswordController@reset')->name('password.reset');
 });
 
-Route::group(['middleware' => ['auth:api', 'api.sentry']], function() {
+Route::group(['middleware' => ['auth:api', 'api.sentry', 'api.instance']], function() {
 
     Route::get('/auth/login', 'CheckController@apiCheckLogin')->name('check');
 
@@ -27,15 +27,22 @@ Route::group(['middleware' => ['auth:api', 'api.sentry']], function() {
 
     // User bots
     Route::group(['prefix' => 'bots', 'as' => 'bots.'], function () {
+        Route::get('/', 'BotController@index')->name('running');
         Route::get('/running', 'BotInstanceController@index')->name('running');
         Route::put('/running/status', 'BotInstanceController@changeStatus')->name('running.update.status');
     });
 
     Route::group(['prefix' => 'instances', 'as' => 'instances.'], function () {
+
+        Route::get('/dates', 'BotInstanceController@getInstanceDates')->name('dates');
+        Route::get('/objects', 'BotInstanceController@getS3Objects')->name('objects');
+        Route::get('/logs', 'BotInstanceController@getS3Logs')->name('logs');
+
         Route::get('/regions', 'BotInstanceController@regions')->name('regions');
         Route::post('/launch', 'BotInstanceController@launchInstances')->name('launch');
         Route::put('/{id}', 'BotInstanceController@update')->name('update');
         Route::get('/{id}', 'BotInstanceController@show')->name('get');
+        Route::post('/{id}/report', 'BotInstanceController@reportIssue')->name('report');
     });
 
     // User schedules
@@ -62,14 +69,22 @@ Route::group(['middleware' => ['auth:api', 'api.sentry']], function() {
     });
 
     Route::resources([
-        'bots'     => 'BotController',
         'schedule' => 'ScheduleController',
         'platform' => 'PlatformController'
     ]);
 
 });
 
-Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['auth:api', 'api.admin', 'api.sentry']], function() {
+Route::group([
+    'prefix' => 'admin',
+    'namespace' => 'Admin',
+    'middleware' => [
+        'auth:api',
+        'api.admin',
+        'api.sentry',
+        'api.instance'
+    ]
+], function() {
 
     Route::group(['prefix' => 'posts', 'as' => 'posts.'], function () {
         Route::get('/', 'PostController@index')->name('posts');
@@ -90,8 +105,14 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['aut
     });
 
     Route::group(['prefix' => 'instances', 'as' => 'instances.'], function () {
+
+        Route::get('/dates', 'BotInstanceController@getInstanceDates')->name('dates');
+        Route::get('/objects', 'BotInstanceController@getS3Objects')->name('objects');
+        Route::get('/logs', 'BotInstanceController@getS3Logs')->name('logs');
+
         Route::get('/regions', 'BotInstanceController@regions')->name('regions');
         Route::put('/regions/{id}', 'BotInstanceController@updateRegion')->name('update.region');
+        Route::get('/regions/sync', 'BotInstanceController@syncRegions')->name('sync.regions');
         Route::get('/amis', 'BotInstanceController@amis')->name('amis');
         Route::get('/pem', 'BotInstanceController@getInstancePemFile')->name('pem');
         Route::post('/launch', 'BotInstanceController@launchInstances')->name('launch');

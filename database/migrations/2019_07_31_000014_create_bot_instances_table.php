@@ -18,6 +18,10 @@ class CreateBotInstancesTable extends Migration
             $table->bigIncrements('id');
             $table->unsignedInteger('user_id');
             $table->unsignedInteger('bot_id')->nullable();
+            $table->string('tag_name')->nullable();
+            $table->string('tag_user_email')->nullable();
+            $table->string('aws_instance_id')->nullable();
+            $table->string('aws_public_ip')->nullable();
             $table->unsignedInteger('aws_region_id')->nullable();
             $table->unsignedInteger('used_credit')->default(0);
             $table->unsignedInteger('up_time')->default(0);
@@ -36,6 +40,7 @@ class CreateBotInstancesTable extends Migration
                 'active', 'inactive'
             ])->default('active');
 
+            $table->timestamp('start_time')->nullable();
             $table->timestamps();
             $table->softDeletes();
 

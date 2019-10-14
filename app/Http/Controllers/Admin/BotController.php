@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Bot;
+use App\BotInstance;
+use App\Helpers\QueryHelper;
 use App\Http\Controllers\AppController;
 use App\Http\Resources\Admin\BotCollection;
 use App\Http\Resources\Admin\BotResource;
@@ -12,8 +14,6 @@ use App\Jobs\SyncLocalBots;
 use App\Platform;
 use App\Tag;
 use App\User;
-use App\BotInstance;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
@@ -35,7 +35,7 @@ class BotController extends AppController
         try {
 
             $limit      = $request->query('limit') ?? self::PAGINATE;
-            $platform   = $request->input('platform');
+            $platform   = $request->input('platform'); // TODO: ???
             $search     = $request->input('search');
             $sort       = $request->input('sort');
             $order      = $request->input('order') ?? 'asc';
@@ -45,23 +45,21 @@ class BotController extends AppController
             // TODO: Add Filters
 
             //
-            if (! empty($platform)) {
-                $resource->whereHas('platform', function (Builder $query) use ($platform) {
-                    $query->where('name', '=', $platform);
-                });
-            }
-
-            //
             if (! empty($search)) {
-                $resource->where('name', 'like', "%{$search}%")
-                    ->orWhere('aws_ami_image_id', 'like', "%{$search}%")
-                    ->orWhere('aws_ami_name', 'like', "%{$search}%");
+                $resource->where('bots.name', 'like', "%{$search}%")
+                    ->orWhere('bots.description', 'like', "%{$search}%");
             }
 
             //
-            if (! empty($sort)) {
-                $resource->orderBy($sort, $order);
-            }
+            $resource->when($sort, function ($query, $sort) use ($order) {
+                if (! empty(Bot::ORDER_FIELDS[$sort])) {
+                    return QueryHelper::orderBot($query, Bot::ORDER_FIELDS[$sort], $order);
+                } else {
+                    return $query->orderBy('name', 'asc');
+                }
+            }, function ($query) {
+                return $query->orderBy('name', 'asc');
+            });
 
             $bots   = (new BotCollection($resource->paginate($limit)))->response()->getData();
             $meta   = $bots->meta ?? null;
@@ -274,7 +272,7 @@ class BotController extends AppController
 
         $platforms = $platforms->hasBots($this->limit, $platformId)->paginate(5);
 
-        return view('admin.bots.list',compact('platforms'));
+        return view('admin.bots.list', compact('platforms'));
     }
 
     public function mineBots()
@@ -292,7 +290,8 @@ class BotController extends AppController
         return view('admin.instance.my-bots', compact('userInstances', 'bots'));
     }
 
-    public function getTags(Request $request) {
+    public function getTags(Request $request)
+    {
         try {
 
             $limit  = $request->query('limit') ?? self::PAGINATE;

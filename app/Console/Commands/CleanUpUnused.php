@@ -6,6 +6,7 @@ use App\DeleteSecurityGroup;
 use App\Services\Aws;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class CleanUpUnused extends Command
@@ -61,7 +62,9 @@ class CleanUpUnused extends Command
                             $group->delete();
                         }
 
-                    } catch (Throwable $throwable) {}
+                    } catch (Throwable $throwable) {
+                        Log::error($throwable->getMessage());
+                    }
                 }
         });
     }

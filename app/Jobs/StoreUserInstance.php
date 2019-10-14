@@ -51,19 +51,26 @@ class StoreUserInstance implements ShouldQueue
     protected $params;
 
     /**
+     * @var string|null
+     */
+    protected $ip;
+
+    /**
      * Create a new job instance.
      * @param Bot $bot
      * @param BotInstance $instance
      * @param User $user
      * @param array|null $params
+     * @param string|null $ip
      */
-    public function __construct(Bot $bot, BotInstance $instance, User $user, ?array $params)
+    public function __construct(Bot $bot, BotInstance $instance, User $user, ?array $params, ?string $ip)
     {
         $this->bot      = $bot;
         $this->instance = $instance;
         $this->user     = $user;
         $regions        = Aws::getEc2Regions();
         $this->params   = $params;
+        $this->ip       = $ip;
 
         if (! empty($regions) && in_array($instance->region->code, $regions)) {
             $this->region = $instance->region->code;
@@ -75,7 +82,7 @@ class StoreUserInstance implements ShouldQueue
     /**
      * Execute the job.
      *
-     * @return bool
+     * @return void
      */
     public function handle()
     {
@@ -87,16 +94,19 @@ class StoreUserInstance implements ShouldQueue
             $aws = new Aws;
             $aws->ec2Connection($this->region);
 
+            Log::debug("Connect to region: {$this->region}");
+
             $keyPair        = $aws->createKeyPair();
-            Log::info('Created Key pair');
             $tagName        = $aws->createTagName();
-            Log::info('Created tag name');
-            $securityGroup  = $aws->createSecretGroup();
-            Log::info('Created SecurityGroups');
+            $securityGroup  = $aws->createSecretGroup($this->ip);
 
             if (empty($keyPair) || empty($tagName) || empty($securityGroup)) {
-                return false;
+                return;
             }
+
+            Log::debug("Created Key pair: {$keyPair['keyName']}");
+            Log::debug("Created tag name: {$tagName}");
+            Log::debug("Created SecurityGroups: {$securityGroup['securityGroupName']}");
 
             $keyPairName    = $keyPair['keyName'];
             $keyPairPath    = $keyPair['path'];
@@ -114,24 +124,28 @@ class StoreUserInstance implements ShouldQueue
                 $this->params
             );
 
+            if (empty($newInstanceResponse)) {
+                return;
+            }
+
             if ($newInstanceResponse->hasKey('Instances')) {
 
                 $instanceId = $newInstanceResponse->get('Instances')[0]['InstanceId'] ?? null;
 
+                Log::info('Launched instance ' . $instanceId);
+
                 CreditUsageHelper::startInstance(
                     $this->user,
                     self::START_INSTANCE_CREDIT,
-                    $instanceId,
+                    $this->instance->id,
                     $tagName
                 );
-
-                Log::info('Launched instance ' . $instanceId);
 
                 $aws->waitUntil([$instanceId]);
 
                 Log::info('wait until instance ' . $instanceId);
 
-                $describeInstancesResponse = $aws->describeInstances([$instanceId]);
+                $describeInstancesResponse = $aws->describeInstances([$instanceId], $this->region);
 
                 Log::info('describe instances ' . $instanceId);
 
@@ -144,36 +158,66 @@ class StoreUserInstance implements ShouldQueue
                     // store instance details in database
                     $botInstanceDetail = $this->instance->details()->latest()->first();
                     $botInstanceDetail->update([
-                        'tag_name' => $tagName,
-                        'tag_user_email' => $this->user->email ?? '',
-                        'aws_instance_id' => $instanceArray['InstanceId'] ?? '',
-                        'aws_security_group_id' => $groupId,
-                        'aws_security_group_name' => $groupName,
-                        'aws_public_ip' => $instanceArray['PublicIpAddress'] ?? '',
-                        'aws_public_dns' => $instanceArray['PublicDnsName'] ?? '',
-                        'aws_pem_file_path' => $keyPairPath,
-                        'is_in_queue' => 0,
-                        'start_time' => $launchTime->format('Y-m-d H:i:s'),
+                        'aws_security_group_id'     => $groupId,
+                        'aws_security_group_name'   => $groupName,
+                        'aws_public_dns'            => $instanceArray['PublicDnsName'] ?? '',
+                        'aws_pem_file_path'         => $keyPairPath,
+                        'is_in_queue'               => 0,
+                        'start_time'                => $launchTime->format('Y-m-d H:i:s'),
+                    ]);
+
+                    $this->instance->update([
+                        'tag_name'          => $tagName,
+                        'tag_user_email'    => $this->user->email ?? '',
+                        'aws_instance_id'   => $instanceArray['InstanceId'] ?? '',
+                        'aws_public_ip'     => $instanceArray['PublicIpAddress'] ?? '',
+                        'start_time'        => $launchTime->format('Y-m-d H:i:s'),
                     ]);
 
                     if ($awsStatus === BotInstance::STATUS_RUNNING) {
                         $this->instance->setAwsStatusRunning();
                     }
-
-                    broadcast(new InstanceLaunched($this->instance, $this->user));
                 }
-
-                return true;
             }
 
-            return false;
+        } catch (GuzzleException $exception) {
+
+            $pos = strpos($exception->getMessage(), '<?xml version="1.0" encoding="UTF-8"?>');
+
+            if ($pos === false) {
+                Log::debug("Error on catch Throwable : {$exception->getMessage()}");
+            } else {
+                $message = preg_replace('/^(.*)<\?xml version="1\.0" encoding="UTF-8"\?>/s', '', $exception->getMessage());
+                Log::debug("Error on catch GuzzleException : {$message}");
+            }
+
+            $this->removeInstance();
 
         } catch (Throwable $throwable) {
-            Log::debug("Error on catch : {$throwable->getMessage()}");
-            return false;
-        } catch (GuzzleException $expression) {
-            Log::debug("Error on catch : {$expression->getMessage()}");
-            return false;
+
+            $pos = strpos($throwable->getMessage(), '<?xml version="1.0" encoding="UTF-8"?>');
+
+            if ($pos === false) {
+                Log::debug("Error on catch Throwable : {$throwable->getMessage()}");
+            } else {
+                $message = preg_replace('/^(.*)<\?xml version="1\.0" encoding="UTF-8"\?>/s', '', $throwable->getMessage());
+                Log::debug("Error on catch Throwable : {$message}");
+            }
+
+            $this->removeInstance();
+        }
+
+        broadcast(new InstanceLaunched($this->instance, $this->user));
+    }
+
+    private function removeInstance()
+    {
+        Log::debug("removeInstance");
+        Log::debug(print_r($this->instance, true));
+
+        if (! empty($this->instance)) {
+            $this->instance->setAwsStatusTerminated();
+            $this->instance->delete();
         }
     }
 }

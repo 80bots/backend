@@ -93,11 +93,19 @@ class SyncLocalBots extends Command
                                     ]);
                                 }
 
-                                $bot = Bot::where('name', '=', $result['about']->name)->first();
+                                $i = 0;
+                                foreach($result['params'] as $key => $val) {
+                                    $val->order = $i;
+                                    $result['params']->$key = $val;
+                                    $i++;
+                                }
+
+                                $bot = Bot::where('path', '=', $file->getFilename())->first();
 
                                 if (!empty($bot)) {
                                     $bot->update([
                                         'description' => $result['about']->description,
+                                        'name' => $result['about']->name,
                                         'parameters' => json_encode($result['params'])
                                     ]);
                                 } else {

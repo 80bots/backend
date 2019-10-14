@@ -67,7 +67,7 @@ class CalculateInstancesUpTime extends Command
 
                             $instanceDetail = $instance->details()->latest()->first();
 
-                            $describeInstance = $aws->describeInstances([$instanceDetail->aws_instance_id]);
+                            $describeInstance = $aws->describeInstances([$instance->aws_instance_id], $instance->region->code);
 
                             if ($describeInstance->hasKey('Reservations')) {
                                 $reservations = collect($describeInstance->get('Reservations'));
@@ -83,14 +83,14 @@ class CalculateInstancesUpTime extends Command
                                         'used_credit'   => CommonHelper::calculateUsedCredit($cronUpTime + $instance->total_up_time ?? 0)
                                     ]);
 
-                                    Log::debug('instance id ' . $instanceDetail->aws_instance_id . ' Cron Up Time is ' . $cronUpTime);
+                                    Log::debug('instance id ' . $instance->aws_instance_id . ' Cron Up Time is ' . $cronUpTime);
                                 }
 
                                 unset($reservations, $awsInstancesInfo, $awsInstance);
 
                             } else {
                                 //
-                                Log::debug('instance id ' . $instanceDetail->aws_instance_id . ' already terminated');
+                                Log::debug('instance id ' . $instance->aws_instance_id . ' already terminated');
                                 $instance->setAwsStatusTerminated();
 
                                 InstanceHelper::cleanUpTerminatedInstanceData($aws, $instanceDetail);

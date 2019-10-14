@@ -103,6 +103,8 @@ return [
         'launch_limit_error'    => 'Limit error!',
         'credits_error'         => "You don't have enough credits in your account to run the new bot",
         'parameters_incorrect'  => 'Passed parameters are incorrect',
+        'not_exist_ami'         => 'The selected AMI is absent in this region',
+        'not_found'             => 'Instance Not Found'
     ],
     'aws' => [
         'error' => 'Aws error'

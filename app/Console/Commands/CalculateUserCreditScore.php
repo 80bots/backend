@@ -73,13 +73,13 @@ class CalculateUserCreditScore extends Command
 
                     $used = $instance->used_credit - $order->credits;
 
-                    if ($used >= $user->credits && $user->hasRole('User')) {
-                        $instancesId = $instance->details()->latest()->first()->aws_instance_id ?? null;
-                        $this->stopUserAllInstances([$instancesId]);
+                    if ($user->isUser() && $used >= $user->credits) {
+                        $instancesId = $instance->aws_instance_id ?? null;
+                        $this->stopUserAllInstances([$instancesId], $instance->region->code);
                     }
 
                     if ($used > 0) {
-                        CreditUsageHelper::usingTheBot($user, $instance->bot, $used);
+                        CreditUsageHelper::usingTheBot($user, $instance->bot, $instance->id, $used);
                     }
 
                     $order->increment('credits', $used);
@@ -114,11 +114,11 @@ class CalculateUserCreditScore extends Command
         });
     }
 
-    private function stopUserAllInstances(array $instancesIds)
+    private function stopUserAllInstances(array $instancesIds, string $region)
     {
         $aws = new Aws;
 
-        $describeInstance = $aws->describeInstances($instancesIds);
+        $describeInstance = $aws->describeInstances($instancesIds, $region);
 
         if ($describeInstance->hasKey('Reservations')) {
 

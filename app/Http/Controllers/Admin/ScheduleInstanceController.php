@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\QueryHelper;
 use App\Http\Controllers\AppController;
 use App\Http\Resources\Admin\SchedulingInstanceCollection;
 use App\Http\Resources\Admin\SchedulingInstanceResource;
@@ -34,26 +35,27 @@ class ScheduleInstanceController extends AppController
             $resource = SchedulingInstance::ajax();
 
             // TODO: Add Filters
-            switch ($list) {
-                case 'my':
-                    $resource->findByUserId(Auth::id());
-                    break;
-                default:
-                    break;
+            if ($list === 'my') {
+                $resource->findByUserId(Auth::id());
             }
 
             //
             if (! empty($search)) {
-                $resource->whereHas('user', function (Builder $query) use ($search) {
-                    $query->where('name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%");
+                $resource->whereHas('instance', function (Builder $query) use ($search) {
+                    $query->where('tag_name', 'like', "%{$search}%");
                 });
             }
 
             //
-            if (! empty($sort)) {
-                $resource->orderBy($sort, $order);
-            }
+            $resource->when($sort, function ($query, $sort) use ($order) {
+                if (! empty(SchedulingInstance::ORDER_FIELDS[$sort])) {
+                    return QueryHelper::orderBotScheduling($query, SchedulingInstance::ORDER_FIELDS[$sort], $order);
+                } else {
+                    return $query->orderBy('created_at', 'desc');
+                }
+            }, function ($query) {
+                return $query->orderBy('created_at', 'desc');
+            });
 
             $instances  = (new SchedulingInstanceCollection($resource->paginate($limit)))->response()->getData();
             $meta       = $instances->meta ?? null;
@@ -119,8 +121,8 @@ class ScheduleInstanceController extends AppController
             if (empty($schedule)) {
 
                 $schedule = SchedulingInstance::create([
-                    'user_id'           => Auth::id(),
-                    'user_instance_id'  => $instance->id,
+                    'user_id'       => Auth::id(),
+                    'instance_id'   => $instance->id,
                 ]);
 
                 if ($schedule) {
@@ -276,7 +278,7 @@ class ScheduleInstanceController extends AppController
     private function updateOrCreateSchedulingInstancesDetails(SchedulingInstance $instance, array $details, $timezone): void
     {
         // Delete all
-        SchedulingInstancesDetails::where('scheduling_instance_id', '=', $instance->id ?? null)->delete();
+        SchedulingInstancesDetails::where('scheduling_id', '=', $instance->id ?? null)->delete();
 
         /**
          * details[0][type] = stop | start
@@ -299,13 +301,13 @@ class ScheduleInstanceController extends AppController
             $selectedTime = Carbon::parse("{$detail['day']} {$detail['time']}");
 
             SchedulingInstancesDetails::create([
-                'scheduling_instance_id'    => $instance->id ?? null,
-                'day'                       => $detail['day'] ?? '',
-                'selected_time'             => $selectedTime->format('h:i A'),
-                'time_zone'                 => $timezone,
-                'cron_data'                 => "{$selectedTime->format('D h:i A')} {$timezone}",
-                'schedule_type'             => $type,
-                'status'                    => SchedulingInstancesDetails::STATUS_ACTIVE
+                'scheduling_id' => $instance->id ?? null,
+                'day'           => $detail['day'] ?? '',
+                'selected_time' => $selectedTime->format('h:i A'),
+                'time_zone'     => $timezone,
+                'cron_data'     => "{$selectedTime->format('D h:i A')} {$timezone}",
+                'schedule_type' => $type,
+                'status'        => SchedulingInstancesDetails::STATUS_ACTIVE
             ]);
         }
     }

@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Helpers\QueryHelper;
 use Illuminate\Database\Eloquent\Model;
 
 class CreditUsage extends Model
@@ -12,9 +13,33 @@ class CreditUsage extends Model
     const FILTER_ALL    = 'all';
     const FILTER_MY     = 'my';
 
+    const ORDER_FIELDS      = [
+        'credits' => [
+            'entity'    => QueryHelper::ENTITY_CREDIT_USAGE,
+            'field'     => 'credits'
+        ],
+        'total' => [
+            'entity'    => QueryHelper::ENTITY_CREDIT_USAGE,
+            'field'     => 'total'
+        ],
+        'action' => [
+            'entity'    => QueryHelper::ENTITY_CREDIT_USAGE,
+            'field'     => 'action'
+        ],
+        'description' => [
+            'entity'    => QueryHelper::ENTITY_CREDIT_USAGE,
+            'field'     => 'subject'
+        ],
+        'date' => [
+            'entity'    => QueryHelper::ENTITY_CREDIT_USAGE,
+            'field'     => 'created_at'
+        ],
+    ];
+
     protected $table = "credit_usages";
 
     protected $fillable = [
+        'instance_id',
         'user_id',
         'credits',
         'total',
@@ -59,6 +84,11 @@ class CreditUsage extends Model
     public function scopeOnlyUsed($query)
     {
         $query->where('action', '=', self::ACTION_USED);
+    }
+
+    public function instance()
+    {
+        return $this->belongsTo(BotInstance::class, 'instance_id');
     }
 
     public function user()

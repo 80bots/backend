@@ -23,6 +23,9 @@ class BotResource extends JsonResource
                     'name' => $key
                 ], (array) $param);
             }
+            usort($formattedParameters, function($a, $b) {
+                return ($a['order'] > $b['order']) ? 1 : -1;
+            });
         }
 
         return [

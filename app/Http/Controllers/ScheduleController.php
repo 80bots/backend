@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\CommonHelper;
+use App\Helpers\QueryHelper;
 use App\Http\Resources\User\ScheduleCollection;
 use App\Http\Resources\User\ScheduleResource;
 use App\Http\Resources\User\BotInstanceCollection;
@@ -33,10 +34,22 @@ class ScheduleController extends Controller
 
             // TODO: Add Filters
 
-            //
-            if (! empty($sort)) {
-                $resource->orderBy($sort, $order);
+            if (! empty($search)) {
+                $resource->whereHas('instance', function (Builder $query) use ($search) {
+                    $query->where('tag_name', 'like', "%{$search}%");
+                });
             }
+
+            //
+            $resource->when($sort, function ($query, $sort) use ($order) {
+                if (! empty(SchedulingInstance::ORDER_FIELDS[$sort])) {
+                    return QueryHelper::orderBotScheduling($query, SchedulingInstance::ORDER_FIELDS[$sort], $order);
+                } else {
+                    return $query->orderBy('created_at', 'desc');
+                }
+            }, function ($query) {
+                return $query->orderBy('created_at', 'desc');
+            });
 
             $schedules  = (new ScheduleCollection($resource->paginate($limit)))->response()->getData();
             $meta       = $schedules->meta ?? null;
@@ -297,7 +310,7 @@ class ScheduleController extends Controller
         // Delete all
         SchedulingInstancesDetails::whereHas('schedulingInstance', function(Builder $query) {
             $query->where('user_id', '=', Auth::id());
-        })->where('scheduling_instance_id', '=', $instance->id ?? null)->delete();
+        })->where('scheduling_id', '=', $instance->id ?? null)->delete();
 
         /**
          * details[0][type] = stop | start
@@ -320,13 +333,13 @@ class ScheduleController extends Controller
             $selectedTime = Carbon::parse("{$detail['day']} {$detail['time']}");
 
             SchedulingInstancesDetails::create([
-                'scheduling_instance_id'    => $instance->id ?? null,
-                'day'                       => $detail['day'] ?? '',
-                'selected_time'             => $selectedTime->format('h:i A'),
-                'time_zone'                 => $timezone,
-                'cron_data'                 => "{$selectedTime->format('D h:i A')} {$timezone}",
-                'schedule_type'             => $type,
-                'status'                    => SchedulingInstancesDetails::STATUS_ACTIVE
+                'scheduling_id' => $instance->id ?? null,
+                'day'           => $detail['day'] ?? '',
+                'selected_time' => $selectedTime->format('h:i A'),
+                'time_zone'     => $timezone,
+                'cron_data'     => "{$selectedTime->format('D h:i A')} {$timezone}",
+                'schedule_type' => $type,
+                'status'        => SchedulingInstancesDetails::STATUS_ACTIVE
             ]);
         }
     }

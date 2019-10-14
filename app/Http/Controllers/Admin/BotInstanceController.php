@@ -4,12 +4,18 @@ namespace App\Http\Controllers\Admin;
 
 use App\AwsAmi;
 use App\AwsRegion;
+use App\Events\InstanceStatusUpdated;
+use App\Helpers\InstanceHelper;
+use App\Helpers\QueryHelper;
 use App\Http\Controllers\AppController;
 use App\Http\Resources\Admin\BotInstanceCollection;
 use App\Http\Resources\Admin\RegionCollection;
 use App\Http\Resources\Admin\BotInstanceResource;
 use App\Http\Resources\Admin\RegionResource;
+use App\Http\Resources\Admin\S3ObjectCollection;
 use App\Jobs\SyncBotInstances;
+use App\Jobs\SyncRegions;
+use App\S3Object;
 use App\Services\Aws;
 use App\BotInstance;
 use Illuminate\Http\Request;
@@ -36,31 +42,33 @@ class BotInstanceController extends AppController
             $sort   = $request->input('sort');
             $order  = $request->input('order') ?? 'asc';
 
+            //$resource = BotInstance::withTrashed()->with(['oneDetail', 'user', 'region'])->ajax();
             $resource = BotInstance::withTrashed()->ajax();
 
             // TODO: Add Filters
 
-            switch ($list) {
-                case 'my':
-                    $resource->with('user')->findByUserId(Auth::id());
-                    break;
-                default:
-                    $resource->with('user');
-                    break;
+            if ($list === 'my') {
+                $resource->findByUserId(Auth::id());
             }
 
             //
             if (! empty($search)) {
-                $resource->where('tag_name', 'like', "%{$search}%")
-                    ->orWhere('aws_instance_id', 'like', "%{$search}%");
+                $resource->where('bot_instances.tag_name', 'like', "%{$search}%")
+                    ->orWhere('bot_instances.tag_user_email', 'like', "%{$search}%");
             }
 
             //
-            if (empty($sort)) {
-                $sort   = 'created_at';
-                $order  = 'desc';
-            }
-            $resource->orderBy($sort, $order);
+            $resource->when($sort, function ($query, $sort) use ($order) {
+                if (! empty(BotInstance::ORDER_FIELDS[$sort])) {
+                    return QueryHelper::orderBotInstance($query, BotInstance::ORDER_FIELDS[$sort], $order);
+                } else {
+                    return $query->orderBy('aws_status', 'asc')->orderBy('start_time', 'desc');
+                }
+            }, function ($query) {
+                return $query->orderBy('aws_status', 'asc')->orderBy('start_time', 'desc');
+            });
+
+            //$resource->dd();
 
             $instances  = (new BotInstanceCollection($resource->paginate($limit)))->response()->getData();
             $meta       = $instances->meta ?? null;
@@ -108,12 +116,15 @@ class BotInstanceController extends AppController
         }
 
         //
-        if (empty($sort)) {
-            $sort   = 'created_at';
-            $order  = 'desc';
-        }
-
-        $resource->orderBy($sort, $order);
+        $resource->when($sort, function ($query, $sort) use ($order) {
+            if (! empty(AwsRegion::ORDER_FIELDS[$sort])) {
+                return QueryHelper::orderAwsRegion($query, AwsRegion::ORDER_FIELDS[$sort], $order);
+            } else {
+                return $query->orderBy('name', 'asc');
+            }
+        }, function ($query) {
+            return $query->orderBy('name', 'asc');
+        });
 
         $regions    = (new RegionCollection($resource->paginate($limit)))->response()->getData();
         $meta       = $regions->meta ?? null;
@@ -148,6 +159,16 @@ class BotInstanceController extends AppController
             } else {
                 return $this->error(__('admin.error'), __('admin.regions.update_error'));
             }
+        } catch (Throwable $throwable) {
+            return $this->error(__('admin.server_error'), $throwable->getMessage());
+        }
+    }
+
+    public function syncRegions(Request $request)
+    {
+        try {
+            dispatch(new SyncRegions(Auth::user()));
+            return $this->success([], __('admin.regions.success_sync'));
         } catch (Throwable $throwable) {
             return $this->error(__('admin.server_error'), $throwable->getMessage());
         }
@@ -213,6 +234,9 @@ class BotInstanceController extends AppController
                             if ($this->changeStatus($value, $id)) {
                                 $instance = new BotInstanceResource(BotInstance::withTrashed()
                                     ->where('id', '=', $id)->first());
+
+                                broadcast(new InstanceStatusUpdated(Auth::id()));
+
                                 return $this->success($instance->toArray($request));
                             } else {
                                 return $this->error(__('admin.server_error'), __('admin.instances.not_updated'));
@@ -243,30 +267,117 @@ class BotInstanceController extends AppController
         if (! empty($instance)) {
 
             try {
+
                 $instance = BotInstance::find($instance);
 
                 if (! empty($instance)) {
 
                     $details    = $instance->details()->latest()->first();
+                    $aws        = new Aws;
 
-                    $aws = new Aws;
-                    $aws->s3Connection();
+                    $describeInstancesResponse = $aws->describeInstances(
+                        [$instance->aws_instance_id ?? null],
+                        $instance->region->code
+                    );
 
-                    $result = $aws->getKeyPairObject($details->aws_pem_file_path ?? '');
+                    if (! $describeInstancesResponse->hasKey('Reservations') || InstanceHelper::checkTerminatedStatus($describeInstancesResponse)) {
 
-                    $body = $result->get('Body');
+                        $instance->setAwsStatusTerminated();
 
-                    if (! empty($body)) {
-                        return response($body)->header('Content-Type', $result->get('ContentType'));
+                        if ($instance->region->created_instances > 0) {
+                            $instance->region->decrement('created_instances');
+                        }
+
+                        InstanceHelper::cleanUpTerminatedInstanceData($aws, $details);
+
+                        return $this->error(__('admin.error'), __('admin.instances.key_pair_not_found'));
+
+                    } else {
+
+                        $aws->s3Connection();
+
+                        $result = $aws->getKeyPairObject($details->aws_pem_file_path ?? '');
+
+                        $body = $result->get('Body');
+
+                        if (! empty($body)) {
+                            return response($body)->header('Content-Type', $result->get('ContentType'));
+                        }
+
+                        return $this->error(__('admin.error'), __('admin.error'));
                     }
-
-                    return $this->error(__('admin.error'), __('admin.error'));
                 }
+
             } catch (Throwable $throwable){
                 return $this->error(__('admin.server_error'), $throwable->getMessage());
             }
         }
 
         return $this->error(__('admin.error'), __('admin.parameters_incorrect'));
+    }
+
+    public function getS3Objects(Request $request)
+    {
+        $instance = BotInstance::find($request->query('instance_id'));
+
+        if (empty($instance)) {
+            return $this->notFound(__('admin.not_found'), __('admin.instances.not_found'));
+        }
+
+        // Remove links from DB, which will be expired soon
+        S3Object::removeOldLinks($instance->id);
+
+        $limit  = $request->query('limit') ?? self::PAGINATE;
+        $type   = InstanceHelper::getTypeS3Object($request->query('type'));
+        $date   = $request->query('date');
+
+        $resource = $instance->s3Objects()
+            ->where('folder', '=', $date)
+            ->where('type', '=', $type);
+
+        if ($resource->count() === 0) {
+            InstanceHelper::saveS3Objects($instance, $type, $date);
+        }
+
+        $instances  = (new S3ObjectCollection($resource->paginate($limit)))->response()->getData();
+        $meta       = $instances->meta ?? null;
+
+        $response = [
+            'data'  => $instances->data ?? [],
+            'total' => $meta->total ?? 0
+        ];
+
+        return $this->success($response);
+    }
+
+    public function getS3Logs(Request $request)
+    {
+        $instance = BotInstance::find($request->query('instance_id'));
+
+        if (empty($instance)) {
+            return $this->notFound(__('admin.not_found'), __('admin.instances.not_found'));
+        }
+
+        // Remove links from DB, which will be expired soon
+        S3Object::removeOldLinks($instance->id);
+
+        $limit  = $request->query('limit') ?? self::PAGINATE;
+
+        $resource = $instance->s3Objects()
+            ->where('type', '=', S3Object::TYPE_LOGS);
+
+        if ($resource->count() === 0) {
+            InstanceHelper::saveS3Logs($instance);
+        }
+
+        $instances  = (new S3ObjectCollection($resource->paginate($limit)))->response()->getData();
+        $meta       = $instances->meta ?? null;
+
+        $response = [
+            'data'  => $instances->data ?? [],
+            'total' => $meta->total ?? 0
+        ];
+
+        return $this->success($response);
     }
 }

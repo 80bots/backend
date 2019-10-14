@@ -6,6 +6,7 @@ use App\DeleteSecurityGroup;
 use App\Services\Aws;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class RefreshDatabase extends Command
@@ -51,6 +52,7 @@ class RefreshDatabase extends Command
         $this->call('passport:install');
         $this->comment('Refreshing cache again...');
         $this->call('cache:refresh');
+        $this->comment('chmod storage/logs...');
         $this->info('Completed');
     }
 }

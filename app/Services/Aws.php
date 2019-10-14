@@ -8,11 +8,18 @@ use App\BotInstance;
 use App\Helpers\GeneratorID;
 use App\User;
 use Aws\Ec2\Ec2Client;
+use Aws\Exception\AwsException;
+use Aws\Iam\Exception\IamException;
+use Aws\Iam\IamClient;
 use Aws\Result;
 use Aws\S3\Exception\S3Exception;
 use Aws\S3\S3Client;
+use Aws\S3\Transfer;
+use Aws\ServiceQuotas\ServiceQuotasClient;
+use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Nubs\RandomNameGenerator\All as AllRandomName;
 use Nubs\RandomNameGenerator\Alliteration as AlliterationName;
@@ -30,6 +37,11 @@ class Aws
      * @var S3Client
      */
     protected $s3;
+
+    /**
+     * @var IamClient
+     */
+    protected $iam;
 
     /**
      * @var string
@@ -75,6 +87,27 @@ class Aws
     }
 
     /**
+     * @return string
+     */
+    public function getS3Bucket()
+    {
+        return $this->s3Bucket;
+    }
+
+    /**
+     * @param string $region
+     * @param array|null $credentials
+     */
+    public function iamConnection(string $region = '', array $credentials = null)
+    {
+        $this->iam = new IamClient([
+            'region'        => empty($region) ? config('aws.region', 'us-east-2') : $region,
+            'version'       => config('aws.version', 'latest'),
+            'credentials'   => empty($credentials) ? config('aws.credentials') : $credentials
+        ]);
+    }
+
+    /**
      * @return array
      */
     public static function getEc2Regions(): array
@@ -105,6 +138,7 @@ class Aws
 
     /**
      * @return array
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function getEc2RegionsWithName(): array
     {
@@ -151,6 +185,65 @@ class Aws
         }
 
         return [];
+    }
+
+    /**
+     * @param string $name
+     * @param string $email
+     * @return array|null
+     */
+    public function createIamUser(string $name, string $email): ?array
+    {
+        if (empty($this->iam)) {
+            $this->iamConnection();
+        }
+
+        $access = null;
+        $user = null;
+
+        try {
+
+            $getUser = $this->iam->getUser([
+                'UserName' => $name,
+            ]);
+
+            if ($getUser->hasKey('User')) {
+                $user = $getUser->get('User');
+            }
+        } catch (IamException $exception) {
+            Log::error("User {$name} Not Found");
+        }
+
+        if (empty($user)) {
+
+            try {
+                $result = $this->iam->CreateUser([
+                    'UserName' => $name
+                ]);
+
+                $this->iam->addUserToGroup([
+                    'GroupName' => config('aws.iam.group', 'saas-s3'),
+                    'UserName' => $name,
+                ]);
+
+                $result = $this->iam->createAccessKey([
+                    'UserName' => $name,
+                ]);
+
+                if ($result->hasKey('AccessKey')) {
+                    $accessKey = $result->get('AccessKey');
+
+                    $access = [
+                        'key' => $accessKey['AccessKeyId'] ?? '',
+                        'secret' => $accessKey['SecretAccessKey'] ?? '',
+                    ];
+                }
+            } catch (Throwable $throwable) {
+                Log::error($throwable->getMessage());
+            }
+        }
+
+        return $access;
     }
 
     /**
@@ -252,6 +345,10 @@ class Aws
         }
     }
 
+    /**
+     * @param string $path
+     * @param string $bucket
+     */
     public function deleteS3KeyPair(string $path, string $bucket = ''): void
     {
         if (empty($this->s3)) {
@@ -352,10 +449,11 @@ class Aws
     /**
      * Create a Security Group
      *
+     * @param string|null $ip
      * @return array|null
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function createSecretGroup(): ?array
+    public function createSecretGroup(?string $ip): ?array
     {
         if (empty($this->ec2)) {
             $this->ec2Connection();
@@ -373,7 +471,7 @@ class Aws
             ]);
 
             if ($result->hasKey('GroupId')) {
-                $this->setSecretGroupIngress($securityGroupName);
+                $this->setSecretGroupIngress($ip, $securityGroupName);
                 // Get the security group ID (optional)
                 return [
                     'securityGroupId'   => $result->get('GroupId'),
@@ -390,73 +488,95 @@ class Aws
     }
 
     /**
-     * Add an Ingress Rule
-     *
-     * @param null $securityGroupName
+     * @param string $securityGroupId
      * @return Result
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function setSecretGroupIngress($securityGroupName = null): Result
+    public function describeSecurityGroups(string $securityGroupId): Result
     {
         if (empty($this->ec2)) {
             $this->ec2Connection();
         }
 
-        $serverIp = $this->getServerIp();
+        return $this->ec2->describeSecurityGroups([
+            'GroupIds' => [$securityGroupId],
+        ]);
+    }
+
+    /**
+     * @param int $port
+     * @param string $ip
+     * @param string $ipProtocol
+     * @param null $securityGroupId
+     * @return Result
+     */
+    public function updateSecretGroupIngress(int $port, string $ip, string $ipProtocol = 'tcp', $securityGroupId = null): Result
+    {
+        if (empty($this->ec2)) {
+            $this->ec2Connection();
+        }
+
+        return $this->ec2->authorizeSecurityGroupIngress([
+            'GroupId' => $securityGroupId,
+            'IpPermissions' => [
+                [
+                    'IpProtocol' => $ipProtocol,
+                    'FromPort' => $port,
+                    'ToPort' => $port,
+                    'IpRanges' => [
+                        ['CidrIp' => "{$ip}/32"]
+                    ],
+                ],
+            ]
+        ]);
+    }
+
+    /**
+     * Add an Ingress Rule
+     *
+     * @param string|null $ip
+     * @param null $securityGroupName     *
+     * @return Result
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function setSecretGroupIngress(?string $ip, $securityGroupName = null): Result
+    {
+        if (empty($this->ec2)) {
+            $this->ec2Connection();
+        }
+
+        $serverIp = config('app.env') === 'local' ? '0.0.0.0/0' : "{$ip}/32";
+
+        $userPorts = config('aws.ports.access_user');
+        $adminPorts = config('aws.ports.access_admin');
+
+        $ipPermissions = [];
+
+        foreach ($userPorts as $port) {
+            array_push($ipPermissions, [
+                'IpProtocol' => 'tcp',
+                'FromPort' => $port,
+                'ToPort' => $port,
+                'IpRanges' => [
+                    ['CidrIp' => $serverIp]
+                ],
+            ]);
+        }
+
+        foreach ($adminPorts as $adminPort) {
+            array_push($ipPermissions, [
+                'IpProtocol' => 'tcp',
+                'FromPort' => $adminPort,
+                'ToPort' => $adminPort,
+                'IpRanges' => [
+                    ['CidrIp' => '0.0.0.0/0'] // TODO: add admin IP
+                ],
+            ]);
+        }
 
         // Set ingress rules for the security group
         return $this->ec2->authorizeSecurityGroupIngress([
             'GroupName' => $securityGroupName,
-            'IpPermissions' => [
-                [
-                    'IpProtocol' => 'tcp',
-                    'FromPort' => 6002,
-                    'ToPort' => 6002,
-                    'IpRanges' => [
-                        ['CidrIp' => '0.0.0.0/0']
-                    ],
-                ],
-                [
-                    'IpProtocol' => 'tcp',
-                    'FromPort' => 6080,
-                    'ToPort' => 6080,
-                    'IpRanges' => [
-                       ['CidrIp' => '0.0.0.0/0']
-                    ],
-                ],
-                [
-                    'IpProtocol' => 'tcp',
-                    'FromPort' => 22,
-                    'ToPort' => 22,
-                    'IpRanges' => [
-                        ['CidrIp' => '0.0.0.0/0']
-                    ],
-                ],
-                [
-                    'IpProtocol' => 'tcp',
-                    'FromPort' => 80,
-                    'ToPort' => 80,
-                    'IpRanges' => [
-                        ['CidrIp' => '0.0.0.0/0']
-                    ],
-                ]
-//                [
-//                    'IpProtocol' => 'tcp',
-//                    'FromPort' => 22,
-//                    'ToPort' => 22,
-//                    'IpRanges' => [
-//                        ['CidrIp' => $serverIp . '/32']
-//                    ],
-//                ],
-//                [
-//                    'IpProtocol' => 'tcp',
-//                    'FromPort' => 8080,
-//                    'ToPort' => 8080,
-//                    'IpRanges' => [
-//                        ['CidrIp' => $serverIp . '/32']
-//                    ],
-//                ]
-            ]
+            'IpPermissions' => $ipPermissions
         ]);
     }
 
@@ -474,13 +594,15 @@ class Aws
      */
     public function launchInstance(Bot $bot, BotInstance $instance, User $user, string $keyPairName, string $securityGroupName, string $tagName, ?array $params): ?Result
     {
+        Log::debug("AWS: start launch instance");
+
         $botInstanceDetail = $instance->details()->latest()->first();
 
         if (empty($botInstanceDetail)) {
             return null;
         }
 
-        $region         = $instance->region ? $instance->region->code : config('aws.region', 'us-east-2');
+        $region         = ! empty($instance->region) ? $instance->region->code : config('aws.region', 'us-east-2');
         $imageId        = $botInstanceDetail->aws_image_id ?? config('aws.image_id');
         $instanceType   = $botInstanceDetail->aws_instance_type ?? config('aws.instance_type');
         $volumeSize     = $botInstanceDetail->aws_storage_gb ?? config('aws.volume_size');
@@ -536,6 +658,9 @@ class Aws
             $securityGroupName,
             $userData
         );
+
+        Log::debug("Instance Launch Request");
+        Log::debug(print_r($instanceLaunchRequest, true));
 
         return $this->ec2->runInstances($instanceLaunchRequest);
     }
@@ -670,6 +795,10 @@ class Aws
         $this->ec2->waitUntil('InstanceRunning', ['InstanceIds' => $instanceIds]);
     }
 
+    /**
+     * @param string $instanceId
+     * @return Result
+     */
     public function describeOneInstanceStatus(string $instanceId): Result
     {
         if (empty($this->ec2)) {
@@ -688,13 +817,14 @@ class Aws
     }
 
     /**
-     * @param $instanceIds
+     * @param array $instanceIds
+     * @param string $region
      * @return Result
      */
-    public function describeInstances(array $instanceIds): Result
+    public function describeInstances(array $instanceIds, string $region): Result
     {
         if (empty($this->ec2)) {
-            $this->ec2Connection();
+            $this->ec2Connection($region);
         }
 
         // Describe the now-running instance to get the public URL
@@ -848,15 +978,32 @@ EOF
 chmod +x \$shellFile && chown \$username:\$username \$shellFile
 HERESHELL;
 
-        $rc = <<<HERESHELL
-############## Output to /etc/rc.local file ###############
-rcFile="/etc/rc.local"
-cat > \$rcFile <<EOF
-#!/bin/bash
-/home/\$username/\$shellFile
-exit 0
+        $rc = '';
+
+//        $rc = <<<HERESHELL
+//############## Output to /etc/rc.local file ###############
+//rcFile="/etc/rc.local"
+//cat > \$rcFile <<EOF
+//#!/bin/bash
+///home/\$username/\$shellFile
+//exit 0
+//EOF
+//chmod +x \$rcFile
+//HERESHELL;
+
+        $accessKey = config('aws.iam.access_key');
+        $secretKey = config('aws.iam.secret_key');
+
+        $credentials = <<<HERESHELL
+############## Output to credentials.json file ###############
+credentialsFile="credentials.json"
+cat > \$credentialsFile <<EOF
+{
+    "access": "{$accessKey}",
+    "secret": "{$secretKey}",
+}
 EOF
-chmod +x \$rcFile
+chown \$username:\$username \$credentialsFile
 HERESHELL;
 
         $settings = AwsSetting::isDefault()->first();
@@ -865,15 +1012,14 @@ HERESHELL;
 {$settings->script}
 {$shell}
 {$rc}
+{$credentials}
 ############## Output user params to params.json file ###############
 cat > \$file <<EOF
 {$params}
 EOF
-npm i -g pm2
-su - \$username -c 'cd ~/ && mkdir .logs'
-su - \$username -c 'git clone -b master https://14b12de18e2199b2d584d3f6cf9492f3353f9b3e@github.com/80bots/data-streamer.git ./data-streamer'
-su - \$username -c 'cd ./data-streamer && cp .env.example .env && npm i && npm run build && pm2 start --name "data-streamer" npm -- run start'
-su - \$username -c 'DISPLAY=:1 node puppeteer/{$path} > ~/.logs/log.txt'
+su - \$username -c 'echo "starting script {$path}"'
+su - \$username -c 'rm -rf ~/.screenshots/*'
+su - \$username -c 'cd ~/puppeteer && git pull && yarn && mkdir logs && DISPLAY=:1 node {$path} > /dev/null'
 HERESHELL;
     }
 
@@ -900,14 +1046,6 @@ HERESHELL;
             'ImageId'   => $imageId,
             'MinCount'  => 1,
             'MaxCount'  => 1,
-            'BlockDeviceMappings' => [
-                [
-                    'DeviceName' => 'sdh',
-                    'Ebs' => [
-                        'VolumeSize' => $volumeSize
-                    ],
-                ],
-            ],
             'InstanceType'  => $instanceType,
             'KeyName'       => $keyPairName,
             'TagSpecifications' => [
@@ -992,11 +1130,171 @@ HERESHELL;
         }
     }
 
+    /**
+     * @param string $region
+     * @param array|null $credentials
+     * @return Result
+     */
+    public function getServiceQuotasT3MediumInstance(string $region, array $credentials = null): Result
+    {
+        $sqc = new ServiceQuotasClient([
+            'region'        => empty($region) ? config('aws.region', 'us-east-2') : $region,
+            'version'       => config('aws.version', 'latest'),
+            'credentials'   => empty($credentials) ? config('aws.credentials') : $credentials
+        ]);
+
+        return $sqc->getServiceQuota([
+            "QuotaCode"     => config('aws.quota.code_t3_medium'),
+            "ServiceCode"   => config('aws.services.ec2.code'),
+        ]);
+    }
+
+    /**
+     * @return array|null
+     */
     protected function getEc2InstanceTypes(): ?array
     {
         if (empty($this->ec2)) {
             $this->ec2Connection();
         }
         // TODO: need to get available instance types here via pricing API
+
+        return null;
+    }
+
+    /**
+     * @param $instanceId
+     * @param $images
+     * @return array|null
+     */
+    public function uploadScreenshots($instanceId, $images): ?array
+    {
+        $result = [];
+
+        if(empty($this->s3)) {
+            $this->s3Connection('us-east-2', null,'80bots-issued-screenshots');
+        }
+
+        foreach ($images as $image) {
+            $saveKeyLocation = "screenshots/{$instanceId}/{$image->getClientOriginalName()}";
+            $bucket = empty($bucket) ? $this->s3Bucket : $bucket;
+
+            // Save the private key
+            $res = $this->s3->putObject([
+                'Bucket'      => $bucket,
+                'Key'         => $saveKeyLocation,
+                'Body'        => $image->get(),
+                'ContentType' => $image->getClientMimeType()
+            ]);
+
+            $result[] = $res['ObjectURL'];
+        }
+        return $result;
+    }
+
+    /**
+     * @param string $bucket
+     * @param string $key
+     * @param string $saveAs
+     * @return Result
+     */
+    public function getS3Object(string $bucket, string $key, string $saveAs = ''): Result
+    {
+        $params = [
+            'Bucket'    => $bucket,
+            'Key'       => $key
+        ];
+
+        if (! empty($saveAs)) {
+            $params['SaveAs'] = $saveAs;
+        }
+
+        return $this->s3->getObject($params);
+    }
+
+    /**
+     * @param string $bucket
+     * @param int $limit
+     * @param string|null $prefix ('streamer-data/2019-10-06')
+     * @param string|null $next
+     * @return Result
+     */
+    public function getS3ListObjects(string $bucket, int $limit, string $prefix = null, string $next = null): Result
+    {
+        $params = [
+            'Bucket'  => $bucket,
+            'MaxKeys' => $limit
+        ];
+
+        if (! empty($prefix)) {
+            $params['Prefix'] = $prefix;
+        }
+
+        if (! empty($next)) {
+            $params['ContinuationToken'] = $next;
+        }
+
+        return $this->s3->listObjectsV2($params);
+    }
+
+    /**
+     * @param Collection $keys
+     * @return array
+     */
+    public function getS3Objects(Collection $keys): array
+    {
+        $data = [];
+
+        foreach ($keys as $key) {
+
+            $promise = $this->s3->getObjectAsync([
+                'Bucket' => '80bots',
+                'Key' => $key,
+            ]);
+
+            try {
+
+                $result = $promise->wait();
+                array_push($data, [
+                    'type' => $result->get('ContentType'),
+                    'body'  => $result->get('Body')
+                ]);
+
+            } catch (AwsException $exception) {
+                // Handle the error
+                Log::error($exception->getMessage());
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * @param string $bucket
+     * @param string $path
+     */
+    public function s3TransferFolder(string $bucket, string $path)
+    {
+        $source = "s3://{$bucket}/{$path}";
+        $dest = storage_path('logs/transfer');
+        $manager = new Transfer($this->s3, $source, $dest);
+        $manager->transfer();
+    }
+
+    /**
+     * @param string $bucket
+     * @param string $key
+     * @return string
+     */
+    public function getPresignedLink(string $bucket, string $key): string
+    {
+        $cmd = $this->s3->getCommand('GetObject', [
+            'Bucket'    => $bucket,
+            'Key'       => $key
+        ]);
+
+        $request = $this->s3->createPresignedRequest($cmd, '+60 minutes');
+
+        return (string)$request->getUri();
     }
 }

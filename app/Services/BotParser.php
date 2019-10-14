@@ -48,8 +48,8 @@ class BotParser
     ]
      */
 
-    private static $regexParams = '/\/\*\*\s*PARAMS[\r\n|\r|\n](.*)\*\//s';
-    private static $regexAbout  = '/\/\*\*\s*ABOUT[\r\n|\r|\n](.*)\*\/[\r\n|\r|\n]+\//s';
+    private static $regexParams = '/\/\*\*\s*PARAMS[\r\n|\r|\n](.*)\*\//sU';
+    private static $regexAbout  = '/\/\*\*\s*ABOUT[\r\n|\r|\n](.*)\*\/[\r\n|\r|\n]+\//sU';
 
     private static function removeCommentsAndNewLines(string $text): string
     {

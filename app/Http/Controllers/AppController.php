@@ -57,7 +57,7 @@ class AppController extends Controller
              */
             $user = User::find(Auth::id()); // Get "App\User" object
 
-            if ($user->credits < ($credit*$params->count())) {
+            if ($user->isUser() && $user->credits < ($credit*$params->count())) {
                 return $this->error(__('keywords.error'), __('keywords.instance.credits_error'));
             }
 
@@ -104,18 +104,21 @@ class AppController extends Controller
                     ]);
 
                     if (! empty($instance)) {
-                        dispatch(new StoreUserInstance($bot, $instance, $user, $param));
+                        dispatch(new StoreUserInstance($bot, $instance, $user, $param, $request->ip()));
                     }
                 }
+
+                Log::debug("COUNT PARAMS: {$params->count()}");
 
                 $region->increment('created_instances', $params->count());
 
                 return $this->success([
                     'instance_id' => $instance->id ?? null
                 ], __('keywords.instance.launch_success'));
-            }
 
-            return $this->error(__('keywords.error'), __('keywords.instance.launch_error'));
+            } else {
+                return $this->error(__('keywords.error'), __('keywords.instance.not_exist_ami'));
+            }
 
         } catch (Throwable $throwable) {
             Log::error($throwable->getMessage());
@@ -172,38 +175,42 @@ class AppController extends Controller
             return false;
         }
 
-        $awsRegion = AwsRegion::find($instance->aws_region_id ?? null);
-
-        if (empty($awsRegion)) {
+        if (empty($instance->aws_region_id)) {
             return false;
         }
 
         $user   = User::find(Auth::id());
         $aws    = new Aws;
 
-        $describeInstancesResponse = $aws->describeInstances([$instanceDetail->aws_instance_id ?? null]);
+        //
+        $instance->clearPublicIp();
 
-        if (! $describeInstancesResponse->hasKey('Reservations')) {
-            // TODO: Remove instance
-            return false;
-        }
+        try {
 
-        if (InstanceHelper::checkTerminatedStatus($describeInstancesResponse)) {
-            $instance->setAwsStatusTerminated();
-            //
-            if ($awsRegion->created_instances > 0) {
-                $awsRegion->decrement('created_instances');
+            $describeInstancesResponse = $aws->describeInstances(
+                [$instance->aws_instance_id ?? null],
+                $instance->region->code
+            );
+
+            if (! $describeInstancesResponse->hasKey('Reservations') || InstanceHelper::checkTerminatedStatus($describeInstancesResponse)) {
+                $instance->setAwsStatusTerminated();
+
+                if ($instance->region->created_instances > 0) {
+                    $instance->region->decrement('created_instances');
+                }
+
+                InstanceHelper::cleanUpTerminatedInstanceData($aws, $instanceDetail);
+                return true;
             }
-            //
-            InstanceHelper::cleanUpTerminatedInstanceData($aws, $instanceDetail);
+
+        } catch (Throwable $throwable) {
+            Log::error($throwable->getMessage());
             return false;
         }
 
         $instance->setAwsStatusPending();
-        //
-        $instanceDetail->clearPublicIp();
 
-        dispatch(new InstanceChangeStatus($instance, $user, $awsRegion, $status));
+        dispatch(new InstanceChangeStatus($instance, $user, $instance->region, $status));
 
         return true;
     }
@@ -223,6 +230,52 @@ class AppController extends Controller
         } else {
             return redirect(route('login'))->with('error', 'Unauthorized');
         }
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    protected function getInstanceDates(Request $request)
+    {
+        $instance = $this->getInstanceWithCheckUser($request->query('instance_id'));
+
+        if (empty($instance)) {
+            return $this->notFound(__('admin.not_found'), __('admin.instances.not_found'));
+        }
+
+        $type = InstanceHelper::getTypeS3Object($request->query('type'));
+
+        $isset = [];
+
+        $dates = InstanceHelper::getListInstancesDates($instance);
+
+        if (! empty($dates)) {
+
+            $credentials = [
+                'key'    => config('aws.iam.access_key'),
+                'secret' => config('aws.iam.secret_key')
+            ];
+
+            $aws = new Aws;
+            $aws->s3Connection('', $credentials);
+
+            $folder = config('aws.streamer.folder');
+
+            foreach ($dates as $date) {
+
+                $prefix = "{$folder}/{$instance->tag_name}/{$type}/{$date}";
+                $result = $aws->getS3ListObjects($aws->getS3Bucket(), 1, $prefix);
+
+                if ($result->hasKey('Contents')) {
+                    array_push($isset, $date);
+                }
+            }
+        }
+
+        return $this->success([
+            'dates' => $isset
+        ]);
     }
 
     /**

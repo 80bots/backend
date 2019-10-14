@@ -16,6 +16,7 @@ class CreateCreditUsagesTable extends Migration
     {
         Schema::create('credit_usages', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->unsignedBigInteger('instance_id')->nullable();
             $table->unsignedInteger('user_id');
             $table->integer('credits');
             $table->integer('total');
@@ -27,6 +28,12 @@ class CreateCreditUsagesTable extends Migration
 
             $table->string('subject')->nullable();
             $table->timestamps();
+
+            $table->foreign('instance_id')
+                ->references('id')
+                ->on('bot_instances')
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
 
             $table->foreign('user_id')
                 ->references('id')
@@ -44,7 +51,7 @@ class CreateCreditUsagesTable extends Migration
     public function down()
     {
         Schema::table('credit_usages', function (Blueprint $table) {
-            $table->dropForeign(['user_id']);
+            $table->dropForeign(['instance_id', 'user_id']);
         });
 
         Schema::dropIfExists('credit_usages');

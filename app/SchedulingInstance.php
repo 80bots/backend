@@ -2,12 +2,28 @@
 
 namespace App;
 
+use App\Helpers\QueryHelper;
 use Illuminate\Database\Eloquent\Model;
 
 class SchedulingInstance extends Model
 {
     const STATUS_ACTIVE     = 'active';
     const STATUS_INACTIVE   = 'inactive';
+
+    const ORDER_FIELDS      = [
+        'status' => [
+            'entity'    => QueryHelper::ENTITY_SCHEDULING,
+            'field'     => 'status'
+        ],
+        'instance_id' => [
+            'entity'    => QueryHelper::ENTITY_BOT_INSTANCES,
+            'field'     => 'aws_instance_id'
+        ],
+        'bot_name' => [
+            'entity'    => QueryHelper::ENTITY_BOT_INSTANCES,
+            'field'     => 'tag_name'
+        ],
+    ];
 
     protected $table = 'scheduling_instances';
 
@@ -35,7 +51,7 @@ class SchedulingInstance extends Model
 
     public function scopeFindByUserInstanceId($query, $instanceId, $userId)
     {
-   	    return $query->where('instance_id', '=',$instanceId)
+   	    return $query->where('instance_id', '=', $instanceId)
             ->where('user_id', '=', $userId)
             ->with('details');
     }

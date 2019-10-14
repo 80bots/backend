@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\CreditUsage;
+use App\Helpers\QueryHelper;
 use App\Http\Resources\User\CreditUsageCollection;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
@@ -15,14 +17,21 @@ class HistoryController extends Controller
     public function getCreditUsage(Request $request)
     {
         try {
-            $limit = $request->query('limit') ?? self::PAGINATE;
-            $action = $request->input('action');
-            $sort = $request->input('sort');
-            $order = $request->input('order') ?? 'asc';
+            $limit      = $request->query('limit') ?? self::PAGINATE;
+            $action     = $request->input('action');
+            $sort       = $request->input('sort');
+            $order      = $request->input('order') ?? 'asc';
+            $instanceId = $request->input('instanceId');
 
             $resource = CreditUsage::with('user')->findByUserId(Auth::id());
 
             // TODO: Add Filters
+
+            if (! empty($instanceId)) {
+                $resource->whereHas('instance', function (Builder $query) use ($instanceId) {
+                    $query->where('aws_instance_id', '=', $instanceId);
+                });
+            }
 
             switch ($action) {
                 case CreditUsage::ACTION_ADDED:
@@ -35,12 +44,15 @@ class HistoryController extends Controller
                     break;
             }
 
-            //
-            if (empty($sort)) {
-                $sort = 'created_at';
-                $order = 'desc';
-            }
-            $resource->orderBy($sort, $order);
+            $resource->when($sort, function ($query, $sort) use ($order) {
+                if (! empty(CreditUsage::ORDER_FIELDS[$sort])) {
+                    return QueryHelper::orderCreditHistory($query, CreditUsage::ORDER_FIELDS[$sort], $order);
+                } else {
+                    return $query->orderBy('created_at', 'desc');
+                }
+            }, function ($query) {
+                return $query->orderBy('created_at', 'desc');
+            });
 
             $history    = (new CreditUsageCollection($resource->paginate($limit)))->response()->getData();
             $meta       = $history->meta ?? null;

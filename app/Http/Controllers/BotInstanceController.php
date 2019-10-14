@@ -3,13 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\AwsRegion;
+use App\Events\InstanceStatusUpdated;
+use App\Helpers\ApiResponse;
+use App\Helpers\InstanceHelper;
+use App\Helpers\QueryHelper;
 use App\Http\Resources\User\BotInstanceCollection;
 use App\Http\Resources\User\BotInstanceResource;
+use App\Http\Resources\Admin\BotInstanceResource as AdminBotInstanceResource;
 use App\BotInstance;
+use App\Http\Resources\User\S3ObjectCollection;
+use App\S3Object;
+use App\Services\Aws;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
+use App\Services\GitHub;
 
 class BotInstanceController extends AppController
 {
@@ -34,16 +43,19 @@ class BotInstanceController extends AppController
 
             //
             if (! empty($search)) {
-                $resource->where('tag_name', 'like', "%{$search}%")
-                    ->orWhere('aws_instance_id', 'like', "%{$search}%");
+                $resource->where('bot_instances.tag_name', 'like', "%{$search}%")
+                    ->orWhere('bot_instances.tag_user_email', 'like', "%{$search}%");
             }
 
-            //
-            if (empty($sort)) {
-                $sort   = 'created_at';
-                $order  = 'desc';
-            }
-            $resource->orderBy($sort, $order);
+            $resource->when($sort, function ($query, $sort) use ($order) {
+                if (! empty(BotInstance::ORDER_FIELDS[$sort])) {
+                    return QueryHelper::orderBotInstance($query, BotInstance::ORDER_FIELDS[$sort], $order);
+                } else {
+                    return $query->orderBy('aws_status', 'asc')->orderBy('start_time', 'desc');
+                }
+            }, function ($query) {
+                return $query->orderBy('aws_status', 'asc')->orderBy('start_time', 'desc');
+            });
 
             $bots   = (new BotInstanceCollection($resource->paginate($limit)))->response()->getData();
             $meta   = $bots->meta ?? null;
@@ -231,8 +243,12 @@ class BotInstanceController extends AppController
                         case 'status':
 
                             if ($this->changeStatus($value, $id)) {
+
                                 $instance = new BotInstanceResource(BotInstance::withTrashed()
                                     ->where('id', '=', $id)->first());
+
+                                broadcast(new InstanceStatusUpdated(Auth::id()));
+
                                 return $this->success($instance->toArray($request));
                             } else {
                                 return $this->error(__('user.server_error'), __('user.instances.not_updated'));
@@ -263,5 +279,110 @@ class BotInstanceController extends AppController
     public function destroy(BotInstance $userInstances)
     {
         //
+    }
+
+    /**
+     * @param Request $request
+     * @param $id
+     * @return ApiResponse
+     */
+    public function reportIssue(Request $request, $id) {
+        $instance = BotInstance::withTrashed()->find($id);
+        $aws = new Aws();
+        if(!empty($instance)) {
+            $resource = new AdminBotInstanceResource($instance);
+            if(!empty($request->screenshots)) {
+                $instanceId = $resource->toArray($request)['instance_id'];
+                $botName = $resource->toArray($request)['bot_name'];
+                $urls = $aws->uploadScreenshots($instanceId, $request->screenshots);
+
+                $body = "User: {$request->user()->email}\nInstance ID: {$instanceId}\nBot Name: {$botName}
+                \nMessage: {$request->message}";
+
+                if(!empty($urls)) {
+                    $screenshots = '';
+                    for($i = 0; $i < count($urls); $i++) {
+                        $screenshots = $screenshots . " ![{$request->screenshots[$i]->getClientOriginalName()}]({$urls[$i]})";
+                    }
+                    $body = $body . "\n{$screenshots}";
+                }
+
+                GitHub::createIssue('Issue Report', $body);
+                return $this->success([]);
+            }
+        } else {
+            $this->error('Not found', __('admin.bots.not_found'));
+        }
+    }
+
+    public function getS3Objects(Request $request)
+    {
+        $instance = BotInstance::where([
+            ['id', '=', $request->query('instance_id')],
+            ['user_id', '=', Auth::id()]
+        ])->first();
+
+        if (empty($instance)) {
+            return $this->notFound(__('keywords.not_found'), __('keywords.instance.not_found'));
+        }
+
+        // Remove links from DB, which will be expired soon
+        S3Object::removeOldLinks($instance->id);
+
+        $limit  = $request->query('limit') ?? self::PAGINATE;
+        $type   = InstanceHelper::getTypeS3Object($request->query('type'));
+        $date   = $request->query('date');
+
+        $resource = $instance->s3Objects()
+            ->where('folder', '=', $date)
+            ->where('type', '=', $type);
+
+        if ($resource->count() === 0) {
+            InstanceHelper::saveS3Objects($instance, $type, $date);
+        }
+
+        $instances  = (new S3ObjectCollection($resource->paginate($limit)))->response()->getData();
+        $meta       = $instances->meta ?? null;
+
+        $response = [
+            'data'  => $instances->data ?? [],
+            'total' => $meta->total ?? 0
+        ];
+
+        return $this->success($response);
+    }
+
+    public function getS3Logs(Request $request)
+    {
+        $instance = BotInstance::where([
+            ['id', '=', $request->query('instance_id')],
+            ['user_id', '=', Auth::id()]
+        ])->first();
+
+        if (empty($instance)) {
+            return $this->notFound(__('keywords.not_found'), __('keywords.instance.not_found'));
+        }
+
+        // Remove links from DB, which will be expired soon
+        S3Object::removeOldLinks($instance->id);
+
+        $limit  = $request->query('limit') ?? self::PAGINATE;
+
+        $resource = $instance->s3Objects()
+            ->where('type', '=', S3Object::TYPE_LOGS);
+
+        if ($resource->count() === 0) {
+            InstanceHelper::saveS3Logs($instance);
+        }
+
+        $instances  = (new S3ObjectCollection($resource->paginate($limit)))->response()->getData();
+        $meta       = $instances->meta ?? null;
+
+        $response = [
+            'data'  => $instances->data ?? [],
+            'total' => $meta->total ?? 0
+        ];
+
+        return $this->success($response);
     }
 }

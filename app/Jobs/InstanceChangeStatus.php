@@ -105,7 +105,7 @@ class InstanceChangeStatus implements ShouldQueue
      */
     private function getCurrentInstanceStatus(Aws $aws): ?string
     {
-        $result = $aws->describeInstances([$this->details->aws_instance_id]);
+        $result = $aws->describeInstances([$this->instance->aws_instance_id], $this->region->code);
 
         if ($result->hasKey('Reservations')) {
             $reservations = collect($result->get('Reservations'));
@@ -120,7 +120,7 @@ class InstanceChangeStatus implements ShouldQueue
 
     private function setStatusRunning(Aws $aws)
     {
-        if ($this->user->credits < 1) {
+        if ($this->user->isUser() && $this->user->credits < 1) {
             // TODO: Add a message notifying the user about credits lack for changing the status
             broadcast(new InstanceLaunched($this->instance, $this->user));
         }
@@ -129,11 +129,11 @@ class InstanceChangeStatus implements ShouldQueue
 
         if ($current === BotInstance::STATUS_STOPPED) {
 
-            $result = $aws->startInstance([$this->details->aws_instance_id]);
+            $result = $aws->startInstance([$this->instance->aws_instance_id]);
 
             if ($result->hasKey('StartingInstances')) {
 
-                $aws->waitUntil([$this->details->aws_instance_id]);
+                $aws->waitUntil([$this->instance->aws_instance_id]);
 
                 $info = $this->getPublicIpAddressAndDns($aws);
 
@@ -147,11 +147,15 @@ class InstanceChangeStatus implements ShouldQueue
 
                     $newInstanceDetail->fill([
                         'start_time'        => $this->currentDate,
-                        'aws_public_ip'     => $info['ip'],
                         'aws_public_dns'    => $info['dns']
                     ]);
 
                     $newInstanceDetail->save();
+
+                    $this->instance->update([
+                        'aws_public_ip' => $info['ip'],
+                        'start_time'    => $this->currentDate,
+                    ]);
                 }
 
                 broadcast(new InstanceLaunched($this->instance, $this->user));
@@ -176,7 +180,7 @@ class InstanceChangeStatus implements ShouldQueue
 
         if ($current === BotInstance::STATUS_RUNNING) {
 
-            $result = $aws->stopInstance([$this->details->aws_instance_id]);
+            $result = $aws->stopInstance([$this->instance->aws_instance_id]);
 
             if ($result->hasKey('StoppingInstances')) {
 
@@ -203,7 +207,7 @@ class InstanceChangeStatus implements ShouldQueue
      */
     private function setStatusTerminated(Aws $aws)
     {
-        $terminateInstance = $aws->terminateInstance([$this->details->aws_instance_id]);
+        $terminateInstance = $aws->terminateInstance([$this->instance->aws_instance_id]);
 
         if ($terminateInstance->hasKey('TerminatingInstances')) {
 
@@ -237,7 +241,7 @@ class InstanceChangeStatus implements ShouldQueue
      */
     private function getPublicIpAddressAndDns(Aws $aws): Collection
     {
-        $result = $aws->describeInstances([$this->details->aws_instance_id]);
+        $result = $aws->describeInstances([$this->instance->aws_instance_id], $this->region->code);
 
         if ($result->hasKey('Reservations')) {
             $reservations = collect($result->get('Reservations'));

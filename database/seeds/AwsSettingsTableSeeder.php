@@ -12,20 +12,20 @@ class AwsSettingsTableSeeder extends Seeder
      */
     public function run()
     {
+        // moved to /etc/rc.local file
+        //cd /home/\$username/
+        //su - \$username -c 'cd ~/data-streamer && git pull && cp .env.example .env && yarn && yarn build && pm2 start --name "data-streamer" yarn -- start'
+
         $script = <<<HERESHELL
-file="params/params.json"
+file="puppeteer/params/params.json"
 username="kabas"
 cd /home/\$username/
-
-su - \$username -c 'git clone -b master https://14b12de18e2199b2d584d3f6cf9492f3353f9b3e@github.com/80bots/puppeteer.git ./puppeteer'
-su - \$username -c 'cd ./puppeteer && npm i'
-
-su - \$username -c 'mkdir params'
+su - \$username -c 'cd ~/data-streamer && git pull && cp .env.example .env && yarn && yarn build && pm2 start --name "data-streamer" yarn -- start'
 HERESHELL;
 
         AwsSetting::create([
             'image_id'  => config('aws.image_id', 'ami-0a15d2bfc04351315'),
-            'type'      => config('aws.instance_type', 't3a.small'),
+            'type'      => config('aws.instance_type', 't3.medium'),
             'storage'   => config('aws.volume_size', 32),
             'script'    => $script,
             'default'   => true

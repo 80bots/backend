@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Helpers\QueryHelper;
 use App\Notifications\SaasVerifyEmail;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -23,6 +24,33 @@ class User extends Authenticatable
     const ROLE_NAME_USER    = 'User';
     const ROLE_NAME_ADMIN   = 'Admin';
 
+    const ORDER_FIELDS      = [
+        'role' => [
+            'entity'    => QueryHelper::ENTITY_ROLE,
+            'field'     => 'name'
+        ],
+        'name' => [
+            'entity'    => QueryHelper::ENTITY_USER,
+            'field'     => 'name'
+        ],
+        'email' => [
+            'entity'    => QueryHelper::ENTITY_USER,
+            'field'     => 'email'
+        ],
+        'credits' => [
+            'entity'    => QueryHelper::ENTITY_USER,
+            'field'     => 'credits'
+        ],
+        'date' => [
+            'entity'    => QueryHelper::ENTITY_USER,
+            'field'     => 'created_at'
+        ],
+        'status' => [
+            'entity'    => QueryHelper::ENTITY_USER,
+            'field'     => 'status'
+        ],
+    ];
+
     /**
      * The attributes that are mass assignable.
      *
@@ -31,6 +59,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'visitor',
         'password',
         'role_id',
         'timezone_id',
@@ -82,6 +111,14 @@ class User extends Authenticatable
     public function instances()
     {
         return $this->hasMany(BotInstance::class);
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function visitors()
+    {
+        return $this->hasMany(Visitor::class);
     }
 
     public function orders()

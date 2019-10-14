@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Helpers\QueryHelper;
 use Illuminate\Database\Eloquent\Model;
 
 class AwsRegion extends Model
@@ -9,6 +10,25 @@ class AwsRegion extends Model
     const PERCENT_LIMIT = 0.9;
 
     const TYPE_EC2      = 'ec2';
+
+    const ORDER_FIELDS      = [
+        'name' => [
+            'entity'    => QueryHelper::ENTITY_AWS_REGION,
+            'field'     => 'name'
+        ],
+        'code' => [
+            'entity'    => QueryHelper::ENTITY_AWS_REGION,
+            'field'     => 'code'
+        ],
+        'limit' => [
+            'entity'    => QueryHelper::ENTITY_AWS_REGION,
+            'field'     => 'limit'
+        ],
+        'used_limit' => [
+            'entity'    => QueryHelper::ENTITY_AWS_REGION,
+            'field'     => 'created_instances'
+        ],
+    ];
 
     protected $table    = "aws_regions";
 

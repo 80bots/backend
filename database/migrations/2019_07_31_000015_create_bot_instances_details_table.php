@@ -16,19 +16,15 @@ class CreateBotInstancesDetailsTable extends Migration
         Schema::create('bot_instances_details', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('instance_id');
-            $table->string('tag_name')->nullable();
-            $table->string('tag_user_email')->nullable();
             $table->timestamp('start_time')->nullable();
             $table->timestamp('end_time')->nullable();
             $table->double('total_time')->default(0);
 
-            $table->string('aws_instance_id')->nullable();
             $table->string('aws_instance_type')->nullable();
             $table->integer('aws_storage_gb')->nullable();
             $table->string('aws_image_id')->nullable();
             $table->string('aws_security_group_id')->nullable();
             $table->string('aws_security_group_name')->nullable();
-            $table->string('aws_public_ip')->nullable();
             $table->string('aws_public_dns')->nullable();
             $table->string('aws_pem_file_path')->nullable();
 

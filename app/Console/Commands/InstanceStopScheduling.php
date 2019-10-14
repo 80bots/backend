@@ -15,6 +15,8 @@ use Throwable;
 
 class InstanceStopScheduling extends Command
 {
+    const CURRENT_STATE_STOPPING = 'stopping';
+
     /**
      * The name and signature of the console command.
      *
@@ -57,12 +59,14 @@ class InstanceStopScheduling extends Command
 
         try {
 
-            $instancesIds = InstanceHelper::getScheduleInstancesIds(
-                SchedulingInstance::scheduling('stop')->get(),
-                $this->now
-            );
+            SchedulingInstance::scheduling('stop')->chunk(100, function ($schedulers) {
+                $instancesIds = InstanceHelper::getScheduleInstancesIds(
+                    $schedulers,
+                    $this->now
+                );
 
-            $this->stopInstances($instancesIds);
+                $this->stopInstances($instancesIds);
+            });
 
         } catch (Throwable $throwable) {
             Log::info('Catch Error Message ' . $throwable->getMessage());
@@ -87,38 +91,42 @@ class InstanceStopScheduling extends Command
                     $currentState   = $instanceDetail['CurrentState'];
                     $instanceId     = $instanceDetail['InstanceId'];
 
-                    if ($currentState['Name'] == 'stopped' || $currentState['Name'] == 'stopping') {
+                    if ($currentState['Name'] == BotInstance::STATUS_STOPPED || $currentState['Name'] == self::CURRENT_STATE_STOPPING) {
 
-                        $userInstance = BotInstance::findByInstanceId($instanceId)->first();
-                        $userInstance->status = 'stop';
+                        $instance = BotInstance::findByInstanceId($instanceId)->first();
 
                         $instanceDetail = BotInstancesDetails::where([
-                            'user_instance_id' => $userInstance->id,
+                            'instance_id' => $instance->id,
                             'end_time' => null
                         ])->latest()->first();
 
-                        if (!empty($instanceDetail)) {
+                        if (! empty($instanceDetail)) {
 
-                            $instanceDetail->end_time = $this->now->toDateTimeString();
+                            $endTime = $this->now->toDateTimeString();
 
-                            $diffTime = CommonHelper::diffTimeInMinutes($instanceDetail->start_time, $instanceDetail->end_date);
-                            $instanceDetail->total_time = $diffTime;
+                            $diffTime = CommonHelper::diffTimeInMinutes($instanceDetail->start_time, $endTime);
 
-                            if ($instanceDetail->save()) {
-                                if ($diffTime > $userInstance->cron_up_time) {
-                                    $userInstance->cron_up_time = 0;
-                                    $tempUpTime = $userInstance->total_up_time ?? 0;
-                                    $upTime = $diffTime + $tempUpTime;
-                                    $userInstance->total_up_time = $upTime;
-                                    $userInstance->up_time = $upTime;
-                                    $userInstance->used_credit = CommonHelper::calculateUsedCredit($upTime);
-                                }
-                            }
+                            $instanceDetail->update([
+                                'end_time' => $endTime,
+                                'total_time' => $diffTime,
+                            ]);
+
+                            $upTime = $diffTime + ($instance->total_up_time ?? 0);
+
+                            $instance->update([
+                                'cron_up_time'  => 0,
+                                'total_up_time' => $upTime,
+                                'up_time'       => $upTime,
+                                'used_credit'   => CommonHelper::calculateUsedCredit($upTime),
+                                'aws_status'    => BotInstance::STATUS_STOPPED,
+                            ]);
+                        } else {
+                            $instance->update([
+                                'aws_status' => BotInstance::STATUS_STOPPED
+                            ]);
                         }
 
-                        if ($userInstance->save()) {
-                            Log::info('Instance Id ' . $instanceId . ' Stopped');
-                        }
+                        Log::info('Instance Id ' . $instanceId . ' Stopped');
 
                     } else {
                         Log::info('Instance Id ' . $instanceId . ' Not Stopped Successfully');
@@ -126,7 +134,8 @@ class InstanceStopScheduling extends Command
                 }
 
             } else {
-                Log::info('Instances are not Stopped [' . $instancesIds . ']');
+                Log::info('Instances are not Stopped');
+                Log::info(print_r($instancesIds, true));
             }
 
         } else {

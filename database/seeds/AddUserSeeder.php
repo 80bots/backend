@@ -18,7 +18,8 @@ class AddUserSeeder extends Seeder
         $adminRole  = Role::where('name', '=', 'Admin')->pluck('id')->first();
         $userRole   = Role::where('name', '=', 'User')->pluck('id')->first();
         $timezone   = Timezone::all()->pluck('id')->first();
-        $region     = AwsRegion::onlyEc2()->pluck('id')->first();
+        $region     = AwsRegion::onlyEc2()->where('code', '=', 'us-east-2')->pluck('id')->first()
+            ?? AwsRegion::onlyEc2()->pluck('id')->first();
 
         $users = [
           ['name' => 'Francis', 'passwords' => ['q<jS\9EwtT9h(U`m', 'u&z!#d-RB]w]nX6@']],

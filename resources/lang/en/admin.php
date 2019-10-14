@@ -24,13 +24,16 @@ return [
     'instances' => [
         'success_sync' => 'Instances sync was successfully',
         'error_sync' => 'Instances sync failed',
-        'not_found' => '',
+        'key_pair_not_found' => 'File is unavailable as the current instance was removed',
+        'not_found' => 'Instance Not Found',
         'not_updated' => ''
     ],
     'regions' => [
         'not_found' => 'Region not found',
         'update_success' => 'AMI for a region was successfully installed',
         'update_error' => 'Cannot update AMI at this moment',
+        'success_sync'  => 'Regions synchronization was successfully performed',
+        'error_sync'  => 'Regions synchronization failed'
     ],
     'scheduling' => [
         'title' => 'Scheduling List',
