@@ -24,7 +24,7 @@ class PostController extends Controller
             $sort   = $request->query('sort');
             $order  = $request->query('order') ?? 'asc';
 
-            $resource = Post::ajax();
+            $resource = Post::query();
 
             // TODO: Add Filters
 
@@ -41,11 +41,11 @@ class PostController extends Controller
                 $resource->orderBy('created_at', 'desc');
             }
 
-            $bots   = (new PostCollection($resource->paginate($limit)))->response()->getData();
-            $meta   = $bots->meta ?? null;
+            $posts  = (new PostCollection($resource->paginate($limit)))->response()->getData();
+            $meta   = $posts->meta ?? null;
 
             $response = [
-                'data'  => $bots->data ?? [],
+                'data'  => $posts->data ?? [],
                 'total' => $meta->total ?? 0
             ];
 

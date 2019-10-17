@@ -6,6 +6,7 @@ use App\Bot;
 use App\Platform;
 use App\Post;
 use App\Services\BotParser;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
@@ -28,6 +29,11 @@ class SyncLocalBots extends Command
     protected $description = 'Command description';
 
     /**
+     * @var string
+     */
+    protected $now;
+
+    /**
      * Create a new command instance.
      *
      * @return void
@@ -35,6 +41,8 @@ class SyncLocalBots extends Command
     public function __construct()
     {
         parent::__construct();
+
+        $this->now = Carbon::now()->toDateTimeString();
     }
 
     /**
@@ -102,7 +110,7 @@ class SyncLocalBots extends Command
 
                                 $bot = Bot::where('path', '=', $file->getFilename())->first();
 
-                                if (!empty($bot)) {
+                                if (! empty($bot)) {
                                     $bot->update([
                                         'description' => $result['about']->description,
                                         'name' => $result['about']->name,
@@ -136,9 +144,11 @@ class SyncLocalBots extends Command
         Post::updateOrInsert([
             'slug' => $bot->name ?? '',
         ], [
-            'bot_id' => $bot->id ?? null,
-            'title' => $bot->description ?? '',
-            'type' => Post::TYPE_BOT
+            'bot_id'        => $bot->id ?? null,
+            'title'         => $bot->description ?? '',
+            'type'          => Post::TYPE_BOT,
+            'created_at'    => $this->now,
+            'updated_at'    => $this->now
         ]);
     }
 }

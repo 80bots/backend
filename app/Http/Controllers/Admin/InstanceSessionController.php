@@ -28,7 +28,7 @@ class InstanceSessionController extends AppController
             $sort   = $request->input('sort');
             $order  = $request->input('order') ?? 'asc';
 
-            $resource = InstanceSessionsHistory::ajax();
+            $resource = InstanceSessionsHistory::query();
 
             // TODO: Add Filters
             $resource->with(['schedulingInstance.userInstance', 'user']);

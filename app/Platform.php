@@ -19,17 +19,6 @@ class Platform extends Model
     ];
 
     /**
-     * Creation of an object for further applying with filters
-     *
-     * @param $query
-     * @return mixed
-     */
-    public function scopeAjax($query)
-    {
-        return $query;
-    }
-
-    /**
      * @param null $limit
      * @param null $platformId
      * @param bool $status

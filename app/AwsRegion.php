@@ -41,17 +41,6 @@ class AwsRegion extends Model
         'default_image_id'
     ];
 
-    /**
-     * Creation of an object for further applying with filters
-     *
-     * @param $query
-     * @return mixed
-     */
-    public function scopeAjax($query)
-    {
-        return $query;
-    }
-
     public function scopeOnlyEc2($query)
     {
         $query->where('type', '=', self::TYPE_EC2);

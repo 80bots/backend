@@ -69,17 +69,6 @@ class BotInstance extends BaseModel
         'start_time'
     ];
 
-    /**
-     * Creation of an object for further applying with filters
-     *
-     * @param $query
-     * @return mixed
-     */
-    public function scopeAjax($query)
-    {
-        return $query;
-    }
-
     public function scopeFindByUserId($query, $userId)
     {
         return $query->where('user_id', $userId);

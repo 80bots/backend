@@ -15,15 +15,4 @@ class SubscriptionHistory extends Model
         'price',
         'credits'
     ];
-
-    /**
-     * Creation of an object for further applying with filters
-     *
-     * @param $query
-     * @return mixed
-     */
-    public function scopeAjax($query)
-    {
-        return $query;
-    }
 }

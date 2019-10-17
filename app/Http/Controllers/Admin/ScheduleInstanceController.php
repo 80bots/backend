@@ -32,7 +32,7 @@ class ScheduleInstanceController extends AppController
             $sort   = $request->input('sort');
             $order  = $request->input('order') ?? 'asc';
 
-            $resource = SchedulingInstance::ajax();
+            $resource = SchedulingInstance::query();
 
             // TODO: Add Filters
             if ($list === 'my') {

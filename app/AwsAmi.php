@@ -32,16 +32,8 @@ class AwsAmi extends Model
     ];
 
     /**
-     * Creation of an object for further applying with filters
-     *
-     * @param $query
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function scopeAjax($query)
-    {
-        return $query;
-    }
-
     public function region()
     {
         return $this->belongsTo(AwsRegion::class, 'aws_region_id');

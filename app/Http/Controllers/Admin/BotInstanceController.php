@@ -42,8 +42,7 @@ class BotInstanceController extends AppController
             $sort   = $request->input('sort');
             $order  = $request->input('order') ?? 'asc';
 
-            //$resource = BotInstance::withTrashed()->with(['oneDetail', 'user', 'region'])->ajax();
-            $resource = BotInstance::withTrashed()->ajax();
+            $resource = BotInstance::withTrashed();
 
             // TODO: Add Filters
 
@@ -107,7 +106,7 @@ class BotInstanceController extends AppController
         $sort   = $request->input('sort');
         $order  = $request->input('order') ?? 'asc';
 
-        $resource = AwsRegion::onlyEc2()->ajax();
+        $resource = AwsRegion::onlyEc2();
 
         //
         if (! empty($search)) {

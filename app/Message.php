@@ -20,17 +20,6 @@ class Message extends Model
         'moderation'
     ];
 
-    /**
-     * Creation of an object for further applying with filters
-     *
-     * @param $query
-     * @return mixed
-     */
-    public function scopeAjax($query)
-    {
-        return $query;
-    }
-
     public function scopeIsModerated($query)
     {
         return $query->where('moderation', true);
