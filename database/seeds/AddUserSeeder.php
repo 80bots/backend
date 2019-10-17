@@ -21,16 +21,18 @@ class AddUserSeeder extends Seeder
         $region     = AwsRegion::onlyEc2()->where('code', '=', 'us-east-2')->pluck('id')->first()
             ?? AwsRegion::onlyEc2()->pluck('id')->first();
 
+
         $users = [
-          ['name' => 'Francis', 'passwords' => ['q<jS\9EwtT9h(U`m', 'u&z!#d-RB]w]nX6@']],
-          ['name' => 'Mishra', 'passwords' => ['z8Gjhp4!v@#3Wxm', 'q6.USnjSSt,::9UG']],
-          ['name' => 'Kumar', 'passwords' => ['?9d8%?Pm(g3~2qS)', 'ht3!Q#u7w_?Pr9D3']],
-          ['name' => 'Mike', 'passwords' => ['B8J]+Ridb#YP=F', 'xJY+d/c[ks3M']],
-          ['name' => 'Sergey', 'passwords' => ['t#cW=$@%^>9XS&j<', ';Gr-{UA3XzC<WgWc']],
+          ['name' => 'Francis', 'email' => 'francis@inforca.com', 'passwords' => ['q<jS\9EwtT9h(U`m', 'u&z!#d-RB]w]nX6@']],
+          ['name' => 'Mishra', 'email' => 'akkimysite@gmail.com', 'passwords' => ['z8Gjhp4!v@#3Wxm', 'q6.USnjSSt,::9UG']],
+          ['name' => 'Kumar', 'email' => 'kumargaf@gmail.com', 'passwords' => ['?9d8%?Pm(g3~2qS)', 'ht3!Q#u7w_?Pr9D3']],
+          ['name' => 'Mike', 'email' => 'mike.mitrofanov.dev@gmail.com', 'passwords' => ['B8J]+Ridb#YP=F', 'xJY+d/c[ks3M']],
+          ['name' => 'Sergey', 'email' => 's.sergeykoval@gmail.com', 'passwords' => ['t#cW=$@%^>9XS&j<', ';Gr-{UA3XzC<WgWc']],
+          ['name' => 'Uxd', 'email' => 'uxd.jun@gmail.com', 'passwords' => ['{7>bVswE+53}hGXt', '&3L=DJWp"&#eVd7Q']],
         ];
 
         foreach ($users as $user) {
-            $emailName = strtolower($user['name']);
+            $emailParts = explode('@', $user['email']);
             $name = $user['name'];
 
             DB::table('users')->insert([
@@ -38,7 +40,7 @@ class AddUserSeeder extends Seeder
                 'timezone_id'   => $timezone,
                 'region_id'     => $region,
                 'name'          => "$name Admin",
-                'email'         => "$emailName+admin@inforca.com",
+                'email'         => "$emailParts[0]+admin@$emailParts[1]",
                 'password'      => bcrypt($user['passwords'][0]),
                 'status'        => 'active',
                 'credits'       => 100
@@ -49,7 +51,7 @@ class AddUserSeeder extends Seeder
                 'region_id'     => $region,
                 'timezone_id'   => $timezone,
                 'name'          => "$name User",
-                'email'         => "$emailName+user@inforca.com",
+                'email'         => "$emailParts[0]+user@$emailParts[1]",
                 'password'      => bcrypt($user['passwords'][1]),
                 'status'        => 'active',
                 'credits'       => 100
