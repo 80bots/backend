@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Console\Commands\AddUser;
 use App\Console\Commands\AwsSyncAmis;
 use App\Console\Commands\AwsSyncRegions;
 use App\Console\Commands\CacheRefresh;
@@ -35,7 +36,8 @@ class Kernel extends ConsoleKernel
         AwsSyncRegions::class,
         RefreshDatabase::class,
         AwsSyncAmis::class,
-        SyncLocalBots::class
+        SyncLocalBots::class,
+        AddUser::class
     ];
 
     /**
