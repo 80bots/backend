@@ -354,10 +354,32 @@ class BotInstanceController extends AppController
 
     public function getS3Logs(Request $request)
     {
-        $instance = BotInstance::where([
-            ['id', '=', $request->query('instance_id')],
+        $request->validate([
+            'type' => 'required:in:script_work,server_init',
+            'instance_id' => 'required:exists:bot_instances',
+            'withTrashed' => 'nullable:boolean',
+        ]);
+        $withTrashed = $request->query('withTrashed', false);
+        $instance_id = $request->query('instance_id');
+        $type = $request->query('type', null);
+
+        // TODO: Move that check to the model, ideally make migration with the expanding the table by some kind of logType
+        if($type === 'script_work') {
+            $queryTerm = '%WORK.log%';
+        } else {
+            $queryTerm = '%INIT.log%';
+        }
+
+        /** @var BotInstance $query */
+        $query = BotInstance::query();
+        if($withTrashed) {
+            $query->withTrashed();
+        }
+        $query->where([
+            ['id', '=', $instance_id],
             ['user_id', '=', Auth::id()]
-        ])->first();
+        ]);
+        $instance = $query->first();
 
         if (empty($instance)) {
             return $this->notFound(__('keywords.not_found'), __('keywords.instance.not_found'));
@@ -369,7 +391,8 @@ class BotInstanceController extends AppController
         $limit  = $request->query('limit') ?? self::PAGINATE;
 
         $resource = $instance->s3Objects()
-            ->where('type', '=', S3Object::TYPE_LOGS);
+            ->where('type', '=', S3Object::TYPE_LOGS)
+            ->where('link', 'like', $queryTerm);
 
         if ($resource->count() === 0) {
             InstanceHelper::saveS3Logs($instance);

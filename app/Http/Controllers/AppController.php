@@ -238,8 +238,9 @@ class AppController extends Controller
      */
     protected function getInstanceDates(Request $request)
     {
-        $instance = $this->getInstanceWithCheckUser($request->query('instance_id'));
-
+        // TODO: Validate request and define all the query params on the top of func's body
+        $withTrashed = $request->query('withTrashed', false);
+        $instance = $this->getInstanceWithCheckUser($request->query('instance_id'), $withTrashed);
         if (empty($instance)) {
             return $this->notFound(__('admin.not_found'), __('admin.instances.not_found'));
         }
@@ -250,29 +251,30 @@ class AppController extends Controller
 
         $dates = InstanceHelper::getListInstancesDates($instance);
 
-        if (! empty($dates)) {
-
-            $credentials = [
-                'key'    => config('aws.iam.access_key'),
-                'secret' => config('aws.iam.secret_key')
-            ];
-
-            $aws = new Aws;
-            $aws->s3Connection('', $credentials);
-
-            $folder = config('aws.streamer.folder');
-
-            foreach ($dates as $date) {
-
-                $prefix = "{$folder}/{$instance->tag_name}/{$type}/{$date}";
-                $result = $aws->getS3ListObjects($aws->getS3Bucket(), 1, $prefix);
-
-                if ($result->hasKey('Contents')) {
-                    array_push($isset, $date);
-                }
-            }
+        if (empty($dates)) {
+            return $this->success([
+                'dates' => $isset
+            ]);
         }
 
+        $credentials = [
+            'key'    => config('aws.iam.access_key'),
+            'secret' => config('aws.iam.secret_key')
+        ];
+
+        $aws = new Aws;
+        $aws->s3Connection('', $credentials);
+
+        $folder = config('aws.streamer.folder');
+
+        foreach ($dates as $date) {
+
+            $prefix = "{$folder}/{$instance->tag_name}/{$type}/{$date}";
+            $result = $aws->getS3ListObjects($aws->getS3Bucket(), 1, $prefix);
+            if ($result->hasKey('Contents')) {
+                array_push($isset, $date);
+            }
+        }
         return $this->success([
             'dates' => $isset
         ]);
@@ -280,14 +282,20 @@ class AppController extends Controller
 
     /**
      * @param string|null $id
+     * @param bool|null $withTrashed
      * @return BotInstance|null
      */
-    private function getInstanceWithCheckUser(?string $id): ?BotInstance
+    private function getInstanceWithCheckUser(?string $id, ?bool $withTrashed = false): ?BotInstance
     {
+        /** @var BotInstance $query */
+        $query = BotInstance::query();
+        if($withTrashed) {
+            $query->withTrashed();
+        }
         if (Auth::user()->isAdmin()) {
-            return BotInstance::find($id);
+            return $query->find($id);
         } elseif (Auth::user()->isUser()) {
-            return BotInstance::where([
+            return $query->where([
                 ['id', '=', $id],
                 ['user_id', '=', Auth::id()]
             ])->first();
