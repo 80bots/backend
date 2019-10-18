@@ -517,11 +517,17 @@ class InstanceHelper
             $name = $date;
         }
 
+        if (! empty($thumbnail['key'])) {
+            $thumbnail = $aws->getPresignedLink($aws->getS3Bucket(), $thumbnail['key']);
+        } else {
+            $thumbnail = '';
+        }
+
         return [
             "date"      => $date,
             "name"      => $name,
             "total"     => $total,
-            "thumbnail" => $thumbnail['key'] ?? ''
+            "thumbnail" => $thumbnail
         ];
     }
 }
