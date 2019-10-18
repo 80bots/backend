@@ -67,8 +67,6 @@ class BotInstanceController extends AppController
                 return $query->orderBy('aws_status', 'asc')->orderBy('start_time', 'desc');
             });
 
-            //$resource->dd();
-
             $instances  = (new BotInstanceCollection($resource->paginate($limit)))->response()->getData();
             $meta       = $instances->meta ?? null;
 
@@ -323,12 +321,12 @@ class BotInstanceController extends AppController
             return $this->notFound(__('admin.not_found'), __('admin.instances.not_found'));
         }
 
-        // Remove links from DB, which will be expired soon
-        S3Object::removeOldLinks($instance->id);
-
         $limit  = $request->query('limit') ?? self::PAGINATE;
         $type   = InstanceHelper::getTypeS3Object($request->query('type'));
         $date   = $request->query('date');
+
+        // Remove links from DB, which will be expired soon
+        S3Object::removeOldLinks($instance->id);
 
         $resource = $instance->s3Objects()
             ->where('folder', '=', $date)

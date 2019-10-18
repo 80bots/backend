@@ -22,6 +22,8 @@ use Throwable;
 
 class InstanceHelper
 {
+    const LIMIT_S3_LIST_OBJECTS = 1000;
+
     /**
      * @param SchedulingInstancesDetails $detail
      * @param int $currentTime
@@ -365,7 +367,7 @@ class InstanceHelper
 
         do {
 
-            $result = $aws->getS3ListObjects($aws->getS3Bucket(), 100, $prefix, $next);
+            $result = $aws->getS3ListObjects($aws->getS3Bucket(), self::LIMIT_S3_LIST_OBJECTS, $prefix, $next);
 
             if ($result->hasKey('IsTruncated') && $result->get('IsTruncated')) {
                 if ($result->hasKey('NextContinuationToken')) {
@@ -455,5 +457,71 @@ class InstanceHelper
         } catch (Throwable $throwable) {
             Log::error($throwable->getMessage());
         }
+    }
+
+    /**
+     * @param Aws $aws
+     * @param string $prefix
+     * @param string $date
+     * @param string $nowDate
+     * @param string $yesterdayDate
+     * @return array
+     */
+    public static function getDateInfo(Aws $aws, string $prefix, string $date, string $nowDate, string $yesterdayDate): array
+    {
+        $next   = '';
+        $total  = 0;
+        $sorted = collect([]);
+
+        do {
+
+            $result = $aws->getS3ListObjects($aws->getS3Bucket(), self::LIMIT_S3_LIST_OBJECTS, $prefix, $next);
+
+            if ($result->hasKey('IsTruncated') && $result->get('IsTruncated')) {
+                if ($result->hasKey('NextContinuationToken')) {
+                    $next = $result->get('NextContinuationToken');
+                }
+            } else {
+                $next = '';
+            }
+
+            if ($result->hasKey('Contents')) {
+                $contents = collect($result->get('Contents'))->map(function ($item, $key) {
+                    return [
+                        'key'       => $item['Key'],
+                        'modified'  => $item['LastModified']->getTimestamp()
+                    ];
+                })->filter(function ($item, $key) use ($prefix) {
+                    return $item['key'] !== "{$prefix}/" ;
+                });
+
+                if ($contents->count() > 0) {
+                    $contents = $contents->sortByDesc('modified');
+                    $total += $contents->count();
+                    $sorted = $sorted->concat([$contents->first()]);
+                } else {
+                    return [];
+                }
+            }
+
+        } while (! empty($next));
+
+        $sorted = $sorted->sortByDesc('modified');
+        $thumbnail = $sorted->first();
+
+        if ($date === $nowDate) {
+            $name = 'Today';
+        } elseif ($date === $yesterdayDate) {
+            $name = 'Yesterday';
+        } else {
+            $name = $date;
+        }
+
+        return [
+            "date"      => $date,
+            "name"      => $name,
+            "total"     => $total,
+            "thumbnail" => $thumbnail['key'] ?? ''
+        ];
     }
 }

@@ -12,6 +12,7 @@ use App\Jobs\InstanceChangeStatus;
 use App\Jobs\StoreUserInstance;
 use App\Services\Aws;
 use App\User;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -244,6 +245,10 @@ class AppController extends Controller
             return $this->notFound(__('admin.not_found'), __('admin.instances.not_found'));
         }
 
+        $now = Carbon::now();
+        $nowDate = $now->toDateString();
+        $yesterdayDate = $now->subDay()->toDateString();
+
         $type = InstanceHelper::getTypeS3Object($request->query('type'));
 
         $isset = [];
@@ -265,10 +270,11 @@ class AppController extends Controller
             foreach ($dates as $date) {
 
                 $prefix = "{$folder}/{$instance->tag_name}/{$type}/{$date}";
-                $result = $aws->getS3ListObjects($aws->getS3Bucket(), 1, $prefix);
 
-                if ($result->hasKey('Contents')) {
-                    array_push($isset, $date);
+                $info = InstanceHelper::getDateInfo($aws, $prefix, $date, $nowDate, $yesterdayDate);
+
+                if (! empty($info)) {
+                    array_push($isset, $info);
                 }
             }
         }
