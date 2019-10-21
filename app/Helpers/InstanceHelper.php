@@ -470,50 +470,49 @@ class InstanceHelper
      */
     public static function getDateInfo(Aws $aws, string $prefix, string $date, string $nowDate, string $yesterdayDate): array
     {
-        $result = $aws->getS3ListObjects($aws->getS3Bucket(), self::LIMIT_S3_OBJECTS_INFO, $prefix);
+        $result = $aws->getS3ListObjects($aws->getS3Bucket(), 2, $prefix);
 
-        if ($result->hasKey('Contents')) {
-
-            $contents = collect($result->get('Contents'))->map(function ($item, $key) {
-                return [
-                    'key'       => $item['Key'],
-                    'modified'  => $item['LastModified']->getTimestamp()
-                ];
-            })->filter(function ($item, $key) use ($prefix) {
-                return $item['key'] !== "{$prefix}/" ;
-            });
-
-            if ($contents->count() === 0) {
-                return [];
-            }
-
-            $thumbnail = $contents->first();
-
-            if ($date === $nowDate) {
-                $name = 'Today';
-            } elseif ($date === $yesterdayDate) {
-                $name = 'Yesterday';
-            } else {
-                $name = $date;
-            }
-
-            if (! empty($thumbnail['key'])) {
-                $info       = pathinfo($thumbnail['key']);
-                $thumbnail  = $aws->getPresignedLink($aws->getS3Bucket(), $thumbnail['key']);
-            } else {
-                $thumbnail  = '';
-                $info       = '';
-            }
-
-            return [
-                "name"      => $name,
-                "thumbnail" => [
-                    'url'   => $thumbnail,
-                    'name'  => $info['filename'] ?? ''
-                ]
-            ];
+        if (! $result->hasKey('Contents')) {
+            return [];
         }
 
-        return [];
+        $contents = collect($result->get('Contents'))->map(function ($item, $key) {
+            return [
+                'key'       => $item['Key'],
+                'modified'  => $item['LastModified']->getTimestamp()
+            ];
+        })->filter(function ($item, $key) use ($prefix) {
+            return $item['key'] !== "{$prefix}/" ;
+        });
+
+        if ($contents->count() === 0) {
+            return [];
+        }
+
+        $thumbnail = $contents->first();
+
+        if ($date === $nowDate) {
+            $name = 'Today';
+        } elseif ($date === $yesterdayDate) {
+            $name = 'Yesterday';
+        } else {
+            $name = $date;
+        }
+
+        if (! empty($thumbnail['key'])) {
+            $info       = pathinfo($thumbnail['key']);
+            $thumbnail  = $aws->getPresignedLink($aws->getS3Bucket(), $thumbnail['key']);
+        } else {
+            $thumbnail  = '';
+            $info       = '';
+        }
+
+        return [
+            "name"      => $name,
+            "thumbnail" => [
+                'url'   => $thumbnail,
+                'name'  => $info['filename'] ?? ''
+            ]
+        ];
     }
 }

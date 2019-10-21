@@ -269,13 +269,32 @@ class AppController extends Controller
 
             foreach ($dates as $date) {
 
-                $prefix = "{$folder}/{$instance->tag_name}/{$type}/{$date}";
-
-                $info = InstanceHelper::getDateInfo($aws, $prefix, $date, $nowDate, $yesterdayDate);
-
-                if (! empty($info)) {
-                    array_push($isset, $info);
+                if ($date === $nowDate) {
+                    $name = 'Today';
+                } elseif ($date === $yesterdayDate) {
+                    $name = 'Yesterday';
+                } else {
+                    $name = $date;
                 }
+
+                $prefix     = "{$folder}/{$instance->tag_name}/{$type}/{$date}/thumbnail.jpg";
+                $thumbnail  = $aws->getPresignedLink($aws->getS3Bucket(), $prefix);
+
+                if (! empty($thumbnail)) {
+                    array_push($isset, [
+                        "name"      => $name,
+                        "thumbnail" => [
+                            'url'   => $thumbnail
+                        ]
+                    ]);
+                }
+
+//                $prefix     = "{$folder}/{$instance->tag_name}/{$type}/{$date}";
+//                $info = InstanceHelper::getDateInfo($aws, $prefix, $date, $nowDate, $yesterdayDate);
+//
+//                if (! empty($info)) {
+//                    array_push($isset, $info);
+//                }
             }
         }
 

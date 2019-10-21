@@ -89,6 +89,11 @@ class BotInstance extends BaseModel
         return $query->where('aws_status', self::STATUS_RUNNING)->get();
     }
 
+    public function scopeFindNotTerminated($query)
+    {
+        return $query->where('aws_status', '!=', self::STATUS_TERMINATED);
+    }
+
     public function setAwsStatusPending()
     {
         $this->update(['aws_status' => BotInstance::STATUS_PENDING]);
@@ -112,6 +117,11 @@ class BotInstance extends BaseModel
     public function isAwsStatusTerminated()
     {
         return $this->aws_status === self::STATUS_TERMINATED;
+    }
+
+    public function isNotAwsStatusTerminated()
+    {
+        return $this->aws_status !== self::STATUS_TERMINATED;
     }
 
     public function details()

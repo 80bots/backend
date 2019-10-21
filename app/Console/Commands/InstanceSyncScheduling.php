@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\AwsRegion;
+use App\BotInstance;
 use App\Helpers\InstanceHelper;
 use App\Services\Aws;
 use Illuminate\Console\Command;
@@ -55,7 +56,7 @@ class InstanceSyncScheduling extends Command
                     Log::info("Sync region {$region->code}");
 
                     $aws    = new Aws;
-                    $limit  = 5;
+                    $limit  = 50;
                     $token  = '';
 
                     do
@@ -71,6 +72,8 @@ class InstanceSyncScheduling extends Command
 
                     } while(! empty($token));
 
+                    $this->checkNotTerminatedInstances($aws, $region);
+
                     unset($aws, $limit, $token);
                 }
             }
@@ -81,5 +84,68 @@ class InstanceSyncScheduling extends Command
             Log::info('ERROR');
             Log::error($throwable->getMessage());
         }
+    }
+
+    private function checkNotTerminatedInstances(Aws $aws, AwsRegion $region): void
+    {
+        Log::info('checkNotTerminatedInstances started at ' . date('Y-m-d h:i:s'));
+
+        $aws->ec2Connection($region->code ?? '');
+
+        $region->instances()->findNotTerminated()->chunk(100, function ($instances) use ($aws, $region){
+
+            $instanceIds = $instances->map(function ($item, $key) {
+                return $item['aws_instance_id'];
+            })->toArray();
+
+            // Filters['instance-state-code'] => The code for the instance state, as a 16-bit unsigned integer.
+            // The valid values are 0 (pending), 16 (running), 32 (shutting-down), 48 (terminated), 64 (stopping), and 80 (stopped).
+
+            $parameters = [
+                'IncludeAllInstances' => true,
+                'InstanceIds' => $instanceIds,
+                'Filters' => [
+                    [
+                        'Name' => 'instance-state-code',
+                        'Values' => [48],// 48 (terminated)
+                    ],
+                ]
+            ];
+
+            try {
+
+                $instanceStatuses = $aws->describeInstanceStatus($region->code ?? '', $parameters);
+
+                if ($instanceStatuses->hasKey('InstanceStatuses')) {
+                    $instanceStatuses = collect($instanceStatuses->get('InstanceStatuses'));
+
+                    $count = $instanceStatuses->count();
+
+                    if ($count > 0) {
+
+                        $terminatedIds = $instanceStatuses->map(function ($item, $key) {
+                            return $item['InstanceId'];
+                        })->toArray();
+
+                        if ($region->created_instances >= $count) {
+                            $region->decrement('created_instances', $instanceStatuses->count());
+                        }
+
+                        BotInstance::whereIn('aws_instance_id', $terminatedIds)
+                            ->update([
+                                'aws_public_ip' => null,
+                                'aws_status'    => BotInstance::STATUS_TERMINATED
+                            ]);
+
+                        BotInstance::whereIn('aws_instance_id', $terminatedIds)->delete();
+                    }
+                }
+
+            } catch (Throwable $throwable) {
+                Log::error($throwable->getMessage());
+            }
+        });
+
+        Log::info('checkNotTerminatedInstances completed at ' . date('Y-m-d h:i:s'));
     }
 }
