@@ -237,7 +237,7 @@ class AppController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    protected function getInstanceDates(Request $request)
+    protected function getInstanceFolders(Request $request)
     {
         $instance = $this->getInstanceWithCheckUser($request->query('instance_id'));
 
@@ -280,7 +280,7 @@ class AppController extends Controller
         }
 
         return $this->success([
-            'dates' => $isset
+            'folders' => $isset
         ]);
     }
 

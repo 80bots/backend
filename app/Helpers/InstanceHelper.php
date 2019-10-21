@@ -23,6 +23,7 @@ use Throwable;
 class InstanceHelper
 {
     const LIMIT_S3_LIST_OBJECTS = 1000;
+    const LIMIT_S3_OBJECTS_INFO = 2;
 
     /**
      * @param SchedulingInstancesDetails $detail
@@ -469,65 +470,50 @@ class InstanceHelper
      */
     public static function getDateInfo(Aws $aws, string $prefix, string $date, string $nowDate, string $yesterdayDate): array
     {
-        $next   = '';
-        $total  = 0;
-        $sorted = collect([]);
+        $result = $aws->getS3ListObjects($aws->getS3Bucket(), self::LIMIT_S3_OBJECTS_INFO, $prefix);
 
-        do {
+        if ($result->hasKey('Contents')) {
 
-            $result = $aws->getS3ListObjects($aws->getS3Bucket(), self::LIMIT_S3_LIST_OBJECTS, $prefix, $next);
+            $contents = collect($result->get('Contents'))->map(function ($item, $key) {
+                return [
+                    'key'       => $item['Key'],
+                    'modified'  => $item['LastModified']->getTimestamp()
+                ];
+            })->filter(function ($item, $key) use ($prefix) {
+                return $item['key'] !== "{$prefix}/" ;
+            });
 
-            if ($result->hasKey('IsTruncated') && $result->get('IsTruncated')) {
-                if ($result->hasKey('NextContinuationToken')) {
-                    $next = $result->get('NextContinuationToken');
-                }
+            if ($contents->count() === 0) {
+                return [];
+            }
+
+            $thumbnail = $contents->first();
+
+            if ($date === $nowDate) {
+                $name = 'Today';
+            } elseif ($date === $yesterdayDate) {
+                $name = 'Yesterday';
             } else {
-                $next = '';
+                $name = $date;
             }
 
-            if ($result->hasKey('Contents')) {
-                $contents = collect($result->get('Contents'))->map(function ($item, $key) {
-                    return [
-                        'key'       => $item['Key'],
-                        'modified'  => $item['LastModified']->getTimestamp()
-                    ];
-                })->filter(function ($item, $key) use ($prefix) {
-                    return $item['key'] !== "{$prefix}/" ;
-                });
-
-                if ($contents->count() > 0) {
-                    $contents = $contents->sortByDesc('modified');
-                    $total += $contents->count();
-                    $sorted = $sorted->concat([$contents->first()]);
-                } else {
-                    return [];
-                }
+            if (! empty($thumbnail['key'])) {
+                $info       = pathinfo($thumbnail['key']);
+                $thumbnail  = $aws->getPresignedLink($aws->getS3Bucket(), $thumbnail['key']);
+            } else {
+                $thumbnail  = '';
+                $info       = '';
             }
 
-        } while (! empty($next));
-
-        $sorted = $sorted->sortByDesc('modified');
-        $thumbnail = $sorted->first();
-
-        if ($date === $nowDate) {
-            $name = 'Today';
-        } elseif ($date === $yesterdayDate) {
-            $name = 'Yesterday';
-        } else {
-            $name = $date;
+            return [
+                "name"      => $name,
+                "thumbnail" => [
+                    'url'   => $thumbnail,
+                    'name'  => $info['filename'] ?? ''
+                ]
+            ];
         }
 
-        if (! empty($thumbnail['key'])) {
-            $thumbnail = $aws->getPresignedLink($aws->getS3Bucket(), $thumbnail['key']);
-        } else {
-            $thumbnail = '';
-        }
-
-        return [
-            "date"      => $date,
-            "name"      => $name,
-            "total"     => $total,
-            "thumbnail" => $thumbnail
-        ];
+        return [];
     }
 }
