@@ -296,7 +296,7 @@ class BotInstanceController extends AppController
 
                         $result = $aws->getKeyPairObject($details->aws_pem_file_path ?? '');
 
-                        Log::debug("getKeyPairObject > ", print_r($details->aws_pem_file_path, true));
+                        Log::debug("getKeyPairObject > ", $details->aws_pem_file_path);
                         Log::debug("getKeyPairObject > ", print_r($result, true));
 
                         $body = $result->get('Body');
