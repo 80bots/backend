@@ -317,6 +317,7 @@ class Aws
                 'Key'       => $path
             ]);
         } catch (S3Exception $exception) {
+            Log::error($exception->getMessage());
             return null;
         }
     }
