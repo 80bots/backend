@@ -6,7 +6,9 @@ use App\AwsRegion;
 use App\BotInstance;
 use App\Helpers\InstanceHelper;
 use App\Services\Aws;
+use Aws\Exception\AwsException;
 use Illuminate\Console\Command;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -101,51 +103,62 @@ class InstanceSyncScheduling extends Command
             // Filters['instance-state-code'] => The code for the instance state, as a 16-bit unsigned integer.
             // The valid values are 0 (pending), 16 (running), 32 (shutting-down), 48 (terminated), 64 (stopping), and 80 (stopped).
 
-            $parameters = [
-                'IncludeAllInstances' => true,
-                'InstanceIds' => $instanceIds,
-                'Filters' => [
-                    [
-                        'Name' => 'instance-state-code',
-                        'Values' => [48],// 48 (terminated)
-                    ],
-                ]
-            ];
+            foreach ($instanceIds as $instanceId) {
 
-            try {
+                $parameters = [
+                    'IncludeAllInstances' => true,
+                    'InstanceIds' => [$instanceId],
+                    'Filters' => [
+                        [
+                            'Name' => 'instance-state-code',
+                            'Values' => [48],// 48 (terminated)
+                        ],
+                    ]
+                ];
 
-                $instanceStatuses = $aws->describeInstanceStatus($region->code ?? '', $parameters);
+                try {
 
-                if ($instanceStatuses->hasKey('InstanceStatuses')) {
-                    $instanceStatuses = collect($instanceStatuses->get('InstanceStatuses'));
+                    $instanceStatuses = $aws->describeInstanceStatus($region->code ?? '', $parameters);
 
-                    $count = $instanceStatuses->count();
+                    if ($instanceStatuses->hasKey('InstanceStatuses')) {
 
-                    if ($count > 0) {
+                        $instanceStatuses = collect($instanceStatuses->get('InstanceStatuses'));
 
-                        $terminatedIds = $instanceStatuses->map(function ($item, $key) {
-                            return $item['InstanceId'];
-                        })->toArray();
-
-                        if ($region->created_instances >= $count) {
-                            $region->decrement('created_instances', $instanceStatuses->count());
-                        }
-
-                        BotInstance::whereIn('aws_instance_id', $terminatedIds)
-                            ->update([
-                                'aws_public_ip' => null,
-                                'aws_status'    => BotInstance::STATUS_TERMINATED
-                            ]);
-
-                        BotInstance::whereIn('aws_instance_id', $terminatedIds)->delete();
+                        $this->deleteTerminatedInstances($instanceStatuses, $region);
                     }
-                }
 
-            } catch (Throwable $throwable) {
-                Log::error($throwable->getMessage());
+                } catch (AwsException $exception) {
+                    $this->deleteTerminatedInstances(collect([['InstanceId' => $instanceId]]), $region);
+                } catch (Throwable $throwable) {
+                    Log::error($throwable->getMessage());
+                }
             }
         });
 
         Log::info('checkNotTerminatedInstances completed at ' . date('Y-m-d h:i:s'));
+    }
+
+    private function deleteTerminatedInstances(Collection $instanceStatuses, AwsRegion $region)
+    {
+        $count = $instanceStatuses->count();
+
+        if ($count > 0) {
+
+            $terminatedIds = $instanceStatuses->map(function ($item, $key) {
+                return $item['InstanceId'];
+            })->toArray();
+
+            if ($region->created_instances >= $count) {
+                $region->decrement('created_instances', $count);
+            }
+
+            BotInstance::whereIn('aws_instance_id', $terminatedIds)
+                ->update([
+                    'aws_public_ip' => null,
+                    'aws_status'    => BotInstance::STATUS_TERMINATED
+                ]);
+
+            BotInstance::whereIn('aws_instance_id', $terminatedIds)->delete();
+        }
     }
 }
