@@ -296,9 +296,9 @@ class BotInstanceController extends AppController
 
                         $result = $aws->getKeyPairObject($details->aws_pem_file_path ?? '');
 
-                        Log::debug("getKeyPairObject > ");
-                        Log::debug($details->aws_pem_file_path);
-                        Log::debug(print_r($result, true));
+                        if (empty($result)) {
+                            return $this->error(__('admin.error'), __('admin.access_denied'));
+                        }
 
                         $body = $result->get('Body');
 
