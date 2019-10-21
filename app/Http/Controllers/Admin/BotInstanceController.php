@@ -20,6 +20,7 @@ use App\Services\Aws;
 use App\BotInstance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class BotInstanceController extends AppController
@@ -294,6 +295,9 @@ class BotInstanceController extends AppController
                         $aws->s3Connection();
 
                         $result = $aws->getKeyPairObject($details->aws_pem_file_path ?? '');
+
+                        Log::debug("getKeyPairObject > ", print_r($details->aws_pem_file_path, true));
+                        Log::debug("getKeyPairObject > ", print_r($result, true));
 
                         $body = $result->get('Body');
 
