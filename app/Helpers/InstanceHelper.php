@@ -123,104 +123,114 @@ class InstanceHelper
     {
         $currentDate = Carbon::now()->toDateTimeString();
 
+        $availableStatuses = [
+            BotInstance::STATUS_RUNNING,
+            BotInstance::STATUS_STOPPED,
+            BotInstance::STATUS_TERMINATED
+        ];
+
         foreach ($instancesByStatus as $statusKey => $instances) {
 
-            foreach ($instances as $key => $instance) {
+            if (in_array($statusKey, $availableStatuses)) {
 
-                $user   = User::where('email', '=', $instance['tag_user_email'])->first();
-                $bot    = Bot::where('name', '=', $instance['tag_bot_name'])->first();
+                foreach ($instances as $key => $instance) {
 
-                if (! empty($user)) {
+                    $user = User::where('email', '=', $instance['tag_user_email'])->first();
 
-                    $status = $statusKey === 'stopping' ? BotInstance::STATUS_STOPPED : $statusKey;
+                    if (! empty($user)) {
 
-                    $instanceId = $instance['aws_instance_id'] ?? null;
+                        $status = $statusKey === 'stopping' ? BotInstance::STATUS_STOPPED : $statusKey;
 
-                    $botInstance = $user->instances()->where('aws_instance_id', '=', $instanceId)->first();
+                        $instanceId = $instance['aws_instance_id'] ?? null;
 
-                    if (! empty($botInstance)) {
+                        $botInstance = $user->instances()->where('aws_instance_id', '=', $instanceId)->first();
 
-                        switch ($status) {
-                            case BotInstance::STATUS_RUNNING:
-                            case BotInstance::STATUS_STOPPED:
-                            case BotInstance::STATUS_TERMINATED:
+                        if (! empty($botInstance)) {
+                            self::syncInstancesUpdateStatus($botInstance, $status, $currentDate);
+                        } else {
 
-                                $botInstance->update(['aws_status' => $status]);
-
-                                if ($status === BotInstance::STATUS_TERMINATED) {
-
-                                    if ($botInstance->region->created_instances > 0) {
-                                        $botInstance->region->decrement('created_instances');
-                                    }
-
-                                    $detail = $botInstance->details()->latest()->first();
-
-                                    // TODO: Check whether old status was 'running'
-                                    self::updateUpTime($botInstance, $detail, $currentDate);
-
-                                    $botInstance->delete();
-                                }
-
-                                break;
-                        }
-                    } else {
-
-                        if ($status !== BotInstance::STATUS_TERMINATED) {
-
-                            $aws                = new Aws;
-                            $describeVolumes    = $aws->describeVolumes($region->code ?? null, $instance['aws_volumes_params']);
-
-                            if ($describeVolumes->hasKey('Volumes')) {
-
-                                $volumes = collect($describeVolumes->get('Volumes'));
-
-                                if ($volumes->isNotEmpty()) {
-
-                                    $volumeSize = $volumes->filter(function ($value, $key) {
-                                        return $value['Attachments'][0]['Device'] === '/dev/sda1';
-                                    })->map(function ($item, $key) {
-                                        return $item['Size'] ?? 0;
-                                    })->first();
-
-                                    if ($volumeSize > 0) {
-
-                                        $newInstance = BotInstance::create([
-                                            'user_id'           => $user->id,
-                                            'bot_id'            => $bot->id ?? null,
-                                            'tag_name'          => $instance['tag_name'],
-                                            'tag_user_email'    => $instance['tag_user_email'],
-                                            'aws_instance_id'   => $instance['aws_instance_id'],
-                                            'aws_public_ip'     => $instance['aws_public_ip'],
-                                            'aws_region_id'     => $region->id ?? null,
-                                            'aws_status'        => $status,
-                                            'start_time'        => $instance['created_at']
-                                        ]);
-
-                                        $newInstance->details()->create([
-                                            'aws_instance_type'         => $instance['aws_instance_type'],
-                                            'aws_storage_gb'            => $volumeSize,
-                                            'aws_image_id'              => $instance['aws_image_id'],
-                                            'aws_security_group_id'     => $instance['aws_security_group_id'],
-                                            'aws_security_group_name'   => $instance['aws_security_group_name'],
-                                            'aws_public_dns'            => $instance['aws_public_dns'],
-                                            'aws_pem_file_path'         => "keys/{$instance['aws_key_name']}.pem",
-                                            'is_in_queue'               => 0,
-                                            'start_time'                => $instance['created_at']
-                                        ]);
-                                    }
-                                }
+                            if ($status !== BotInstance::STATUS_TERMINATED) {
+                                self::syncInstancesCreateBotInstance($region, $user, $instance, $status);
                             }
                         }
                     }
-                }
 
-                unset($user, $botInstance, $describeVolumes, $volumes, $newInstance);
+                    unset($user, $botInstance, $describeVolumes, $volumes, $newInstance);
+                }
             }
         }
 
-        unset($instancesByStatus);
-
         Log::info('Synced completed at ' . date('Y-m-d h:i:s'));
+    }
+
+    private static function syncInstancesUpdateStatus(BotInstance $botInstance, string $status, string $currentDate): void
+    {
+        $botInstance->update(['aws_status' => $status]);
+
+        if ($status === BotInstance::STATUS_TERMINATED) {
+
+            if ($botInstance->region->created_instances > 0) {
+                $botInstance->region->decrement('created_instances');
+            }
+
+            $detail = $botInstance->details()->latest()->first();
+
+            // TODO: Check whether old status was 'running'
+            self::updateUpTime($botInstance, $detail, $currentDate);
+
+            $botInstance->delete();
+        }
+    }
+
+    private static function syncInstancesCreateBotInstance(AwsRegion $region, User $user, array $instance, string $status)
+    {
+        $aws = new Aws;
+        $describeVolumes = $aws->describeVolumes($region->code ?? null, $instance['aws_volumes_params']);
+
+        $bot = Bot::where('name', '=', $instance['tag_bot_name'])->first();
+
+        if ($describeVolumes->hasKey('Volumes')) {
+
+            $volumes = collect($describeVolumes->get('Volumes'));
+
+            if ($volumes->isNotEmpty()) {
+
+                $volumeSize = $volumes->filter(function ($value, $key) {
+                    return $value['Attachments'][0]['Device'] === '/dev/sda1';
+                })->map(function ($item, $key) {
+                    return $item['Size'] ?? 0;
+                })->first();
+
+                if ($volumeSize > 0) {
+
+                    $newInstance = BotInstance::create([
+                        'user_id'           => $user->id,
+                        'bot_id'            => $bot->id ?? null,
+                        'tag_name'          => $instance['tag_name'],
+                        'tag_user_email'    => $instance['tag_user_email'],
+                        'aws_instance_id'   => $instance['aws_instance_id'],
+                        'aws_public_ip'     => $instance['aws_public_ip'],
+                        'aws_region_id'     => $region->id ?? null,
+                        'aws_status'        => $status,
+                        'start_time'        => $instance['created_at']
+                    ]);
+
+                    $newInstance->details()->create([
+                        'aws_instance_type'         => $instance['aws_instance_type'],
+                        'aws_storage_gb'            => $volumeSize,
+                        'aws_image_id'              => $instance['aws_image_id'],
+                        'aws_security_group_id'     => $instance['aws_security_group_id'],
+                        'aws_security_group_name'   => $instance['aws_security_group_name'],
+                        'aws_public_dns'            => $instance['aws_public_dns'],
+                        'aws_pem_file_path'         => "keys/{$instance['aws_key_name']}.pem",
+                        'is_in_queue'               => 0,
+                        'start_time'                => $instance['created_at']
+                    ]);
+
+                    $newInstance->region->increment('created_instances');
+                }
+            }
+        }
     }
 
     /**
