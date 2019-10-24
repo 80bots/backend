@@ -8,8 +8,11 @@ use App\Bot;
 use App\BotInstance;
 use App\Helpers\CommonHelper;
 use App\Helpers\InstanceHelper;
+use App\Http\Resources\S3ObjectCollection;
 use App\Jobs\InstanceChangeStatus;
+use App\Jobs\StoreS3Objects;
 use App\Jobs\StoreUserInstance;
+use App\S3Object;
 use App\Services\Aws;
 use App\User;
 use Carbon\Carbon;
@@ -26,6 +29,11 @@ class AppController extends Controller
     public function __construct()
     {
         $this->credit = CommonHelper::calculateCredit();
+    }
+
+    public function status()
+    {
+        return response()->json(['aaa'=>'bbb']);
     }
 
     public function apiEmpty()
@@ -233,6 +241,27 @@ class AppController extends Controller
         }
     }
 
+    protected function storeS3Objects(Request $request)
+    {
+//        $instance = BotInstance::find(2);
+//
+//        $s3Objects = $instance->s3Objects()
+//            ->with('children')
+//            ->whereNull('parent_id')
+//            ->get();
+//
+//        dd($s3Objects->toArray());
+//
+//        dd("DD");
+
+        dispatch(new StoreS3Objects(
+            $request->ip(),
+            $request->only('instance_id', 'key')
+        ));
+
+        return response()->json([], 201);
+    }
+
     /**
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
@@ -242,65 +271,95 @@ class AppController extends Controller
         $instance = $this->getInstanceWithCheckUser($request->query('instance_id'));
 
         if (empty($instance)) {
-            return $this->notFound(__('admin.not_found'), __('admin.instances.not_found'));
+            return $this->notFound(__('keywords.not_found'), __('keywords.instance.not_found'));
         }
 
-        $now = Carbon::now();
-        $nowDate = $now->toDateString();
-        $yesterdayDate = $now->subDay()->toDateString();
+        $limit = $request->query('limit') ?? 10;
 
-        $type = InstanceHelper::getTypeS3Object($request->query('type'));
+        $this->updateObjectsThumbnailLink($request, $instance);
 
-        $isset = [];
+        $resource   = $instance->s3Objects()->whereNull('parent_id');
+        $folders    = (new S3ObjectCollection($resource->paginate($limit)))->response()->getData();
+        $meta       = $folders->meta ?? null;
 
-        $dates = InstanceHelper::getListInstancesDates($instance);
+        $response = [
+            'data'  => $folders->data ?? [],
+            'total' => $meta->total ?? 0
+        ];
 
-        if (! empty($dates)) {
+        return $this->success($response);
+    }
 
-            $credentials = [
-                'key'    => config('aws.iam.access_key'),
-                'secret' => config('aws.iam.secret_key')
-            ];
+    public function getS3Objects(Request $request)
+    {
+        $instance = $this->getInstanceWithCheckUser($request->query('instance_id'));
 
-            $aws = new Aws;
-            $aws->s3Connection('', $credentials);
-
-            $folder = config('aws.streamer.folder');
-
-            foreach ($dates as $date) {
-
-                if ($date === $nowDate) {
-                    $name = 'Today';
-                } elseif ($date === $yesterdayDate) {
-                    $name = 'Yesterday';
-                } else {
-                    $name = $date;
-                }
-
-                $prefix     = "{$folder}/{$instance->tag_name}/{$type}/{$date}/thumbnail.jpg";
-                $thumbnail  = $aws->getPresignedLink($aws->getS3Bucket(), $prefix);
-
-                if (! empty($thumbnail)) {
-                    array_push($isset, [
-                        "name"      => $name,
-                        "thumbnail" => [
-                            'url'   => $thumbnail
-                        ]
-                    ]);
-                }
-
-//                $prefix     = "{$folder}/{$instance->tag_name}/{$type}/{$date}";
-//                $info = InstanceHelper::getDateInfo($aws, $prefix, $date, $nowDate, $yesterdayDate);
-//
-//                if (! empty($info)) {
-//                    array_push($isset, $info);
-//                }
-            }
+        if (empty($instance)) {
+            return $this->notFound(__('keywords.not_found'), __('keywords.instance.not_found'));
         }
 
-        return $this->success([
-            'folders' => $isset
-        ]);
+        $limit  = $request->query('limit') ?? self::PAGINATE;
+        $folder = $request->query('folder');
+        $type   = InstanceHelper::getTypeS3Object($request->query('type'));
+
+        $folderObjects = S3Object::find($folder);
+
+        if (empty($folderObjects)) {
+            return $this->notFound(__('keywords.not_found'), __('keywords.not_found'));
+        }
+
+        switch ($type) {
+            case S3Object::TYPE_SCREENSHOTS:
+                // Update links from DB, which will be expired soon
+                InstanceHelper::updateScreenshotsOldLinks($instance, $folderObjects);
+                break;
+        }
+
+        $resource = $instance->s3Objects()
+            ->where('path', 'like', "{$folderObjects->name}/output/{$type}/%")
+            ->where('entity', '=', S3Object::ENTITY_FILE)
+            ->where('name', '!=', 'thumbnail');
+
+        $screenshots    = (new S3ObjectCollection($resource->paginate($limit)))->response()->getData();
+        $meta           = $screenshots->meta ?? null;
+
+        $response = [
+            'data'  => $screenshots->data ?? [],
+            'total' => $meta->total ?? 0
+        ];
+
+        return $this->success($response);
+    }
+
+    public function getS3Logs(Request $request)
+    {
+        $instance = $this->getInstanceWithCheckUser($request->query('instance_id'));
+
+        if (empty($instance)) {
+            return $this->notFound(__('keywords.not_found'), __('keywords.instance.not_found'));
+        }
+
+        // Remove links from DB, which will be expired soon
+        S3Object::removeOldLinks($instance->id);
+
+        $limit  = $request->query('limit') ?? self::PAGINATE;
+
+        $resource = $instance->s3Objects()
+            ->where('type', '=', S3Object::TYPE_LOGS);
+
+        if ($resource->count() === 0) {
+            InstanceHelper::saveS3Logs($instance);
+        }
+
+        $instances  = (new S3ObjectCollection($resource->paginate($limit)))->response()->getData();
+        $meta       = $instances->meta ?? null;
+
+        $response = [
+            'data'  => $instances->data ?? [],
+            'total' => $meta->total ?? 0
+        ];
+
+        return $this->success($response);
     }
 
     /**
@@ -319,6 +378,44 @@ class AppController extends Controller
         } else {
             return null;
         }
+    }
+
+    private function updateObjectsThumbnailLink(Request $request, BotInstance $instance): void
+    {
+        $page   = $request->query('page') ?? 1;
+        $limit  = $request->query('limit') ?? 10;
+        $skip   = $page === 1 ? 0 : ($page-1)*$limit;
+        $type   = $request->query('type') ?? '';
+
+        $folders = $instance->s3Objects()
+            ->whereNull('parent_id')
+            ->skip($skip)
+            ->take($limit)
+            ->get();
+
+        if ($folders->isNotEmpty()) {
+
+            $thumbnailPath = InstanceHelper::getThumbnailPathByTypeS3Object($type);
+
+            $credentials = [
+                'key'    => config('aws.iam.access_key'),
+                'secret' => config('aws.iam.secret_key')
+            ];
+
+            $aws = new Aws;
+            $aws->s3Connection('', $credentials);
+
+            foreach ($folders as $folder) {
+                $prefix = "{$instance->baseS3Dir}/{$folder->name}/{$thumbnailPath}";
+                $folder->update([
+                    'link' => $aws->getPresignedLink($aws->getS3Bucket(), $prefix)
+                ]);
+            }
+
+            unset($thumbnailPath, $credentials, $aws);
+        }
+
+        unset($page, $limit, $skip, $folders);
     }
 }
 

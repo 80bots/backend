@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources\Admin;
+namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
@@ -11,7 +11,7 @@ class S3ObjectCollection extends ResourceCollection
      *
      * @var string
      */
-    public $collects = 'App\Http\Resources\Admin\S3ObjectResource';
+    public $collects = 'App\Http\Resources\S3ObjectResource';
 
     /**
      * Transform the resource collection into an array.

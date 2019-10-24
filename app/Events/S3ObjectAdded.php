@@ -2,32 +2,27 @@
 
 namespace App\Events;
 
+use App\BotInstance;
+use App\User;
 use Illuminate\Broadcasting\Channel;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Broadcasting\PresenceChannel;
-use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
-use Illuminate\Database\Eloquent\Builder;
-use App\User;
+use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Queue\SerializesModels;
 
-class InstanceCreated implements ShouldBroadcast
+class S3ObjectAdded implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    private $user;
     private $instance;
 
     /**
      * Create a new event instance.
      *
-     * @param User $user
-     * @param $instance
+     * @param BotInstance $instance
      */
-    public function __construct(User $user, $instance)
+    public function __construct(BotInstance $instance)
     {
-        $this->user = $user;
         $this->instance = $instance;
     }
 
@@ -38,7 +33,7 @@ class InstanceCreated implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new Channel('instance-live');
+        return new Channel("instance.{$this->instance->id}.show");
     }
 
     /**
@@ -48,9 +43,14 @@ class InstanceCreated implements ShouldBroadcast
      */
     public function broadcastWith()
     {
+        $s3Objects = $this->instance
+            ->s3Objects()
+            ->with('children')
+            ->whereNull('parent_id')
+            ->get();
+
         return [
-            'user' => $this->user,
-            'instance' => $this->instance,
+            'objects' => $s3Objects,
         ];
     }
 }

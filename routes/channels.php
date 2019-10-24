@@ -10,6 +10,8 @@
 |
 */
 
+use App\BotInstance;
+
 Broadcast::channel('App.User.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });
@@ -20,6 +22,10 @@ Broadcast::channel('running.{user_id}', function ($user, $user_id) {
 
 Broadcast::channel('bots.{user_id}', function ($user, $user_id) {
     return true;
+});
+
+Broadcast::channel('instance.{instance_id}.show', function ($user, $instance_id) {
+    return $user->isAdmin() ? true : $user->id === BotInstance::find($instance_id)->user_id;
 });
 
 Broadcast::channel('instance-live', function ($user) {

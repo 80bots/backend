@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Helpers\InstanceHelper;
 use App\Helpers\QueryHelper;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -68,6 +69,11 @@ class BotInstance extends BaseModel
         'status',
         'start_time'
     ];
+
+    public function getBaseS3DirAttribute ()
+    {
+        return InstanceHelper::DATA_STREAMER_FOLDER . '/' . $this->tag_name;
+    }
 
     public function scopeFindByUserId($query, $userId)
     {
