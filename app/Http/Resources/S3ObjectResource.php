@@ -35,9 +35,8 @@ class S3ObjectResource extends JsonResource
         return [
             'id'    => $this->id ?? '',
             'name'  => $name,
-            'thumbnail' => [
-                'url'   => $this->link ?? ''
-            ]
+            'thumbnail' => $this->link ?? '',
+            'type'  => $this->entity
         ];
     }
 }

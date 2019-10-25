@@ -300,6 +300,9 @@ class AppController extends Controller
 
         $limit  = $request->query('limit') ?? self::PAGINATE;
         $folder = $request->query('folder');
+        if(!$folder) {
+            return $this->getInstanceFolders($request);
+        }
         $type   = InstanceHelper::getTypeS3Object($request->query('type'));
 
         $folderObjects = S3Object::find($folder);
@@ -312,6 +315,10 @@ class AppController extends Controller
             case S3Object::TYPE_SCREENSHOTS:
                 // Update links from DB, which will be expired soon
                 InstanceHelper::updateScreenshotsOldLinks($instance, $folderObjects);
+                break;
+            case S3Object::TYPE_JSON:
+                // Update links from DB, which will be expired soon
+                InstanceHelper::updateJsonsOldLinks($instance, $folderObjects);
                 break;
         }
 

@@ -357,8 +357,6 @@ class InstanceHelper
     public static function getThumbnailPathByTypeS3Object(string $type): string
     {
         switch ($type) {
-            case S3Object::TYPE_SCREENSHOTS:
-                return 'output/screenshots/thumbnail.jpg';
             case S3Object::TYPE_IMAGES:
                 return 'output/images/thumbnail.jpg';
             default:
@@ -655,6 +653,10 @@ class InstanceHelper
         }
     }
 
+    /**
+     * @param BotInstance $instance
+     * @param S3Object $folder
+     */
     public static function updateScreenshotsOldLinks(BotInstance $instance, S3Object $folder): void
     {
         $expires = Carbon::now()->addMinutes(10)->toDateTimeString();
@@ -679,6 +681,42 @@ class InstanceHelper
                 foreach ($screenshots as $screenshot) {
                     $prefix = "{$instance->baseS3Dir}/{$screenshot->path}";
                     $screenshot->update([
+                        'expires'   => Carbon::now()->addHour()->toDateTimeString(),
+                        'link'      => $aws->getPresignedLink($aws->getS3Bucket(), $prefix)
+                    ]);
+                }
+            });
+
+        unset($expires, $credentials, $aws);
+    }
+
+    /**
+     * @param BotInstance $instance
+     * @param $folderObjects
+     */
+    public static function updateJsonsOldLinks(BotInstance $instance, S3Object $folder): void
+    {
+        $expires = Carbon::now()->addMinutes(10)->toDateTimeString();
+
+        $credentials = [
+            'key'    => config('aws.iam.access_key'),
+            'secret' => config('aws.iam.secret_key')
+        ];
+
+        $aws = new Aws;
+        $aws->s3Connection('', $credentials);
+
+        $instance->s3Objects()
+            ->where('path', 'like', "{$folder->name}/output/json/%")
+            ->where('entity', '=', S3Object::ENTITY_FILE)
+            ->where(function ($query) use ($expires) {
+                $query->where('expires', '<=', $expires)
+                    ->orWhereNull('link');
+            })
+            ->chunkById(100, function ($jsons) use ($instance, $aws) {
+                foreach ($jsons as $json) {
+                    $prefix = "{$instance->baseS3Dir}/{$json->path}";
+                    $json->update([
                         'expires'   => Carbon::now()->addHour()->toDateTimeString(),
                         'link'      => $aws->getPresignedLink($aws->getS3Bucket(), $prefix)
                     ]);
