@@ -14,7 +14,8 @@ class BroadcastServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        Broadcast::routes();
+        // We don't have a Web interface with the CSRF usage
+        Broadcast::routes(['middleware' => ['auth:api']]);
 
         require base_path('routes/channels.php');
     }
