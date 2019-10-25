@@ -18,25 +18,23 @@ class S3Object extends Model
         'instance_id',
         'folder',
         'link',
-        'expires'
+        'expires',
+        'type',
     ];
 
     /**
-     * Creation of an object for further applying with filters
-     *
-     * @param $query
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function scopeAjax($query)
-    {
-        return $query;
-    }
-
     public function instance()
     {
         return $this->belongsTo(BotInstance::class, 'instance_id', 'id');
     }
 
+    /**
+     * @param $query
+     * @param $instanceId
+     * @return mixed
+     */
     public function scopeRemoveOldLinks($query, $instanceId)
     {
         $expires = Carbon::now()->addMinutes(10)->toDateTimeString();

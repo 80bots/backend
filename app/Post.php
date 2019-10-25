@@ -25,17 +25,6 @@ class Post extends Model
         'type'
     ];
 
-    /**
-     * Creation of an object for further applying with filters
-     *
-     * @param $query
-     * @return mixed
-     */
-    public function scopeAjax($query)
-    {
-        return $query;
-    }
-
     public function likes()
     {
         return $this->belongsToMany(Like::class, 'like_post');
@@ -44,5 +33,20 @@ class Post extends Model
     public function dislikes()
     {
         return $this->belongsToMany(Dislike::class, 'dislike_post');
+    }
+
+    public function bot()
+    {
+        return $this->belongsTo(Bot::class,'bot_id');
+    }
+
+    public function author()
+    {
+        return $this->belongsTo(User::class, 'author_id');
+    }
+
+    public function messages()
+    {
+        return $this->hasMany(Message::class, 'post_id', 'id');
     }
 }

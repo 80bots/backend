@@ -50,17 +50,6 @@ class Bot extends Model
         'type'
     ];
 
-    /**
-     * Creation of an object for further applying with filters
-     *
-     * @param $query
-     * @return mixed
-     */
-    public function scopeAjax($query)
-    {
-        return $query;
-    }
-
     public function platform()
     {
         return $this->belongsTo(Platform::class, 'platform_id');

@@ -317,6 +317,7 @@ class Aws
                 'Key'       => $path
             ]);
         } catch (S3Exception $exception) {
+            Log::error($exception->getMessage());
             return null;
         }
     }
@@ -831,6 +832,15 @@ class Aws
         return $this->ec2->describeInstances([ 'InstanceIds' => $instanceIds ]);
     }
 
+    public function describeInstanceStatus(string $region, array $parameters): Result
+    {
+        if (empty($this->ec2)) {
+            $this->ec2Connection($region);
+        }
+
+        return $this->ec2->describeInstanceStatus($parameters);
+    }
+
     /**
      * @param $instanceIds
      * @return Result
@@ -1288,6 +1298,10 @@ HERESHELL;
      */
     public function getPresignedLink(string $bucket, string $key): string
     {
+//        if (! $this->s3->doesObjectExist($bucket, $key)) {
+//            return '';
+//        }
+
         $cmd = $this->s3->getCommand('GetObject', [
             'Bucket'    => $bucket,
             'Key'       => $key

@@ -33,17 +33,6 @@ class SchedulingInstance extends Model
         'status',
     ];
 
-    /**
-     * Creation of an object for further applying with filters
-     *
-     * @param $query
-     * @return mixed
-     */
-    public function scopeAjax($query)
-    {
-        return $query;
-    }
-
    	public function scopeFindByUserId($query, $user_id)
     {
         return $query->with('instance.bot')->where('user_id' , $user_id);

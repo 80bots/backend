@@ -40,6 +40,7 @@ class AwsSyncRegions extends Command
      * Execute the console command.
      *
      * @return void
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function handle()
     {
@@ -51,8 +52,6 @@ class AwsSyncRegions extends Command
             foreach ($regions as $region) {
 
                 $limit = $this->getLimitByRegion($region['code'] ?? null);
-
-                echo "Region {$region['name']} / limit {$limit}\n";
 
                 AwsRegion::updateOrInsert(
                     [ 'code' => $region['code'] ],

@@ -36,7 +36,7 @@ class UserController extends AppController
             $sort   = $request->input('sort');
             $order  = $request->input('order') ?? 'asc';
 
-            $resource = User::ajax();
+            $resource = User::query();
 
             // TODO: Add Filters
 

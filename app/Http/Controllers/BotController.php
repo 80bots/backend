@@ -22,7 +22,7 @@ class BotController extends Controller
             $sort       = $request->input('sort');
             $order      = $request->input('order') ?? 'asc';
 
-            $resource = Bot::ajax();
+            $resource = Bot::query();
 
             // TODO: Add Filters
 

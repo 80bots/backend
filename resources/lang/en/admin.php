@@ -99,4 +99,5 @@ return [
     'server_error' => 'Server error',
     'delete_error' => '',
     'parameters_incorrect' => 'Passed parameters are incorrect',
+    'access_denied' => 'Access Denied',
 ];

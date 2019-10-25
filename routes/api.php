@@ -34,7 +34,7 @@ Route::group(['middleware' => ['auth:api', 'api.sentry', 'api.instance']], funct
 
     Route::group(['prefix' => 'instances', 'as' => 'instances.'], function () {
 
-        Route::get('/dates', 'BotInstanceController@getInstanceDates')->name('dates');
+        Route::get('/folders', 'BotInstanceController@getInstanceFolders')->name('folders');
         Route::get('/objects', 'BotInstanceController@getS3Objects')->name('objects');
         Route::get('/logs', 'BotInstanceController@getS3Logs')->name('logs');
 
@@ -107,7 +107,7 @@ Route::group([
 
     Route::group(['prefix' => 'instances', 'as' => 'instances.'], function () {
 
-        Route::get('/dates', 'BotInstanceController@getInstanceDates')->name('dates');
+        Route::get('/folders', 'BotInstanceController@getInstanceFolders')->name('folders');
         Route::get('/objects', 'BotInstanceController@getS3Objects')->name('objects');
         Route::get('/logs', 'BotInstanceController@getS3Logs')->name('logs');
 

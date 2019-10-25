@@ -20,6 +20,7 @@ use App\Services\Aws;
 use App\BotInstance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class BotInstanceController extends AppController
@@ -42,8 +43,7 @@ class BotInstanceController extends AppController
             $sort   = $request->input('sort');
             $order  = $request->input('order') ?? 'asc';
 
-            //$resource = BotInstance::withTrashed()->with(['oneDetail', 'user', 'region'])->ajax();
-            $resource = BotInstance::withTrashed()->ajax();
+            $resource = BotInstance::withTrashed();
 
             // TODO: Add Filters
 
@@ -67,8 +67,6 @@ class BotInstanceController extends AppController
             }, function ($query) {
                 return $query->orderBy('aws_status', 'asc')->orderBy('start_time', 'desc');
             });
-
-            //$resource->dd();
 
             $instances  = (new BotInstanceCollection($resource->paginate($limit)))->response()->getData();
             $meta       = $instances->meta ?? null;
@@ -107,7 +105,7 @@ class BotInstanceController extends AppController
         $sort   = $request->input('sort');
         $order  = $request->input('order') ?? 'asc';
 
-        $resource = AwsRegion::onlyEc2()->ajax();
+        $resource = AwsRegion::onlyEc2();
 
         //
         if (! empty($search)) {
@@ -298,6 +296,10 @@ class BotInstanceController extends AppController
 
                         $result = $aws->getKeyPairObject($details->aws_pem_file_path ?? '');
 
+                        if (empty($result)) {
+                            return $this->error(__('admin.error'), __('admin.access_denied'));
+                        }
+
                         $body = $result->get('Body');
 
                         if (! empty($body)) {
@@ -324,12 +326,12 @@ class BotInstanceController extends AppController
             return $this->notFound(__('admin.not_found'), __('admin.instances.not_found'));
         }
 
-        // Remove links from DB, which will be expired soon
-        S3Object::removeOldLinks($instance->id);
-
         $limit  = $request->query('limit') ?? self::PAGINATE;
         $type   = InstanceHelper::getTypeS3Object($request->query('type'));
         $date   = $request->query('date');
+
+        // Remove links from DB, which will be expired soon
+        S3Object::removeOldLinks($instance->id);
 
         $resource = $instance->s3Objects()
             ->where('folder', '=', $date)

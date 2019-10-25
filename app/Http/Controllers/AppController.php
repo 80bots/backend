@@ -12,6 +12,7 @@ use App\Jobs\InstanceChangeStatus;
 use App\Jobs\StoreUserInstance;
 use App\Services\Aws;
 use App\User;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -236,14 +237,17 @@ class AppController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    protected function getInstanceDates(Request $request)
+    protected function getInstanceFolders(Request $request)
     {
-        // TODO: Validate request and define all the query params on the top of func's body
-        $withTrashed = $request->query('withTrashed', false);
-        $instance = $this->getInstanceWithCheckUser($request->query('instance_id'), $withTrashed);
+        $instance = $this->getInstanceWithCheckUser($request->query('instance_id'));
+
         if (empty($instance)) {
             return $this->notFound(__('admin.not_found'), __('admin.instances.not_found'));
         }
+
+        $now = Carbon::now();
+        $nowDate = $now->toDateString();
+        $yesterdayDate = $now->subDay()->toDateString();
 
         $type = InstanceHelper::getTypeS3Object($request->query('type'));
 
@@ -251,51 +255,64 @@ class AppController extends Controller
 
         $dates = InstanceHelper::getListInstancesDates($instance);
 
-        if (empty($dates)) {
-            return $this->success([
-                'dates' => $isset
-            ]);
-        }
+        if (! empty($dates)) {
 
-        $credentials = [
-            'key'    => config('aws.iam.access_key'),
-            'secret' => config('aws.iam.secret_key')
-        ];
+            $credentials = [
+                'key'    => config('aws.iam.access_key'),
+                'secret' => config('aws.iam.secret_key')
+            ];
 
-        $aws = new Aws;
-        $aws->s3Connection('', $credentials);
+            $aws = new Aws;
+            $aws->s3Connection('', $credentials);
 
-        $folder = config('aws.streamer.folder');
+            $folder = config('aws.streamer.folder');
 
-        foreach ($dates as $date) {
+            foreach ($dates as $date) {
 
-            $prefix = "{$folder}/{$instance->tag_name}/{$type}/{$date}";
-            $result = $aws->getS3ListObjects($aws->getS3Bucket(), 1, $prefix);
-            if ($result->hasKey('Contents')) {
-                array_push($isset, $date);
+                if ($date === $nowDate) {
+                    $name = 'Today';
+                } elseif ($date === $yesterdayDate) {
+                    $name = 'Yesterday';
+                } else {
+                    $name = $date;
+                }
+
+                $prefix     = "{$folder}/{$instance->tag_name}/{$type}/{$date}/thumbnail.jpg";
+                $thumbnail  = $aws->getPresignedLink($aws->getS3Bucket(), $prefix);
+
+                if (! empty($thumbnail)) {
+                    array_push($isset, [
+                        "name"      => $name,
+                        "thumbnail" => [
+                            'url'   => $thumbnail
+                        ]
+                    ]);
+                }
+
+//                $prefix     = "{$folder}/{$instance->tag_name}/{$type}/{$date}";
+//                $info = InstanceHelper::getDateInfo($aws, $prefix, $date, $nowDate, $yesterdayDate);
+//
+//                if (! empty($info)) {
+//                    array_push($isset, $info);
+//                }
             }
         }
+
         return $this->success([
-            'dates' => $isset
+            'folders' => $isset
         ]);
     }
 
     /**
      * @param string|null $id
-     * @param bool|null $withTrashed
      * @return BotInstance|null
      */
-    private function getInstanceWithCheckUser(?string $id, ?bool $withTrashed = false): ?BotInstance
+    private function getInstanceWithCheckUser(?string $id): ?BotInstance
     {
-        /** @var BotInstance $query */
-        $query = BotInstance::query();
-        if($withTrashed) {
-            $query->withTrashed();
-        }
         if (Auth::user()->isAdmin()) {
-            return $query->find($id);
+            return BotInstance::find($id);
         } elseif (Auth::user()->isUser()) {
-            return $query->where([
+            return BotInstance::where([
                 ['id', '=', $id],
                 ['user_id', '=', Auth::id()]
             ])->first();

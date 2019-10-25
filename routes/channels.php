@@ -23,7 +23,7 @@ Broadcast::channel('bots.{user_id}', function ($user, $user_id) {
 });
 
 Broadcast::channel('instance-live', function ($user) {
-    return $user->role->name === 'Admin';
+    return $user->isAdmin();
 });
 
 // Channel for the client and bot's storage collaboration using Laravel Echo server

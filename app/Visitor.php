@@ -14,16 +14,8 @@ class Visitor extends Model
     ];
 
     /**
-     * Creation of an object for further applying with filters
-     *
-     * @param $query
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function scopeAjax($query)
-    {
-        return $query;
-    }
-
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');

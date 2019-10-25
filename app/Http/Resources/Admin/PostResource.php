@@ -3,7 +3,6 @@
 namespace App\Http\Resources\Admin;
 
 use Illuminate\Http\Resources\Json\JsonResource;
-use function Zend\Diactoros\normalizeUploadedFiles;
 
 class PostResource extends JsonResource
 {
@@ -18,16 +17,18 @@ class PostResource extends JsonResource
         $content = '';
 
         if (! empty($this->content)) {
-            $content = mb_strimwidth($this->content, 0, 40, "...");
+            $content = mb_strimwidth(strip_tags($this->content), 0, 40, "...");
         }
 
         return [
             'id'        => $this->id ?? '',
             'title'     => $this->title ?? '',
             'slug'      => $this->slug ?? '',
-            'bot'       => $this->bot->name ?? null,
+            'type'      => $this->type ?? '',
+            'bot'       => $this->bot ?? null,
             'content'   => $content,
             'status'    => $this->status ?? '',
+            'messages'  => $this->messages ?? [],
         ];
     }
 }

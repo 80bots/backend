@@ -21,7 +21,7 @@ class PostController extends Controller
             $sort       = $request->input('sort');
             $order      = $request->input('order') ?? 'asc';
 
-            $resource = Post::ajax();
+            $resource = Post::query();
 
             // TODO: Add Filters
 

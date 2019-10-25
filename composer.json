@@ -26,7 +26,8 @@
         "predis/predis": "^1.1",
         "sentry/sentry-laravel": "^1.2",
         "stripe/stripe-php": "^6.41",
-        "ext-mbstring": "*"
+        "ext-mbstring": "*",
+        "ext-curl": "*"
     },
     "require-dev": {
         "aws/aws-sdk-php-laravel": "~3.0",

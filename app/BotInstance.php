@@ -69,17 +69,6 @@ class BotInstance extends BaseModel
         'start_time'
     ];
 
-    /**
-     * Creation of an object for further applying with filters
-     *
-     * @param $query
-     * @return mixed
-     */
-    public function scopeAjax($query)
-    {
-        return $query;
-    }
-
     public function scopeFindByUserId($query, $userId)
     {
         return $query->where('user_id', $userId);
@@ -98,6 +87,11 @@ class BotInstance extends BaseModel
     public function scopeFindRunningInstance($query)
     {
         return $query->where('aws_status', self::STATUS_RUNNING)->get();
+    }
+
+    public function scopeFindNotTerminated($query)
+    {
+        return $query->where('aws_status', '!=', self::STATUS_TERMINATED);
     }
 
     public function setAwsStatusPending()
@@ -123,6 +117,11 @@ class BotInstance extends BaseModel
     public function isAwsStatusTerminated()
     {
         return $this->aws_status === self::STATUS_TERMINATED;
+    }
+
+    public function isNotAwsStatusTerminated()
+    {
+        return $this->aws_status !== self::STATUS_TERMINATED;
     }
 
     public function details()
