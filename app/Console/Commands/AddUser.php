@@ -2,17 +2,11 @@
 
 namespace App\Console\Commands;
 
-use App\DeleteSecurityGroup;
-use App\Services\Aws;
-use Carbon\Carbon;
-use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Log;
-use mysql_xdevapi\Exception;
-use Throwable;
+use App\AwsRegion;
 use App\Role;
 use App\Timezone;
-use App\AwsRegion;
 use App\User;
+use Illuminate\Console\Command;
 
 class AddUser extends Command
 {

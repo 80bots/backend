@@ -3,12 +3,11 @@
 namespace App\Jobs;
 
 use App\Bot;
+use App\BotInstance;
 use App\Events\InstanceLaunched;
 use App\Helpers\CreditUsageHelper;
 use App\Services\Aws;
 use App\User;
-use App\BotInstance;
-use App\BotInstancesDetails;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -16,7 +15,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Session;
 use Throwable;
 
 class StoreUserInstance implements ShouldQueue
@@ -134,16 +132,18 @@ class StoreUserInstance implements ShouldQueue
 
                 Log::info('Launched instance ' . $instanceId);
 
+                $aws->waitUntil([$instanceId]);
+
+                Log::info('wait until instance ' . $instanceId);
+
+                //$this->addToMongoDb();
+
                 CreditUsageHelper::startInstance(
                     $this->user,
                     self::START_INSTANCE_CREDIT,
                     $this->instance->id,
                     $tagName
                 );
-
-                $aws->waitUntil([$instanceId]);
-
-                Log::info('wait until instance ' . $instanceId);
 
                 $describeInstancesResponse = $aws->describeInstances([$instanceId], $this->region);
 
@@ -219,5 +219,43 @@ class StoreUserInstance implements ShouldQueue
             $this->instance->setAwsStatusTerminated();
             $this->instance->delete();
         }
+    }
+
+    private function addToMongoDb()
+    {
+//        $mongo = MongoInstance::create([
+//            'instance_id'       => 2,
+//            'tag_name'          => 'unsightlyunicorn794',
+//            'tag_user_email'    => 'akkimysite+admin@gmail.com',
+//            'aws_region_id'     => 2,
+//            'used_credit'       => 1,
+//            'total_up_time'     => 1,
+//            'details'           => [
+//                [
+//                    'detail_id' => 1,
+//                    'start_time' => Carbon::now(),
+//                    'end_time'  => Carbon::now()->addHour(),
+//                    'total_time' => 1.0,
+//                ],
+//                [
+//                    'detail_id' => 2,
+//                    'start_time' => Carbon::now(),
+//                    'end_time'  => Carbon::now()->addHours(2),
+//                    'total_time' => 1.98,
+//                ]
+//            ],
+//            'params'    => [
+//                [
+//                    "searchKeyword" => "cats",
+//                    "maxPage" => 5,
+//                    "speed" => 9,
+//                ],
+//                [
+//                    "searchKeyword" => "cats",
+//                    "maxPage" => 5,
+//                    "speed" => 9
+//                ]
+//            ]
+//        ]);
     }
 }

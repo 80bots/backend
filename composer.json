@@ -9,11 +9,15 @@
     "license": "MIT",
     "require": {
         "php": "^7.1.3",
+        "ext-curl": "*",
         "ext-dom": "*",
         "ext-json": "*",
+        "ext-mbstring": "*",
+        "ext-mongodb": "^1.6",
         "fideloper/proxy": "^4.0",
         "graham-campbell/github": "^8.2",
         "illuminate/routing": "^5.8",
+        "jenssegers/mongodb": "^3.6",
         "laravel/cashier": "^10.0",
         "laravel/framework": "5.8.*",
         "laravel/horizon": "^3.2",
@@ -21,13 +25,12 @@
         "laravel/tinker": "^1.0",
         "lavary/crunz": "^2.0",
         "league/flysystem-aws-s3-v3": "^1.0",
+        "mongodb/mongodb": "^1.5",
         "nubs/random-name-generator": "^2.1",
         "php-http/guzzle6-adapter": "1.1.1",
         "predis/predis": "^1.1",
         "sentry/sentry-laravel": "^1.2",
-        "stripe/stripe-php": "^6.41",
-        "ext-mbstring": "*",
-        "ext-curl": "*"
+        "stripe/stripe-php": "^6.41"
     },
     "require-dev": {
         "aws/aws-sdk-php-laravel": "~3.0",

@@ -666,6 +666,11 @@ class Aws
         return $this->ec2->runInstances($instanceLaunchRequest);
     }
 
+    public function restoreInstance(BotInstance $instance, string $keyPairName, string $securityGroupName)
+    {
+
+    }
+
     /**
      * @param string $region
      * @param int $limit This value can be between 5 and 1000.

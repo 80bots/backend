@@ -10,6 +10,7 @@ use App\Helpers\CommonHelper;
 use App\Helpers\InstanceHelper;
 use App\Jobs\InstanceChangeStatus;
 use App\Jobs\StoreUserInstance;
+use App\MongoInstance;
 use App\Services\Aws;
 use App\User;
 use Carbon\Carbon;
