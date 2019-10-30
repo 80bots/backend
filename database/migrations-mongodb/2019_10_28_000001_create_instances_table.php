@@ -18,11 +18,13 @@ class CreateInstancesTable extends Migration
             $collection->unsignedBigInteger('instance_id')->index();
             $collection->string('tag_name')->nullable();
             $collection->string('tag_user_email')->nullable();
-            $collection->unsignedInteger('aws_region_id')->nullable();
-            $collection->unsignedInteger('used_credit')->default(0);
-            $collection->unsignedInteger('total_up_time')->default(0);
+            $collection->string('bot_path')->nullable();
+            $collection->string('bot_name')->nullable();
+            $collection->string('aws_region')->nullable();
+            $collection->string('aws_instance_type')->nullable();
+            $collection->unsignedSmallInteger('aws_storage_gb')->nullable();
+            $collection->string('aws_image_id')->nullable();
             $collection->json('params');
-            $collection->json('details');
         });
     }
 

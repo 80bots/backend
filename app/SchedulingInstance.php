@@ -3,9 +3,8 @@
 namespace App;
 
 use App\Helpers\QueryHelper;
-use Illuminate\Database\Eloquent\Model;
 
-class SchedulingInstance extends Model
+class SchedulingInstance extends BaseModel
 {
     const STATUS_ACTIVE     = 'active';
     const STATUS_INACTIVE   = 'inactive';

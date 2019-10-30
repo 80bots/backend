@@ -2,9 +2,7 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-
-class AwsAmi extends Model
+class AwsAmi extends BaseModel
 {
     const VISIBILITY_PUBLIC     = 'public';
     const VISIBILITY_PRIVATE    = 'private';

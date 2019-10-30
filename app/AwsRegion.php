@@ -3,9 +3,8 @@
 namespace App;
 
 use App\Helpers\QueryHelper;
-use Illuminate\Database\Eloquent\Model;
 
-class AwsRegion extends Model
+class AwsRegion extends BaseModel
 {
     const PERCENT_LIMIT = 0.9;
 

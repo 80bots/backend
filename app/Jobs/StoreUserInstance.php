@@ -4,8 +4,11 @@ namespace App\Jobs;
 
 use App\Bot;
 use App\BotInstance;
+use App\BotInstancesDetails;
 use App\Events\InstanceLaunched;
 use App\Helpers\CreditUsageHelper;
+use App\Helpers\InstanceHelper;
+use App\MongoInstance;
 use App\Services\Aws;
 use App\User;
 use GuzzleHttp\Exception\GuzzleException;
@@ -32,6 +35,11 @@ class StoreUserInstance implements ShouldQueue
      * @var BotInstance
      */
     protected $instance;
+
+    /**
+     * @var BotInstancesDetails
+     */
+    protected $instanceDetail;
 
     /**
      * @var User
@@ -63,12 +71,13 @@ class StoreUserInstance implements ShouldQueue
      */
     public function __construct(Bot $bot, BotInstance $instance, User $user, ?array $params, ?string $ip)
     {
-        $this->bot      = $bot;
-        $this->instance = $instance;
-        $this->user     = $user;
-        $regions        = Aws::getEc2Regions();
-        $this->params   = $params;
-        $this->ip       = $ip;
+        $this->bot              = $bot;
+        $this->instance         = $instance;
+        $this->instanceDetail   = $this->instance->details()->latest()->first();
+        $this->user             = $user;
+        $regions                = Aws::getEc2Regions();
+        $this->params           = $params;
+        $this->ip               = $ip;
 
         if (! empty($regions) && in_array($instance->region->code, $regions)) {
             $this->region = $instance->region->code;
@@ -94,31 +103,20 @@ class StoreUserInstance implements ShouldQueue
 
             Log::debug("Connect to region: {$this->region}");
 
-            $keyPair        = $aws->createKeyPair();
-            $tagName        = $aws->createTagName();
-            $securityGroup  = $aws->createSecretGroup($this->ip);
+            $awsData = InstanceHelper::createAwsKeyAndGroup($aws, $this->ip);
 
-            if (empty($keyPair) || empty($tagName) || empty($securityGroup)) {
+            if (empty($awsData)) {
                 return;
             }
-
-            Log::debug("Created Key pair: {$keyPair['keyName']}");
-            Log::debug("Created tag name: {$tagName}");
-            Log::debug("Created SecurityGroups: {$securityGroup['securityGroupName']}");
-
-            $keyPairName    = $keyPair['keyName'];
-            $keyPairPath    = $keyPair['path'];
-            $groupId        = $securityGroup['securityGroupId'];
-            $groupName      = $securityGroup['securityGroupName'];
 
             // Instance Create
             $newInstanceResponse = $aws->launchInstance(
                 $this->bot,
                 $this->instance,
                 $this->user,
-                $keyPairName,
-                $groupName,
-                $tagName,
+                $awsData['keyPairName'],
+                $awsData['groupName'],
+                $awsData['tagName'],
                 $this->params
             );
 
@@ -136,13 +134,11 @@ class StoreUserInstance implements ShouldQueue
 
                 Log::info('wait until instance ' . $instanceId);
 
-                //$this->addToMongoDb();
-
                 CreditUsageHelper::startInstance(
                     $this->user,
                     self::START_INSTANCE_CREDIT,
                     $this->instance->id,
-                    $tagName
+                    $awsData['tagName']
                 );
 
                 $describeInstancesResponse = $aws->describeInstances([$instanceId], $this->region);
@@ -156,23 +152,24 @@ class StoreUserInstance implements ShouldQueue
                     $awsStatus      = $instanceArray['State']['Name'];
 
                     // store instance details in database
-                    $botInstanceDetail = $this->instance->details()->latest()->first();
-                    $botInstanceDetail->update([
-                        'aws_security_group_id'     => $groupId,
-                        'aws_security_group_name'   => $groupName,
+                    $this->instanceDetail->update([
+                        'aws_security_group_id'     => $awsData['groupId'],
+                        'aws_security_group_name'   => $awsData['groupName'],
                         'aws_public_dns'            => $instanceArray['PublicDnsName'] ?? '',
-                        'aws_pem_file_path'         => $keyPairPath,
-                        'is_in_queue'               => 0,
+                        'aws_pem_file_path'         => $awsData['keyPairPath'],
                         'start_time'                => $launchTime->format('Y-m-d H:i:s'),
                     ]);
 
                     $this->instance->update([
-                        'tag_name'          => $tagName,
+                        'tag_name'          => $awsData['tagName'],
                         'tag_user_email'    => $this->user->email ?? '',
                         'aws_instance_id'   => $instanceArray['InstanceId'] ?? '',
                         'aws_public_ip'     => $instanceArray['PublicIpAddress'] ?? '',
                         'start_time'        => $launchTime->format('Y-m-d H:i:s'),
                     ]);
+
+                    //
+                    $this->addInstanceInfoToMongoDb();
 
                     if ($awsStatus === BotInstance::STATUS_RUNNING) {
                         $this->instance->setAwsStatusRunning();
@@ -217,45 +214,29 @@ class StoreUserInstance implements ShouldQueue
 
         if (! empty($this->instance)) {
             $this->instance->setAwsStatusTerminated();
-            $this->instance->delete();
         }
     }
 
-    private function addToMongoDb()
+    private function addInstanceInfoToMongoDb()
     {
-//        $mongo = MongoInstance::create([
-//            'instance_id'       => 2,
-//            'tag_name'          => 'unsightlyunicorn794',
-//            'tag_user_email'    => 'akkimysite+admin@gmail.com',
-//            'aws_region_id'     => 2,
-//            'used_credit'       => 1,
-//            'total_up_time'     => 1,
-//            'details'           => [
-//                [
-//                    'detail_id' => 1,
-//                    'start_time' => Carbon::now(),
-//                    'end_time'  => Carbon::now()->addHour(),
-//                    'total_time' => 1.0,
-//                ],
-//                [
-//                    'detail_id' => 2,
-//                    'start_time' => Carbon::now(),
-//                    'end_time'  => Carbon::now()->addHours(2),
-//                    'total_time' => 1.98,
-//                ]
-//            ],
-//            'params'    => [
-//                [
-//                    "searchKeyword" => "cats",
-//                    "maxPage" => 5,
-//                    "speed" => 9,
-//                ],
-//                [
-//                    "searchKeyword" => "cats",
-//                    "maxPage" => 5,
-//                    "speed" => 9
-//                ]
-//            ]
-//        ]);
+        try {
+
+            $details = $this->instanceDetail->only('aws_instance_type', 'aws_storage_gb', 'aws_image_id');
+
+            $data = array_merge([
+                'instance_id'       => $this->instance->id,
+                'tag_name'          => $this->instance->tag_name,
+                'tag_user_email'    => $this->instance->tag_user_email,
+                'bot_path'          => $this->bot->path,
+                'bot_name'          => $this->bot->name,
+                'params'            => $this->params,
+                'aws_region'        => $this->instance->region->code,
+            ], $details);
+
+            MongoInstance::create($data);
+
+        } catch (Throwable $throwable) {
+            Log::error($throwable->getMessage());
+        }
     }
 }

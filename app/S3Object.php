@@ -3,9 +3,8 @@
 namespace App;
 
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
 
-class S3Object extends Model
+class S3Object extends BaseModel
 {
     const TYPE_SCREENSHOTS  = 'screenshots';
     const TYPE_IMAGES       = 'images';

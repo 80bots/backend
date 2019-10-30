@@ -2,9 +2,7 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-
-class Timezone extends Model
+class Timezone extends BaseModel
 {
     protected $table = 'timezones';
 }

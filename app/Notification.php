@@ -2,9 +2,7 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-
-class Notification extends Model
+class Notification extends BaseModel
 {
     const STATUS_QUEUED         = 'queued';
     const STATUS_SENT           = 'sent';

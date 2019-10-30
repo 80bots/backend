@@ -157,8 +157,6 @@ class InstanceSyncScheduling extends Command
                     'aws_public_ip' => null,
                     'aws_status'    => BotInstance::STATUS_TERMINATED
                 ]);
-
-            BotInstance::whereIn('aws_instance_id', $terminatedIds)->delete();
         }
     }
 }

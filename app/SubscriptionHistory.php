@@ -2,9 +2,7 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-
-class SubscriptionHistory extends Model
+class SubscriptionHistory extends BaseModel
 {
     protected $table = "subscription_histories";
 

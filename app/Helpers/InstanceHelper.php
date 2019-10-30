@@ -525,4 +525,29 @@ class InstanceHelper
             ]
         ];
     }
+
+    /**
+     * @param Aws $aws
+     * @param string|null $ip
+     * @return array|null
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public static function createAwsKeyAndGroup(Aws $aws, ?string $ip): ?array
+    {
+        $keyPair        = $aws->createKeyPair();
+        $tagName        = $aws->createTagName();
+        $securityGroup  = $aws->createSecretGroup($ip);
+
+        if (empty($keyPair) || empty($tagName) || empty($securityGroup)) {
+            return null;
+        }
+
+        return [
+            'tagName'       => $tagName,
+            'keyPairName'   => $keyPair['keyName'],
+            'keyPairPath'   => $keyPair['path'],
+            'groupId'       => $securityGroup['securityGroupId'],
+            'groupName'     => $securityGroup['securityGroupName'],
+        ];
+    }
 }

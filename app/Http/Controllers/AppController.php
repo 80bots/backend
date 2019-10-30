@@ -9,8 +9,8 @@ use App\BotInstance;
 use App\Helpers\CommonHelper;
 use App\Helpers\InstanceHelper;
 use App\Jobs\InstanceChangeStatus;
+use App\Jobs\RestoreUserInstance;
 use App\Jobs\StoreUserInstance;
-use App\MongoInstance;
 use App\Services\Aws;
 use App\User;
 use Carbon\Carbon;
@@ -29,8 +29,41 @@ class AppController extends Controller
         $this->credit = CommonHelper::calculateCredit();
     }
 
-    public function apiEmpty()
+    public function apiEmpty(Request $request)
     {
+        try {
+            //Specify the Amazon DocumentDB cert
+            $ctx = stream_context_create(array(
+                    "ssl" => array(
+                        "cafile" => storage_path('rds-ca-2019-root.pem'),
+                    ))
+            );
+
+            $client = new \MongoDB\Client("mongodb://saas:123456789@docdb-2019-10-30-12-28-41.cluster-cw5mo3pxfvfe.us-east-2.docdb.amazonaws.com:27017",
+                [
+                    "ssl" => true
+                ],
+                [
+                    "context" => $ctx
+                ]
+            );
+
+            //Specify the database and collection to be used
+            $col = $client->test->col;
+
+            //Insert a single document
+            $result = $col->insertOne( [ 'hello' => 'Amazon DocumentDB'] );
+
+            //Find the document that was previously written
+            $result = $col->findOne(array('hello' => 'Amazon DocumentDB'));
+
+            //Print the result to the screen
+            dd($result);
+
+        } catch (Throwable $throwable) {
+            dd("Throwable", $throwable->getMessage());
+        }
+
         return response()->json([]);
     }
 
@@ -126,6 +159,28 @@ class AppController extends Controller
             Log::error($throwable->getMessage());
             return $this->error(__('keywords.server_error'), $throwable->getMessage());
         }
+    }
+
+    /**
+     * Restore EC2 Instance
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    protected function restoreInstance(Request $request)
+    {
+        $instance = $this->getInstanceWithCheckUser($request->input('instance_id'));
+
+        if (empty($instance)) {
+            return $this->notFound(__('keywords.not_found'), __('keywords.instance.not_found'));
+        }
+
+        dispatch(new RestoreUserInstance($instance, Auth::user(), $request->ip()));
+
+        $instance->region->increment('created_instances', 1);
+
+        return $this->success([
+            'instance_id' => $instance->id ?? null
+        ], __('keywords.instance.launch_success'));
     }
 
     /**
@@ -243,7 +298,7 @@ class AppController extends Controller
         $instance = $this->getInstanceWithCheckUser($request->query('instance_id'));
 
         if (empty($instance)) {
-            return $this->notFound(__('admin.not_found'), __('admin.instances.not_found'));
+            return $this->notFound(__('keywords.not_found'), __('keywords.instance.not_found'));
         }
 
         $now = Carbon::now();

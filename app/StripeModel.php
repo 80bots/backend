@@ -2,14 +2,13 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Stripe\Error\ApiConnection;
 use Stripe\Error\Card;
 use Stripe\Stripe;
 use Stripe\Token;
 
-class StripeModel extends Model
+class StripeModel extends BaseModel
 {
     public function __construct()
     {

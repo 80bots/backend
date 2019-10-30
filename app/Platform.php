@@ -3,10 +3,9 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
-class Platform extends Model
+class Platform extends BaseModel
 {
     const STATUS_ACTIVE     = 'active';
     const STATUS_INACTIVE   = 'inactive';

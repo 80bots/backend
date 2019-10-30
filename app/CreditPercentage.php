@@ -2,9 +2,7 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-
-class CreditPercentage extends Model
+class CreditPercentage extends BaseModel
 {
     protected $table = "credit_percentages";
 }

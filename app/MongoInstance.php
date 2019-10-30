@@ -14,15 +14,17 @@ class MongoInstance extends Eloquent
         'instance_id',
         'tag_name',
         'tag_user_email',
-        'aws_region_id',
-        'used_credit',
-        'total_up_time',
-        'params',
-        'details'
+        'bot_path',
+        'bot_name',
+        'aws_region',
+        'aws_instance_type',
+        'aws_storage_gb',
+        'aws_image_id',
+        'params'
     ];
 
-//    public function instance()
-//    {
-//        return $this->belongsTo(BotInstance::class, 'instance_id', 'id');
-//    }
+    public function instance()
+    {
+        return $this->belongsTo(BotInstance::class, 'instance_id', 'id');
+    }
 }

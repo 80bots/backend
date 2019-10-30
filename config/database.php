@@ -87,11 +87,25 @@ return [
 
         'mongodb' => [
             'driver'   => 'mongodb',
-            'host'     => 'localhost',
+            'host'     => 'docdb-2019-10-30-12-28-41.cw5mo3pxfvfe.us-east-2.docdb.amazonaws.com',
             'port'     => 27017,
             'database' => 'saas',
-            'username' => '',
-            'password' => '',
+            'username' => 'saas',
+            'password' => '123456789',
+//            'options' => [
+//                'ssl' => true,
+//            ],
+//            'driver_options' => [
+//                'context' => [
+//                    'ssl' => [
+//                        'cafile' => '/home/ubuntu/.ssh/rds-combined-ca-bundle.pem',
+//                        'allow_self_signed' => true,
+//                        'verify_peer' => true,
+//                        'verify_peer_name' => true,
+//                        'verify_expiry' => true,
+//                    ]
+//                ]
+//            ]
 //            'host'     => env('DB_HOST', 'localhost'),
 //            'port'     => env('DB_PORT', 27017),
 //            'database' => env('DB_DATABASE'),

@@ -2,10 +2,9 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class SubscriptionPlan extends Model
+class SubscriptionPlan extends BaseModel
 {
     use SoftDeletes;
 

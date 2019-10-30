@@ -223,7 +223,6 @@ class InstanceChangeStatus implements ShouldQueue
             }
 
             $this->instance->setAwsStatusTerminated();
-            $this->instance->delete();
 
             InstanceHelper::cleanUpTerminatedInstanceData($aws, $this->details);
 

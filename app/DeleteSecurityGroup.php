@@ -2,9 +2,7 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-
-class DeleteSecurityGroup extends Model
+class DeleteSecurityGroup extends BaseModel
 {
     protected $table = 'delete_security_groups';
 

@@ -50,8 +50,6 @@ class BotInstance extends BaseModel
         ],
     ];
 
-    protected $connection = 'mysql';
-
     protected $table = "bot_instances";
 
     protected $fillable = [

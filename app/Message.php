@@ -2,9 +2,7 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-
-class Message extends Model
+class Message extends BaseModel
 {
     const STATUS_ACTIVE     = 'active';
     const STATUS_INACTIVE   = 'inactive';
