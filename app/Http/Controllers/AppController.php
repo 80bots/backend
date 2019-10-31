@@ -31,38 +31,39 @@ class AppController extends Controller
 
     public function apiEmpty(Request $request)
     {
-        try {
-            //Specify the Amazon DocumentDB cert
-            $ctx = stream_context_create(array(
-                    "ssl" => array(
-                        "cafile" => storage_path('rds-ca-2019-root.pem'),
-                    ))
-            );
-
-            $client = new \MongoDB\Client("mongodb://saas:123456789@docdb-2019-10-30-12-28-41.cluster-cw5mo3pxfvfe.us-east-2.docdb.amazonaws.com:27017",
-                [
-                    "ssl" => true
-                ],
-                [
-                    "context" => $ctx
-                ]
-            );
-
-            //Specify the database and collection to be used
-            $col = $client->test->col;
-
-            //Insert a single document
-            $result = $col->insertOne( [ 'hello' => 'Amazon DocumentDB'] );
-
-            //Find the document that was previously written
-            $result = $col->findOne(array('hello' => 'Amazon DocumentDB'));
-
-            //Print the result to the screen
-            dd($result);
-
-        } catch (Throwable $throwable) {
-            dd("Throwable", $throwable->getMessage());
-        }
+//        try {
+//            //Specify the Amazon DocumentDB cert
+//            $ctx = stream_context_create(array(
+//                    "ssl" => array(
+//                        //"cafile" => storage_path('rds-ca-2019-root.pem'),
+//                        "cafile" => storage_path('rds-combined-ca-bundle.pem'),
+//                    ))
+//            );
+//
+//            $client = new \MongoDB\Client("mongodb://saas:123456789@docdb-2019-10-30-15-15-51.cluster-cw5mo3pxfvfe.us-east-2.docdb.amazonaws.com:27017",
+//                [
+//                    "ssl" => true
+//                ],
+//                [
+//                    "context" => $ctx
+//                ]
+//            );
+//
+//            //Specify the database and collection to be used
+//            $col = $client->test->col;
+//
+//            //Insert a single document
+//            $result = $col->insertOne( [ 'hello' => 'Amazon DocumentDB'] );
+//
+//            //Find the document that was previously written
+//            $result = $col->findOne(array('hello' => 'Amazon DocumentDB'));
+//
+//            //Print the result to the screen
+//            dd($result);
+//
+//        } catch (Throwable $throwable) {
+//            dd("Throwable", $throwable->getMessage());
+//        }
 
         return response()->json([]);
     }
