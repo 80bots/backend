@@ -169,7 +169,7 @@ class StoreUserInstance implements ShouldQueue
                     ]);
 
                     //
-                    $this->addInstanceInfoToMongoDb();
+                    //$this->addInstanceInfoToMongoDb();
 
                     if ($awsStatus === BotInstance::STATUS_RUNNING) {
                         $this->instance->setAwsStatusRunning();
