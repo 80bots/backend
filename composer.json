@@ -46,7 +46,8 @@
         "optimize-autoloader": true,
         "preferred-install": "dist",
         "sort-packages": true,
-        "github-oauth": {}
+        "github-oauth": {},
+        "platform": { "php": "7.2.*" }
     },
     "extra": {
         "laravel": {
