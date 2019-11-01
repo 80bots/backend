@@ -94,17 +94,31 @@ return [
             'password' => env('MONGO_DB_PASSWORD', ''),
             'options' => [
                 'ssl' => true,
-                'driver_options' => [
-                    'context' => stream_context_create([
-                        "ssl" => [
-                            "cafile" => storage_path(env('MONGO_RDS_PEM', 'rds-combined-ca-bundle.pem')),
-                            'capture_peer_cert' => true,
-                            'verify_peer' => true,
-                            'verify_peer_name' => true,
-                            'allow_self_signed' => false,
-                        ]])
-                ],
             ],
+            'driver_options' => [
+                'context' => [
+                    'ssl' => [
+                        'cafile' => storage_path(env('MONGO_RDS_PEM', 'rds-combined-ca-bundle.pem')),
+                        'allow_self_signed' => true,
+                        'verify_peer' => true,
+                        'verify_peer_name' => true,
+                        'verify_expiry' => true,
+                    ]
+                ]
+            ]
+//            'options' => [
+//                'ssl' => true,
+//                'driver_options' => [
+//                    'context' => stream_context_create([
+//                        "ssl" => [
+//                            "cafile" => storage_path(env('MONGO_RDS_PEM', 'rds-combined-ca-bundle.pem')),
+//                            'capture_peer_cert' => true,
+//                            'verify_peer' => true,
+//                            'verify_peer_name' => true,
+//                            'allow_self_signed' => false,
+//                        ]])
+//                ],
+//            ],
         ],
 
     ],
