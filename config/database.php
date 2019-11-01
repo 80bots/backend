@@ -87,39 +87,20 @@ return [
 
         'mongodb' => [
             'driver'   => 'mongodb',
-            'host'     => 'docdb-2019-10-30-15-15-51.cw5mo3pxfvfe.us-east-2.docdb.amazonaws.com',
-            'port'     => 27017,
-            'database' => 'saas',
-            'username' => 'saas',
-            'password' => '123456789',
+            'host'     => env('MONGO_DB_HOST', 'localhost'),
+            'port'     => env('MONGO_DB_PORT', 27017),
+            'database' => env('MONGO_DB_DATABASE', 'saas'),
+            'username' => env('MONGO_DB_USERNAME', 'saas'),
+            'password' => env('MONGO_DB_PASSWORD', ''),
             'options' => [
                 'ssl' => true,
                 'driver_options' => [
                     'context' => stream_context_create([
                         "ssl" => [
-                            "ca_file" => storage_path('rds-combined-ca-bundle.pem'),
+                            "ca_file" => storage_path(env('MONGO_RDS_PEM', 'rds-combined-ca-bundle.pem')),
                         ]])
                 ],
             ],
-//            'driver_options' => [
-//                'context' => [
-//                    'ssl' => [
-//                        'cafile' => storage_path('rds-combined-ca-bundle.pem'),
-//                        'allow_self_signed' => true,
-//                        'verify_peer' => true,
-//                        'verify_peer_name' => true,
-//                        'verify_expiry' => true,
-//                    ]
-//                ]
-//            ]
-//            'host'     => env('DB_HOST', 'localhost'),
-//            'port'     => env('DB_PORT', 27017),
-//            'database' => env('DB_DATABASE'),
-//            'username' => env('DB_USERNAME'),
-//            'password' => env('DB_PASSWORD'),
-//            'options'  => [
-//                'database' => 'admin' // sets the authentication database required by mongo 3
-//            ]
         ],
 
     ],

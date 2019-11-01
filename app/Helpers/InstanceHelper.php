@@ -534,7 +534,7 @@ class InstanceHelper
      */
     public static function createAwsKeyAndGroup(Aws $aws, ?string $ip): ?array
     {
-        $keyPair        = $aws->createKeyPair();
+        $keyPair        = $aws->createKeyPair(config('aws.bucket'));
         $tagName        = $aws->createTagName();
         $securityGroup  = $aws->createSecretGroup($ip);
 
