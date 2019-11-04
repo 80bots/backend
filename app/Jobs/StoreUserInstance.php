@@ -146,7 +146,7 @@ class StoreUserInstance implements ShouldQueue
 
                 Log::info('describe instances ' . $instanceId);
 
-                Log:debug(print_r($describeInstancesResponse, true));
+                Log::debug(print_r($describeInstancesResponse, true));
 
                 if ($describeInstancesResponse->hasKey('Reservations')) {
 
