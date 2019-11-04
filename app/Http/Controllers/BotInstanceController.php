@@ -370,16 +370,8 @@ class BotInstanceController extends AppController
             $queryTerm = '%INIT.log%';
         }
 
-        /** @var BotInstance $query */
-        $query = BotInstance::query();
-        if($withTrashed) {
-            $query->withTrashed();
-        }
-        $query->where([
-            ['id', '=', $instance_id],
-            ['user_id', '=', Auth::id()]
-        ]);
-        $instance = $query->first();
+        /** @var BotInstance $instance */
+        $instance = $this->getInstanceWithCheckUser($instance_id, $withTrashed);
 
         if (empty($instance)) {
             return $this->notFound(__('keywords.not_found'), __('keywords.instance.not_found'));

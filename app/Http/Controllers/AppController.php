@@ -14,6 +14,7 @@ use App\Jobs\StoreUserInstance;
 use App\Services\Aws;
 use App\User;
 use Carbon\Carbon;
+use Doctrine\DBAL\Query\QueryBuilder;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -366,20 +367,20 @@ class AppController extends Controller
 
     /**
      * @param string|null $id
+     * @param bool $withTrashed
      * @return BotInstance|null
      */
-    private function getInstanceWithCheckUser(?string $id): ?BotInstance
+    public function getInstanceWithCheckUser(?string $id, $withTrashed = false): ?BotInstance
     {
-        if (Auth::user()->isAdmin()) {
-            return BotInstance::find($id);
-        } elseif (Auth::user()->isUser()) {
-            return BotInstance::where([
-                ['id', '=', $id],
-                ['user_id', '=', Auth::id()]
-            ])->first();
-        } else {
-            return null;
+        /** @var BotInstance $query */
+        $query = BotInstance::where('id', '=', $id);
+        if($withTrashed) {
+            $query->withTrashed();
         }
+        if(!Auth::user()->isAdmin()) {
+            $query->where('user_id', '=', Auth::id());
+        }
+        return $query->first();
     }
 }
 
