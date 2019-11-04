@@ -177,8 +177,6 @@ class InstanceHelper
 
             // TODO: Check whether old status was 'running'
             self::updateUpTime($botInstance, $detail, $currentDate);
-
-            $botInstance->delete();
         }
     }
 

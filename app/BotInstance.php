@@ -95,6 +95,20 @@ class BotInstance extends BaseModel
         return $query->where('aws_status', '!=', self::STATUS_TERMINATED);
     }
 
+    public function scopeFindPending($query)
+    {
+        return $query->where('aws_status', '=', self::STATUS_PENDING);
+    }
+
+    public function scopeEmptyData($query)
+    {
+        return $query->where('aws_status', '=', self::STATUS_PENDING)
+            ->where(function ($query) {
+                $query->whereNull('tag_name')
+                    ->orWhere('tag_name', '=', '');
+            });
+    }
+
     public function setAwsStatusPending()
     {
         $this->update(['aws_status' => BotInstance::STATUS_PENDING]);
