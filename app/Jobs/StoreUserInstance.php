@@ -19,6 +19,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Throwable;
+use function Psy\debug;
 
 class StoreUserInstance implements ShouldQueue
 {
@@ -145,7 +146,11 @@ class StoreUserInstance implements ShouldQueue
 
                 Log::info('describe instances ' . $instanceId);
 
+                Log:debug(print_r($describeInstancesResponse, true));
+
                 if ($describeInstancesResponse->hasKey('Reservations')) {
+
+                    Log::info('update instance data: ' . $instanceId);
 
                     $instanceArray  = $describeInstancesResponse->get('Reservations')[0]['Instances'][0];
                     $launchTime     = $instanceArray['LaunchTime'] ?? '';
@@ -175,6 +180,8 @@ class StoreUserInstance implements ShouldQueue
                         $this->instance->setAwsStatusRunning();
                     }
                 }
+
+                Log::info('completed handle ' . $instanceId);
             }
 
         } catch (GuzzleException $exception) {
@@ -182,10 +189,10 @@ class StoreUserInstance implements ShouldQueue
             $pos = strpos($exception->getMessage(), '<?xml version="1.0" encoding="UTF-8"?>');
 
             if ($pos === false) {
-                Log::debug("Error on catch Throwable : {$exception->getMessage()}");
+                Log::error("Error on catch Throwable : {$exception->getMessage()}");
             } else {
                 $message = preg_replace('/^(.*)<\?xml version="1\.0" encoding="UTF-8"\?>/s', '', $exception->getMessage());
-                Log::debug("Error on catch GuzzleException : {$message}");
+                Log::error("Error on catch GuzzleException : {$message}");
             }
 
             $this->removeInstance();
@@ -195,10 +202,10 @@ class StoreUserInstance implements ShouldQueue
             $pos = strpos($throwable->getMessage(), '<?xml version="1.0" encoding="UTF-8"?>');
 
             if ($pos === false) {
-                Log::debug("Error on catch Throwable : {$throwable->getMessage()}");
+                Log::error("Error on catch Throwable : {$throwable->getMessage()}");
             } else {
                 $message = preg_replace('/^(.*)<\?xml version="1\.0" encoding="UTF-8"\?>/s', '', $throwable->getMessage());
-                Log::debug("Error on catch Throwable : {$message}");
+                Log::error("Error on catch Throwable : {$message}");
             }
 
             $this->removeInstance();
