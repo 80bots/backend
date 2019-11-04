@@ -188,7 +188,7 @@ class InstanceSyncScheduling extends Command
     {
         Log::info('Clear Terminated Records');
 
-        BotInstance::findTerminated()->chunk(100, function ($instances) {
+        BotInstance::findTerminated()->withTrashed()->chunk(100, function ($instances) {
             foreach ($instances as $instance) {
                 $instance->update([
                     'aws_public_ip' => null
