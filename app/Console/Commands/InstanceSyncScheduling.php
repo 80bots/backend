@@ -51,6 +51,8 @@ class InstanceSyncScheduling extends Command
 
             $this->removeEmptyRecords();
 
+            $this->clearTerminatedInstances();
+
             $regions = AwsRegion::all();
 
             if (! empty($regions)) {
@@ -167,7 +169,7 @@ class InstanceSyncScheduling extends Command
     }
 
     /**
-     *
+     * Blank records removal during instances synchronization
      */
     private function removeEmptyRecords(): void
     {
@@ -175,6 +177,22 @@ class InstanceSyncScheduling extends Command
         BotInstance::emptyData()->chunk(100, function ($instances) {
             foreach ($instances as $instance) {
                 $instance->forceDelete();
+            }
+        });
+    }
+
+    /**
+     *
+     */
+    private function clearTerminatedInstances(): void
+    {
+        Log::info('Clear Terminated Records');
+
+        BotInstance::findTerminated()->chunk(100, function ($instances) {
+            foreach ($instances as $instance) {
+                $instance->update([
+                    'aws_public_ip' => null
+                ]);
             }
         });
     }

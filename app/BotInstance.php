@@ -90,6 +90,11 @@ class BotInstance extends BaseModel
         return $query->where('aws_status', self::STATUS_RUNNING)->get();
     }
 
+    public function scopeFindTerminated($query)
+    {
+        return $query->where('aws_status', '=', self::STATUS_TERMINATED);
+    }
+
     public function scopeFindNotTerminated($query)
     {
         return $query->where('aws_status', '!=', self::STATUS_TERMINATED);
