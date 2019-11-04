@@ -221,6 +221,8 @@ class StoreUserInstance implements ShouldQueue
     {
         try {
 
+            Log::debug("Start addInstanceInfoToMongoDb");
+
             $details = $this->instanceDetail->only('aws_instance_type', 'aws_storage_gb', 'aws_image_id');
 
             $data = array_merge([
@@ -233,7 +235,11 @@ class StoreUserInstance implements ShouldQueue
                 'aws_region'        => $this->instance->region->code,
             ], $details);
 
+            Log::debug(print_r($data, true));
+
             MongoInstance::create($data);
+
+            Log::debug("Completed addInstanceInfoToMongoDb");
 
         } catch (Throwable $throwable) {
             Log::error($throwable->getMessage());
