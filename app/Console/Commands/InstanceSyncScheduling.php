@@ -193,6 +193,7 @@ class InstanceSyncScheduling extends Command
                 $instance->update([
                     'aws_public_ip' => null
                 ]);
+                Log::info("Clear public_ip / instance name: {$instance->tag_name}");
             }
         });
     }
