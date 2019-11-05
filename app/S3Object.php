@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Helpers\InstanceHelper;
 use Carbon\Carbon;
 
 class S3Object extends BaseModel
@@ -32,6 +33,19 @@ class S3Object extends BaseModel
     {
         $rootDir = $this->instance->baseS3Dir;
         return $rootDir . '/' . $this->attributes['path'];
+    }
+
+    public function getLinkAttribute ()
+    {
+        $expires = Carbon::now()->addMinutes(10)->toDateTimeString();
+        $current_expires = $this->attributes['expires'];
+        $link = $this->attributes['link'];
+        if (!$link || $current_expires <= $expires) {
+            $this->link = InstanceHelper::getFreshLink($this);
+            $this->expires = Carbon::now()->addHour()->toDateTimeString();
+            $this->save();
+        }
+        return $this->attributes['link'];
     }
 
     public function scopeFolders ($query)

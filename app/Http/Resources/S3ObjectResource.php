@@ -15,28 +15,11 @@ class S3ObjectResource extends JsonResource
      */
     public function toArray($request)
     {
-        $name = $this->name;
-
-        if (empty($this->parent_id)) {
-
-            $now = Carbon::now();
-            $nowDate = $now->toDateString();
-            $yesterdayDate = $now->subDay()->toDateString();
-
-            if ($this->name === $nowDate) {
-                $name = 'Today';
-            } elseif ($this->name === $yesterdayDate) {
-                $name = 'Yesterday';
-            } else {
-                $name = $this->name;
-            }
-        }
-
         return [
-            'id'    => $this->id ?? '',
-            'name'  => $name,
+            'id'        => $this->id ?? '',
+            'name'      => $this->name,
             'thumbnail' => $this->link ?? '',
-            'type'  => $this->entity
+            'type'      => $this->entity
         ];
     }
 }

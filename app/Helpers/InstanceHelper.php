@@ -372,7 +372,7 @@ class InstanceHelper
      * @param string $type
      * @return string
      */
-    public static function getTypeS3Object(string $type): ?string
+    public static function getTypeS3Object(?string $type): ?string
     {
         switch ($type) {
             case S3Object::TYPE_SCREENSHOTS:
@@ -626,70 +626,13 @@ class InstanceHelper
     }
 
     /**
-     * @param BotInstance|null $instance
-     * @param string $key
-     * @param string $original
-     */
-    public static function storeRecursionS3Object(?BotInstance $instance, string $key, string $original): void
-    {
-        try {
-
-            if (! empty($instance)) {
-
-                $baseFolder = self::DATA_STREAMER_FOLDER;
-
-                $path = pathinfo($key);
-
-                $dirname    = $path['dirname'] ?? '';
-                $basename   = $path['basename'] ?? '';
-                $filename   = $path['filename'] ?? '';
-
-                $parent = S3Object::where('instance_id', $instance->id)
-                    ->where('path', $dirname)
-                    ->where('type', S3Object::ENTITY_FOLDER)
-                    ->first();
-
-                if (empty($parent)) {
-
-                    if ($dirname === $baseFolder) {
-
-                        S3Object::create([
-                            'instance_id' => $instance->id,
-                            'name' => $filename,
-                            'path' => "{$dirname}/{$filename}",
-                            'entity' => S3Object::ENTITY_FOLDER,
-                        ]);
-
-                        dd("CR");
-
-                        self::storeRecursionS3Object($instance, $original, $original);
-
-                    } elseif ($dirname === "{$baseFolder}/{$instance->tag_name}") {
-                        // "{$baseFolder}/{$instance->tag_name}"
-                        dd("THIS PARENT", $dirname, $filename);
-                        self::storeRecursionS3Object($instance, $dirname, $original);
-                    } else {
-                        self::storeRecursionS3Object($instance, $dirname, $original);
-                    }
-
-                } else {
-
-                }
-
-                dd($path);
-            }
-
-        } catch (Throwable $throwable) {
-            Log::error($throwable->getMessage());
-            dd($throwable->getMessage());
-        }
-    }
-
-    /**
      * @param BotInstance $instance
      * @param S3Object $folder
+     * @param string $type
+     * @param int $limit
+     * @param int $offset
      */
-    public static function updateScreenshotsOldLinks(BotInstance $instance, S3Object $folder): void
+    public static function updateObjectsOldLinks(BotInstance $instance, string $folder, string $type, int $limit, int $offset): void
     {
         $expires = Carbon::now()->addMinutes(10)->toDateTimeString();
 
@@ -701,35 +644,32 @@ class InstanceHelper
         $aws = new Aws;
         $aws->s3Connection('', $credentials);
 
-        $instance->s3Objects()
-            ->where('path', 'like', "{$folder->name}/output/screenshots/%")
+        $objects = $instance->s3Objects()
+            ->where('path', 'like', "{$folder}/{$type}/%")
             ->where('entity', '=', S3Object::ENTITY_FILE)
             ->where('name', '!=', 'thumbnail')
             ->where(function ($query) use ($expires) {
                 $query->where('expires', '<=', $expires)
                     ->orWhereNull('link');
             })
-            ->chunkById(100, function ($screenshots) use ($instance, $aws) {
-                foreach ($screenshots as $screenshot) {
-                    $prefix = "{$instance->baseS3Dir}/{$screenshot->path}";
-                    $screenshot->update([
-                        'expires'   => Carbon::now()->addHour()->toDateTimeString(),
-                        'link'      => $aws->getPresignedLink($aws->getS3Bucket(), $prefix)
-                    ]);
-                }
-            });
+            ->latest()
+            ->skip($offset)
+            ->take($limit)
+            ->get();
 
-        unset($expires, $credentials, $aws);
+        foreach ($objects as $object) {
+            $prefix = "{$instance->baseS3Dir}/{$object->path}";
+            $object->update([
+                'expires'   => Carbon::now()->addHour()->toDateTimeString(),
+                'link'      => $aws->getPresignedLink($aws->getS3Bucket(), $prefix)
+            ]);
+        }
+
+        unset($expires, $credentials, $aws, $objects);
     }
 
-    /**
-     * @param BotInstance $instance
-     * @param $folderObjects
-     */
-    public static function updateJsonsOldLinks(BotInstance $instance, S3Object $folder): void
+    public static function getFreshLink (S3Object $object): string
     {
-        $expires = Carbon::now()->addMinutes(10)->toDateTimeString();
-
         $credentials = [
             'key'    => config('aws.iam.access_key'),
             'secret' => config('aws.iam.secret_key')
@@ -737,26 +677,11 @@ class InstanceHelper
 
         $aws = new Aws;
         $aws->s3Connection('', $credentials);
-
-        $instance->s3Objects()
-            ->where('path', 'like', "{$folder->name}/output/json/%")
-            ->where('entity', '=', S3Object::ENTITY_FILE)
-            ->where(function ($query) use ($expires) {
-                $query->where('expires', '<=', $expires)
-                    ->orWhereNull('link');
-            })
-            ->chunkById(100, function ($jsons) use ($instance, $aws) {
-                foreach ($jsons as $json) {
-                    $prefix = "{$instance->baseS3Dir}/{$json->path}";
-                    $json->update([
-                        'expires'   => Carbon::now()->addHour()->toDateTimeString(),
-                        'link'      => $aws->getPresignedLink($aws->getS3Bucket(), $prefix)
-                    ]);
-                }
-            });
-
-        unset($expires, $credentials, $aws);
+        $base = $object->instance->baseS3Dir;
+        $key = "{$base}/{$object->path}";
+        return $aws->getPresignedLink($aws->getS3Bucket(), $key);
     }
+
 
     /**
      * @param Aws $aws

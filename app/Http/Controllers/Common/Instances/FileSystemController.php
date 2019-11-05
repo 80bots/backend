@@ -6,13 +6,19 @@ use App\BotInstance;
 use App\Helpers\InstanceHelper;
 use App\Http\Resources\S3ObjectCollection;
 use App\Jobs\StoreS3Objects;
+use App\S3Object;
 use App\Services\Aws;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class FileSystemController extends InstanceController
 {
-
+    /**
+     * @param Request $request
+     * @param string $instance_id
+     * @return JsonResponse
+     */
     public function storeS3Object(Request $request, string $instance_id)
     {
         $user = Auth::user();
@@ -24,20 +30,21 @@ class FileSystemController extends InstanceController
     /**
      * @param Request $request
      * @param $instance_id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function getS3Objects(Request $request, string $instance_id)
     {
         $request->validate([
             'limit' => 'numeric:nullable'
         ]);
+
         /** @var BotInstance $instance */
         $instance = $this->getInstanceWithCheckUser($instance_id);
 
         $limit = $request->query('limit') ?? self::PAGINATE;
         $type = $request->query('type');
         $entity = $request->query('entity');
-        $parent_id = $request->query('parent_id');
+        $parent = $request->query('parent') ?? null;
 
         $type = InstanceHelper::getTypeS3Object($type);
 
@@ -45,20 +52,15 @@ class FileSystemController extends InstanceController
             ->s3Objects()
             ->where('type', '=', $type)
             ->where('entity', '=', $entity)
-            ->where('parent_id', '=', $parent_id)
             ->where('name', '!=', 'thumbnail');
 
-        // TODO: Update items by limit;
-//        switch ($type) {
-//            case S3Object::TYPE_SCREENSHOTS:
-//                // Update links from DB, which will be expired soon
-//                InstanceHelper::updateScreenshotsOldLinks($instance, $folderObjects);
-//                break;
-//            case S3Object::TYPE_JSON:
-//                // Update links from DB, which will be expired soon
-//                InstanceHelper::updateJsonsOldLinks($instance, $folderObjects);
-//                break;
-//        }
+        if ($parent) {
+            $resource->where('path', 'like', "%{$parent}%");
+        } else {
+            $resource->whereNull('parent_id');
+        }
+
+        $resource->latest();
 
         $objects = (new S3ObjectCollection($resource->paginate($limit)))->response()->getData();
         $meta = $objects->meta ?? null;
