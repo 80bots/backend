@@ -147,7 +147,7 @@ class InstanceHelper
                         $botInstance = $user->instances()->where('aws_instance_id', '=', $instanceId)->first();
 
                         if (! empty($botInstance)) {
-                            self::syncInstancesUpdateStatus($botInstance, $status, $currentDate);
+                            self::syncInstancesUpdateStatus($botInstance, $status, $instance, $currentDate);
                         } else {
 
                             if ($status !== BotInstance::STATUS_TERMINATED) {
@@ -164,9 +164,42 @@ class InstanceHelper
         Log::info('Synced completed at ' . date('Y-m-d h:i:s'));
     }
 
-    private static function syncInstancesUpdateStatus(BotInstance $botInstance, string $status, string $currentDate): void
+    private static function syncInstancesUpdateStatus(BotInstance $botInstance, string $status, array $instance, string $currentDate): void
     {
-        $botInstance->update(['aws_status' => $status]);
+        $oldDetail = $botInstance->details()->latest()->first();
+
+        if ($botInstance->aws_status === BotInstance::STATUS_STOPPED && $status === BotInstance::STATUS_RUNNING) {
+
+            $detail = $oldDetail->replicate([
+                'end_time', 'total_time'
+            ]);
+
+            $detail->fill([
+                'start_time'                => $instance['aws_launch_time'],
+                'aws_public_dns'            => $instance['aws_public_ip'],
+                'aws_instance_type'         => $instance['aws_instance_type'],
+                'aws_image_id'              => $instance['aws_image_id'],
+                'aws_security_group_id'     => $instance['aws_security_group_id'],
+                'aws_security_group_name'   => $instance['aws_security_group_name'],
+            ]);
+
+            $detail->save();
+        } else {
+            $detail = $oldDetail;
+        }
+
+        $botInstance->update([
+            'aws_public_ip' => $instance['aws_public_ip'],
+            'aws_status'    => $status
+        ]);
+
+        $detail->update([
+            'aws_instance_type'         => $instance['aws_instance_type'],
+            'aws_image_id'              => $instance['aws_image_id'],
+            'aws_security_group_id'     => $instance['aws_security_group_id'],
+            'aws_security_group_name'   => $instance['aws_security_group_name'],
+            'aws_public_dns'            => $instance['aws_public_dns'],
+        ]);
 
         if ($status === BotInstance::STATUS_TERMINATED) {
 
@@ -174,13 +207,11 @@ class InstanceHelper
                 $botInstance->region->decrement('created_instances');
             }
 
-            $detail = $botInstance->details()->latest()->first();
-
             // TODO: Check whether old status was 'running'
             self::updateUpTime($botInstance, $detail, $currentDate);
-
-            $botInstance->delete();
         }
+
+        unset($oldDetail, $detail);
     }
 
     private static function syncInstancesCreateBotInstance(AwsRegion $region, User $user, array $instance, string $status)
@@ -724,5 +755,30 @@ class InstanceHelper
             });
 
         unset($expires, $credentials, $aws);
+    }
+
+    /**
+     * @param Aws $aws
+     * @param string|null $ip
+     * @return array|null
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public static function createAwsKeyAndGroup(Aws $aws, ?string $ip): ?array
+    {
+        $keyPair        = $aws->createKeyPair(config('aws.bucket'));
+        $tagName        = $aws->createTagName();
+        $securityGroup  = $aws->createSecretGroup($ip);
+
+        if (empty($keyPair) || empty($tagName) || empty($securityGroup)) {
+            return null;
+        }
+
+        return [
+            'tagName'       => $tagName,
+            'keyPairName'   => $keyPair['keyName'],
+            'keyPairPath'   => $keyPair['path'],
+            'groupId'       => $securityGroup['securityGroupId'],
+            'groupName'     => $securityGroup['securityGroupName'],
+        ];
     }
 }

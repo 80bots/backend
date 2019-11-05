@@ -49,6 +49,10 @@ class InstanceSyncScheduling extends Command
 
             Log::info('Sync started at ' . date('Y-m-d h:i:s'));
 
+            $this->removeEmptyRecords();
+
+            $this->clearTerminatedInstances();
+
             $regions = AwsRegion::all();
 
             if (! empty($regions)) {
@@ -138,7 +142,11 @@ class InstanceSyncScheduling extends Command
         Log::info('checkNotTerminatedInstances completed at ' . date('Y-m-d h:i:s'));
     }
 
-    private function deleteTerminatedInstances(Collection $instanceStatuses, AwsRegion $region)
+    /**
+     * @param Collection $instanceStatuses
+     * @param AwsRegion $region
+     */
+    private function deleteTerminatedInstances(Collection $instanceStatuses, AwsRegion $region): void
     {
         $count = $instanceStatuses->count();
 
@@ -157,8 +165,36 @@ class InstanceSyncScheduling extends Command
                     'aws_public_ip' => null,
                     'aws_status'    => BotInstance::STATUS_TERMINATED
                 ]);
-
-            BotInstance::whereIn('aws_instance_id', $terminatedIds)->delete();
         }
+    }
+
+    /**
+     * Blank records removal during instances synchronization
+     */
+    private function removeEmptyRecords(): void
+    {
+        Log::info('Remove Empty Records');
+        BotInstance::emptyData()->chunk(100, function ($instances) {
+            foreach ($instances as $instance) {
+                $instance->forceDelete();
+            }
+        });
+    }
+
+    /**
+     *
+     */
+    private function clearTerminatedInstances(): void
+    {
+        Log::info('Clear Terminated Records');
+
+        BotInstance::findTerminated()->withTrashed()->chunk(100, function ($instances) {
+            foreach ($instances as $instance) {
+                $instance->update([
+                    'aws_public_ip' => null
+                ]);
+                Log::info("Clear public_ip / instance name: {$instance->tag_name}");
+            }
+        });
     }
 }

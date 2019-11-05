@@ -6,6 +6,7 @@ use App\AwsSetting;
 use App\Bot;
 use App\BotInstance;
 use App\Helpers\GeneratorID;
+use App\MongoInstance;
 use App\User;
 use Aws\Ec2\Ec2Client;
 use Aws\Exception\AwsException;
@@ -666,6 +667,50 @@ class Aws
         return $this->ec2->runInstances($instanceLaunchRequest);
     }
 
+    public function restoreInstance(MongoInstance $instance, string $keyPairName, string $securityGroupName): Result
+    {
+        if (empty($this->ec2)) {
+            $this->ec2Connection($instance->aws_region);
+        }
+
+        $params = array_merge([
+            'userEmail'     => $instance->tag_user_email ?? '',
+            'instanceId'    => $instance->instance_id ?? '',
+        ], $instance->params);
+
+        $userData = $this->createUserData($params, $instance->bot_path);
+
+        $tags = [
+            [
+                'Key'   => 'Name',
+                'Value' => $instance->tag_name,
+            ],
+            [
+                'Key'   => 'User Email',
+                'Value' => $instance->tag_user_email ?? '',
+            ],
+            [
+                'Key'   => 'Bot',
+                'Value' => $instance->bot_name ?? '',
+            ]
+        ];
+
+        $instanceLaunchRequest = $this->getInstanceLaunchRequest(
+            $instance->aws_image_id,
+            $instance->aws_storage_gb,
+            $instance->aws_instance_type,
+            $keyPairName,
+            $tags,
+            $securityGroupName,
+            $userData
+        );
+
+        Log::debug("Instance Restore From DB");
+        Log::debug(print_r($instanceLaunchRequest, true));
+
+        return $this->ec2->runInstances($instanceLaunchRequest);
+    }
+
     /**
      * @param string $region
      * @param int $limit This value can be between 5 and 1000.
@@ -1310,5 +1355,23 @@ HERESHELL;
         $request = $this->s3->createPresignedRequest($cmd, '+60 minutes');
 
         return (string)$request->getUri();
+    }
+
+    private function createUserData(array $params, string $path): string
+    {
+        if (! empty($params)) {
+
+            $formattedParams = [];
+
+            foreach ($params as $key => $param) {
+                $formattedParams[$key] = [
+                    'value' => $param
+                ];
+            }
+
+            return base64_encode("#!/bin/bash\n{$this->startupScript(json_encode($formattedParams), $path ?? '')}");
+        }
+
+        return '';
     }
 }

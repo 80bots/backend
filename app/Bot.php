@@ -3,9 +3,8 @@
 namespace App;
 
 use App\Helpers\QueryHelper;
-use Illuminate\Database\Eloquent\Model;
 
-class Bot extends Model
+class Bot extends BaseModel
 {
     const STATUS_ACTIVE     = 'active';
     const STATUS_INACTIVE   = 'inactive';

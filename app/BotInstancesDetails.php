@@ -2,9 +2,7 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-
-class BotInstancesDetails extends Model
+class BotInstancesDetails extends BaseModel
 {
 
     protected $table = 'bot_instances_details';

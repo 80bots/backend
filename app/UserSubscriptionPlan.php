@@ -2,9 +2,7 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-
-class UserSubscriptionPlan extends Model
+class UserSubscriptionPlan extends BaseModel
 {
     protected $table = 'user_subscription_plans';
 

@@ -10,16 +10,19 @@ use App\Helpers\CommonHelper;
 use App\Helpers\InstanceHelper;
 use App\Http\Resources\S3ObjectCollection;
 use App\Jobs\InstanceChangeStatus;
+use App\Jobs\RestoreUserInstance;
 use App\Jobs\StoreS3Objects;
 use App\Jobs\StoreUserInstance;
 use App\S3Object;
 use App\Services\Aws;
 use App\User;
 use Carbon\Carbon;
+use Doctrine\DBAL\Query\QueryBuilder;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use MongoDB\Client;
 use Throwable;
 
 class AppController extends Controller
@@ -29,11 +32,6 @@ class AppController extends Controller
     public function __construct()
     {
         $this->credit = CommonHelper::calculateCredit();
-    }
-
-    public function status()
-    {
-        return response()->json(['aaa'=>'bbb']);
     }
 
     public function apiEmpty()
@@ -133,6 +131,28 @@ class AppController extends Controller
             Log::error($throwable->getMessage());
             return $this->error(__('keywords.server_error'), $throwable->getMessage());
         }
+    }
+
+    /**
+     * Restore EC2 Instance
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    protected function restoreInstance(Request $request)
+    {
+        $instance = $this->getInstanceWithCheckUser($request->input('instance_id'));
+
+        if (empty($instance)) {
+            return $this->notFound(__('keywords.not_found'), __('keywords.instance.not_found'));
+        }
+
+        dispatch(new RestoreUserInstance($instance, Auth::user(), $request->ip()));
+
+        $instance->region->increment('created_instances', 1);
+
+        return $this->success([
+            'instance_id' => $instance->id ?? null
+        ], __('keywords.instance.launch_success'));
     }
 
     /**
@@ -371,20 +391,20 @@ class AppController extends Controller
 
     /**
      * @param string|null $id
+     * @param bool $withTrashed
      * @return BotInstance|null
      */
-    private function getInstanceWithCheckUser(?string $id): ?BotInstance
+    public function getInstanceWithCheckUser(?string $id, $withTrashed = false): ?BotInstance
     {
-        if (Auth::user()->isAdmin()) {
-            return BotInstance::find($id);
-        } elseif (Auth::user()->isUser()) {
-            return BotInstance::where([
-                ['id', '=', $id],
-                ['user_id', '=', Auth::id()]
-            ])->first();
-        } else {
-            return null;
+        /** @var BotInstance $query */
+        $query = BotInstance::where('id', '=', $id);
+        if($withTrashed) {
+            $query->withTrashed();
         }
+        if(!Auth::user()->isAdmin()) {
+            $query->where('user_id', '=', Auth::id());
+        }
+        return $query->first();
     }
 
     private function updateObjectsThumbnailLink(Request $request, BotInstance $instance): void

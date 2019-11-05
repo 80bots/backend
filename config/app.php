@@ -182,13 +182,17 @@ return [
          */
         Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class,
         Sentry\Laravel\ServiceProvider::class,
+        // TODO: Switch once the issue https://github.com/jenssegers/laravel-mongodb/issues/1709
+        // will be fixed
+//        Jenssegers\Mongodb\MongodbServiceProvider::class,
+        App\Providers\MongodbServiceProvider::class,
 
         /*
          * Application Service Providers...
          */
         App\Providers\AppServiceProvider::class,
         App\Providers\AuthServiceProvider::class,
-        // App\Providers\BroadcastServiceProvider::class,
+        App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\HorizonServiceProvider::class,
         App\Providers\RouteServiceProvider::class,

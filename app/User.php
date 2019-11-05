@@ -261,4 +261,18 @@ class User extends Authenticatable
             ]
         ]);
     }
+
+    /**
+     * Checking access of the authenticated user to specified instance
+     * @param $aws_instance_id
+     * @return bool
+     */
+    public function hasAccessToInstance ($aws_instance_id) {
+        return $this->isAdmin() ||
+            $this
+                ->instances()
+                ->withTrashed()
+                ->whereAwsInstanceId($aws_instance_id)
+                ->count() > 0;
+    }
 }

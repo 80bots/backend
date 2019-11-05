@@ -2,9 +2,7 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-
-class Visitor extends Model
+class Visitor extends BaseModel
 {
     protected $table = "visitors";
 

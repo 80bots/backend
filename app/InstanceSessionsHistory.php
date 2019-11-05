@@ -2,9 +2,7 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-
-class InstanceSessionsHistory extends Model
+class InstanceSessionsHistory extends BaseModel
 {
     const STATUS_FAILED     = 'failed';
     const STATUS_SUCCEED    = 'succeed';

@@ -2,9 +2,7 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-
-class AwsSetting extends Model
+class AwsSetting extends BaseModel
 {
     protected $table = "aws_settings";
 

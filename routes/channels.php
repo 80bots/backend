@@ -31,3 +31,6 @@ Broadcast::channel('instance.{instance_id}.show', function ($user, $instance_id)
 Broadcast::channel('instance-live', function ($user) {
     return $user->isAdmin();
 });
+
+// Channel for the client and bot's storage collaboration using Laravel Echo server
+Broadcast::channel('instances.{instance_id}.storage', \App\Broadcasting\InstanceStorageStreamer::class);

@@ -2,9 +2,7 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-
-class Post extends Model
+class Post extends BaseModel
 {
     const STATUS_DRAFT      = 'draft';
     const STATUS_ACTIVE     = 'active';

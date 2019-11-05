@@ -3,9 +3,8 @@
 namespace App;
 
 use App\Helpers\QueryHelper;
-use Illuminate\Database\Eloquent\Model;
 
-class CreditUsage extends Model
+class CreditUsage extends BaseModel
 {
     const ACTION_ADDED  = 'added';
     const ACTION_USED   = 'used';

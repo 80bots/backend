@@ -3,9 +3,8 @@
 namespace App;
 
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
 
-class S3Object extends Model
+class S3Object extends BaseModel
 {
     const ENTITY_FOLDER     = 'folder';
     const ENTITY_FILE       = 'file';
