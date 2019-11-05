@@ -578,7 +578,7 @@ class InstanceHelper
         $type       = self::getTypeS3ObjectByExtension($pathInfo['extension'] ?? null, $path);
 
         if($parentPath === '.') {
-            $object = S3Object::create([
+            $object = S3Object::firstOrCreate([
                 'instance_id'   => $instanceId,
                 'path'          => $path,
                 'name'          => $filename,
