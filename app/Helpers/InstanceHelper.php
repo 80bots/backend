@@ -372,16 +372,17 @@ class InstanceHelper
      * @param string $type
      * @return string
      */
-    public static function getTypeS3Object(string $type): string
+    public static function getTypeS3Object(string $type): ?string
     {
         switch ($type) {
             case S3Object::TYPE_SCREENSHOTS:
             case S3Object::TYPE_IMAGES:
             case S3Object::TYPE_LOGS:
             case S3Object::TYPE_JSON:
+            case S3Object::TYPE_ENTITY:
                 return $type;
             default:
-                return S3Object::TYPE_SCREENSHOTS;
+                return null;
         }
     }
 

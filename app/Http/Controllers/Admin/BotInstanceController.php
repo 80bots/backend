@@ -7,7 +7,7 @@ use App\AwsRegion;
 use App\Events\InstanceStatusUpdated;
 use App\Helpers\InstanceHelper;
 use App\Helpers\QueryHelper;
-use App\Http\Controllers\AppController;
+use App\Http\Controllers\Common\Instances\InstanceController;
 use App\Http\Resources\Admin\BotInstanceCollection;
 use App\Http\Resources\Admin\RegionCollection;
 use App\Http\Resources\Admin\BotInstanceResource;
@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
-class BotInstanceController extends AppController
+class BotInstanceController extends InstanceController
 {
     const PAGINATE = 1;
     const SYNC_LIMIT = 5;
