@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\BotInstance;
 use App\Helpers\InstanceHelper;
+use App\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -15,9 +16,13 @@ class StoreS3Objects implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
-     * @var BotInstance
+     * @var User
      */
-    protected $instance;
+    protected $user;
+    /**
+     * @var string
+     */
+    protected $instance_id;
 
     /**
      * @var string
@@ -27,13 +32,15 @@ class StoreS3Objects implements ShouldQueue
     /**
      * Create a new job instance.
      *
-     * @param BotInstance $instance
+     * @param User $user
+     * @param string $instance_id
      * @param string $key
      */
-    public function __construct(BotInstance $instance, string $key)
+    public function __construct(User $user, string $instance_id, string $key)
     {
-        $this->instance = $instance;
-        $this->key      = $key;
+        $this->user = $user;
+        $this->instance_id = $instance_id;
+        $this->key = $key;
     }
 
 
@@ -44,11 +51,13 @@ class StoreS3Objects implements ShouldQueue
      */
     public function handle()
     {
-        if (strpos($this->key, (string)$this->instance->baseS3Dir) !== false) {
-            $base = $this->instance->baseS3Dir . '/';
-            //streamer-data/unsightlyunicorn794/2019-10-15/output/json/test.json
-            $key = str_replace($base, '', $this->key);
-            InstanceHelper::getObjectByPath($this->instance->id, $key);
+        $query = BotInstance::where('id', '=', $this->instance_id)
+            ->orWhere('aws_instance_id', '=', $this->instance_id);
+        if(!$this->user->isAdmin()) {
+            $query->where('user_id', '=', $this->user->id);
         }
+        $instance = BotInstance::where('id', '=', $this->instance_id)
+            ->orWhere('aws_instance_id', '=', $this->instance_id)->first();
+        InstanceHelper::getObjectByPath($instance->id, $this->key);
     }
 }

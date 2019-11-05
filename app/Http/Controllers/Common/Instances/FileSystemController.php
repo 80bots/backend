@@ -8,19 +8,16 @@ use App\Http\Resources\S3ObjectCollection;
 use App\Jobs\StoreS3Objects;
 use App\Services\Aws;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class FileSystemController extends InstanceController
 {
 
     public function storeS3Object(Request $request, string $instance_id)
     {
-        $key        = $request->input('key');
-        $instance   = $this->getInstanceWithCheckUser($instance_id);
-
-        //if ($request->ip() === $instance->aws_public_ip) {
-            dispatch(new StoreS3Objects( $instance, $key ));
-        //}
-
+        $user = Auth::user();
+        $key = $request->input('key');
+        dispatch(new StoreS3Objects( $user, $instance_id, $key ));
         return response()->json([], 201);
     }
 
