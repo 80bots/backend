@@ -56,8 +56,8 @@ class StoreS3Objects implements ShouldQueue
         if(!$this->user->isAdmin()) {
             $query->where('user_id', '=', $this->user->id);
         }
-        $instance = BotInstance::where('id', '=', $this->instance_id)
-            ->orWhere('aws_instance_id', '=', $this->instance_id)->first();
+        $instance = $query->first();
+        if(!$instance) return;
         InstanceHelper::getObjectByPath($instance->id, $this->key);
     }
 }
