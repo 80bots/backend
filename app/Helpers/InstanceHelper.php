@@ -613,7 +613,7 @@ class InstanceHelper
             case 'jpeg':
             case 'jpg':
             case 'png':
-                if (strpos($path, 'screenshots' !== false)){
+                if (strpos($path, 'screenshots') !== false){
                     return S3Object::TYPE_SCREENSHOTS;
                 } else {
                     return S3Object::TYPE_IMAGES;

@@ -3,7 +3,6 @@
 namespace App\Jobs;
 
 use App\BotInstance;
-use App\Events\S3ObjectAdded;
 use App\Helpers\InstanceHelper;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -16,25 +15,25 @@ class StoreS3Objects implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
-     * @var string
+     * @var BotInstance
      */
-    protected $ip;
+    protected $instance;
 
     /**
-     * @var array
+     * @var string
      */
-    protected $parameters;
+    protected $key;
 
     /**
      * Create a new job instance.
      *
-     * @param string $ip
-     * @param array $parameters
+     * @param BotInstance $instance
+     * @param string $key
      */
-    public function __construct(string $ip, array $parameters)
+    public function __construct(BotInstance $instance, string $key)
     {
-        $this->ip           = $ip;
-        $this->parameters   = $parameters;
+        $this->instance = $instance;
+        $this->key      = $key;
     }
 
 
@@ -45,15 +44,11 @@ class StoreS3Objects implements ShouldQueue
      */
     public function handle()
     {
-        $instance   = BotInstance::find($this->parameters['instance_id'] ?? null);
-
-        if (! empty($instance) /* && $this->ip === $instance->aws_public_ip*/) {
-            if (strpos($this->parameters['key'], (string)$instance->baseS3Dir) !== false) {
-                //streamer-data/unsightlyunicorn794/2019-10-15/output/json/test.json
-                $key = str_replace("{$instance->baseS3Dir}/", '', $this->parameters['key']);
-                $result = InstanceHelper::getObjectByPath($instance->id, $key);
-                //broadcast(new S3ObjectAdded($instance));
-            }
+        if (strpos($this->key, (string)$this->instance->baseS3Dir) !== false) {
+            $base = $this->instance->baseS3Dir . '/';
+            //streamer-data/unsightlyunicorn794/2019-10-15/output/json/test.json
+            $key = str_replace($base, '', $this->key);
+            InstanceHelper::getObjectByPath($this->instance->id, $key);
         }
     }
 }

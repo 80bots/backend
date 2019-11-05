@@ -3,27 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\AwsRegion;
-use App\AwsSetting;
-use App\Bot;
-use App\BotInstance;
 use App\Helpers\CommonHelper;
-use App\Helpers\InstanceHelper;
-use App\Http\Resources\S3ObjectCollection;
-use App\Jobs\InstanceChangeStatus;
-use App\Jobs\RestoreUserInstance;
-use App\Jobs\StoreS3Objects;
-use App\Jobs\StoreUserInstance;
-use App\S3Object;
-use App\Services\Aws;
 use App\User;
-use Carbon\Carbon;
-use Doctrine\DBAL\Query\QueryBuilder;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
-use MongoDB\Client;
-use Throwable;
 
 class AppController extends Controller
 {
