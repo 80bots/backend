@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Http\Resources\Admin;
+namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
-class SchedulingInstanceCollection extends ResourceCollection
+class ScheduleCollection extends ResourceCollection
 {
     /**
      * The resource that this resource collects.
      *
      * @var string
      */
-    public $collects = 'App\Http\Resources\Admin\SchedulingInstanceResource';
+    public $collects = 'App\Http\Resources\ScheduleResource';
 
     /**
      * Transform the resource collection into an array.

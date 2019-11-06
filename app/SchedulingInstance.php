@@ -22,6 +22,10 @@ class SchedulingInstance extends BaseModel
             'entity'    => QueryHelper::ENTITY_BOT_INSTANCES,
             'field'     => 'tag_name'
         ],
+        'user' => [
+            'entity'    => QueryHelper::ENTITY_USER,
+            'field'     => 'email'
+        ],
     ];
 
     protected $table = 'scheduling_instances';
@@ -34,7 +38,7 @@ class SchedulingInstance extends BaseModel
 
    	public function scopeFindByUserId($query, $user_id)
     {
-        return $query->with('instance.bot')->where('user_id' , $user_id);
+        return $query->with('instance.bot')->where('scheduling_instances.user_id' , $user_id);
     }
 
     public function scopeFindByUserInstanceId($query, $instanceId, $userId)

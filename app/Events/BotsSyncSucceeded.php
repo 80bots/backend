@@ -8,9 +8,6 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
-use App\BotInstance;
-use App\Http\Resources\Admin\BotInstanceResource as AdminBotInstanceResource;
-use App\Http\Resources\User\BotInstanceResource as UserBotInstanceResource;
 
 class BotsSyncSucceeded implements ShouldBroadcast
 {

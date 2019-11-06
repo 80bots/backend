@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Helpers\CommonHelper;
 use App\Helpers\QueryHelper;
-use App\Http\Resources\User\ScheduleCollection;
-use App\Http\Resources\User\ScheduleResource;
-use App\Http\Resources\User\BotInstanceCollection;
+use App\Http\Resources\ScheduleCollection;
+use App\Http\Resources\ScheduleResource;
+use App\Http\Resources\BotInstanceCollection;
 use App\SchedulingInstance;
 use App\SchedulingInstancesDetails;
 use App\BotInstance;
@@ -68,13 +68,6 @@ class ScheduleController extends Controller
 
     public function create()
     {
-        try {
-            // TODO: status stop ?????
-            $resource = BotInstance::where(['status' => 'stop','user_id'=> Auth::id()]);
-            return new BotInstanceCollection($resource->paginate(self::PAGINATE));
-        } catch (Throwable $throwable) {
-            return $this->error(__('user.server_error'), $throwable->getMessage());
-        }
     }
 
     /**
@@ -119,18 +112,22 @@ class ScheduleController extends Controller
 
             $instance = BotInstance::findByInstanceId($data['instance_id'])->first();
 
-            if(empty($instance)) return $this->error(__('user.server_error'), 'Such bot does not exists');
+            if (empty($instance)) {
+                return $this->error(__('user.server_error'), 'Such bot does not exists');
+            }
 
             $schedule = SchedulingInstance::findByUserInstanceId($instance->id, Auth::id())
                 ->first();
 
             if (empty($schedule)) {
                 $schedule = SchedulingInstance::create([
-                    'user_id'           => Auth::id(),
-                    'user_instance_id'  => $instance->id,
+                    'user_id'       => Auth::id(),
+                    'instance_id'   => $instance->id,
                 ]);
+            }
 
-                if($schedule) return $this->success();
+            if ($schedule) {
+                return $this->success();
             }
 
             return $this->error(__('user.error'), __('user.parameters_incorrect'));

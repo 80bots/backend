@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Resources\Admin;
+namespace App\Http\Resources;
 
 use App\CreditUsage;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Auth;
 
 class CreditUsageResource extends JsonResource
 {
@@ -17,14 +18,21 @@ class CreditUsageResource extends JsonResource
     {
         $credits = ($this->action === CreditUsage::ACTION_ADDED) ? ("+" . $this->credits ?? 0) : ("-" . $this->credits ?? 0);
 
-        return [
+        $data = [
             'id'        => $this->id ?? '-',
-            'user'      => $this->user->email ?? '',
             'credits'   => $credits,
             'total'     => $this->total ?? 0,
             'action'    => ucfirst($this->action ?? ''),
             'subject'   => $this->subject ?? '-',
             'date'      => $this->created_at->format('Y-m-d H:i:s')
         ];
+
+        if (Auth::check() && Auth::user()->isAdmin()) {
+            $data = array_merge($data, [
+                'user' => $this->user->email ?? ''
+            ]);
+        }
+
+        return $data;
     }
 }

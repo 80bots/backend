@@ -6,16 +6,18 @@ use App\AwsRegion;
 use App\BotInstance;
 use App\Events\InstanceStatusUpdated;
 use App\Helpers\ApiResponse;
+use App\Helpers\InstanceHelper;
 use App\Helpers\QueryHelper;
 use App\Http\Controllers\AppController;
-use App\Http\Resources\Admin\BotInstanceResource as AdminBotInstanceResource;
-use App\Http\Resources\User\BotInstanceCollection;
-use App\Http\Resources\User\BotInstanceResource;
+use App\Http\Resources\BotInstanceCollection;
+use App\Http\Resources\BotInstanceResource;
+use App\Jobs\InstanceChangeStatus;
 use App\Services\Aws;
 use App\Services\GitHub;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Throwable;
 
 class InstanceController extends AppController {
     const PAGINATE = 1;
@@ -183,7 +185,8 @@ class InstanceController extends AppController {
      * @param $id
      * @return Response
      */
-    public function show(Request $request, $id) {
+    public function show(Request $request, $id)
+    {
         $resource = BotInstance::withTrashed()->find($id);
         if(!empty($resource)) {
             return $this->success((new BotInstanceResource($resource))->toArray($request));
@@ -214,10 +217,7 @@ class InstanceController extends AppController {
     {
         try {
 
-            $instance = BotInstance::where([
-                ['id', '=', $id],
-                ['user_id', '=', Auth::id()]
-            ])->first();
+            $instance = $this->getInstanceWithCheckUser($id);
 
             if (empty($instance)) {
                 return $this->notFound(__('user.not_found'), __('user.instances.not_found'));
@@ -236,7 +236,7 @@ class InstanceController extends AppController {
                     switch ($key) {
                         case 'status':
 
-                            if ($this->changeStatus($value, $id)) {
+                            if (InstanceHelper::changeInstanceStatus($value, $id)) {
 
                                 $instance = new BotInstanceResource(BotInstance::withTrashed()
                                     ->where('id', '=', $id)->first());
@@ -247,11 +247,8 @@ class InstanceController extends AppController {
                             } else {
                                 return $this->error(__('user.server_error'), __('user.instances.not_updated'));
                             }
-
-                            break;
                         default:
                             return $this->error(__('user.server_error'), __('user.instances.not_updated'));
-                            break;
                     }
                 }
 
@@ -285,7 +282,7 @@ class InstanceController extends AppController {
         $instance = BotInstance::withTrashed()->find($id);
         $aws = new Aws();
         if(!empty($instance)) {
-            $resource = new AdminBotInstanceResource($instance);
+            $resource = new BotInstanceResource($instance);
             if(!empty($request->screenshots)) {
                 $instanceId = $resource->toArray($request)['instance_id'];
                 $botName = $resource->toArray($request)['bot_name'];
@@ -306,7 +303,7 @@ class InstanceController extends AppController {
                 return $this->success([]);
             }
         } else {
-            $this->error('Not found', __('admin.bots.not_found'));
+            return $this->error('Not found', __('admin.bots.not_found'));
         }
     }
 
@@ -319,16 +316,15 @@ class InstanceController extends AppController {
     {
         /** @var BotInstance $query */
         $query = BotInstance::where('id', '=', $id)->orWhere('aws_instance_id', '=', $id);
-        if($withTrashed) {
+
+        if ($withTrashed) {
             $query->withTrashed();
         }
-        if(!Auth::user()->isAdmin()) {
+
+        if (! Auth::user()->isAdmin()) {
             $query->where('user_id', '=', Auth::id());
         }
-        $instance = $query->first();
-        if (empty($instance)) {
-            return $this->notFound(__('keywords.not_found'), __('keywords.instance.not_found'));
-        }
-        return $instance;
+
+        return $query->first();
     }
 }

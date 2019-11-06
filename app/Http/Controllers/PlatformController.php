@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ApiResponse;
-use App\Http\Resources\User\PlatformCollection;
+use App\Http\Resources\PlatformCollection;
 use App\Platform;
 use Illuminate\Http\Request;
 use Throwable;

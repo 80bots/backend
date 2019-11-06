@@ -28,7 +28,7 @@ class AppController extends Controller
      * @param int $countInstances
      * @return bool
      */
-    private function checkLimitInRegion(AwsRegion $awsRegion, int $countInstances): bool
+    protected function checkLimitInRegion(AwsRegion $awsRegion, int $countInstances): bool
     {
         $limit      = $awsRegion->limit ?? 0;
         $created    = $awsRegion->created_instances ?? 0;
@@ -41,7 +41,7 @@ class AppController extends Controller
      * @param string $imageId
      * @return bool
      */
-    private function issetAmiInRegion(AwsRegion $region, string $imageId): bool
+    protected function issetAmiInRegion(AwsRegion $region, string $imageId): bool
     {
         $result = AwsRegion::whereHas('amis', function (Builder $query) use ($imageId) {
             $query->where('image_id', '=', $imageId);

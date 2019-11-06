@@ -85,6 +85,13 @@ class QueryHelper
                     ->orderBy("bot_instances.{$sort['field']}", $order)
                     ->select('scheduling_instances.*');
                 break;
+            case self::ENTITY_USER:
+                $query->leftJoin('users', function ($join) {
+                    $join->on('scheduling_instances.user_id', '=', 'users.id');
+                })
+                    ->orderBy("users.{$sort['field']}", $order)
+                    ->select('scheduling_instances.*');
+                break;
         }
 
         return $query;

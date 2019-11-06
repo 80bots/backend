@@ -12,6 +12,8 @@ use App\Jobs\StoreUserInstance;
 use App\Services\Aws;
 use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class ManageController extends InstanceController {

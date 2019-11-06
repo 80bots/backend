@@ -8,6 +8,7 @@ use App\BotInstance;
 use App\BotInstancesDetails;
 use App\DeleteSecurityGroup;
 use App\InstanceSessionsHistory;
+use App\Jobs\InstanceChangeStatus;
 use App\S3Object;
 use App\SchedulingInstancesDetails;
 use App\Services\Aws;
@@ -17,7 +18,9 @@ use Carbon\Carbon;
 use Carbon\CarbonTimeZone;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use phpDocumentor\Reflection\Types\Self_;
 use Throwable;
 
 class InstanceHelper
@@ -668,7 +671,7 @@ class InstanceHelper
         unset($expires, $credentials, $aws, $objects);
     }
 
-    public static function getFreshLink (S3Object $object): string
+    public static function getFreshLink(S3Object $object): string
     {
         $credentials = [
             'key'    => config('aws.iam.access_key'),
@@ -706,5 +709,81 @@ class InstanceHelper
             'groupId'       => $securityGroup['securityGroupId'],
             'groupName'     => $securityGroup['securityGroupName'],
         ];
+    }
+
+    /**
+     * @param string|null $id
+     * @param bool $withTrashed
+     * @return BotInstance|null
+     */
+    public static function getInstanceWithCheckUser(?string $id, $withTrashed = false): ?BotInstance
+    {
+        /** @var BotInstance $query */
+        $query = BotInstance::where('id', '=', $id)
+            ->orWhere('aws_instance_id', '=', $id);
+
+        if($withTrashed) {
+            $query->withTrashed();
+        }
+
+        if (! Auth::user()->isAdmin()) {
+            $query->where('user_id', '=', Auth::id());
+        }
+
+        return $query->first();
+    }
+
+    public static function changeInstanceStatus($status, $id): bool
+    {
+        $instance = self::getInstanceWithCheckUser($id);
+
+        if (empty($instance)) {
+            return false;
+        }
+
+        $instanceDetail = $instance->details()->latest()->first();
+
+        if (empty($instanceDetail)) {
+            return false;
+        }
+
+        if (empty($instance->aws_region_id)) {
+            return false;
+        }
+
+        $user   = User::find(Auth::id());
+        $aws    = new Aws;
+
+        //
+        $instance->clearPublicIp();
+
+        try {
+
+            $describeInstancesResponse = $aws->describeInstances(
+                [$instance->aws_instance_id ?? null],
+                $instance->region->code
+            );
+
+            if (! $describeInstancesResponse->hasKey('Reservations') || self::checkTerminatedStatus($describeInstancesResponse)) {
+                $instance->setAwsStatusTerminated();
+
+                if ($instance->region->created_instances > 0) {
+                    $instance->region->decrement('created_instances');
+                }
+
+                self::cleanUpTerminatedInstanceData($aws, $instanceDetail);
+                return true;
+            }
+
+        } catch (Throwable $throwable) {
+            Log::error($throwable->getMessage());
+            return false;
+        }
+
+        $instance->setAwsStatusPending();
+
+        dispatch(new InstanceChangeStatus($instance, $user, $instance->region, $status));
+
+        return true;
     }
 }

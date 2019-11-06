@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\CreditUsage;
 use App\Helpers\QueryHelper;
-use App\Http\Resources\User\CreditUsageCollection;
+use App\Http\Resources\CreditUsageCollection;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

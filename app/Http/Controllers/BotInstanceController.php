@@ -3,21 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\AwsRegion;
+use App\BotInstance;
 use App\Events\InstanceStatusUpdated;
 use App\Helpers\ApiResponse;
-use App\Helpers\InstanceHelper;
 use App\Helpers\QueryHelper;
-use App\Http\Resources\User\BotInstanceCollection;
-use App\Http\Resources\User\BotInstanceResource;
-use App\Http\Resources\Admin\BotInstanceResource as AdminBotInstanceResource;
-use App\BotInstance;
-use App\S3Object;
+use App\Http\Resources\BotInstanceCollection;
+use App\Http\Resources\BotInstanceResource;
 use App\Services\Aws;
+use App\Services\GitHub;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
-use App\Services\GitHub;
 
 class BotInstanceController extends AppController
 {
@@ -290,7 +287,7 @@ class BotInstanceController extends AppController
         $instance = BotInstance::withTrashed()->find($id);
         $aws = new Aws();
         if(!empty($instance)) {
-            $resource = new AdminBotInstanceResource($instance);
+            $resource = new BotInstanceResource($instance);
             if(!empty($request->screenshots)) {
                 $instanceId = $resource->toArray($request)['instance_id'];
                 $botName = $resource->toArray($request)['bot_name'];

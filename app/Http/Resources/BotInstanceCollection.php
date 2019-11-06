@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Http\Resources\Admin;
+namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
-class BotCollection extends ResourceCollection
+class BotInstanceCollection extends ResourceCollection
 {
     /**
      * The resource that this resource collects.
      *
      * @var string
      */
-    public $collects = 'App\Http\Resources\Admin\BotResource';
+    public $collects = 'App\Http\Resources\BotInstanceResource';
 
     /**
      * Transform the resource collection into an array.
