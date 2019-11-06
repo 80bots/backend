@@ -16,10 +16,10 @@ class S3ObjectResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id'        => $this->id ?? '',
-            'name'      => $this->name,
-            'thumbnail' => $this->link ?? '',
-            'type'      => $this->entity
+            'id'    => $this->id ?? '',
+            'name'  => $this->name,
+            'url'   => $this->link ?? '',
+            'type'  => $this->entity
         ];
     }
 }

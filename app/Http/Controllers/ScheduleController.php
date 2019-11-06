@@ -177,32 +177,7 @@ class ScheduleController extends Controller
      */
     public function edit($id)
     {
-        if (! empty($id)) {
-
-            try {
-
-                // TODO: ????
-                $instances = BotInstance::where(['status' => 'stop', 'user_id' => Auth::id()])->get();
-
-                $instance = SchedulingInstance::with('userInstance')->where('user_id', '=', Auth::id())
-                    ->where('id', '=', $id)->first();
-
-                if (! empty($instance)) {
-                    $resource = new ScheduleResource($instance);
-                    return $this->success([
-                        'instances' => $instances,
-                        'scheduling' => $resource->response()->getData(),
-                    ]);
-                }
-
-                return $this->notFound(__('user.not_found'), __('user.not_found'));
-
-            } catch (Throwable $throwable) {
-                return $this->error(__('user.server_error'), $throwable->getMessage());
-            }
-        }
-
-        return $this->error(__('user.error'), __('user.parameters_incorrect'));
+        return $this->success();
     }
 
     /**
