@@ -58,7 +58,7 @@ class InstanceHelper
 
         foreach ($schedulers as $scheduler) {
 
-            if (! empty($scheduler->instance) && ! empty($scheduler->details)) {
+            if (! empty($scheduler->details)) {
 
                 foreach ($scheduler->details as $detail) {
 

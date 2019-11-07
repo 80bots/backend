@@ -56,13 +56,16 @@ class InstanceStartScheduling extends Command
 
         try {
 
-            SchedulingInstance::scheduling('start')->chunk(100, function ($schedulers) {
-                $instancesIds = InstanceHelper::getScheduleInstancesIds(
-                    $schedulers,
-                    $this->now
-                );
+            SchedulingInstance::has('details')
+                ->scheduling('start')
+                ->chunkById(100, function ($schedulers) {
 
-                $this->startInstances($instancesIds);
+                    $instancesIds = InstanceHelper::getScheduleInstancesIds(
+                        $schedulers,
+                        $this->now
+                    );
+
+                    $this->startInstances($instancesIds);
             });
 
         } catch (Throwable $throwable) {

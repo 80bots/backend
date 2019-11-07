@@ -59,13 +59,16 @@ class InstanceStopScheduling extends Command
 
         try {
 
-            SchedulingInstance::scheduling('stop')->chunk(100, function ($schedulers) {
-                $instancesIds = InstanceHelper::getScheduleInstancesIds(
-                    $schedulers,
-                    $this->now
-                );
+            SchedulingInstance::has('details')
+                ->scheduling('stop')
+                ->chunkById(100, function ($schedulers) {
 
-                $this->stopInstances($instancesIds);
+                    $instancesIds = InstanceHelper::getScheduleInstancesIds(
+                        $schedulers,
+                        $this->now
+                    );
+
+                    $this->stopInstances($instancesIds);
             });
 
         } catch (Throwable $throwable) {
