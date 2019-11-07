@@ -76,10 +76,11 @@ class ManageController extends InstanceController {
                 foreach ($params as $param) {
 
                     $instance = BotInstance::create([
-                        'user_id'       => Auth::id(),
-                        'bot_id'        => $bot->id ?? null,
-                        'aws_region_id' => $region->id ?? null,
-                        'aws_status'    => BotInstance::STATUS_PENDING
+                        'user_id'           => Auth::id(),
+                        'tag_user_email'    => Auth::user()->email ?? '',
+                        'bot_id'            => $bot->id ?? null,
+                        'aws_region_id'     => $region->id ?? null,
+                        'aws_status'        => BotInstance::STATUS_PENDING
                     ]);
 
                     $instance->details()->create([

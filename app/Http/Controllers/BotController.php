@@ -36,8 +36,7 @@ class BotController extends Controller
             //
             if (! empty($search)) {
                 $resource->where('name', 'like', "%{$search}%")
-                    ->orWhere('aws_ami_image_id', 'like', "%{$search}%")
-                    ->orWhere('aws_ami_name', 'like', "%{$search}%");
+                    ->orWhere('description', 'like', "%{$search}%");
             }
 
             //
