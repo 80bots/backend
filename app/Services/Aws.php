@@ -1039,8 +1039,8 @@ class Aws
 shellFile="startup.sh"
 cat > \$shellFile <<EOF
 #!/bin/bash
-su - \$username -c 'cd ~/data-streamer && git pull && cp .env.example .env && yarn && yarn build && pm2 start --name "data-streamer" yarn -- start'
-su - \$username -c 'DISPLAY=:1 node puppeteer/{$path}'
+su - \$username -c 'cd ~/data-streamer && git pull && yarn && yarn build && pm2 start --name "data-streamer" yarn -- start'
+su - \$username -c 'cd ~/puppeteer && yarn && DISPLAY=:1 node {$path} > /dev/null'
 EOF
 chmod +x \$shellFile && chown \$username:\$username \$shellFile
 HERESHELL;
