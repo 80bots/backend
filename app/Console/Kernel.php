@@ -13,6 +13,7 @@ use App\Console\Commands\InstanceStartScheduling;
 use App\Console\Commands\InstanceStopScheduling;
 use App\Console\Commands\InstanceSyncScheduling;
 use App\Console\Commands\RefreshDatabase;
+use App\Console\Commands\SyncDataFolders;
 use App\Console\Commands\SyncLocalBots;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -37,6 +38,7 @@ class Kernel extends ConsoleKernel
         AwsSyncAmis::class,
         SyncLocalBots::class,
         AddUser::class,
+        SyncDataFolders::class,
     ];
 
     /**
@@ -57,6 +59,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('aws:sync-regions')->daily();
         $schedule->command('aws:sync-amis')->everyThirtyMinutes();
         $schedule->command('bots:sync-local')->daily();
+        $schedule->command('sync:folders')->everyMinute();
     }
 
     /**

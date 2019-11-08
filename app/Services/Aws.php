@@ -1034,6 +1034,7 @@ class Aws
      */
     protected function startupScript(string $params = '', string $path = ''): string
     {
+        // scripts performing after reloading server
         $shell = <<<HERESHELL
 ############## Output to startup.sh file ###############
 shellFile="startup.sh"
@@ -1045,6 +1046,7 @@ EOF
 chmod +x \$shellFile && chown \$username:\$username \$shellFile
 HERESHELL;
 
+        // This file is performed after reloading server
         $rc = <<<HERESHELL
 ############## Output to /etc/rc.local file ###############
 rcFile="/etc/rc.local"
@@ -1059,6 +1061,7 @@ HERESHELL;
         $accessKey = config('aws.iam.access_key');
         $secretKey = config('aws.iam.secret_key');
 
+        // file with credentials to AWS S3
         $credentials = <<<HERESHELL
 ############## Output to credentials.json file ###############
 credentialsFile="credentials.json"
@@ -1073,6 +1076,7 @@ HERESHELL;
 
         $settings = AwsSetting::isDefault()->first();
 
+        // run data-streamer first ($settings->script)
         return <<<HERESHELL
 {$settings->script}
 {$shell}
