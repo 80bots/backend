@@ -125,9 +125,6 @@ class SyncLocalBots extends Command
                                         'path' => $file->getFilename()
                                     ]);
                                 }
-
-                                // Create post
-                                $this->createPost($bot);
                             }
                         }
                     }
@@ -137,18 +134,5 @@ class SyncLocalBots extends Command
         } catch (Throwable $throwable) {
             Log::error($throwable->getMessage());
         }
-    }
-
-    private function createPost(Bot $bot): void
-    {
-        Post::updateOrInsert([
-            'slug' => $bot->name ?? '',
-        ], [
-            'bot_id'        => $bot->id ?? null,
-            'title'         => $bot->description ?? '',
-            'type'          => Post::TYPE_BOT,
-            'created_at'    => $this->now,
-            'updated_at'    => $this->now
-        ]);
     }
 }

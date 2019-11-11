@@ -8,7 +8,7 @@ class Post extends BaseModel
     const STATUS_ACTIVE     = 'active';
     const STATUS_INACTIVE   = 'inactive';
 
-    const TYPE_BOT          = 'bot';
+    const TYPE_PAGE         = 'page';
     const TYPE_POST         = 'post';
 
     protected $table = "posts";
