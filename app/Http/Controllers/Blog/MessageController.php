@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers\Blog;
 
+use App\Http\Controllers\Controller;
 use App\Http\Resources\Blog\MessageCollection;
 use App\Message;
 use App\Post;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-use Monolog\Handler\IFTTTHandler;
 use Throwable;
 
 class MessageController extends Controller

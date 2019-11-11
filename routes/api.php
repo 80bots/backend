@@ -65,8 +65,12 @@ Route::group(['middleware' => ['auth:api', 'api.sentry', 'api.instance']], funct
        Route::get('/credits', 'HistoryController@getCreditUsage');
     });
 
-    Route::group(['prefix' => 'blog', 'as' => 'blog.', 'namespace' => 'Blog'], function() {
-        Route::post('messages', 'MessageController@store')->name('store');
+    Route::group(['prefix' => 'posts', 'as' => 'posts.'], function () {
+        Route::get('/', 'PostController@index')->name('posts');
+        Route::post('/', 'PostController@store')->name('store');
+        Route::get('/{id}', 'PostController@show')->name('show');
+        Route::put('/{id}', 'PostController@update')->name('update');
+        Route::delete('/{id}', 'PostController@delete')->name('delete');
     });
 
     Route::resources([
@@ -86,14 +90,6 @@ Route::group([
         'api.instance'
     ]
 ], function() {
-
-    Route::group(['prefix' => 'posts', 'as' => 'posts.'], function () {
-        Route::get('/', 'PostController@index')->name('posts');
-        Route::post('/', 'PostController@store')->name('store');
-        Route::get('/{id}', 'PostController@show')->name('show');
-        Route::put('/{id}', 'PostController@update')->name('update');
-        Route::delete('/{id}', 'PostController@delete')->name('delete');
-    });
 
     Route::group(['prefix' => 'aws', 'as' => 'aws.'], function () {
         Route::get('/', 'AwsSettingController@index')->name('aws');

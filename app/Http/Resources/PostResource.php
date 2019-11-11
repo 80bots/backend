@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources\Blog;
+namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -14,12 +14,21 @@ class PostResource extends JsonResource
      */
     public function toArray($request)
     {
+        $content = '';
+
+        if (! empty($this->content)) {
+            $content = mb_strimwidth(strip_tags($this->content), 0, 40, "...");
+        }
+
         return [
             'id'        => $this->id ?? '',
             'title'     => $this->title ?? '',
             'slug'      => $this->slug ?? '',
-            'content'   => $this->content ?? '',
+            'type'      => $this->type ?? '',
+            'bot'       => $this->bot ?? null,
+            'content'   => $content,
             'status'    => $this->status ?? '',
+            'messages'  => $this->messages ?? [],
         ];
     }
 }

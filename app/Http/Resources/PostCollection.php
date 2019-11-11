@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources\Blog;
+namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
@@ -11,7 +11,7 @@ class PostCollection extends ResourceCollection
      *
      * @var string
      */
-    public $collects = 'App\Http\Resources\Blog\PostResource';
+    public $collects = 'App\Http\Resources\PostResource';
 
     /**
      * Transform the resource collection into an array.

@@ -8,14 +8,24 @@ class Post extends BaseModel
     const STATUS_ACTIVE     = 'active';
     const STATUS_INACTIVE   = 'inactive';
 
+    const STATUSES = [
+        self::STATUS_DRAFT,
+        self::STATUS_ACTIVE,
+        self::STATUS_INACTIVE
+    ];
+
     const TYPE_PAGE         = 'page';
     const TYPE_POST         = 'post';
+
+    const TYPES = [
+        self::TYPE_PAGE,
+        self::TYPE_POST
+    ];
 
     protected $table = "posts";
 
     protected $fillable = [
         'author_id',
-        'bot_id',
         'title',
         'slug',
         'content',
@@ -31,11 +41,6 @@ class Post extends BaseModel
     public function dislikes()
     {
         return $this->belongsToMany(Dislike::class, 'dislike_post');
-    }
-
-    public function bot()
-    {
-        return $this->belongsTo(Bot::class,'bot_id');
     }
 
     public function author()

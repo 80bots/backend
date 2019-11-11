@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use App\Bot;
 use App\Platform;
-use App\Post;
 use App\Services\BotParser;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
