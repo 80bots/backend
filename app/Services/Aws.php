@@ -1028,23 +1028,22 @@ class Aws
 shellFile="startup.sh"
 cat > \$shellFile <<EOF
 #!/bin/bash
-su - \$username -c 'DISPLAY=:1 node puppeteer/{$path}'
+su - \$username -c 'cd ~/data-streamer && git pull && yarn && yarn build && pm2 start --name "data-streamer" yarn -- start'
+su - \$username -c 'cd ~/puppeteer && yarn && DISPLAY=:1 node {$path} > /dev/null'
 EOF
 chmod +x \$shellFile && chown \$username:\$username \$shellFile
 HERESHELL;
 
-        $rc = '';
-
-//        $rc = <<<HERESHELL
-//############## Output to /etc/rc.local file ###############
-//rcFile="/etc/rc.local"
-//cat > \$rcFile <<EOF
-//#!/bin/bash
-///home/\$username/\$shellFile
-//exit 0
-//EOF
-//chmod +x \$rcFile
-//HERESHELL;
+        $rc = <<<HERESHELL
+############## Output to /etc/rc.local file ###############
+rcFile="/etc/rc.local"
+cat > \$rcFile <<EOF
+#!/bin/bash
+/home/\$username/\$shellFile
+exit 0
+EOF
+chmod +x \$rcFile
+HERESHELL;
 
         $accessKey = config('aws.iam.access_key');
         $secretKey = config('aws.iam.secret_key');
@@ -1069,12 +1068,13 @@ HERESHELL;
 {$rc}
 {$credentials}
 ############## Output user params to params.json file ###############
+su - \$username -c 'echo "starting script {$path}"'
+su - \$username -c 'rm -rf ~/.screenshots/*'
+su - \$username -c 'cd ~/puppeteer && git pull'
 cat > \$file <<EOF
 {$params}
 EOF
-su - \$username -c 'echo "starting script {$path}"'
-su - \$username -c 'rm -rf ~/.screenshots/*'
-su - \$username -c 'cd ~/puppeteer && git pull && yarn && mkdir logs && DISPLAY=:1 node {$path} > /dev/null'
+su - \$username -c 'cd ~/puppeteer && yarn && mkdir logs && DISPLAY=:1 node {$path} > /dev/null'
 HERESHELL;
     }
 
