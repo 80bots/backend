@@ -99,9 +99,11 @@ class PostController extends Controller
     {
         try {
 
-            $url    = $request->input('url');
-            $status = $request->input('status');
-            $type   = $request->input('type');
+            $url        = $request->input('url');
+            $status     = $request->input('status');
+            $type       = $request->input('type');
+            $title      = $request->input('title');
+            $content    = $request->input('content');
 
             if (! in_array($status, Post::STATUSES)) {
                 $status = Post::STATUS_DRAFT;
@@ -113,14 +115,14 @@ class PostController extends Controller
 
             $data = [
                 'author_id' => Auth::id(),
-                'title'     => $request->input('title') ?? 'Without title',
-                'slug'      => CommonHelper::slugify($request->input('title')),
-                'content'   => $request->input('content'),
+                'title'     => $title ?? 'Without title',
+                'slug'      => CommonHelper::slugify($title),
+                'content'   => $content,
                 'status'    => $status,
                 'type'      => $type
             ];
 
-            if (! empty($url)) {
+            if (! empty($url) && $type === Post::TYPE_PAGE) {
                 $data = array_merge($data, [
                     'url'  => $url,
                     'slug' => $url,
@@ -195,5 +197,10 @@ class PostController extends Controller
         } catch (Throwable $throwable) {
             return $this->error(__('keywords.server_error'), $throwable->getMessage());
         }
+    }
+
+    public function showBySlug(Request $request, $slug)
+    {
+
     }
 }
