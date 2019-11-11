@@ -28,6 +28,7 @@ class Post extends BaseModel
         'author_id',
         'title',
         'slug',
+        'url',
         'content',
         'status',
         'type'
@@ -51,5 +52,25 @@ class Post extends BaseModel
     public function messages()
     {
         return $this->hasMany(Message::class, 'post_id', 'id');
+    }
+
+    public function scopeFindBySlug($query, $slug)
+    {
+        return $query->where('slug', '=', $slug)
+            ->where(function ($query) {
+                $query->where('type', '=', self::TYPE_POST)
+                    ->orWhere('type', '=', self::TYPE_PAGE);
+            })
+            ->first();
+    }
+
+    public function isPage(): bool
+    {
+        return $this->type === self::TYPE_PAGE;
+    }
+
+    public function isPost(): bool
+    {
+        return $this->type === self::TYPE_POST;
     }
 }

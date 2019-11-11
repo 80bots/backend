@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\CommonHelper;
+use App\Http\Requests\StorePost;
 use App\Http\Resources\PostCollection;
 use App\Http\Resources\PostResource;
 use App\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Throwable;
+use Validator;
 
 class PostController extends Controller
 {
@@ -21,7 +24,7 @@ class PostController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('api.admin')->except('show');
+        $this->middleware('api.admin')->except(['show', 'showBySlug']);
     }
 
     /**
@@ -92,12 +95,29 @@ class PostController extends Controller
     }
 
     /**
-     * @param Request $request
+     * @param StorePost $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {
         try {
+
+            $validator = Validator::make($request->all(), [
+                'title'     => 'required|max:255',
+                'content'   => 'required',
+                'status'    => [
+                    'required',
+                    Rule::in(Post::STATUSES),
+                ],
+                'type'      => [
+                    'required',
+                    Rule::in(Post::TYPES),
+                ],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->error('Transferred data isn\'t valid', $validator->errors());
+            }
 
             $url        = $request->input('url');
             $status     = $request->input('status');
@@ -124,8 +144,7 @@ class PostController extends Controller
 
             if (! empty($url) && $type === Post::TYPE_PAGE) {
                 $data = array_merge($data, [
-                    'url'  => $url,
-                    'slug' => $url,
+                    'slug' => $url
                 ]);
             }
 
@@ -151,6 +170,23 @@ class PostController extends Controller
     {
         try {
 
+            $validator = Validator::make($request->all(), [
+                'title'     => 'required|max:255',
+                'content'   => 'required',
+                'status'    => [
+                    'required',
+                    Rule::in(Post::STATUSES),
+                ],
+                'type'      => [
+                    'required',
+                    Rule::in(Post::TYPES),
+                ],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->error('Transferred data isn\'t valid', $validator->errors());
+            }
+
             $post = Post::find($id);
 
             if (empty($post)) {
@@ -158,7 +194,16 @@ class PostController extends Controller
             }
 
             $data = $request->input('update');
-            $data['slug'] = CommonHelper::slugify($data['title'] ?? '');
+
+            if ($data['type'] === Post::TYPE_PAGE) {
+                $data = array_merge($data, [
+                    'slug' => $data['url']
+                ]);
+            } else {
+                $data = array_merge($data, [
+                    'slug' => CommonHelper::slugify($data['title'] ?? '')
+                ]);
+            }
 
             $update = $post->update($data);
 
@@ -201,6 +246,12 @@ class PostController extends Controller
 
     public function showBySlug(Request $request, $slug)
     {
+        $post = Post::findBySlug($slug);
 
+        if (empty($post)) {
+            return $this->notFound(__('keywords.not_found'), __('keywords.posts.not_found'));
+        }
+
+        return $this->success((new PostResource($post))->toArray($request));
     }
 }

@@ -18,8 +18,7 @@ class CreatePostsTable extends Migration
             $table->bigIncrements('id');
             $table->unsignedInteger('author_id')->nullable();
             $table->string('title');
-            $table->string('slug');
-            $table->string('url')->nullable();
+            $table->string('slug')->index();
             $table->text('content')->nullable();
 
             $table->enum('status', [

@@ -71,7 +71,7 @@ Route::group(['middleware' => ['auth:api', 'api.sentry', 'api.instance']], funct
         Route::get('/{id}', 'PostController@show')->name('show');
         Route::put('/{id}', 'PostController@update')->name('update');
         Route::delete('/{id}', 'PostController@delete')->name('delete');
-//        Route::get('/slug');
+        Route::get('/show/{slug}', 'PostController@showBySlug')->name('slug');
     });
 
     Route::resources([
