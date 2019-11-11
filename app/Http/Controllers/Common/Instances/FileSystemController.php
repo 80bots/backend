@@ -42,25 +42,12 @@ class FileSystemController extends InstanceController
         $instance = $this->getInstanceWithCheckUser($instance_id);
 
         $limit = $request->query('limit') ?? self::PAGINATE;
-        $type = $request->query('type');
-        $entity = $request->query('entity');
         $parent = $request->query('parent') ?? null;
-
-        $type = InstanceHelper::getTypeS3Object($type);
-
-        $resource = $instance
-            ->s3Objects()
-            ->where('type', '=', $type)
-            ->where('entity', '=', $entity)
-            ->where('name', '!=', 'thumbnail');
-
-        if ($parent) {
-            $resource->where('path', 'like', "%{$parent}%");
-        } else {
-            $resource->whereNull('parent_id');
+        $parentFolder = $instance->s3Objects()->where('path', '=', "{$parent}")->first();
+        if(!$parentFolder) {
+            return $this->notFound(__('keywords.not_found'), __('keywords.files.not_exist'));
         }
-
-        $resource->latest();
+        $resource = $parentFolder->children()->latest();
 
         $objects = (new S3ObjectCollection($resource->paginate($limit)))->response()->getData();
         $meta = $objects->meta ?? null;

@@ -36,6 +36,7 @@ class BotInstanceResource extends JsonResource
             'status'            => $this->aws_status ?? BotInstance::STATUS_TERMINATED,
             'ip'                => $this->aws_public_ip ?? '',
             'is_in_queue'       => $this->is_in_queue ?? 0,
+            'storage_channel'   => "instances.{$this->aws_instance_id}.storage"
         ];
 
         if (Auth::check() && Auth::user()->isAdmin()) {

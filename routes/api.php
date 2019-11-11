@@ -43,7 +43,6 @@ Route::group(['middleware' => ['auth:api', 'api.sentry', 'api.instance']], funct
         Route::get('/{id}', 'InstanceController@show')->name('get');
         Route::post('/{id}/report', 'InstanceController@reportIssue')->name('report');
 
-        Route::post('/{instance_id}/objects', 'FileSystemController@storeS3Object');
         Route::get('/{instance_id}/objects', 'FileSystemController@getS3Objects');
         Route::get('/{instance_id}/objects/{id}', 'FileSystemController@getS3Object');
     });

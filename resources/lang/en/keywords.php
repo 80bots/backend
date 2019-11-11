@@ -106,6 +106,9 @@ return [
         'not_exist_ami'         => 'The selected AMI is absent in this region',
         'not_found'             => 'Instance Not Found'
     ],
+    'files' => [
+        'not_exist'             => 'This file does not exists',
+    ],
     'aws' => [
         'error' => 'Aws error'
     ],
