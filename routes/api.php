@@ -67,10 +67,11 @@ Route::group(['middleware' => ['auth:api', 'api.sentry', 'api.instance']], funct
 
     Route::group(['prefix' => 'posts', 'as' => 'posts.'], function () {
         Route::get('/', 'PostController@index')->name('posts');
-        Route::get('/show', 'PostController@show')->name('show');
+        Route::get('/show', 'PostController@showBySlug')->name('slug');
         Route::post('/', 'PostController@store')->name('store');
         Route::put('/{id}', 'PostController@update')->name('update');
         Route::delete('/{id}', 'PostController@delete')->name('delete');
+        Route::get('/{id}', 'PostController@show')->name('show');
     });
 
     Route::resources([

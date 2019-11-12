@@ -24,7 +24,7 @@ class PostController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('api.admin')->except('show');
+        $this->middleware('api.admin')->except('showBySlug');
     }
 
     /**
@@ -74,15 +74,39 @@ class PostController extends Controller
 
     /**
      * @param Request $request
+     * @param $id
      * @return PostResource|JsonResponse
      */
-    public function show(Request $request)
+    public function show(Request $request, $id)
+    {
+        try{
+            $post = Post::find($id);
+            if (empty($post)) {
+                return $this->notFound(__('admin.not_found'), __('admin.posts.not_found'));
+            }
+            return $this->success((new PostResource($post))->toArray($request));
+        } catch (Throwable $throwable){
+            return $this->error(__('admin.server_error'), $throwable->getMessage());
+        }
+    }
+
+    /**
+     * @param Request $request
+     * @return PostResource|JsonResponse
+     */
+    public function showBySlug(Request $request)
     {
         try{
 
             $slug = $request->query('slug');
 
-            $post = Post::isActive()->findBySlug($slug)->first();
+            $query = Post::query();
+
+            if (Auth::check() && Auth::user()->isAdmin()) {
+                $post = $query->findBySlug($slug)->first();
+            } else {
+                $post = $query->isActive()->findBySlug($slug)->first();
+            }
 
             if (empty($post)) {
                 return $this->notFound(__('keywords.not_found'), __('keywords.posts.not_found'));
