@@ -386,15 +386,18 @@ class AppController extends Controller
     public function copy(Request $request)
     {
         try {
+
             $instance = $this->getInstanceWithCheckUser($request->input('instance_id'));
 
             if (empty($instance)) {
                 return $this->notFound(__('keywords.not_found'), __('keywords.instance.not_found'));
             }
 
-            $copy = $instance->replicate([
+            $copy = $instance->replicate();
+//            $copy->fill([
+//                'tag_name' =>
+//            ]);
 
-            ]);
 
             dd($instance, $copy);
 
