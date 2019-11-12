@@ -5,6 +5,11 @@ use Illuminate\Support\Facades\Route;
 Route::get('password/show', 'AppController@apiEmpty')->name('password.reset');
 //Route::get('user', 'AppController@apiEmpty')->name('login');
 
+Route::group(['prefix' => 'posts', 'as' => 'posts.'], function () {
+    Route::get('/show', 'PostController@showBySlug')->name('slug');
+});
+
+
 // Authentication Routes. Auth::routes() is not used to not provide unneeded routes
 Route::group(['prefix' => 'auth', 'as' => 'auth.', 'namespace' => 'Auth'], function() {
     Route::post('login', 'LoginController@apiLogin')->name('login');
@@ -67,7 +72,6 @@ Route::group(['middleware' => ['auth:api', 'api.sentry', 'api.instance']], funct
 
     Route::group(['prefix' => 'posts', 'as' => 'posts.'], function () {
         Route::get('/', 'PostController@index')->name('posts');
-        Route::get('/show', 'PostController@showBySlug')->name('slug');
         Route::post('/', 'PostController@store')->name('store');
         Route::put('/{id}', 'PostController@update')->name('update');
         Route::delete('/{id}', 'PostController@delete')->name('delete');
