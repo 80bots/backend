@@ -14,21 +14,13 @@ class PostResource extends JsonResource
      */
     public function toArray($request)
     {
-        $content = '';
-
-        if (! empty($this->content)) {
-            $content = mb_strimwidth(strip_tags($this->content), 0, 40, "...");
-        }
-
         return [
             'id'        => $this->id ?? '',
             'title'     => $this->title ?? '',
             'slug'      => $this->slug ?? '',
             'type'      => $this->type ?? '',
-            'bot'       => $this->bot ?? null,
-            'content'   => $content,
-            'status'    => $this->status ?? '',
-            'messages'  => $this->messages ?? [],
+            'content'   => $this->content ?? '',
+            'status'    => $this->status ?? ''
         ];
     }
 }

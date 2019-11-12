@@ -24,7 +24,7 @@ class PostController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('api.admin')->except(['showBySlug']);
+        //$this->middleware('api.admin')->except('showBySlug');
     }
 
     /**
@@ -74,20 +74,26 @@ class PostController extends Controller
 
     /**
      * @param Request $request
-     * @param $id
      * @return PostResource|JsonResponse
      */
-    public function show(Request $request, $id)
+    public function show(Request $request)
     {
         try{
 
-            $post = Post::find($id);
+            $slug = $request->query('slug');
+            $type = $request->query('type');
+
+            if (! in_array($type, Post::TYPES)) {
+                return $this->notFound(__('keywords.not_found'), __('keywords.posts.not_found'));
+            }
+
+            $post = Post::isActive()->findBySlug($slug, $type)->first();
 
             if (empty($post)) {
                 return $this->notFound(__('keywords.not_found'), __('keywords.posts.not_found'));
             }
 
-            return new PostResource($post);
+            return $this->success((new PostResource($post))->toArray($request));
 
         } catch (Throwable $throwable){
             return $this->error(__('keywords.server_error'), $throwable->getMessage());
@@ -102,7 +108,13 @@ class PostController extends Controller
     {
         try {
 
-            $validator = Validator::make($request->all(), [
+            $url        = $request->input('url');
+            $status     = $request->input('status');
+            $type       = $request->input('type');
+            $title      = $request->input('title');
+            $content    = $request->input('content');
+
+            $rules = [
                 'title'     => 'required|max:255',
                 'content'   => 'required',
                 'status'    => [
@@ -113,17 +125,19 @@ class PostController extends Controller
                     'required',
                     Rule::in(Post::TYPES),
                 ],
-            ]);
+            ];
+
+            if ($type === Post::TYPE_PAGE) {
+                $rules = array_merge($rules, [
+                    'slug' => 'required'
+                ]);
+            }
+
+            $validator = Validator::make($request->all(), $rules);
 
             if ($validator->fails()) {
                 return $this->error('Transferred data isn\'t valid', $validator->errors());
             }
-
-            $url        = $request->input('url');
-            $status     = $request->input('status');
-            $type       = $request->input('type');
-            $title      = $request->input('title');
-            $content    = $request->input('content');
 
             if (! in_array($status, Post::STATUSES)) {
                 $status = Post::STATUS_DRAFT;
@@ -170,7 +184,7 @@ class PostController extends Controller
     {
         try {
 
-            $validator = Validator::make($request->all(), [
+            $rules = [
                 'title'     => 'required|max:255',
                 'content'   => 'required',
                 'status'    => [
@@ -181,7 +195,9 @@ class PostController extends Controller
                     'required',
                     Rule::in(Post::TYPES),
                 ],
-            ]);
+            ];
+
+            $validator = Validator::make($request->all(), $rules);
 
             if ($validator->fails()) {
                 return $this->error('Transferred data isn\'t valid', $validator->errors());
@@ -242,20 +258,5 @@ class PostController extends Controller
         } catch (Throwable $throwable) {
             return $this->error(__('keywords.server_error'), $throwable->getMessage());
         }
-    }
-
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     */
-    public function showBySlug(Request $request)
-    {
-        $post = Post::findBySlug($request->query('slug'));
-
-        if (empty($post)) {
-            return $this->notFound(__('keywords.not_found'), __('keywords.posts.not_found'));
-        }
-
-        return $this->success((new PostResource($post))->toArray($request));
     }
 }

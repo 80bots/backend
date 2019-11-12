@@ -28,7 +28,6 @@ class Post extends BaseModel
         'author_id',
         'title',
         'slug',
-        'url',
         'content',
         'status',
         'type'
@@ -54,14 +53,15 @@ class Post extends BaseModel
         return $this->hasMany(Message::class, 'post_id', 'id');
     }
 
-    public function scopeFindBySlug($query, $slug)
+    public function scopeFindBySlug($query, $slug, $type)
     {
         return $query->where('slug', '=', $slug)
-            ->where(function ($query) {
-                $query->where('type', '=', self::TYPE_POST)
-                    ->orWhere('type', '=', self::TYPE_PAGE);
-            })
-            ->first();
+            ->where('type', '=', $type);
+    }
+
+    public function scopeIsActive($query)
+    {
+        return $query->where('status', '=', self::STATUS_ACTIVE);
     }
 
     public function isPage(): bool
