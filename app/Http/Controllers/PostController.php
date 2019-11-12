@@ -98,11 +98,14 @@ class PostController extends Controller
     {
         try{
 
+            //$token = $request->bearerToken();
+            $user = auth('api')->user();
+
             $slug = $request->query('slug');
 
             $query = Post::query();
 
-            if (Auth::check() && Auth::user()->isAdmin()) {
+            if (! empty($user) && $user->isAdmin()) {
                 $post = $query->findBySlug($slug)->first();
             } else {
                 $post = $query->isActive()->findBySlug($slug)->first();
