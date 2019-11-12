@@ -24,7 +24,7 @@ class PostController extends Controller
      */
     public function __construct()
     {
-        //$this->middleware('api.admin')->except('showBySlug');
+        $this->middleware('api.admin')->except('show');
     }
 
     /**
@@ -81,13 +81,8 @@ class PostController extends Controller
         try{
 
             $slug = $request->query('slug');
-            $type = $request->query('type');
 
-            if (! in_array($type, Post::TYPES)) {
-                return $this->notFound(__('keywords.not_found'), __('keywords.posts.not_found'));
-            }
-
-            $post = Post::isActive()->findBySlug($slug, $type)->first();
+            $post = Post::isActive()->findBySlug($slug)->first();
 
             if (empty($post)) {
                 return $this->notFound(__('keywords.not_found'), __('keywords.posts.not_found'));
@@ -108,30 +103,7 @@ class PostController extends Controller
     {
         try {
 
-            $url        = $request->input('url');
-            $status     = $request->input('status');
-            $type       = $request->input('type');
-            $title      = $request->input('title');
-            $content    = $request->input('content');
-
-            $rules = [
-                'title'     => 'required|max:255',
-                'content'   => 'required',
-                'status'    => [
-                    'required',
-                    Rule::in(Post::STATUSES),
-                ],
-                'type'      => [
-                    'required',
-                    Rule::in(Post::TYPES),
-                ],
-            ];
-
-            if ($type === Post::TYPE_PAGE) {
-                $rules = array_merge($rules, [
-                    'slug' => 'required'
-                ]);
-            }
+            $rules = $this->getPostRules($request);
 
             $validator = Validator::make($request->all(), $rules);
 
@@ -139,26 +111,20 @@ class PostController extends Controller
                 return $this->error('Transferred data isn\'t valid', $validator->errors());
             }
 
-            if (! in_array($status, Post::STATUSES)) {
-                $status = Post::STATUS_DRAFT;
-            }
+            $slug = $request->input('slug');
+            $data = $request->except(['slug']);
 
-            if (! in_array($type, Post::TYPES)) {
-                $status = Post::TYPE_POST;
-            }
-
-            $data = [
+            $data = array_merge($data, [
                 'author_id' => Auth::id(),
-                'title'     => $title ?? 'Without title',
-                'slug'      => CommonHelper::slugify($title),
-                'content'   => $content,
-                'status'    => $status,
-                'type'      => $type
-            ];
+            ]);
 
-            if (! empty($url) && $type === Post::TYPE_PAGE) {
+            if ($data['type'] === Post::TYPE_PAGE) {
                 $data = array_merge($data, [
-                    'slug' => $url
+                    'slug' => $slug
+                ]);
+            } else {
+                $data = array_merge($data, [
+                    'slug' => CommonHelper::slugify($data['title']),
                 ]);
             }
 
@@ -184,18 +150,7 @@ class PostController extends Controller
     {
         try {
 
-            $rules = [
-                'title'     => 'required|max:255',
-                'content'   => 'required',
-                'status'    => [
-                    'required',
-                    Rule::in(Post::STATUSES),
-                ],
-                'type'      => [
-                    'required',
-                    Rule::in(Post::TYPES),
-                ],
-            ];
+            $rules = $this->getPostRules($request);
 
             $validator = Validator::make($request->all(), $rules);
 
@@ -209,21 +164,20 @@ class PostController extends Controller
                 return $this->notFound(__('keywords.not_found'), __('keywords.posts.not_found'));
             }
 
-            $data = $request->input('update');
+            $slug   = $request->input('slug');
+            $update = $request->except(['slug']);
 
-            if ($data['type'] === Post::TYPE_PAGE) {
-                $data = array_merge($data, [
-                    'slug' => $data['url']
+            if ($update['type'] === Post::TYPE_PAGE) {
+                $update = array_merge($update, [
+                    'slug' => $slug
                 ]);
             } else {
-                $data = array_merge($data, [
-                    'slug' => CommonHelper::slugify($data['title'] ?? '')
+                $update = array_merge($update, [
+                    'slug' => CommonHelper::slugify($update['title'])
                 ]);
             }
 
-            $update = $post->update($data);
-
-            if ($update) {
+            if ($post->update($update)) {
                 return $this->success((new PostResource($post))->toArray($request));
             }
 
@@ -258,5 +212,35 @@ class PostController extends Controller
         } catch (Throwable $throwable) {
             return $this->error(__('keywords.server_error'), $throwable->getMessage());
         }
+    }
+
+    /**
+     * @param Request $request
+     * @return array
+     */
+    private function getPostRules(Request $request): array
+    {
+        $type = $request->input('type');
+
+        $rules = [
+            'title'     => 'required|max:255',
+            'content'   => 'required',
+            'status'    => [
+                'required',
+                Rule::in(Post::STATUSES),
+            ],
+            'type'      => [
+                'required',
+                Rule::in(Post::TYPES),
+            ],
+        ];
+
+        if ($type === Post::TYPE_PAGE) {
+            $rules = array_merge($rules, [
+                'slug' => 'required'
+            ]);
+        }
+
+        return $rules;
     }
 }

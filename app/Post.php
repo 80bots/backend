@@ -53,10 +53,9 @@ class Post extends BaseModel
         return $this->hasMany(Message::class, 'post_id', 'id');
     }
 
-    public function scopeFindBySlug($query, $slug, $type)
+    public function scopeFindBySlug($query, $slug)
     {
-        return $query->where('slug', '=', $slug)
-            ->where('type', '=', $type);
+        return $query->where('slug', '=', $slug);
     }
 
     public function scopeIsActive($query)
