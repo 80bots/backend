@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\CommonHelper;
-use App\Http\Requests\StorePost;
 use App\Http\Resources\PostCollection;
 use App\Http\Resources\PostResource;
 use App\Post;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -24,12 +24,12 @@ class PostController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('api.admin')->except(['show', 'showBySlug']);
+        $this->middleware('api.admin')->except(['showBySlug']);
     }
 
     /**
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function index(Request $request)
     {
@@ -75,7 +75,7 @@ class PostController extends Controller
     /**
      * @param Request $request
      * @param $id
-     * @return PostResource|\Illuminate\Http\JsonResponse
+     * @return PostResource|JsonResponse
      */
     public function show(Request $request, $id)
     {
@@ -95,8 +95,8 @@ class PostController extends Controller
     }
 
     /**
-     * @param StorePost $request
-     * @return \Illuminate\Http\JsonResponse
+     * @param Request $request
+     * @return JsonResponse
      */
     public function store(Request $request)
     {
@@ -164,7 +164,7 @@ class PostController extends Controller
     /**
      * @param Request $request
      * @param $id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function update(Request $request, $id)
     {
@@ -221,7 +221,7 @@ class PostController extends Controller
     /**
      * @param Request $request
      * @param $id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function delete(Request $request, $id)
     {
@@ -244,9 +244,13 @@ class PostController extends Controller
         }
     }
 
-    public function showBySlug(Request $request, $slug)
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function showBySlug(Request $request)
     {
-        $post = Post::findBySlug($slug);
+        $post = Post::findBySlug($request->query('slug'));
 
         if (empty($post)) {
             return $this->notFound(__('keywords.not_found'), __('keywords.posts.not_found'));
