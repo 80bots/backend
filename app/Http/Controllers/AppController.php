@@ -35,36 +35,36 @@ class AppController extends Controller
     {
         try {
             //Specify the Amazon DocumentDB cert
-            $ctx = stream_context_create(array(
-                    "ssl" => array(
-                        "cafile" => storage_path('rds-combined-ca-bundle.pem'),
-                        'capture_peer_cert' => true,
-                        'verify_peer' => true,
-                        'verify_peer_name' => true,
-                        'allow_self_signed' => false,
-                    ))
-            );
-
-            $client = new Client("mongodb://saas:123456789@docdb-2019-10-30-15-15-51.cluster-cw5mo3pxfvfe.us-east-2.docdb.amazonaws.com:27017",
-                [
-                    "ssl" => true
-                ],
-                [
-                    "context" => $ctx
-                ]
-            );
-
-            //Specify the database and collection to be used
-            $col = $client->test->col;
-
-            //Insert a single document
-            $result1 = $col->insertOne( [ 'hello' => 'Amazon DocumentDB'] );
-
-            //Find the document that was previously written
-            $result2 = $col->findOne(['hello' => 'Amazon DocumentDB']);
-
-            //Print the result to the screen
-            dd($result1, $result2);
+//            $ctx = stream_context_create(array(
+//                    "ssl" => array(
+//                        "cafile" => storage_path('rds-combined-ca-bundle.pem'),
+//                        'capture_peer_cert' => true,
+//                        'verify_peer' => true,
+//                        'verify_peer_name' => true,
+//                        'allow_self_signed' => false,
+//                    ))
+//            );
+//
+//            $client = new Client("mongodb://saas:123456789@docdb-2019-10-30-15-15-51.cluster-cw5mo3pxfvfe.us-east-2.docdb.amazonaws.com:27017",
+//                [
+//                    "ssl" => true
+//                ],
+//                [
+//                    "context" => $ctx
+//                ]
+//            );
+//
+//            //Specify the database and collection to be used
+//            $col = $client->test->col;
+//
+//            //Insert a single document
+//            $result1 = $col->insertOne( [ 'hello' => 'Amazon DocumentDB'] );
+//
+//            //Find the document that was previously written
+//            $result2 = $col->findOne(['hello' => 'Amazon DocumentDB']);
+//
+//            //Print the result to the screen
+//            dd($result1, $result2);
 
         } catch (Throwable $throwable) {
             dd("Throwable", $throwable->getMessage());
@@ -381,6 +381,29 @@ class AppController extends Controller
             $query->where('user_id', '=', Auth::id());
         }
         return $query->first();
+    }
+
+    public function copy(Request $request)
+    {
+        try {
+            $instance = $this->getInstanceWithCheckUser($request->input('instance_id'));
+
+            if (empty($instance)) {
+                return $this->notFound(__('keywords.not_found'), __('keywords.instance.not_found'));
+            }
+
+            $copy = $instance->replicate([
+
+            ]);
+
+            dd($instance, $copy);
+
+            return $this->success();
+
+        } catch (Throwable $throwable) {
+            Log::error($throwable->getMessage());
+            return $this->error(__('user.server_error'), $throwable->getMessage());
+        }
     }
 }
 

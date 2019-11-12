@@ -44,6 +44,8 @@ Route::group(['middleware' => ['auth:api', 'api.sentry', 'api.instance']], funct
         Route::put('/{id}', 'BotInstanceController@update')->name('update');
         Route::get('/{id}', 'BotInstanceController@show')->name('get');
         Route::post('/{id}/report', 'BotInstanceController@reportIssue')->name('report');
+
+        Route::post('/copy', 'BotInstanceController@copy')->name('copy');
     });
 
     // User schedules
