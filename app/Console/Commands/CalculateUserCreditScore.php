@@ -126,6 +126,11 @@ class CalculateUserCreditScore extends Command
                 return $item['Instances'][0]['InstanceId'];
             })->toArray();
 
+            if (empty($instancesIds)){
+                Log::debug('CalculateUserCreditScore > stopUserAllInstances > Received list of instances is empty');
+                return;
+            }
+
             $result = $aws->stopInstance($instancesIds);
 
             if ($result->hasKey('StoppingInstances')) {
