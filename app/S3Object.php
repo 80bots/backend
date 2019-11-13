@@ -4,6 +4,7 @@ namespace App;
 
 use App\Helpers\InstanceHelper;
 use Carbon\Carbon;
+use Storage;
 
 class S3Object extends BaseModel
 {
@@ -41,7 +42,18 @@ class S3Object extends BaseModel
         $current_expires = $this->attributes['expires'];
         $link = $this->attributes['link'];
         if (!$link || $current_expires <= $expires) {
-            $this->link = InstanceHelper::getFreshLink($this);
+            $base = $this->instance->baseS3Dir;
+            $key = "{$base}/{$this->path}";
+
+            $s3Url = Storage::disk('s3')->temporaryUrl($key, $expires);
+            $parse = parse_url($s3Url);
+            $cdn = config('aws.instance_cloudfront');
+            if(!$cdn) {
+                return $s3Url;
+            }
+            $query = $parse['query'];
+            $path = $parse['path'];
+            $this->link = $cdn . $path  . '?' . $query;
             $this->expires = Carbon::now()->addHour()->toDateTimeString();
             $this->save();
         }

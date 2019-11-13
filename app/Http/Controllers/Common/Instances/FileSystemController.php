@@ -45,7 +45,10 @@ class FileSystemController extends InstanceController
         $parent = $request->query('parent') ?? null;
         $parentFolder = $instance->s3Objects()->where('path', '=', "{$parent}")->first();
         if(!$parentFolder) {
-            return $this->notFound(__('keywords.not_found'), __('keywords.files.not_exist'));
+            return $this->success([
+                'data'  => $objects->data ?? [],
+                'total' => $meta->total ?? 0
+            ]);
         }
         $resource = $parentFolder->children()->latest();
 

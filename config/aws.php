@@ -26,6 +26,7 @@ return [
     'region' => env('AWS_REGION', 'us-east-2'),
     'version' => 'latest',
     'bucket' => env('AWS_BUCKET', '80bots'),
+    'instance_cloudfront' => env('AWS_CLOUDFRONT_INSTANCES_HOST'),
     'screenshotsBucket' => env('AWS_SCREENSHOTS_BUCKET', '80bots-issued-screenshots'),
     'ua_append' => [
         'L5MOD/' . AwsServiceProvider::VERSION,
