@@ -405,7 +405,7 @@ class AppController extends Controller
             $copy = $instance->replicate();
             $copy->fill([
                 'user_id'           => $user->id,
-                'tag_name'          => InstanceHelper::createTagName(),
+                'tag_name'          => null,
                 'tag_user_email'    => $user->email,
                 'aws_region_id'     => $user->region->id,
                 'aws_instance_id'   => null,
@@ -413,6 +413,7 @@ class AppController extends Controller
                 'used_credit'       => 0,
                 'up_time'           => 0,
                 'cron_up_time'      => 0,
+                'total_up_time'     => 0,
                 'aws_status'        => BotInstance::STATUS_PENDING,
                 'start_time'        => $start,
                 'created_at'        => $start,

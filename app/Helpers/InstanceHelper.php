@@ -132,6 +132,8 @@ class InstanceHelper
             BotInstance::STATUS_TERMINATED
         ];
 
+        dd($instancesByStatus);
+
         foreach ($instancesByStatus as $statusKey => $instances) {
 
             if (in_array($statusKey, $availableStatuses)) {
