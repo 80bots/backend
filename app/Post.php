@@ -29,6 +29,8 @@ class Post extends BaseModel
         'title',
         'slug',
         'content',
+        'style',
+        'javascript',
         'status',
         'type'
     ];

@@ -19,7 +19,9 @@ class CreatePostsTable extends Migration
             $table->unsignedInteger('author_id')->nullable();
             $table->string('title');
             $table->string('slug')->index();
-            $table->text('content')->nullable();
+            $table->longText('content')->nullable();
+            $table->longText('style')->nullable();
+            $table->longText('javascript')->nullable();
 
             $table->enum('status', [
                 Post::STATUS_DRAFT,
