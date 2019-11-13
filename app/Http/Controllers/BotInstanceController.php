@@ -98,6 +98,8 @@ class BotInstanceController extends AppController
         $StartUpScript = array_filter(explode(';',$string));
         $runScript = $this->RunStartUpScript($StartUpScript);
         dd($runScript);*/
+
+        return $this->success();
     }
 
     /**
@@ -180,6 +182,8 @@ class BotInstanceController extends AppController
             session()->flash('error', $e->getMessage());
             return redirect(route('user.instance.index'));
         }*/
+
+        return $this->success();
     }
 
     /**
@@ -194,7 +198,7 @@ class BotInstanceController extends AppController
         if(!empty($resource)) {
             return $this->success((new BotInstanceResource($resource))->toArray($request));
         } else {
-            $this->error('Not found', __('admin.bots.not_found'));
+            return $this->error('Not found', __('admin.bots.not_found'));
         }
     }
 
@@ -206,7 +210,7 @@ class BotInstanceController extends AppController
      */
     public function edit(BotInstance $userInstances)
     {
-        //
+        return $this->success();
     }
 
     /**
@@ -278,7 +282,7 @@ class BotInstanceController extends AppController
      */
     public function destroy(BotInstance $userInstances)
     {
-        //
+        return $this->success();
     }
 
     /**
@@ -286,7 +290,8 @@ class BotInstanceController extends AppController
      * @param $id
      * @return ApiResponse
      */
-    public function reportIssue(Request $request, $id) {
+    public function reportIssue(Request $request, $id)
+    {
         $instance = BotInstance::withTrashed()->find($id);
         $aws = new Aws();
         if(!empty($instance)) {
@@ -308,10 +313,10 @@ class BotInstanceController extends AppController
                 }
 
                 GitHub::createIssue('Issue Report', $body);
-                return $this->success([]);
             }
+            return $this->success([]);
         } else {
-            $this->error('Not found', __('admin.bots.not_found'));
+            return $this->error('Not found', __('admin.bots.not_found'));
         }
     }
 

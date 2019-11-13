@@ -98,7 +98,7 @@ class InstanceSyncScheduling extends Command
 
         $aws->ec2Connection($region->code ?? '');
 
-        $region->instances()->findNotTerminated()->chunk(100, function ($instances) use ($aws, $region){
+        $region->instances()->findNotTerminated()->chunkById(100, function ($instances) use ($aws, $region){
 
             $instanceIds = $instances->map(function ($item, $key) {
                 return $item['aws_instance_id'];

@@ -132,8 +132,6 @@ class InstanceHelper
             BotInstance::STATUS_TERMINATED
         ];
 
-        dd($instancesByStatus);
-
         foreach ($instancesByStatus as $statusKey => $instances) {
 
             if (in_array($statusKey, $availableStatuses)) {
@@ -148,7 +146,10 @@ class InstanceHelper
 
                         $instanceId = $instance['aws_instance_id'] ?? null;
 
-                        $botInstance = $user->instances()->where('aws_instance_id', '=', $instanceId)->first();
+                        $botInstance = $user->instances()
+                            ->where('aws_instance_id', '=', $instanceId)
+                            ->orWhere('tag_name', '=', $instance['tag_name'])
+                            ->first();
 
                         if (! empty($botInstance)) {
                             self::syncInstancesUpdateStatus($botInstance, $status, $instance, $currentDate);

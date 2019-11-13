@@ -14,12 +14,10 @@ use App\Jobs\StoreUserInstance;
 use App\Services\Aws;
 use App\User;
 use Carbon\Carbon;
-use Doctrine\DBAL\Query\QueryBuilder;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use MongoDB\Client;
 use Throwable;
 
 class AppController extends Controller
