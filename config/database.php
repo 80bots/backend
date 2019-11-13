@@ -90,23 +90,25 @@ return [
             'host'     => env('MONGO_DB_HOST', 'localhost'),
             'port'     => env('MONGO_DB_PORT', 27017),
             'database' => env('MONGO_DB_DATABASE', 'saas'),
-            'username' => env('MONGO_DB_USERNAME', 'saas'),
+            'username' => env('MONGO_DB_USERNAME', ''),
             'password' => env('MONGO_DB_PASSWORD', ''),
-            'options' => [
-                'ssl' => true,
-            ],
-            /**
-             * Add custom options for the DocumentDB, check app/Providers/MongodbServiceProvider.php
-             */
-            'document_db_options' => [
-                'ssl' => [
-                    'cafile' => storage_path(env('MONGO_RDS_PEM', 'rds-combined-ca-bundle.pem')),
-                    'allow_self_signed' => true,
-                    'verify_peer' => true,
-                    'verify_peer_name' => true,
-                    'verify_expiry' => true,
-                ]
-            ],
+//            'username' => env('MONGO_DB_USERNAME', 'saas'),
+//            'password' => env('MONGO_DB_PASSWORD', ''),
+//            'options' => [
+//                'ssl' => true,
+//            ],
+//            /**
+//             * Add custom options for the DocumentDB, check app/Providers/MongodbServiceProvider.php
+//             */
+//            'document_db_options' => [
+//                'ssl' => [
+//                    'cafile' => storage_path(env('MONGO_RDS_PEM', 'rds-combined-ca-bundle.pem')),
+//                    'allow_self_signed' => true,
+//                    'verify_peer' => true,
+//                    'verify_peer_name' => true,
+//                    'verify_expiry' => true,
+//                ]
+//            ],
         ],
 
     ],

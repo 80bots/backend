@@ -18,6 +18,9 @@ use Carbon\CarbonTimeZone;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use Nubs\RandomNameGenerator\All as AllRandomName;
+use Nubs\RandomNameGenerator\Alliteration as AlliterationName;
+use Nubs\RandomNameGenerator\Vgng as VideoGameName;
 use Throwable;
 
 class InstanceHelper
@@ -565,8 +568,8 @@ class InstanceHelper
      */
     public static function createAwsKeyAndGroup(Aws $aws, ?string $ip): ?array
     {
+        $tagName        = self::createTagName();
         $keyPair        = $aws->createKeyPair(config('aws.bucket'));
-        $tagName        = $aws->createTagName();
         $securityGroup  = $aws->createSecretGroup($ip);
 
         if (empty($keyPair) || empty($tagName) || empty($securityGroup)) {
@@ -580,5 +583,19 @@ class InstanceHelper
             'groupId'       => $securityGroup['securityGroupId'],
             'groupName'     => $securityGroup['securityGroupName'],
         ];
+    }
+
+    /**
+     * The random string with number
+     * @return string
+     */
+    public static function createTagName(): string
+    {
+        $generator = new AllRandomName([
+            new AlliterationName(),
+            new VideoGameName()
+        ]);
+
+        return strtolower(preg_replace('/[^a-z\d]/ui', '', $generator->getName())) . rand(100,999);
     }
 }
