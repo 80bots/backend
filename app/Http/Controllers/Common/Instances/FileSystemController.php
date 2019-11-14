@@ -50,7 +50,11 @@ class FileSystemController extends InstanceController
                 'total' => $meta->total ?? 0
             ]);
         }
-        $resource = $parentFolder->children()->latest();
+        $resource = $parentFolder->children();
+
+        $resource = $this->applyBlackList($resource);
+
+        $resource = $resource->latest();
 
         $objects = (new S3ObjectCollection($resource->paginate($limit)))->response()->getData();
         $meta = $objects->meta ?? null;
@@ -105,5 +109,15 @@ class FileSystemController extends InstanceController
         }
 
         unset($page, $limit, $skip, $folders);
+    }
+
+    private function applyBlackList($resource)
+    {
+        $user = Auth::user();
+        if($user->isAdmin()) {
+            return $resource;
+        }
+        $resource->where('path', 'not like', '%logs/cloud-init-output%');
+        return $resource;
     }
 }

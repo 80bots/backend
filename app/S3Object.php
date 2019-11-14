@@ -38,26 +38,18 @@ class S3Object extends BaseModel
 
     public function getLinkAttribute ()
     {
-        $expires = Carbon::now()->addMinutes(10)->toDateTimeString();
-        $current_expires = $this->attributes['expires'];
-        $link = $this->attributes['link'];
-        if (!$link || $current_expires <= $expires) {
-            $base = $this->instance->baseS3Dir;
-            $key = "{$base}/{$this->path}";
-
-            $s3Url = Storage::disk('s3')->temporaryUrl($key, $expires);
-            $parse = parse_url($s3Url);
-            $cdn = config('aws.instance_cloudfront');
-            if(!$cdn) {
-                return $s3Url;
-            }
-            $query = $parse['query'];
-            $path = $parse['path'];
-            $this->link = $cdn . $path  . '?' . $query;
-            $this->expires = Carbon::now()->addHour()->toDateTimeString();
-            $this->save();
+        $expires = Carbon::now()->addMinutes(10);
+        $base = $this->instance->baseS3Dir;
+        $key = "{$base}/{$this->path}";
+        $s3Url = Storage::disk('s3')->temporaryUrl($key, $expires);
+        $parse = parse_url($s3Url);
+        $cdn = config('aws.instance_cloudfront');
+        if(!$cdn) {
+            return $s3Url;
         }
-        return $this->attributes['link'];
+        $query = $parse['query'];
+        $path = $parse['path'];
+        return $cdn . $path  . '?' . $query;
     }
 
     public function scopeFolders ($query)
