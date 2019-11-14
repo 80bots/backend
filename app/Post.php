@@ -8,17 +8,29 @@ class Post extends BaseModel
     const STATUS_ACTIVE     = 'active';
     const STATUS_INACTIVE   = 'inactive';
 
-    const TYPE_BOT          = 'bot';
+    const STATUSES = [
+        self::STATUS_DRAFT,
+        self::STATUS_ACTIVE,
+        self::STATUS_INACTIVE
+    ];
+
+    const TYPE_PAGE         = 'page';
     const TYPE_POST         = 'post';
+
+    const TYPES = [
+        self::TYPE_PAGE,
+        self::TYPE_POST
+    ];
 
     protected $table = "posts";
 
     protected $fillable = [
         'author_id',
-        'bot_id',
         'title',
         'slug',
         'content',
+        'style',
+        'javascript',
         'status',
         'type'
     ];
@@ -33,11 +45,6 @@ class Post extends BaseModel
         return $this->belongsToMany(Dislike::class, 'dislike_post');
     }
 
-    public function bot()
-    {
-        return $this->belongsTo(Bot::class,'bot_id');
-    }
-
     public function author()
     {
         return $this->belongsTo(User::class, 'author_id');
@@ -46,5 +53,25 @@ class Post extends BaseModel
     public function messages()
     {
         return $this->hasMany(Message::class, 'post_id', 'id');
+    }
+
+    public function scopeFindBySlug($query, $slug)
+    {
+        return $query->where('slug', '=', $slug);
+    }
+
+    public function scopeIsActive($query)
+    {
+        return $query->where('status', '=', self::STATUS_ACTIVE);
+    }
+
+    public function isPage(): bool
+    {
+        return $this->type === self::TYPE_PAGE;
+    }
+
+    public function isPost(): bool
+    {
+        return $this->type === self::TYPE_POST;
     }
 }

@@ -7,6 +7,11 @@ Route::get('status', 'AppController@status');
 Route::get('password/show', 'AppController@apiEmpty')->name('password.reset');
 //Route::get('user', 'AppController@apiEmpty')->name('login');
 
+Route::group(['prefix' => 'posts', 'as' => 'posts.'], function () {
+    Route::get('/show', 'PostController@showBySlug')->name('slug');
+});
+
+
 // Authentication Routes. Auth::routes() is not used to not provide unneeded routes
 Route::group(['prefix' => 'auth', 'as' => 'auth.', 'namespace' => 'Auth'], function() {
     Route::post('login', 'LoginController@apiLogin')->name('login');
@@ -69,8 +74,12 @@ Route::group(['middleware' => ['auth:api', 'api.sentry', 'api.instance']], funct
        Route::get('/credits', 'HistoryController@getCreditUsage');
     });
 
-    Route::group(['prefix' => 'blog', 'as' => 'blog.', 'namespace' => 'Blog'], function() {
-        Route::post('messages', 'MessageController@store')->name('store');
+    Route::group(['prefix' => 'posts', 'as' => 'posts.'], function () {
+        Route::get('/', 'PostController@index')->name('posts');
+        Route::post('/', 'PostController@store')->name('store');
+        Route::put('/{id}', 'PostController@update')->name('update');
+        Route::delete('/{id}', 'PostController@delete')->name('delete');
+        Route::get('/{id}', 'PostController@show')->name('show');
     });
 
     Route::resources([
@@ -84,13 +93,6 @@ Route::group([
     'namespace' => 'Admin',
     'middleware' => [ 'auth:api', 'api.admin' ],
 ], function() {
-    Route::group(['prefix' => 'posts', 'as' => 'posts.'], function () {
-        Route::get('/', 'PostController@index')->name('posts');
-        Route::post('/', 'PostController@store')->name('store');
-        Route::get('/{id}', 'PostController@show')->name('show');
-        Route::put('/{id}', 'PostController@update')->name('update');
-        Route::delete('/{id}', 'PostController@delete')->name('delete');
-    });
 
     Route::group(['prefix' => 'aws', 'as' => 'aws.'], function () {
         Route::get('/', 'AwsSettingController@index')->name('aws');
@@ -132,11 +134,4 @@ Route::group([
         'subscription'  => 'SubscriptionController',
         'session'       => 'InstanceSessionController'
     ]);
-});
-
-Route::group(['prefix' => 'blog', 'as' => 'blog.', 'namespace' => 'Blog'], function() {
-    Route::get('posts', 'PostController@index')->name('posts');
-    Route::get('posts/{id}', 'PostController@show')->name('posts.show');
-
-    Route::get('messages/{id}', 'MessageController@postMessages')->name('messages.show');
 });

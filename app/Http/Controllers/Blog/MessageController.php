@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers\Blog;
 
-use App\Http\Resources\Blog\MessageCollection;
+use App\Http\Controllers\Controller;
 use App\Message;
 use App\Post;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-use Monolog\Handler\IFTTTHandler;
 use Throwable;
 
 class MessageController extends Controller
@@ -56,20 +54,22 @@ class MessageController extends Controller
     {
         try {
 
-            $resource = Message::where('post_id', '=', $postId)
-                ->where('status', '=', Message::STATUS_ACTIVE)
-                ->isModerated()
-                ->orderBy('created_at', 'asc');
+//            $resource = Message::where('post_id', '=', $postId)
+//                ->where('status', '=', Message::STATUS_ACTIVE)
+//                ->isModerated()
+//                ->orderBy('created_at', 'asc');
+//
+//            $messages   = (new MessageCollection($resource->paginate(self::PAGINATE)))->response()->getData();
+//            $meta       = $messages->meta ?? null;
+//
+//            $response = [
+//                'data'  => $messages->data ?? [],
+//                'total' => $meta->total ?? 0
+//            ];
+//
+//            return $this->success($response);
 
-            $messages   = (new MessageCollection($resource->paginate(self::PAGINATE)))->response()->getData();
-            $meta       = $messages->meta ?? null;
-
-            $response = [
-                'data'  => $messages->data ?? [],
-                'total' => $meta->total ?? 0
-            ];
-
-            return $this->success($response);
+            return $this->success();
 
         } catch (Throwable $throwable) {
             return $this->error(__('keywords.server_error'), $throwable->getMessage());

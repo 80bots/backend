@@ -17,10 +17,11 @@ class CreatePostsTable extends Migration
         Schema::create('posts', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedInteger('author_id')->nullable();
-            $table->unsignedInteger('bot_id')->nullable();
             $table->string('title');
-            $table->string('slug');
-            $table->text('content')->nullable();
+            $table->string('slug')->index();
+            $table->longText('content')->nullable();
+            $table->longText('style')->nullable();
+            $table->longText('javascript')->nullable();
 
             $table->enum('status', [
                 Post::STATUS_DRAFT,
@@ -29,7 +30,7 @@ class CreatePostsTable extends Migration
             ])->default(Post::STATUS_DRAFT);
 
             $table->enum('type', [
-                Post::TYPE_BOT,
+                Post::TYPE_PAGE,
                 Post::TYPE_POST
             ])->default(Post::TYPE_POST);
 
@@ -38,12 +39,6 @@ class CreatePostsTable extends Migration
             $table->foreign('author_id')
                 ->references('id')
                 ->on('users')
-                ->onUpdate('cascade')
-                ->onDelete('cascade');
-
-            $table->foreign('bot_id')
-                ->references('id')
-                ->on('bots')
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
         });
@@ -57,7 +52,7 @@ class CreatePostsTable extends Migration
     public function down()
     {
         Schema::table('posts', function (Blueprint $table) {
-            $table->dropForeign(['author_id', 'bot_id']);
+            $table->dropForeign(['author_id']);
         });
 
         Schema::dropIfExists('posts');
