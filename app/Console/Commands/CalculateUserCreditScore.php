@@ -11,9 +11,11 @@ use App\Services\Aws;
 use App\User;
 use App\BotInstance;
 use App\BotInstancesDetails;
+use Aws\Exception\AwsException;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class CalculateUserCreditScore extends Command
 {
@@ -131,48 +133,56 @@ class CalculateUserCreditScore extends Command
                 return;
             }
 
-            $result = $aws->stopInstance($instancesIds);
+            try {
+                $result = $aws->stopInstance($instancesIds);
 
-            if ($result->hasKey('StoppingInstances')) {
+                if ($result->hasKey('StoppingInstances')) {
 
-                $stopInstances = $result->get('StoppingInstances');
+                    $stopInstances = $result->get('StoppingInstances');
 
-                // Update instance  on user instance table
-                foreach ($stopInstances as $stopInstance) {
+                    // Update instance  on user instance table
+                    foreach ($stopInstances as $stopInstance) {
 
-                    $CurrentState   = $stopInstance['CurrentState'];
-                    $instanceId     = $stopInstance['InstanceId'];
+                        $CurrentState   = $stopInstance['CurrentState'];
+                        $instanceId     = $stopInstance['InstanceId'];
 
-                    if ($CurrentState['Name'] == 'stopped' || $CurrentState['Name'] == 'stopping') {
+                        if ($CurrentState['Name'] == 'stopped' || $CurrentState['Name'] == 'stopping') {
 
-                        $instance = BotInstance::findByInstanceId($instanceId)->first();
-                        $instance->aws_status = BotInstance::STATUS_STOPPED;
+                            $instance = BotInstance::findByInstanceId($instanceId)->first();
+                            $instance->aws_status = BotInstance::STATUS_STOPPED;
 
-                        $stopInstance = BotInstancesDetails::where(['instance_id' => $instance->id, 'end_time' => null])->latest()->first();
+                            $stopInstance = BotInstancesDetails::where(['instance_id' => $instance->id, 'end_time' => null])->latest()->first();
 
-                        if (! empty($stopInstance)) {
+                            if (! empty($stopInstance)) {
 
-                            $stopInstance->end_time = $this->now->toDateTimeString();
-                            $diffTime = CommonHelper::diffTimeInMinutes($stopInstance->start_time, $stopInstance->end_date);
-                            $stopInstance->total_time = $diffTime;
+                                $stopInstance->end_time = $this->now->toDateTimeString();
+                                $diffTime = CommonHelper::diffTimeInMinutes($stopInstance->start_time, $stopInstance->end_date);
+                                $stopInstance->total_time = $diffTime;
 
-                            if ($stopInstance->save() && $diffTime > $instance->cron_up_time) {
-                                $tempUpTime = $instance->total_up_time ?? 0;
-                                $upTime = $diffTime + $tempUpTime;
-                                $instance->total_up_time = $upTime;
-                                $instance->up_time = $upTime;
-                                $instance->cron_up_time = 0;
+                                if ($stopInstance->save() && $diffTime > $instance->cron_up_time) {
+                                    $tempUpTime = $instance->total_up_time ?? 0;
+                                    $upTime = $diffTime + $tempUpTime;
+                                    $instance->total_up_time = $upTime;
+                                    $instance->up_time = $upTime;
+                                    $instance->cron_up_time = 0;
+                                }
                             }
-                        }
 
-                        if ($instance->save()) {
-                            Log::info('Instance Id ' . $instanceId . ' Stopped');
-                        }
+                            if ($instance->save()) {
+                                Log::info('Instance Id ' . $instanceId . ' Stopped');
+                            }
 
-                    } else {
-                        Log::info('Instance Id ' . $instanceId . ' Not Stopped Successfully');
+                        } else {
+                            Log::info('Instance Id ' . $instanceId . ' Not Stopped Successfully');
+                        }
                     }
                 }
+
+            } catch (AwsException $exception) {
+                Log::error($exception->getMessage());
+            } catch (Throwable $throwable) {
+                Log::error('Instance Id ' . $instanceId . ' Throwable');
+                Log::error($throwable->getMessage());
             }
         }
     }

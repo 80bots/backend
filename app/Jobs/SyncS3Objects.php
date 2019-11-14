@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\BotInstance;
 use App\Helpers\InstanceHelper;
 use App\Services\Aws;
+use Aws\Exception\AwsException;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
@@ -12,6 +13,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class SyncS3Objects implements ShouldQueue
 {
@@ -62,27 +64,36 @@ class SyncS3Objects implements ShouldQueue
 
         do {
 
-            $result = $aws->getS3ListObjects($aws->getS3Bucket(), 500, $prefix, $next);
+            try {
 
-            if ($result->hasKey('IsTruncated') && $result->get('IsTruncated')) {
-                if ($result->hasKey('NextContinuationToken')) {
-                    $next = $result->get('NextContinuationToken');
+                $result = $aws->getS3ListObjects($aws->getS3Bucket(), 500, $prefix, $next);
+
+                if ($result->hasKey('IsTruncated') && $result->get('IsTruncated')) {
+                    if ($result->hasKey('NextContinuationToken')) {
+                        $next = $result->get('NextContinuationToken');
+                    }
+                } else {
+                    $next = '';
                 }
-            } else {
-                $next = '';
-            }
 
-            if ($result->hasKey('Contents')) {
+                if ($result->hasKey('Contents')) {
 
-                $contents = collect($result->get('Contents'))->map(function ($item, $key) {
-                    return $item['Key'];
-                });
+                    $contents = collect($result->get('Contents'))->map(function ($item, $key) {
+                        return $item['Key'];
+                    });
 
-                if ($contents->isNotEmpty()) {
-                    foreach ($contents as $path) {
-                        InstanceHelper::getObjectByPath($this->instance->id, $path);
+                    if ($contents->isNotEmpty()) {
+                        foreach ($contents as $path) {
+                            $object = str_replace($prefix, '', $path);
+                            InstanceHelper::getObjectByPath($this->instance->id, $object);
+                        }
                     }
                 }
+
+            } catch (AwsException $exception) {
+                Log::error($exception->getMessage());
+            } catch (Throwable $throwable) {
+                Log::error($throwable->getMessage());
             }
 
         } while (! empty($next));

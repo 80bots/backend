@@ -6,6 +6,7 @@ use App\Helpers\CommonHelper;
 use App\Helpers\InstanceHelper;
 use App\Services\Aws;
 use App\User;
+use Aws\Exception\AwsException;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -58,6 +59,7 @@ class CalculateInstancesUpTime extends Command
                     ->findRunningInstance()
                     ->chunkById(100, function ($instances) use ($user) {
                         foreach ($instances as $instance) {
+
                             try {
 
                                 $aws = new Aws;
@@ -99,6 +101,8 @@ class CalculateInstancesUpTime extends Command
                                         $instance->region->decrement('created_instances');
                                     }
                                 }
+
+                            } catch (AwsException $exception) {
 
                             } catch (Throwable $throwable) {
                                 Log::error($throwable->getMessage());

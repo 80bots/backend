@@ -86,8 +86,10 @@ class InstanceSyncScheduling extends Command
 
             Log::info('Sync completed at ' . date('Y-m-d h:i:s'));
 
+        } catch (AwsException $exception) {
+            Log::error($exception->getMessage());
         } catch (Throwable $throwable) {
-            Log::info('ERROR');
+            Log::error('ERROR');
             Log::error($throwable->getMessage());
         }
     }
