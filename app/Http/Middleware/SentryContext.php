@@ -23,6 +23,7 @@ class SentryContext
                     'id' => auth()->user()->id,
                     'email' => auth()->user()->email,
                 ]);
+                $scope->setTag('email', auth()->user()->email);
             });
         }
 
