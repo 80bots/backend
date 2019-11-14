@@ -36,7 +36,6 @@ class VerifyInstance
     public function getInstanceBearerTokenForInstance ($aws_instance_id) {
         $instance = BotInstance::withTrashed()
             ->findByInstanceId($aws_instance_id)
-            ->whereAwsPublicIp(request()->ip())
             ->first();
         if(!$instance) return null;
         /** @var User $user */
