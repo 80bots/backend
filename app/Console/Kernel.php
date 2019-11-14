@@ -59,7 +59,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('aws:sync-regions')->daily();
         $schedule->command('aws:sync-amis')->everyThirtyMinutes();
         $schedule->command('bots:sync-local')->daily();
-        $schedule->command('sync:folders')->everyMinute();
+//        $schedule->command('sync:folders')->everyMinute();
     }
 
     /**
