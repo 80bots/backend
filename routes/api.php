@@ -39,11 +39,11 @@ Route::group(['middleware' => ['auth:api', 'api.sentry', 'api.instance']], funct
         Route::get('/regions', 'InstanceController@regions')->name('regions');
         Route::post('/launch', 'ManageController@launchInstances')->name('launch');
         Route::post('/restore', 'ManageController@restoreInstance')->name('restore');
+        Route::post('/copy', 'ManageController@copy')->name('copy');
+
         Route::put('/{id}', 'InstanceController@update')->name('update');
         Route::get('/{id}', 'InstanceController@show')->name('get');
         Route::post('/{id}/report', 'InstanceController@reportIssue')->name('report');
-
-        Route::post('/copy', 'BotInstanceController@copy')->name('copy');
 
         Route::get('/{instance_id}/objects', 'FileSystemController@getS3Objects');
         Route::get('/{instance_id}/objects/{id}', 'FileSystemController@getS3Object');

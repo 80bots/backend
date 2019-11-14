@@ -25,6 +25,7 @@ class BotInstanceResource extends JsonResource
             'id'                => $this->id ?? '',
             'region'            => $region->name ?? '',
             'instance_id'       => $this->aws_instance_id ?? '',
+            'launched_by'       => $this->tag_user_email ?? '',
             'name'              => $this->tag_name ?? '',
             'bot_name'          => $this->bot->name ?? '',
             'parameters'        => $this->bot->parameters ?? '',
@@ -41,7 +42,6 @@ class BotInstanceResource extends JsonResource
 
         if (Auth::check() && Auth::user()->isAdmin()) {
             $data = array_merge($data, [
-                'launched_by'   => $this->tag_user_email ?? '',
                 'pem'           => $details->aws_pem_file_path ?? ''
             ]);
         }

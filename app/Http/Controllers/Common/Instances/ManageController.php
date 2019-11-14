@@ -11,6 +11,7 @@ use App\Jobs\RestoreUserInstance;
 use App\Jobs\StoreUserInstance;
 use App\Services\Aws;
 use App\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -193,5 +194,53 @@ class ManageController extends InstanceController {
         dispatch(new InstanceChangeStatus($instance, $user, $instance->region, $status));
 
         return true;
+    }
+
+    public function copy(Request $request)
+    {
+        try {
+            $instance = $this->getInstanceWithCheckUser($request->input('instance_id'));
+            if (empty($instance)) {
+                return $this->notFound(__('keywords.not_found'), __('keywords.instance.not_found'));
+            }
+            if (empty($instance->mongodb)) {
+                return $this->error(__('keywords.server_error'), __('keywords.bots.error_parameters'));
+            }
+            $instanceDetail = $instance->details()->latest()->first();
+            $user   = Auth::user();
+            $start  = Carbon::now()->toDateTimeString();
+            $copy = $instance->replicate();
+            $copy->fill([
+                'user_id'           => $user->id,
+                'tag_name'          => null,
+                'tag_user_email'    => $user->email,
+                'aws_region_id'     => $user->region->id,
+                'aws_instance_id'   => null,
+                'aws_public_ip'     => null,
+                'used_credit'       => 0,
+                'up_time'           => 0,
+                'cron_up_time'      => 0,
+                'total_up_time'     => 0,
+                'aws_status'        => BotInstance::STATUS_PENDING,
+                'start_time'        => $start,
+                'created_at'        => $start,
+                'updated_at'        => $start
+            ]);
+            if($copy->save()) {
+                $copy->details()->create([
+                    'aws_instance_type' => $instanceDetail->aws_instance_type,
+                    'aws_storage_gb'    => $instanceDetail->aws_storage_gb,
+                    'aws_image_id'      => $instanceDetail->aws_image_id
+                ]);
+                dispatch(new StoreUserInstance($copy->bot, $copy, $user, $instance->mongodb->params, $request->ip()));
+                return $this->success([
+                    'instance_id' => $copy->id ?? null
+                ], __('keywords.instance.launch_success'));
+            }
+            return $this->error(__('keywords.error'), __('keywords.server_error'));
+        } catch (Throwable $throwable) {
+            Log::error($throwable->getMessage());
+            return $this->error(__('keywords.server_error'), $throwable->getMessage());
+        }
     }
 }
