@@ -23,7 +23,7 @@ username="kabas"
 cd /home/\$username/
 su - \$username -c 'cd ~/data-streamer && git pull && cp .env.example .env'
 su - \$username -c 'cd ~/data-streamer && echo "SOCKET_SERVER_HOST=http://{$parsed['host']}:6001" >> ./.env'
-su - \$username -c 'cd ~/data-streamer && echo "API_URL=http://{$url}" >> ./.env'
+su - \$username -c 'cd ~/data-streamer && echo "API_URL=http://{$parsed['host']}" >> ./.env'
 su - \$username -c 'cd ~/data-streamer && yarn && yarn build && pm2 start --name "data-streamer" yarn -- start'
 HERESHELL;
 
