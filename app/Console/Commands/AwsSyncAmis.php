@@ -7,6 +7,7 @@ use App\AwsRegion;
 use App\Services\Aws;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class AwsSyncAmis extends Command
 {
@@ -46,6 +47,9 @@ class AwsSyncAmis extends Command
 
         if ($regions->isNotEmpty()) {
             foreach ($regions as $region) {
+
+                Log::debug("Sync Ami in {$region->code} region");
+
                 $aws = new Aws;
                 if (! empty($owners) && is_array($owners)) {
                     foreach ($owners as $owner) {
