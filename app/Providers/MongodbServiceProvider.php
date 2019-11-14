@@ -20,7 +20,7 @@ class MongodbServiceProvider extends MongodbServiceProviderBase
                 /**
                  * Dynamically create context if AWS DocumentDB options was provided
                  */
-                if ($config['document_db_options']) {
+                if (! empty($config['document_db_options'])) {
                     $config['driver_options']['context'] = stream_context_create($config['document_db_options']);
                 }
                 return new Connection($config);

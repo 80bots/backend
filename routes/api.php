@@ -43,8 +43,11 @@ Route::group(['middleware' => ['auth:api', 'api.sentry', 'api.instance']], funct
         Route::get('/{id}', 'InstanceController@show')->name('get');
         Route::post('/{id}/report', 'InstanceController@reportIssue')->name('report');
 
+        Route::post('/copy', 'BotInstanceController@copy')->name('copy');
+
         Route::get('/{instance_id}/objects', 'FileSystemController@getS3Objects');
         Route::get('/{instance_id}/objects/{id}', 'FileSystemController@getS3Object');
+
     });
 
     // User schedules
@@ -77,9 +80,9 @@ Route::group(['middleware' => ['auth:api', 'api.sentry', 'api.instance']], funct
 });
 
 Route::group([
+    'prefix' => 'admin',
     'namespace' => 'Admin',
     'middleware' => [ 'auth:api', 'api.admin' ],
-    'prefix' => 'admin'
 ], function() {
     Route::group(['prefix' => 'posts', 'as' => 'posts.'], function () {
         Route::get('/', 'PostController@index')->name('posts');
@@ -107,9 +110,13 @@ Route::group([
         Route::get('/regions', 'BotInstanceController@regions')->name('regions');
         Route::put('/regions/{id}', 'BotInstanceController@updateRegion')->name('update.region');
         Route::get('/regions/sync', 'BotInstanceController@syncRegions')->name('sync.regions');
-        Route::get('/sync', 'BotInstanceController@syncInstances')->name('sync');
         Route::get('/amis', 'BotInstanceController@amis')->name('amis');
         Route::get('/pem', 'BotInstanceController@getInstancePemFile')->name('pem');
+        Route::post('/launch', 'BotInstanceController@launchInstances')->name('launch');
+        Route::post('/restore', 'BotInstanceController@restoreInstance')->name('restore');
+        Route::get('/sync', 'BotInstanceController@syncInstances')->name('sync');
+        Route::put('/{id}', 'BotInstanceController@update')->name('update');
+        Route::get('/{id}', 'BotInstanceController@show')->name('show');
     });
 
     Route::group(['prefix' => 'history', 'as' => 'history.'], function() {

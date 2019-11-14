@@ -435,20 +435,6 @@ class Aws
     }
 
     /**
-     * The random string with number
-     * @return string
-     */
-    public function createTagName(): string
-    {
-        $generator = new AllRandomName([
-            new AlliterationName(),
-            new VideoGameName()
-        ]);
-
-        return strtolower(preg_replace('/[^a-z\d]/ui', '', $generator->getName())) . rand(100,999);
-    }
-
-    /**
      * Create a Security Group
      *
      * @param string|null $ip
@@ -1075,8 +1061,7 @@ chown \$username:\$username \$credentialsFile
 HERESHELL;
 
         $settings = AwsSetting::isDefault()->first();
-
-        // run data-streamer first ($settings->script)
+// run data-streamer first ($settings->script)
         return <<<HERESHELL
 {$settings->script}
 {$shell}

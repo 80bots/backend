@@ -54,61 +54,59 @@ class CalculateInstancesUpTime extends Command
         User::chunkById(100, function ($users) {
             foreach ($users as $user) {
 
-                $instances = $user->instances()->findRunningInstance();
+                $user->instances()
+                    ->findRunningInstance()
+                    ->chunkById(100, function ($instances) use ($user) {
+                        foreach ($instances as $instance) {
+                            try {
 
-                if ($instances->isNotEmpty()) {
+                                $aws = new Aws;
+                                $aws->ec2Connection($instance->region->code);
 
-                    foreach ($instances as $instance) {
+                                $instanceDetail = $instance->details()->latest()->first();
 
-                        try {
+                                $describeInstance = $aws->describeInstances([$instance->aws_instance_id], $instance->region->code);
 
-                            $aws = new Aws;
-                            $aws->ec2Connection($instance->region->code);
+                                if ($describeInstance->hasKey('Reservations')) {
+                                    $reservations = collect($describeInstance->get('Reservations'));
 
-                            $instanceDetail = $instance->details()->latest()->first();
+                                    if ($reservations->isNotEmpty()) {
 
-                            $describeInstance = $aws->describeInstances([$instance->aws_instance_id], $instance->region->code);
+                                        $awsInstancesInfo = $reservations->first();
+                                        $awsInstance = $awsInstancesInfo['Instances'][0];
 
-                            if ($describeInstance->hasKey('Reservations')) {
-                                $reservations = collect($describeInstance->get('Reservations'));
-                                if ($reservations->isNotEmpty()) {
-                                    $awsInstancesInfo = $reservations->first();
-                                    $awsInstance = $awsInstancesInfo['Instances'][0];
+                                        $cronUpTime = CommonHelper::diffTimeInMinutes($awsInstance['LaunchTime']->format('Y-m-d H:i:s'), $this->now->toDateTimeString());
 
-                                    $cronUpTime = CommonHelper::diffTimeInMinutes($awsInstance['LaunchTime']->format('Y-m-d H:i:s'), $this->now->toDateTimeString());
+                                        $instance->update([
+                                            'cron_up_time'  => $cronUpTime,
+                                            'up_time'       => $cronUpTime + $instance->total_up_time ?? 0,
+                                            'used_credit'   => CommonHelper::calculateUsedCredit($cronUpTime + $instance->total_up_time ?? 0)
+                                        ]);
 
-                                    $instance->update([
-                                        'cron_up_time'  => $cronUpTime,
-                                        'up_time'       => $cronUpTime + $instance->total_up_time ?? 0,
-                                        'used_credit'   => CommonHelper::calculateUsedCredit($cronUpTime + $instance->total_up_time ?? 0)
-                                    ]);
+                                        Log::debug('instance id ' . $instance->aws_instance_id . ' Cron Up Time is ' . $cronUpTime);
+                                    }
 
-                                    Log::debug('instance id ' . $instance->aws_instance_id . ' Cron Up Time is ' . $cronUpTime);
+                                    unset($reservations, $awsInstancesInfo, $awsInstance);
+
+                                } else {
+                                    //
+                                    Log::debug('instance id ' . $instance->aws_instance_id . ' already terminated');
+                                    $instance->setAwsStatusTerminated();
+
+                                    InstanceHelper::cleanUpTerminatedInstanceData($aws, $instanceDetail);
+
+                                    if ($instance->region->created_instances > 0) {
+                                        $instance->region->decrement('created_instances');
+                                    }
                                 }
 
-                                unset($reservations, $awsInstancesInfo, $awsInstance);
-
-                            } else {
-                                //
-                                Log::debug('instance id ' . $instance->aws_instance_id . ' already terminated');
-                                $instance->setAwsStatusTerminated();
-
-                                InstanceHelper::cleanUpTerminatedInstanceData($aws, $instanceDetail);
-
-                                if ($instance->region->created_instances > 0) {
-                                    $instance->region->decrement('created_instances');
-                                }
-
-                                $instance->delete();
+                            } catch (Throwable $throwable) {
+                                Log::error($throwable->getMessage());
                             }
 
-                        } catch (Throwable $throwable) {
-                            Log::error($throwable->getMessage());
+                            unset($aws, $instanceDetail, $describeInstance);
                         }
-
-                        unset($aws, $instanceDetail, $describeInstance);
-                    }
-                }
+                });
             }
         });
     }
