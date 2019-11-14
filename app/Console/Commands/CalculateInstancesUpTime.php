@@ -103,7 +103,7 @@ class CalculateInstancesUpTime extends Command
                                 }
 
                             } catch (AwsException $exception) {
-
+                                Log::error($exception->getMessage());
                             } catch (Throwable $throwable) {
                                 Log::error($throwable->getMessage());
                             }
