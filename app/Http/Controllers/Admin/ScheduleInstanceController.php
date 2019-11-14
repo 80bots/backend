@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Helpers\QueryHelper;
 use App\Http\Controllers\AppController;
-use App\Http\Resources\Admin\SchedulingInstanceCollection;
-use App\Http\Resources\Admin\SchedulingInstanceResource;
+use App\Http\Resources\ScheduleCollection;
+use App\Http\Resources\ScheduleResource;
 use App\SchedulingInstance;
 use App\SchedulingInstancesDetails;
 use App\BotInstance;
@@ -57,7 +57,7 @@ class ScheduleInstanceController extends AppController
                 return $query->orderBy('created_at', 'desc');
             });
 
-            $instances  = (new SchedulingInstanceCollection($resource->paginate($limit)))->response()->getData();
+            $instances  = (new ScheduleCollection($resource->paginate($limit)))->response()->getData();
             $meta       = $instances->meta ?? null;
 
             $response = [
@@ -152,7 +152,7 @@ class ScheduleInstanceController extends AppController
                     ->where('id', '=', $id)->first();
 
                 if (! empty($instance)) {
-                    $resource = new SchedulingInstanceResource($instance);
+                    $resource = new ScheduleResource($instance);
 
                     return $this->success([
                         'instance' => $resource->response()->getData(),
@@ -221,14 +221,14 @@ class ScheduleInstanceController extends AppController
                 case 'status':
                     $instance->fill(['status' => $value]);
                     if ($instance->save()) {
-                        return $this->success((new SchedulingInstanceResource($instance))->toArray($request));
+                        return $this->success((new ScheduleResource($instance))->toArray($request));
                     } else {
                         return $this->error(__('admin.server_error'), __('admin.scheduling.not_updated'));
                     }
                 case 'details':
                     $this->updateOrCreateSchedulingInstancesDetails($instance, $value,
                         $request->user()->timezone->value ?? '+00:00');
-                    return $this->success((new SchedulingInstanceResource($instance))->toArray($request));
+                    return $this->success((new ScheduleResource($instance))->toArray($request));
                 default:
                     return $this->error(__('admin.server_error'), __('admin.scheduling.not_updated'));
             }

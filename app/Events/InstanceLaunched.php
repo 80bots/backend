@@ -9,8 +9,7 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use App\BotInstance;
-use App\Http\Resources\Admin\BotInstanceResource as AdminBotInstanceResource;
-use App\Http\Resources\User\BotInstanceResource as UserBotInstanceResource;
+use App\Http\Resources\BotInstanceResource;
 
 class InstanceLaunched implements ShouldBroadcast
 {
@@ -48,12 +47,8 @@ class InstanceLaunched implements ShouldBroadcast
      */
     public function broadcastWith()
     {
-        $instanceResource = $this->user->isAdmin()
-            ? (new AdminBotInstanceResource($this->data))->toArray(null)
-            : (new UserBotInstanceResource($this->data))->toArray(null);
-
         return [
-            'instance' => $instanceResource,
+            'instance' => (new BotInstanceResource($this->data))->toArray(null),
         ];
     }
 }

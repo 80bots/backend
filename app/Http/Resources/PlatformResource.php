@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Resources\Admin;
+namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class S3ObjectResource extends JsonResource
+class PlatformResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -15,8 +15,9 @@ class S3ObjectResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id'    => $this->id ?? '',
-            'link'  => $this->link ?? ''
+            'id'        => $this->id ?? '',
+            'name'      => $this->name ?? '',
+            'status'    => $this->status ?? '',
         ];
     }
 }

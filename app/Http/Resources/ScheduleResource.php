@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Resources\User;
+namespace App\Http\Resources;
 
 use App\Helpers\InstanceHelper;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Auth;
 
 class ScheduleResource extends JsonResource
 {
@@ -15,22 +16,26 @@ class ScheduleResource extends JsonResource
      */
     public function toArray($request)
     {
-        $instance = $this->userInstance ?? null;
+        $instance = collect($this->instance->toArray())
+            ->only([
+                'id', 'tag_name', 'aws_instance_id'
+            ])
+            ->toArray();
 
-        if (! empty($instance)) {
-            $instance = collect($instance->toArray())
-                ->only([
-                    'id', 'tag_name', 'aws_instance_id'
-                ])
-                ->toArray();
-        }
-
-        return [
+        $data = [
             'id'            => $this->id ?? '',
             'bot_name'      => $instance['tag_name'] ?? '',
             'instance_id'   => $instance['aws_instance_id'] ?? '',
             'status'        => $this->status ?? null,
             'details'       => InstanceHelper::getSchedulingDetails($this->details ?? null),
         ];
+
+        if (Auth::check() && Auth::user()->isAdmin()) {
+            $data = array_merge($data, [
+                'user' => $this->user->email ?? ''
+            ]);
+        }
+
+        return $data;
     }
 }

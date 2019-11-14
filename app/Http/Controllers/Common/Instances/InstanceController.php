@@ -1,14 +1,17 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Common\Instances;
 
 use App\AwsRegion;
 use App\BotInstance;
 use App\Events\InstanceStatusUpdated;
 use App\Helpers\ApiResponse;
+use App\Helpers\InstanceHelper;
 use App\Helpers\QueryHelper;
+use App\Http\Controllers\AppController;
 use App\Http\Resources\BotInstanceCollection;
 use App\Http\Resources\BotInstanceResource;
+use App\Jobs\InstanceChangeStatus;
 use App\Services\Aws;
 use App\Services\GitHub;
 use Illuminate\Http\Request;
@@ -16,8 +19,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
 
-class BotInstanceController extends AppController
-{
+class InstanceController extends AppController {
     const PAGINATE = 1;
 
     /**
@@ -32,12 +34,10 @@ class BotInstanceController extends AppController
             $search = $request->input('search');
             $sort   = $request->input('sort');
             $order  = $request->input('order') ?? 'asc';
-
-            $resource = BotInstance::withTrashed()->findByUserId(Auth::id());
-
-            // TODO: Add Filters
-
-            //
+            $resource = BotInstance::withTrashed();
+            if(!Auth::user()->isAdmin()) {
+                $resource->findByUserId(Auth::id());
+            }
             if (! empty($search)) {
                 $resource->where('bot_instances.tag_name', 'like', "%{$search}%")
                     ->orWhere('bot_instances.tag_user_email', 'like', "%{$search}%");
@@ -94,8 +94,6 @@ class BotInstanceController extends AppController
         $StartUpScript = array_filter(explode(';',$string));
         $runScript = $this->RunStartUpScript($StartUpScript);
         dd($runScript);*/
-
-        return $this->success();
     }
 
     /**
@@ -106,80 +104,78 @@ class BotInstanceController extends AppController
      */
     public function store(Request $request)
     {
-       /* $user_id = Auth::user()->id;
-        $bot_id = isset($request->bot_id) ? $request->bot_id : '';
-        try {
-            $bots = null;
-            $botObj = Bots::find($bot_id);
-            if(empty($botObj)){
-                return redirect()->back()->with('error', 'Bot Not Found Please Try Again');
-            } else {
-                $bots = $botObj;
-            }
-            $keyPair = $this->CreateKeyPair();
-            $SecurityGroup = $this->CreateSecurityGroupId();
+        /* $user_id = Auth::user()->id;
+         $bot_id = isset($request->bot_id) ? $request->bot_id : '';
+         try {
+             $bots = null;
+             $botObj = Bots::find($bot_id);
+             if(empty($botObj)){
+                 return redirect()->back()->with('error', 'Bot Not Found Please Try Again');
+             } else {
+                 $bots = $botObj;
+             }
+             $keyPair = $this->CreateKeyPair();
+             $SecurityGroup = $this->CreateSecurityGroupId();
 
-            $keyPairName = $keyPair['keyName'];
-            $keyPairPath = $keyPair['path'];
+             $keyPairName = $keyPair['keyName'];
+             $keyPairPath = $keyPair['path'];
 
-            $groupId = $SecurityGroup['securityGroupId'];
-            $groupName = $SecurityGroup['securityGroupName'];
-            $instanceIds = [];
-            // Instance Create
-            $newInstanceResponse = $this->LaunchInstance($keyPairName, $groupName, $bots);
-            $instanceId = $newInstanceResponse->getPath('Instances')[0]['InstanceId'];
+             $groupId = $SecurityGroup['securityGroupId'];
+             $groupName = $SecurityGroup['securityGroupName'];
+             $instanceIds = [];
+             // Instance Create
+             $newInstanceResponse = $this->LaunchInstance($keyPairName, $groupName, $bots);
+             $instanceId = $newInstanceResponse->getPath('Instances')[0]['InstanceId'];
 
-            array_push($instanceIds, $instanceId);
-            $waitUntilResponse = $this->waitUntil($instanceIds);
+             array_push($instanceIds, $instanceId);
+             $waitUntilResponse = $this->waitUntil($instanceIds);
 
-            /*if(!empty($bots)){
-                $StartUpScriptString = $bots->aws_startup_script;
-                $StartUpScript = explode(PHP_EOL, $StartUpScriptString);
-                $runScript = $this->RunStartUpScript($StartUpScript);
-            }*/
+             /*if(!empty($bots)){
+                 $StartUpScriptString = $bots->aws_startup_script;
+                 $StartUpScript = explode(PHP_EOL, $StartUpScriptString);
+                 $runScript = $this->RunStartUpScript($StartUpScript);
+             }*/
 
-            // Instance Describe for Public Dns Name
-            /*$describeInstancesResponse = $this->DescribeInstances($instanceIds);
-            $instanceArray = $describeInstancesResponse->getPath('Reservations')[0]['Instances'][0];
+        // Instance Describe for Public Dns Name
+        /*$describeInstancesResponse = $this->DescribeInstances($instanceIds);
+        $instanceArray = $describeInstancesResponse->getPath('Reservations')[0]['Instances'][0];
 
-            $LaunchTime = isset($instanceArray['LaunchTime']) ? $instanceArray['LaunchTime'] : '';
-            $publicIp = isset($instanceArray['PublicIpAddress']) ? $instanceArray['PublicIpAddress'] : '';
-            $publicDnsName = isset($instanceArray['PublicDnsName']) ? $instanceArray['PublicDnsName'] : '';
+        $LaunchTime = isset($instanceArray['LaunchTime']) ? $instanceArray['LaunchTime'] : '';
+        $publicIp = isset($instanceArray['PublicIpAddress']) ? $instanceArray['PublicIpAddress'] : '';
+        $publicDnsName = isset($instanceArray['PublicDnsName']) ? $instanceArray['PublicDnsName'] : '';
 
-            $awsAmiId = env('AWS_IMAGEID','ami-0cd3dfa4e37921605');
+        $awsAmiId = env('AWS_IMAGEID','ami-0cd3dfa4e37921605');
 
-            $created_at = date('Y-m-d H:i:s', strtotime($LaunchTime));
+        $created_at = date('Y-m-d H:i:s', strtotime($LaunchTime));
 
-            // store instance details in database
-            $userInstance = new UserInstances();
-            $userInstance->user_id = $user_id;
-            $userInstance->bot_id = $bot_id;
-            $userInstance->aws_instance_id = $instanceId;
-            $userInstance->aws_ami_id = $awsAmiId;
-            $userInstance->aws_security_group_id = $groupId;
-            $userInstance->aws_security_group_name = $groupName;
-            $userInstance->aws_public_ip = $publicIp;
-            $userInstance->status = 'running';
-            $userInstance->aws_public_dns = $publicDnsName;
-            $userInstance->aws_pem_file_path = $keyPairPath;
-            $userInstance->created_at = $created_at;
-            if($userInstance->save()){
-                $userInstanceDetail = new UserInstancesDetails();
-                $userInstanceDetail->user_instance_id = $userInstance->id;
-                $userInstanceDetail->start_time = $created_at;
-                $userInstanceDetail->save();
-                session()->flash('success', 'Instance Create successfully');
-                return redirect(route('user.instance.index'));
-            }
-            session()->flash('error', 'Please Try again later');
+        // store instance details in database
+        $userInstance = new UserInstances();
+        $userInstance->user_id = $user_id;
+        $userInstance->bot_id = $bot_id;
+        $userInstance->aws_instance_id = $instanceId;
+        $userInstance->aws_ami_id = $awsAmiId;
+        $userInstance->aws_security_group_id = $groupId;
+        $userInstance->aws_security_group_name = $groupName;
+        $userInstance->aws_public_ip = $publicIp;
+        $userInstance->status = 'running';
+        $userInstance->aws_public_dns = $publicDnsName;
+        $userInstance->aws_pem_file_path = $keyPairPath;
+        $userInstance->created_at = $created_at;
+        if($userInstance->save()){
+            $userInstanceDetail = new UserInstancesDetails();
+            $userInstanceDetail->user_instance_id = $userInstance->id;
+            $userInstanceDetail->start_time = $created_at;
+            $userInstanceDetail->save();
+            session()->flash('success', 'Instance Create successfully');
             return redirect(route('user.instance.index'));
         }
-        catch (\Exception $e) {
-            session()->flash('error', $e->getMessage());
-            return redirect(route('user.instance.index'));
-        }*/
-
-        return $this->success();
+        session()->flash('error', 'Please Try again later');
+        return redirect(route('user.instance.index'));
+    }
+    catch (\Exception $e) {
+        session()->flash('error', $e->getMessage());
+        return redirect(route('user.instance.index'));
+    }*/
     }
 
     /**
@@ -189,12 +185,13 @@ class BotInstanceController extends AppController
      * @param $id
      * @return Response
      */
-    public function show(Request $request, $id) {
+    public function show(Request $request, $id)
+    {
         $resource = BotInstance::withTrashed()->find($id);
         if(!empty($resource)) {
             return $this->success((new BotInstanceResource($resource))->toArray($request));
         } else {
-            return $this->error('Not found', __('admin.bots.not_found'));
+            $this->error('Not found', __('admin.bots.not_found'));
         }
     }
 
@@ -206,7 +203,7 @@ class BotInstanceController extends AppController
      */
     public function edit(BotInstance $userInstances)
     {
-        return $this->success();
+        //
     }
 
     /**
@@ -220,10 +217,7 @@ class BotInstanceController extends AppController
     {
         try {
 
-            $instance = BotInstance::where([
-                ['id', '=', $id],
-                ['user_id', '=', Auth::id()]
-            ])->first();
+            $instance = $this->getInstanceWithCheckUser($id);
 
             if (empty($instance)) {
                 return $this->notFound(__('user.not_found'), __('user.instances.not_found'));
@@ -242,7 +236,7 @@ class BotInstanceController extends AppController
                     switch ($key) {
                         case 'status':
 
-                            if ($this->changeStatus($value, $id)) {
+                            if (InstanceHelper::changeInstanceStatus($value, $id)) {
 
                                 $instance = new BotInstanceResource(BotInstance::withTrashed()
                                     ->where('id', '=', $id)->first());
@@ -253,11 +247,8 @@ class BotInstanceController extends AppController
                             } else {
                                 return $this->error(__('user.server_error'), __('user.instances.not_updated'));
                             }
-
-                            break;
                         default:
                             return $this->error(__('user.server_error'), __('user.instances.not_updated'));
-                            break;
                     }
                 }
 
@@ -278,7 +269,7 @@ class BotInstanceController extends AppController
      */
     public function destroy(BotInstance $userInstances)
     {
-        return $this->success();
+        //
     }
 
     /**
@@ -309,10 +300,31 @@ class BotInstanceController extends AppController
                 }
 
                 GitHub::createIssue('Issue Report', $body);
+                return $this->success([]);
             }
-            return $this->success([]);
         } else {
             return $this->error('Not found', __('admin.bots.not_found'));
         }
+    }
+
+    /**
+     * @param string|null $id
+     * @param bool $withTrashed
+     * @return BotInstance|null
+     */
+    public function getInstanceWithCheckUser(?string $id, $withTrashed = false): ?BotInstance
+    {
+        /** @var BotInstance $query */
+        $query = BotInstance::where('id', '=', $id)->orWhere('aws_instance_id', '=', $id);
+
+        if ($withTrashed) {
+            $query->withTrashed();
+        }
+
+        if (! Auth::user()->isAdmin()) {
+            $query->where('user_id', '=', Auth::id());
+        }
+
+        return $query->first();
     }
 }

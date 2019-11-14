@@ -167,7 +167,6 @@ class StoreUserInstance implements ShouldQueue
 
                     $this->instance->update([
                         'tag_name'          => $awsData['tagName'],
-                        'tag_user_email'    => $this->user->email ?? '',
                         'aws_instance_id'   => $instanceArray['InstanceId'] ?? '',
                         'aws_public_ip'     => $instanceArray['PublicIpAddress'] ?? '',
                         'start_time'        => $launchTime->format('Y-m-d H:i:s'),

@@ -15,12 +15,16 @@ class AwsSettingsTableSeeder extends Seeder
         // moved to /etc/rc.local file
         //cd /home/\$username/
         //su - \$username -c 'cd ~/data-streamer && git pull && cp .env.example .env && yarn && yarn build && pm2 start --name "data-streamer" yarn -- start'
-
+        $url = config('app.url');
+        $parsed = parse_url($url);
         $script = <<<HERESHELL
 file="puppeteer/params/params.json"
 username="kabas"
 cd /home/\$username/
-su - \$username -c 'cd ~/data-streamer && git pull && cp .env.example .env && yarn && yarn build && pm2 start --name "data-streamer" yarn -- start'
+su - \$username -c 'cd ~/data-streamer && git pull && cp .env.example .env'
+su - \$username -c 'cd ~/data-streamer && echo "SOCKET_SERVER_HOST=http://{$parsed['host']}:6001" >> ./.env'
+su - \$username -c 'cd ~/data-streamer && echo "API_URL=http://{$url}" >> ./.env'
+su - \$username -c 'cd ~/data-streamer && yarn && yarn build && pm2 start --name "data-streamer" yarn -- start'
 HERESHELL;
 
         AwsSetting::create([

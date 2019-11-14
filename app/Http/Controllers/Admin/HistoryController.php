@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\CreditUsage;
 use App\Helpers\QueryHelper;
 use App\Http\Controllers\AppController;
-use App\Http\Resources\Admin\CreditUsageCollection;
+use App\Http\Resources\CreditUsageCollection;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Throwable;

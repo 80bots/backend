@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Resources\User;
+namespace App\Http\Resources;
 
+use Carbon\Carbon;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class S3ObjectResource extends JsonResource
@@ -16,7 +17,10 @@ class S3ObjectResource extends JsonResource
     {
         return [
             'id'    => $this->id ?? '',
-            'link'  => $this->link ?? ''
+            'name'  => $this->name,
+            'url'   => $this->link ?? '',
+            'type'  => $this->entity,
+            'path'  => $this->path
         ];
     }
 }

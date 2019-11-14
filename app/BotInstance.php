@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Helpers\InstanceHelper;
 use App\Helpers\QueryHelper;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Jenssegers\Mongodb\Eloquent\HybridRelations;
@@ -70,6 +71,11 @@ class BotInstance extends BaseModel
         'start_time'
     ];
 
+    public function getBaseS3DirAttribute ()
+    {
+        return InstanceHelper::DATA_STREAMER_FOLDER . '/' . $this->tag_name;
+    }
+
     public function scopeFindByUserId($query, $userId)
     {
         return $query->where('user_id', $userId);
@@ -87,7 +93,7 @@ class BotInstance extends BaseModel
 
     public function scopeFindRunningInstance($query)
     {
-        return $query->where('aws_status', self::STATUS_RUNNING)->get();
+        return $query->where('aws_status', self::STATUS_RUNNING);
     }
 
     public function scopeFindTerminated($query)

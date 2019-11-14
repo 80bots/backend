@@ -3,8 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Bot;
-use App\Helpers\CommonHelper;
-use App\Http\Resources\User\BotCollection;
+use App\Http\Resources\BotCollection;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Throwable;
@@ -16,6 +15,7 @@ class BotController extends Controller
     public function index(Request $request)
     {
         try {
+
             $limit      = $request->query('limit') ?? self::PAGINATE;
             $platform   = $request->input('platform');
             $search     = $request->input('search');
@@ -36,8 +36,7 @@ class BotController extends Controller
             //
             if (! empty($search)) {
                 $resource->where('name', 'like', "%{$search}%")
-                    ->orWhere('aws_ami_image_id', 'like', "%{$search}%")
-                    ->orWhere('aws_ami_name', 'like', "%{$search}%");
+                    ->orWhere('description', 'like', "%{$search}%");
             }
 
             //

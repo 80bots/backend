@@ -8,6 +8,7 @@ use App\BotInstance;
 use App\BotInstancesDetails;
 use App\DeleteSecurityGroup;
 use App\InstanceSessionsHistory;
+use App\Jobs\InstanceChangeStatus;
 use App\S3Object;
 use App\SchedulingInstancesDetails;
 use App\Services\Aws;
@@ -17,13 +18,18 @@ use Carbon\Carbon;
 use Carbon\CarbonTimeZone;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Nubs\RandomNameGenerator\All as AllRandomName;
+use Nubs\RandomNameGenerator\Alliteration as AlliterationName;
+use Nubs\RandomNameGenerator\Vgng as VideoGameName;
 use Throwable;
 
 class InstanceHelper
 {
     const LIMIT_S3_LIST_OBJECTS = 1000;
     const LIMIT_S3_OBJECTS_INFO = 2;
+    const DATA_STREAMER_FOLDER  = "streamer-data";
 
     /**
      * @param SchedulingInstancesDetails $detail
@@ -54,7 +60,7 @@ class InstanceHelper
 
         foreach ($schedulers as $scheduler) {
 
-            if (! empty($scheduler->instance) && ! empty($scheduler->details)) {
+            if (! empty($scheduler->details)) {
 
                 foreach ($scheduler->details as $detail) {
 
@@ -143,7 +149,10 @@ class InstanceHelper
 
                         $instanceId = $instance['aws_instance_id'] ?? null;
 
-                        $botInstance = $user->instances()->where('aws_instance_id', '=', $instanceId)->first();
+                        $botInstance = $user->instances()
+                            ->where('aws_instance_id', '=', $instanceId)
+                            ->orWhere('tag_name', '=', $instance['tag_name'])
+                            ->first();
 
                         if (! empty($botInstance)) {
                             self::syncInstancesUpdateStatus($botInstance, $status, $instance, $currentDate);
@@ -337,7 +346,7 @@ class InstanceHelper
 
             $diffTime = $created->diffInDays($now);
 
-            for ($i = 0; $i <= ($diffTime+1); $i++) {
+            for ($i = $diffTime; $i >= 0; $i--) {
                 if ($i==0) {
                     array_push($dates, $created->toDateString());
                 } else {
@@ -368,16 +377,17 @@ class InstanceHelper
     }
 
     /**
-     * @param $type
+     * @param string $type
      * @return string
      */
-    public static function getTypeS3Object($type): string
+    public static function getTypeS3Object(?string $type): ?string
     {
         switch ($type) {
             case S3Object::TYPE_SCREENSHOTS:
             case S3Object::TYPE_IMAGES:
             case S3Object::TYPE_LOGS:
             case S3Object::TYPE_JSON:
+            case S3Object::TYPE_ENTITY:
                 return $type;
             default:
                 return S3Object::TYPE_SCREENSHOTS;
@@ -557,6 +567,120 @@ class InstanceHelper
         ];
     }
 
+    public static function getObjectByPath($instanceId, string $path): S3Object
+    {
+        $pathInfo   = pathinfo(trim($path, '/'));
+        $parentPath = $pathInfo['dirname'];
+        $filename   = $pathInfo['filename'];
+        $entity     = !empty($pathInfo['extension']) ? S3Object::ENTITY_FILE : S3Object::ENTITY_FOLDER;
+        $type       = self::getTypeS3ObjectByExtension($pathInfo['extension'] ?? null, $path);
+
+        if($parentPath === '.') {
+            $object = S3Object::firstOrCreate([
+                'instance_id'   => $instanceId,
+                'path'          => $path,
+                'name'          => $filename,
+                'entity'        => $entity,
+                'type'          => $type
+            ]);
+        } else {
+            $object = S3Object::wherePath($path)
+                ->whereInstanceId($instanceId)
+                ->whereEntity($entity)
+                ->first();
+
+            if (! $object) {
+                $parent = self::getObjectByPath($instanceId, $parentPath);
+                $object = $parent->children()->create([
+                    'instance_id'   => $instanceId,
+                    'path'          => $path,
+                    'name'          => $filename,
+                    'entity'        => $entity,
+                    'type'          => $type
+                ]);
+            }
+        }
+        return $object;
+    }
+
+    private static function getTypeS3ObjectByExtension(?string $extension, string $path): string
+    {
+        switch ($extension) {
+            case 'json':
+                return S3Object::TYPE_JSON;
+            case 'jpeg':
+            case 'jpg':
+            case 'png':
+                if (strpos($path, 'screenshots') !== false){
+                    return S3Object::TYPE_SCREENSHOTS;
+                } else {
+                    return S3Object::TYPE_IMAGES;
+                }
+            case 'log':
+                return S3Object::TYPE_LOGS;
+            default:
+                return S3Object::TYPE_ENTITY;
+        }
+    }
+
+    /**
+     * @param BotInstance $instance
+     * @param S3Object $folder
+     * @param string $type
+     * @param int $limit
+     * @param int $offset
+     */
+    public static function updateObjectsOldLinks(BotInstance $instance, string $folder, string $type, int $limit, int $offset): void
+    {
+        $expires = Carbon::now()->addMinutes(10)->toDateTimeString();
+
+        $credentials = [
+            'key'    => config('aws.iam.access_key'),
+            'secret' => config('aws.iam.secret_key')
+        ];
+
+        $aws = new Aws;
+        $aws->s3Connection('', $credentials);
+
+        $objects = $instance->s3Objects()
+            ->where('path', 'like', "{$folder}/{$type}/%")
+            ->where('entity', '=', S3Object::ENTITY_FILE)
+            ->where('name', '!=', 'thumbnail')
+            ->where(function ($query) use ($expires) {
+                $query->where('expires', '<=', $expires)
+                    ->orWhereNull('link');
+            })
+            ->latest()
+            ->skip($offset)
+            ->take($limit)
+            ->get();
+
+        foreach ($objects as $object) {
+            $prefix = "{$instance->baseS3Dir}/{$object->path}";
+            $object->update([
+                'expires'   => Carbon::now()->addHour()->toDateTimeString(),
+                'link'      => $aws->getPresignedLink($aws->getS3Bucket(), $prefix)
+            ]);
+        }
+
+        unset($expires, $credentials, $aws, $objects);
+    }
+
+    public static function getFreshLink(S3Object $object): string
+    {
+        $credentials = [
+            'key'    => config('aws.iam.access_key'),
+            'secret' => config('aws.iam.secret_key')
+        ];
+
+        $aws = new Aws;
+        $aws->s3Connection('', $credentials);
+        $base = $object->instance->baseS3Dir;
+        $key = "{$base}/{$object->path}";
+        return $aws->getPresignedLink($aws->getS3Bucket(), $key);
+    }
+
+
     /**
      * @param Aws $aws
      * @param string|null $ip
@@ -565,8 +689,8 @@ class InstanceHelper
      */
     public static function createAwsKeyAndGroup(Aws $aws, ?string $ip): ?array
     {
+        $tagName        = self::createTagName();
         $keyPair        = $aws->createKeyPair(config('aws.bucket'));
-        $tagName        = $aws->createTagName();
         $securityGroup  = $aws->createSecretGroup($ip);
 
         if (empty($keyPair) || empty($tagName) || empty($securityGroup)) {
@@ -580,5 +704,95 @@ class InstanceHelper
             'groupId'       => $securityGroup['securityGroupId'],
             'groupName'     => $securityGroup['securityGroupName'],
         ];
+    }
+
+    /**
+     * The random string with number
+     * @return string
+     */
+    public static function createTagName(): string
+    {
+        $generator = new AllRandomName([
+            new AlliterationName(),
+            new VideoGameName()
+        ]);
+
+        return strtolower(preg_replace('/[^a-z\d]/ui', '', $generator->getName())) . rand(100,999);
+    }
+
+    /**
+     * @param string|null $id
+     * @param bool $withTrashed
+     * @return BotInstance|null
+     */
+    public static function getInstanceWithCheckUser(?string $id, $withTrashed = false): ?BotInstance
+    {
+        /** @var BotInstance $query */
+        $query = BotInstance::where('id', '=', $id)
+            ->orWhere('aws_instance_id', '=', $id);
+
+        if($withTrashed) {
+            $query->withTrashed();
+        }
+
+        if (! Auth::user()->isAdmin()) {
+            $query->where('user_id', '=', Auth::id());
+        }
+
+        return $query->first();
+    }
+
+    public static function changeInstanceStatus($status, $id): bool
+    {
+        $instance = self::getInstanceWithCheckUser($id);
+
+        if (empty($instance)) {
+            return false;
+        }
+
+        $instanceDetail = $instance->details()->latest()->first();
+
+        if (empty($instanceDetail)) {
+            return false;
+        }
+
+        if (empty($instance->aws_region_id)) {
+            return false;
+        }
+
+        $user   = User::find(Auth::id());
+        $aws    = new Aws;
+
+        //
+        $instance->clearPublicIp();
+
+        try {
+
+            $describeInstancesResponse = $aws->describeInstances(
+                [$instance->aws_instance_id ?? null],
+                $instance->region->code
+            );
+
+            if (! $describeInstancesResponse->hasKey('Reservations') || self::checkTerminatedStatus($describeInstancesResponse)) {
+                $instance->setAwsStatusTerminated();
+
+                if ($instance->region->created_instances > 0) {
+                    $instance->region->decrement('created_instances');
+                }
+
+                self::cleanUpTerminatedInstanceData($aws, $instanceDetail);
+                return true;
+            }
+
+        } catch (Throwable $throwable) {
+            Log::error($throwable->getMessage());
+            return false;
+        }
+
+        $instance->setAwsStatusPending();
+
+        dispatch(new InstanceChangeStatus($instance, $user, $instance->region, $status));
+
+        return true;
     }
 }

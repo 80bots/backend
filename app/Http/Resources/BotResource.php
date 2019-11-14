@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources\User;
+namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -14,14 +14,16 @@ class BotResource extends JsonResource
      */
     public function toArray($request)
     {
-        $tags = $this->tags->isNotEmpty() ? $this->tags : collect([]);
-
-        $tags = $tags->map(function ($item, $key) {
-            return [
-                'id'    => $item['id'] ?? null,
-                'name'  => $item['name'] ?? '',
-            ];
-        })->toArray();
+        if ($this->tags->isNotEmpty()) {
+            $tags = $this->tags->map(function ($item, $key) {
+                return [
+                    'id'    => $item['id'] ?? null,
+                    'name'  => $item['name'] ?? '',
+                ];
+            })->toArray();
+        } else {
+            $tags = collect([]);
+        }
 
         $params = json_decode($this->parameters ?? '');
         $formattedParameters = [];
@@ -42,7 +44,7 @@ class BotResource extends JsonResource
             'name'              => $this->name ?? '',
             'platform'          => $this->platform->name ?? '',
             'description'       => $this->description ?? '',
-            'parameters'        => $formattedParameters ?? array(),
+            'parameters'        => $formattedParameters ?? [],
             'aws_ami_image_id'  => $this->aws_ami_image_id ?? '',
             'aws_ami_name'      => $this->aws_ami_name ?? '',
             'aws_instance_type' => $this->aws_instance_type ?? '',

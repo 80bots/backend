@@ -435,20 +435,6 @@ class Aws
     }
 
     /**
-     * The random string with number
-     * @return string
-     */
-    public function createTagName(): string
-    {
-        $generator = new AllRandomName([
-            new AlliterationName(),
-            new VideoGameName()
-        ]);
-
-        return strtolower(preg_replace('/[^a-z\d]/ui', '', $generator->getName())) . rand(100,999);
-    }
-
-    /**
      * Create a Security Group
      *
      * @param string|null $ip
@@ -667,6 +653,12 @@ class Aws
         return $this->ec2->runInstances($instanceLaunchRequest);
     }
 
+    /**
+     * @param MongoInstance $instance
+     * @param string $keyPairName
+     * @param string $securityGroupName
+     * @return Result
+     */
     public function restoreInstance(MongoInstance $instance, string $keyPairName, string $securityGroupName): Result
     {
         if (empty($this->ec2)) {
@@ -877,6 +869,11 @@ class Aws
         return $this->ec2->describeInstances([ 'InstanceIds' => $instanceIds ]);
     }
 
+    /**
+     * @param string $region
+     * @param array $parameters
+     * @return Result
+     */
     public function describeInstanceStatus(string $region, array $parameters): Result
     {
         if (empty($this->ec2)) {
@@ -1023,32 +1020,34 @@ class Aws
      */
     protected function startupScript(string $params = '', string $path = ''): string
     {
+        // scripts performing after reloading server
         $shell = <<<HERESHELL
 ############## Output to startup.sh file ###############
 shellFile="startup.sh"
 cat > \$shellFile <<EOF
 #!/bin/bash
-su - \$username -c 'DISPLAY=:1 node puppeteer/{$path}'
+su - \$username -c 'cd ~/data-streamer && git pull && yarn && yarn build && pm2 start --name "data-streamer" yarn -- start'
+su - \$username -c 'cd ~/puppeteer && yarn && DISPLAY=:1 node {$path} > /dev/null'
 EOF
 chmod +x \$shellFile && chown \$username:\$username \$shellFile
 HERESHELL;
 
-        $rc = '';
-
-//        $rc = <<<HERESHELL
-//############## Output to /etc/rc.local file ###############
-//rcFile="/etc/rc.local"
-//cat > \$rcFile <<EOF
-//#!/bin/bash
-///home/\$username/\$shellFile
-//exit 0
-//EOF
-//chmod +x \$rcFile
-//HERESHELL;
+        // This file is performed after reloading server
+        $rc = <<<HERESHELL
+############## Output to /etc/rc.local file ###############
+rcFile="/etc/rc.local"
+cat > \$rcFile <<EOF
+#!/bin/bash
+/home/\$username/\$shellFile
+exit 0
+EOF
+chmod +x \$rcFile
+HERESHELL;
 
         $accessKey = config('aws.iam.access_key');
         $secretKey = config('aws.iam.secret_key');
 
+        // file with credentials to AWS S3
         $credentials = <<<HERESHELL
 ############## Output to credentials.json file ###############
 credentialsFile="credentials.json"
@@ -1062,19 +1061,20 @@ chown \$username:\$username \$credentialsFile
 HERESHELL;
 
         $settings = AwsSetting::isDefault()->first();
-
+// run data-streamer first ($settings->script)
         return <<<HERESHELL
 {$settings->script}
 {$shell}
 {$rc}
 {$credentials}
 ############## Output user params to params.json file ###############
+su - \$username -c 'echo "starting script {$path}"'
+su - \$username -c 'rm -rf ~/.screenshots/*'
+su - \$username -c 'cd ~/puppeteer && git pull'
 cat > \$file <<EOF
 {$params}
 EOF
-su - \$username -c 'echo "starting script {$path}"'
-su - \$username -c 'rm -rf ~/.screenshots/*'
-su - \$username -c 'cd ~/puppeteer && git pull && yarn && mkdir logs && DISPLAY=:1 node {$path} > /dev/null'
+su - \$username -c 'cd ~/puppeteer && yarn && mkdir logs && DISPLAY=:1 node {$path} > /dev/null'
 HERESHELL;
     }
 
