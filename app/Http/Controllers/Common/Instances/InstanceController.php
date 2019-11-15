@@ -17,6 +17,7 @@ use App\Services\GitHub;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class InstanceController extends AppController {
@@ -279,31 +280,41 @@ class InstanceController extends AppController {
      */
     public function reportIssue(Request $request, $id)
     {
-        $instance = BotInstance::withTrashed()->find($id);
-        $aws = new Aws();
-        if(!empty($instance)) {
-            $resource = new BotInstanceResource($instance);
-            if(!empty($request->screenshots)) {
-                $instanceId = $resource->toArray($request)['instance_id'];
-                $botName = $resource->toArray($request)['bot_name'];
-                $urls = $aws->uploadScreenshots($instanceId, $request->screenshots);
+        $screenshots    = $request->input('screenshots');
+        $message        = $request->input('message');
+        $instance       = BotInstance::withTrashed()->find($id);
 
-                $body = "User: {$request->user()->email}\nInstance ID: {$instanceId}\nBot Name: {$botName}
-                \nMessage: {$request->message}";
+        if (empty($instance)) {
+            return $this->error(__('keywords.not_found'), __('keywords.bots.not_found'));
+        }
 
-                if(!empty($urls)) {
-                    $screenshots = '';
-                    for($i = 0; $i < count($urls); $i++) {
-                        $screenshots = $screenshots . " ![{$request->screenshots[$i]->getClientOriginalName()}]({$urls[$i]})";
-                    }
-                    $body = $body . "\n{$screenshots}";
+        if (empty($screenshots)) {
+            return $this->error(__('keywords.error'), __('keywords.bots.error_screenshots'));
+        }
+
+        try {
+
+            $aws    = new Aws();
+            $urls   = $aws->uploadScreenshots($instance->aws_instance_id, $screenshots);
+
+            $body = "User: {$request->user()->email}\nInstance ID: {$instance->aws_instance_id}\nBot Name: {$instance->bot->name}
+                \nMessage: {$message}";
+
+            if (! empty($urls)) {
+                $screenshots = '';
+                for ($i = 0; $i < count($urls); $i++) {
+                    $screenshots = $screenshots . " ![{$request->screenshots[$i]->getClientOriginalName()}]({$urls[$i]})";
                 }
-
-                GitHub::createIssue('Issue Report', $body);
-                return $this->success([]);
+                $body = $body . "\n{$screenshots}";
             }
-        } else {
-            return $this->error('Not found', __('admin.bots.not_found'));
+
+            GitHub::createIssue('Issue Report', $body);
+
+            return $this->success([]);
+
+        } catch (Throwable $throwable) {
+            Log::error($throwable->getMessage());
+            return $this->error(__('keywords.server_error'), $throwable->getMessage());
         }
     }
 

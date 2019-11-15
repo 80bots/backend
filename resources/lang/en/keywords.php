@@ -25,6 +25,7 @@ return [
     'action' => 'Action',
     'placeholder' => 'Placeholder',
     'bots' => [
+        'error_screenshots' => 'You have to select the screenshot',
         'error_parameters' => 'Getting error of bot\'s launch parameters',
         'edit' => 'Edit Bot',
         'action' => 'Action',

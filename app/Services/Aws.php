@@ -1226,7 +1226,7 @@ HERESHELL;
     {
         $result = [];
 
-        if(empty($this->s3)) {
+        if (empty($this->s3)) {
             $this->s3Connection('us-east-2', null,'80bots-issued-screenshots');
         }
 
@@ -1244,6 +1244,7 @@ HERESHELL;
 
             $result[] = $res['ObjectURL'];
         }
+
         return $result;
     }
 
