@@ -294,11 +294,15 @@ class InstanceController extends AppController {
 
         try {
 
+            Log::info("Report Issue");
+
             $aws    = new Aws();
             $urls   = $aws->uploadScreenshots($instance->aws_instance_id, $screenshots);
 
             $body = "User: {$request->user()->email}\nInstance ID: {$instance->aws_instance_id}\nBot Name: {$instance->bot->name}
                 \nMessage: {$message}";
+
+            Log::debug($body);
 
             if (! empty($urls)) {
                 $screenshots = '';
@@ -307,6 +311,8 @@ class InstanceController extends AppController {
                 }
                 $body = $body . "\n{$screenshots}";
             }
+
+            Log::debug($body);
 
             GitHub::createIssue('Issue Report', $body);
 
