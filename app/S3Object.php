@@ -30,7 +30,7 @@ class S3Object extends BaseModel
         'type',
     ];
 
-    public function getS3Path ()
+    public function getS3Path()
     {
         $rootDir = $this->instance->baseS3Dir;
         return $rootDir . '/' . $this->attributes['path'];
