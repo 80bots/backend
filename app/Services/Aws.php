@@ -1063,6 +1063,7 @@ HERESHELL;
         $settings = AwsSetting::isDefault()->first();
 // run data-streamer first ($settings->script)
         return <<<HERESHELL
+echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
 {$settings->script}
 {$shell}
 {$rc}
