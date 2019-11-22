@@ -84,7 +84,7 @@ class SyncS3Objects implements ShouldQueue
 
                     if ($contents->isNotEmpty()) {
                         foreach ($contents as $path) {
-                            $object = str_replace($prefix, '', $path);
+                            $object = str_replace("{$prefix}/", '', $path);
                             InstanceHelper::getObjectByPath($this->instance->id, $object);
                         }
                     }

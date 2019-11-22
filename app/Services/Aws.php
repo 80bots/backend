@@ -8,11 +8,13 @@ use App\BotInstance;
 use App\Helpers\GeneratorID;
 use App\MongoInstance;
 use App\User;
+use Aws\CommandPool;
 use Aws\Ec2\Ec2Client;
 use Aws\Exception\AwsException;
 use Aws\Iam\Exception\IamException;
 use Aws\Iam\IamClient;
 use Aws\Result;
+use Aws\ResultInterface;
 use Aws\S3\Exception\S3Exception;
 use Aws\S3\S3Client;
 use Aws\S3\Transfer;
@@ -26,6 +28,7 @@ use Nubs\RandomNameGenerator\All as AllRandomName;
 use Nubs\RandomNameGenerator\Alliteration as AlliterationName;
 use Nubs\RandomNameGenerator\Vgng as VideoGameName;
 use Throwable;
+use function Zend\Diactoros\normalizeUploadedFiles;
 
 class Aws
 {
@@ -1063,6 +1066,7 @@ HERESHELL;
         $settings = AwsSetting::isDefault()->first();
 // run data-streamer first ($settings->script)
         return <<<HERESHELL
+echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
 {$settings->script}
 {$shell}
 {$rc}
@@ -1226,7 +1230,7 @@ HERESHELL;
     {
         $result = [];
 
-        if(empty($this->s3)) {
+        if (empty($this->s3)) {
             $this->s3Connection('us-east-2', null,'80bots-issued-screenshots');
         }
 
@@ -1244,7 +1248,50 @@ HERESHELL;
 
             $result[] = $res['ObjectURL'];
         }
+
         return $result;
+    }
+
+    /**
+     * @param array $sources
+     * @return array|null
+     */
+    public function copyIssuedObject(array $sources): ?array
+    {
+        if (empty($this->s3)) {
+            $this->s3Connection('us-east-2', null, '');
+        }
+
+        $batch = [];
+
+        foreach ($sources as $source) {
+            $batch[] = $this->s3->getCommand('CopyObject', [
+                'Bucket'     => '80bots-issued-screenshots',
+                'Key'        => $source['path'],
+                'CopySource' => "{$this->s3Bucket}/{$source['source']}",
+            ]);
+        }
+
+        try {
+
+            $results    = CommandPool::batch($this->s3, $batch);
+            $urls       = [];
+
+            foreach($results as $result) {
+                if ($result->hasKey('ObjectURL')) {
+                    $urls[] = $result->get('ObjectURL');
+                }
+            }
+
+            return $urls;
+
+        } catch (AwsException $exception) {
+            Log::error($exception->getMessage());
+        } catch (Throwable $throwable) {
+            Log::error($throwable->getMessage());
+        }
+
+        return null;
     }
 
     /**

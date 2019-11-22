@@ -569,7 +569,8 @@ class InstanceHelper
 
     public static function getObjectByPath($instanceId, string $path): S3Object
     {
-        $pathInfo   = pathinfo(trim($path, '/'));
+        $path = trim($path, '/');
+        $pathInfo   = pathinfo($path);
         $parentPath = $pathInfo['dirname'];
         $filename   = $pathInfo['filename'];
         $entity     = !empty($pathInfo['extension']) ? S3Object::ENTITY_FILE : S3Object::ENTITY_FOLDER;

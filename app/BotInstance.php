@@ -71,7 +71,7 @@ class BotInstance extends BaseModel
         'start_time'
     ];
 
-    public function getBaseS3DirAttribute ()
+    public function getBaseS3DirAttribute()
     {
         return InstanceHelper::DATA_STREAMER_FOLDER . '/' . $this->tag_name;
     }

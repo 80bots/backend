@@ -25,6 +25,8 @@ return [
     'action' => 'Action',
     'placeholder' => 'Placeholder',
     'bots' => [
+        'error_screenshots' => 'You have to select the screenshot',
+        'not_found_screenshots' => 'The screenshots weren\'t found in the database',
         'error_parameters' => 'Getting error of bot\'s launch parameters',
         'edit' => 'Edit Bot',
         'action' => 'Action',

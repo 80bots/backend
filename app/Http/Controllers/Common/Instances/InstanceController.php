@@ -11,12 +11,13 @@ use App\Helpers\QueryHelper;
 use App\Http\Controllers\AppController;
 use App\Http\Resources\BotInstanceCollection;
 use App\Http\Resources\BotInstanceResource;
-use App\Jobs\InstanceChangeStatus;
+use App\S3Object;
 use App\Services\Aws;
 use App\Services\GitHub;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class InstanceController extends AppController {
@@ -280,31 +281,65 @@ class InstanceController extends AppController {
      */
     public function reportIssue(Request $request, $id)
     {
-        $instance = BotInstance::withTrashed()->find($id);
-        $aws = new Aws();
-        if(!empty($instance)) {
-            $resource = new BotInstanceResource($instance);
-            if(!empty($request->screenshots)) {
-                $instanceId = $resource->toArray($request)['instance_id'];
-                $botName = $resource->toArray($request)['bot_name'];
-                $urls = $aws->uploadScreenshots($instanceId, $request->screenshots);
+        $screenshots    = $request->input('screenshots');
+        $message        = $request->input('message');
+        $instance       = BotInstance::withTrashed()->find($id);
 
-                $body = "User: {$request->user()->email}\nInstance ID: {$instanceId}\nBot Name: {$botName}
-                \nMessage: {$request->message}";
+        if (empty($instance)) {
+            return $this->error(__('keywords.not_found'), __('keywords.bots.not_found'));
+        }
 
-                if(!empty($urls)) {
+        if (empty($screenshots)) {
+            return $this->error(__('keywords.error'), __('keywords.bots.error_screenshots'));
+        }
+
+        try {
+
+            Log::info("Report Issue");
+
+            $objects = S3Object::whereIn('id', $screenshots)->get();
+
+            if ($objects->isNotEmpty()) {
+
+                $sources = [];
+
+                foreach ($objects as $object) {
+                    $pathInfo   = pathinfo($object->path);
+                    $sources[]  = [
+                        'source'    => $object->getS3Path(),
+                        'path'      => "screenshots/{$object->instance->aws_instance_id}/{$pathInfo['basename']}"
+                    ];
+                }
+
+                $aws    = new Aws();
+                $urls   = $aws->copyIssuedObject($sources);
+
+                $body = "User: {$request->user()->email}\nInstance ID: {$instance->aws_instance_id}\nBot Name: {$instance->bot->name}
+                \nMessage: {$message}";
+
+                Log::debug($body);
+
+                if (! empty($urls)) {
                     $screenshots = '';
-                    for($i = 0; $i < count($urls); $i++) {
-                        $screenshots = $screenshots . " ![{$request->screenshots[$i]->getClientOriginalName()}]({$urls[$i]})";
+                    foreach ($urls as $url) {
+                        $pathInfo   = pathinfo($url);
+                        $screenshots .= " ![{$pathInfo['basename']}]({$url})\n";
                     }
                     $body = $body . "\n{$screenshots}";
                 }
 
+                Log::debug($body);
+
                 GitHub::createIssue('Issue Report', $body);
+
                 return $this->success([]);
             }
-        } else {
-            return $this->error('Not found', __('admin.bots.not_found'));
+
+            return $this->error(__('keywords.error'), __('keywords.bots.not_found_screenshots'));
+
+        } catch (Throwable $throwable) {
+            Log::error($throwable->getMessage());
+            return $this->error(__('keywords.server_error'), $throwable->getMessage());
         }
     }
 
