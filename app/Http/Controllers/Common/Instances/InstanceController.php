@@ -34,8 +34,9 @@ class InstanceController extends AppController {
             $search = $request->input('search');
             $sort   = $request->input('sort');
             $order  = $request->input('order') ?? 'asc';
+            $list  = $request->input('list') ?? 'all';
             $resource = BotInstance::withTrashed();
-            if(!Auth::user()->isAdmin()) {
+            if(!Auth::user()->isAdmin() || $list === 'my') {
                 $resource->findByUserId(Auth::id());
             }
             if (! empty($search)) {
