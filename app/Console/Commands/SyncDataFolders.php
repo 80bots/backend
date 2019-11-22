@@ -39,10 +39,10 @@ class SyncDataFolders extends Command
      */
     public function handle()
     {
-        BotInstance::chunkById(1000, function ($instances) {
-            foreach ($instances as $instance) {
-                dispatch(new SyncS3Objects($instance));
-            }
-        });
+//        BotInstance::chunkById(1000, function ($instances) {
+//            foreach ($instances as $instance) {
+//                dispatch(new SyncS3Objects($instance));
+//            }
+//        });
     }
 }

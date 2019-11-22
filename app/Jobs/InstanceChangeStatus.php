@@ -158,6 +158,9 @@ class InstanceChangeStatus implements ShouldQueue
                     ]);
                 }
 
+                // Update directory tree on instance status change
+                dispatch(new SyncS3Objects($this->instance));
+
                 broadcast(new InstanceLaunched($this->instance, $this->user));
             }
 
@@ -187,6 +190,9 @@ class InstanceChangeStatus implements ShouldQueue
                 $this->instance->setAwsStatusStopped();
 
                 $this->updateUpTime();
+
+                // Update directory tree on instance status change
+                dispatch(new SyncS3Objects($this->instance));
 
                 broadcast(new InstanceLaunched($this->instance, $this->user));
             }
@@ -229,6 +235,9 @@ class InstanceChangeStatus implements ShouldQueue
             if ($this->region->created_instances > 0) {
                 $this->region->decrement('created_instances');
             }
+
+            // Update directory tree on instance status change
+            dispatch(new SyncS3Objects($this->instance));
 
             broadcast(new InstanceLaunched($this->instance, $this->user));
         }
