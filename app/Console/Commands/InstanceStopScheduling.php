@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Helpers\CommonHelper;
 use App\Helpers\InstanceHelper;
+use App\Jobs\SyncS3Objects;
 use App\SchedulingInstance;
 use App\Services\Aws;
 use App\BotInstance;
@@ -128,6 +129,9 @@ class InstanceStopScheduling extends Command
                                 'aws_status' => BotInstance::STATUS_STOPPED
                             ]);
                         }
+
+                        // Update directory tree on instance status change
+                        dispatch(new SyncS3Objects($instance));
 
                         Log::info('Instance Id ' . $instanceId . ' Stopped');
 
