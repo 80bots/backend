@@ -65,15 +65,15 @@ class UpdateInstanceSecurityGroup implements ShouldQueue
                     Log::info('$instance = ' . $instance);
                     Log::info('aws_instance_id = ' . $instance['aws_instance_id']);
 
-                    Log::info($aws->describeOneInstanceStatus($instance['aws_instance_id']));
+                    // $securityGroup = $instance->oneDetail->aws_security_group_id;
 
-                    $securityGroup = $instance->oneDetail->aws_security_group_id;
-
-                    $result = $aws->describeSecurityGroups($securityGroup);
+                    $result = $aws->describeOneInstanceStatus($instance['aws_instance_id']);
 
                     if ($result->hasKey('SecurityGroups')) {
 
                         $securityGroups = $result->get('SecurityGroups');
+                        Log::info('$securityGroups = ' . $securityGroups);
+
                         $ipPermissions = collect($securityGroups[0]['IpPermissions']);
 
                         $ipPermissions = $ipPermissions->filter(function ($item, $key) use ($ports) {
