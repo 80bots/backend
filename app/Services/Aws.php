@@ -65,12 +65,12 @@ class Aws
     public function ec2Connection(string $region = '', array $credentials = null): void
     {
         $this->ec2 = new Ec2Client([
-            'region'        => empty($region) ? config('aws.region', 'us-east-2') : $region,
-            'version'       => config('aws.version', 'latest'),
-            'credentials'   => empty($credentials) ? config('aws.credentials') : $credentials
+            'region' => empty($region) ? config('aws.region', 'us-east-2') : $region,
+            'version' => config('aws.version', 'latest'),
+            'credentials' => empty($credentials) ? config('aws.credentials') : $credentials
         ]);
 
-        $this->ignore   = config('aws.instance_ignore');
+        $this->ignore = config('aws.instance_ignore');
     }
 
     /**
@@ -82,9 +82,9 @@ class Aws
     public function s3Connection(string $region = '', array $credentials = null, string $bucket = ''): void
     {
         $this->s3 = new S3Client([
-            'region'        => empty($region) ? config('aws.region', 'us-east-2') : $region,
-            'version'       => config('aws.version', 'latest'),
-            'credentials'   => empty($credentials) ? config('aws.credentials') : $credentials
+            'region' => empty($region) ? config('aws.region', 'us-east-2') : $region,
+            'version' => config('aws.version', 'latest'),
+            'credentials' => empty($credentials) ? config('aws.credentials') : $credentials
         ]);
 
         $this->s3Bucket = empty($bucket) ? config('aws.bucket') : $bucket;
@@ -105,9 +105,9 @@ class Aws
     public function iamConnection(string $region = '', array $credentials = null)
     {
         $this->iam = new IamClient([
-            'region'        => empty($region) ? config('aws.region', 'us-east-2') : $region,
-            'version'       => config('aws.version', 'latest'),
-            'credentials'   => empty($credentials) ? config('aws.credentials') : $credentials
+            'region' => empty($region) ? config('aws.region', 'us-east-2') : $region,
+            'version' => config('aws.version', 'latest'),
+            'credentials' => empty($credentials) ? config('aws.credentials') : $credentials
         ]);
     }
 
@@ -117,9 +117,9 @@ class Aws
     public static function getEc2Regions(): array
     {
         $ec2 = new Ec2Client([
-            'region'        => empty($region) ? config('aws.region', 'us-east-2') : $region,
-            'version'       => config('aws.version', 'latest'),
-            'credentials'   => empty($credentials) ? config('aws.credentials') : $credentials
+            'region' => empty($region) ? config('aws.region', 'us-east-2') : $region,
+            'version' => config('aws.version', 'latest'),
+            'credentials' => empty($credentials) ? config('aws.credentials') : $credentials
         ]);
 
         try {
@@ -148,7 +148,7 @@ class Aws
     {
         $regions = self::getEc2Regions();
 
-        if (! empty($regions)) {
+        if (!empty($regions)) {
 
             try {
 
@@ -170,8 +170,8 @@ class Aws
                         foreach ($codes as $key => $code) {
                             if (in_array($code, $regions)) {
                                 $result[] = [
-                                    'code'  => $code,
-                                    'name'  => $names[$key]
+                                    'code' => $code,
+                                    'name' => $names[$key]
                                 ];
                             }
                         }
@@ -284,15 +284,15 @@ class Aws
 
             // Save the private key
             $res = $this->s3->putObject([
-                'Bucket'    => $bucket,
-                'Key'       => $saveKeyLocation,
-                'Body'      => $pemKey
+                'Bucket' => $bucket,
+                'Key' => $saveKeyLocation,
+                'Body' => $pemKey
             ]);
 
             if ($res->hasKey('ObjectURL')) {
                 return [
-                    'path'      => $saveKeyLocation,
-                    'keyName'   => $keyPairName
+                    'path' => $saveKeyLocation,
+                    'keyName' => $keyPairName
                 ];
             }
 
@@ -317,8 +317,8 @@ class Aws
 
         try {
             return $this->s3->getObject([
-                'Bucket'    => $bucket,
-                'Key'       => $path
+                'Bucket' => $bucket,
+                'Key' => $path
             ]);
         } catch (S3Exception $exception) {
             Log::error($exception->getMessage());
@@ -364,14 +364,14 @@ class Aws
 
         try {
             $result = $this->s3->getObject([
-                'Bucket'    => $bucket,
-                'Key'       => $path
+                'Bucket' => $bucket,
+                'Key' => $path
             ]);
 
             if ($result->hasKey('Body')) {
                 $this->s3->deleteObject([
-                    'Bucket'    => $bucket,
-                    'Key'       => $path
+                    'Bucket' => $bucket,
+                    'Key' => $path
                 ]);
             }
         } catch (S3Exception $exception) {
@@ -399,7 +399,7 @@ class Aws
             if ($result->hasKey('SecurityGroups')) {
 
                 $res = $this->ec2->deleteSecurityGroup([
-                    'GroupId'   => $groupId,
+                    'GroupId' => $groupId,
                     'GroupName' => $groupName
                 ]);
 
@@ -457,17 +457,17 @@ class Aws
 
             // Create the security group
             $result = $this->ec2->createSecurityGroup([
-                'GroupName'     => $securityGroupName,
-                'Description'   => 'Basic web server security.'
+                'GroupName' => $securityGroupName,
+                'Description' => 'Improved web server security.'
             ]);
 
             if ($result->hasKey('GroupId')) {
                 $this->setSecretGroupIngress($ip, $securityGroupName);
                 // Get the security group ID (optional)
                 return [
-                    'securityGroupId'   => $result->get('GroupId'),
+                    'securityGroupId' => $result->get('GroupId'),
                     'securityGroupName' => $securityGroupName,
-                    'result'            => $result
+                    'result' => $result
                 ];
             }
 
@@ -525,7 +525,7 @@ class Aws
      * Add an Ingress Rule
      *
      * @param string|null $ip
-     * @param null $securityGroupName     *
+     * @param null $securityGroupName *
      * @return Result
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
@@ -535,7 +535,7 @@ class Aws
             $this->ec2Connection();
         }
 
-        $serverIp = config('app.env') === 'local' ? '0.0.0.0/0' : "{$ip}/32";
+        $userIp = "{$ip}/32";
 
         $userPorts = config('aws.ports.access_user');
         $adminPorts = config('aws.ports.access_admin');
@@ -548,7 +548,7 @@ class Aws
                 'FromPort' => $port,
                 'ToPort' => $port,
                 'IpRanges' => [
-                    ['CidrIp' => $serverIp]
+                    ['CidrIp' => $userIp]
                 ],
             ]);
         }
@@ -593,20 +593,20 @@ class Aws
             return null;
         }
 
-        $region         = ! empty($instance->region) ? $instance->region->code : config('aws.region', 'us-east-2');
-        $imageId        = $botInstanceDetail->aws_image_id ?? config('aws.image_id');
-        $instanceType   = $botInstanceDetail->aws_instance_type ?? config('aws.instance_type');
-        $volumeSize     = $botInstanceDetail->aws_storage_gb ?? config('aws.volume_size');
+        $region = !empty($instance->region) ? $instance->region->code : config('aws.region', 'us-east-2');
+        $imageId = $botInstanceDetail->aws_image_id ?? config('aws.image_id');
+        $instanceType = $botInstanceDetail->aws_instance_type ?? config('aws.instance_type');
+        $volumeSize = $botInstanceDetail->aws_storage_gb ?? config('aws.volume_size');
 
-        $userData       = '';
+        $userData = '';
 
-        if (! empty($params)) {
+        if (!empty($params)) {
 
             $formattedParams = [];
 
             foreach ($params as $key => $param) {
                 $formattedParams[$key] = [
-                     'value' => $param
+                    'value' => $param
                 ];
             }
 
@@ -627,15 +627,15 @@ class Aws
 
         $tags = [
             [
-                'Key'   => 'Name',
+                'Key' => 'Name',
                 'Value' => $tagName,
             ],
             [
-                'Key'   => 'User Email',
+                'Key' => 'User Email',
                 'Value' => $user->email ?? '',
             ],
             [
-                'Key'   => 'Bot',
+                'Key' => 'Bot',
                 'Value' => $bot->name ?? '',
             ]
         ];
@@ -669,23 +669,23 @@ class Aws
         }
 
         $params = array_merge([
-            'userEmail'     => $instance->tag_user_email ?? '',
-            'instanceId'    => $instance->instance_id ?? '',
+            'userEmail' => $instance->tag_user_email ?? '',
+            'instanceId' => $instance->instance_id ?? '',
         ], $instance->params);
 
         $userData = $this->createUserData($params, $instance->bot_path);
 
         $tags = [
             [
-                'Key'   => 'Name',
+                'Key' => 'Name',
                 'Value' => $instance->tag_name,
             ],
             [
-                'Key'   => 'User Email',
+                'Key' => 'User Email',
                 'Value' => $instance->tag_user_email ?? '',
             ],
             [
-                'Key'   => 'Bot',
+                'Key' => 'Bot',
                 'Value' => $instance->bot_name ?? '',
             ]
         ];
@@ -718,7 +718,7 @@ class Aws
             $this->ec2Connection($region);
         }
 
-        if (! empty($token)) {
+        if (!empty($token)) {
             $params = ['NextToken' => $token];
         } else {
             $params = ['MaxResults' => $limit];
@@ -736,7 +736,7 @@ class Aws
         if ($result->hasKey('Reservations')) {
 
             $instancesByStatus = [
-                'data'      => [],
+                'data' => [],
                 'nextToken' => $nextToken
             ];
 
@@ -744,19 +744,19 @@ class Aws
 
                 $instances = $reservation['Instances'];
 
-                if (! empty($instances)) {
+                if (!empty($instances)) {
 
                     foreach ($instances as $instance) {
 
                         try {
 
-                            $name   = null;
-                            $email  = null;
-                            $bot    = null;
+                            $name = null;
+                            $email = null;
+                            $bot = null;
 
-                            if( isset($instance['Tags']) && count($instance['Tags'])) {
+                            if (isset($instance['Tags']) && count($instance['Tags'])) {
                                 foreach ($instance['Tags'] as $key => $tag) {
-                                    if($tag['Key'] === 'Name') {
+                                    if ($tag['Key'] === 'Name') {
                                         $name = $tag['Value'];
                                     } elseif ($tag['Key'] === 'User Email') {
                                         $email = $tag['Value'];
@@ -777,25 +777,25 @@ class Aws
                             }
 
                             $instancesByStatus['data'][$instance['State']['Name']][] = [
-                                'tag_name'                => $name,
-                                'tag_user_email'          => $email,
-                                'tag_bot_name'            => $bot,
-                                'aws_instance_id'         => $instance['InstanceId'],
-                                'aws_image_id'            => $instance['ImageId'],
-                                'aws_instance_type'       => $instance['InstanceType'],
-                                'aws_key_name'            => $instance['KeyName'],
-                                'aws_launch_time'         => $instance['LaunchTime'],
-                                'aws_security_group_id'   => isset($instance['SecurityGroups']) && count($instance['SecurityGroups']) ? $instance['SecurityGroups'][0]['GroupId'] : null,
+                                'tag_name' => $name,
+                                'tag_user_email' => $email,
+                                'tag_bot_name' => $bot,
+                                'aws_instance_id' => $instance['InstanceId'],
+                                'aws_image_id' => $instance['ImageId'],
+                                'aws_instance_type' => $instance['InstanceType'],
+                                'aws_key_name' => $instance['KeyName'],
+                                'aws_launch_time' => $instance['LaunchTime'],
+                                'aws_security_group_id' => isset($instance['SecurityGroups']) && count($instance['SecurityGroups']) ? $instance['SecurityGroups'][0]['GroupId'] : null,
                                 'aws_security_group_name' => isset($instance['SecurityGroups']) && count($instance['SecurityGroups']) ? $instance['SecurityGroups'][0]['GroupName'] : null,
-                                'aws_public_ip'           => $instance['PublicIpAddress'] ?? null,
-                                'aws_public_dns'          => $instance['PublicDnsName'] ?? null,
-                                'aws_volumes_params'      => $paramsDescribeVolumes,
-                                'created_at'              => date('Y-m-d H:i:s', strtotime($instance['LaunchTime']))
+                                'aws_public_ip' => $instance['PublicIpAddress'] ?? null,
+                                'aws_public_dns' => $instance['PublicDnsName'] ?? null,
+                                'aws_volumes_params' => $paramsDescribeVolumes,
+                                'created_at' => date('Y-m-d H:i:s', strtotime($instance['LaunchTime']))
                             ];
 
                         } catch (Throwable $throwable) {
                             Log::error($throwable->getMessage());
-                            Log::error('An error occurred while syncing '. $instance['InstanceId']);
+                            Log::error('An error occurred while syncing ' . $instance['InstanceId']);
                         }
                     }
                 }
@@ -869,7 +869,7 @@ class Aws
         }
 
         // Describe the now-running instance to get the public URL
-        return $this->ec2->describeInstances([ 'InstanceIds' => $instanceIds ]);
+        return $this->ec2->describeInstances(['InstanceIds' => $instanceIds]);
     }
 
     /**
@@ -896,7 +896,7 @@ class Aws
             $this->ec2Connection();
         }
 
-        return $this->ec2->startInstances([ 'InstanceIds' => $instanceIds ]);
+        return $this->ec2->startInstances(['InstanceIds' => $instanceIds]);
     }
 
     /**
@@ -909,7 +909,7 @@ class Aws
             $this->ec2Connection();
         }
 
-        return $this->ec2->stopInstances([ 'InstanceIds' => $instanceIds ]);
+        return $this->ec2->stopInstances(['InstanceIds' => $instanceIds]);
     }
 
     /**
@@ -923,8 +923,8 @@ class Aws
         }
 
         return $this->ec2->terminateInstances([
-            'DryRun'        => false,
-            'InstanceIds'   => $instanceIds,
+            'DryRun' => false,
+            'InstanceIds' => $instanceIds,
         ]);
     }
 
@@ -945,9 +945,9 @@ class Aws
 
         if ($allocation->hasKey('AllocationId')) {
             return $this->ec2->associateAddress([
-                'DryRun'        => false,
-                'InstanceId'    => $instanceId,
-                'AllocationId'  => $allocation->get('AllocationId')
+                'DryRun' => false,
+                'InstanceId' => $instanceId,
+                'AllocationId' => $allocation->get('AllocationId')
             ]);
         }
 
@@ -966,9 +966,9 @@ class Aws
         }
 
         if ($monitorInstance == 'ON') {
-            return $this->ec2->monitorInstances([ 'InstanceIds' => $instanceIds ]);
+            return $this->ec2->monitorInstances(['InstanceIds' => $instanceIds]);
         } else {
-            return $this->ec2->unmonitorInstances([ 'InstanceIds' => $instanceIds ]);
+            return $this->ec2->unmonitorInstances(['InstanceIds' => $instanceIds]);
         }
     }
 
@@ -1102,19 +1102,19 @@ HERESHELL;
         string $userData = ''): array
     {
         return [
-            'ImageId'   => $imageId,
-            'MinCount'  => 1,
-            'MaxCount'  => 1,
-            'InstanceType'  => $instanceType,
-            'KeyName'       => $keyPairName,
+            'ImageId' => $imageId,
+            'MinCount' => 1,
+            'MaxCount' => 1,
+            'InstanceType' => $instanceType,
+            'KeyName' => $keyPairName,
             'TagSpecifications' => [
                 [
                     'ResourceType' => 'instance',
                     'Tags' => $tags,
                 ],
             ],
-            'SecurityGroups'    => [$securityGroupName],
-            'UserData'          => $userData
+            'SecurityGroups' => [$securityGroupName],
+            'UserData' => $userData
         ];
     }
 
@@ -1126,7 +1126,7 @@ HERESHELL;
      */
     protected function getServerIp(): ?string
     {
-        if(config('app.env') === 'local') {
+        if (config('app.env') === 'local') {
             return '0.0.0.0';
         } else {
             // To view all categories of instance metadata from within a running instance, use the following URI:
@@ -1197,14 +1197,14 @@ HERESHELL;
     public function getServiceQuotasT3MediumInstance(string $region, array $credentials = null): Result
     {
         $sqc = new ServiceQuotasClient([
-            'region'        => empty($region) ? config('aws.region', 'us-east-2') : $region,
-            'version'       => config('aws.version', 'latest'),
-            'credentials'   => empty($credentials) ? config('aws.credentials') : $credentials
+            'region' => empty($region) ? config('aws.region', 'us-east-2') : $region,
+            'version' => config('aws.version', 'latest'),
+            'credentials' => empty($credentials) ? config('aws.credentials') : $credentials
         ]);
 
         return $sqc->getServiceQuota([
-            "QuotaCode"     => config('aws.quota.code_t3_medium'),
-            "ServiceCode"   => config('aws.services.ec2.code'),
+            "QuotaCode" => config('aws.quota.code_t3_medium'),
+            "ServiceCode" => config('aws.services.ec2.code'),
         ]);
     }
 
@@ -1231,7 +1231,7 @@ HERESHELL;
         $result = [];
 
         if (empty($this->s3)) {
-            $this->s3Connection('us-east-2', null,'80bots-issued-screenshots');
+            $this->s3Connection('us-east-2', null, '80bots-issued-screenshots');
         }
 
         foreach ($images as $image) {
@@ -1240,9 +1240,9 @@ HERESHELL;
 
             // Save the private key
             $res = $this->s3->putObject([
-                'Bucket'      => $bucket,
-                'Key'         => $saveKeyLocation,
-                'Body'        => $image->get(),
+                'Bucket' => $bucket,
+                'Key' => $saveKeyLocation,
+                'Body' => $image->get(),
                 'ContentType' => $image->getClientMimeType()
             ]);
 
@@ -1266,18 +1266,18 @@ HERESHELL;
 
         foreach ($sources as $source) {
             $batch[] = $this->s3->getCommand('CopyObject', [
-                'Bucket'     => '80bots-issued-screenshots',
-                'Key'        => $source['path'],
+                'Bucket' => '80bots-issued-screenshots',
+                'Key' => $source['path'],
                 'CopySource' => "{$this->s3Bucket}/{$source['source']}",
             ]);
         }
 
         try {
 
-            $results    = CommandPool::batch($this->s3, $batch);
-            $urls       = [];
+            $results = CommandPool::batch($this->s3, $batch);
+            $urls = [];
 
-            foreach($results as $result) {
+            foreach ($results as $result) {
                 if ($result->hasKey('ObjectURL')) {
                     $urls[] = $result->get('ObjectURL');
                 }
@@ -1303,11 +1303,11 @@ HERESHELL;
     public function getS3Object(string $bucket, string $key, string $saveAs = ''): Result
     {
         $params = [
-            'Bucket'    => $bucket,
-            'Key'       => $key
+            'Bucket' => $bucket,
+            'Key' => $key
         ];
 
-        if (! empty($saveAs)) {
+        if (!empty($saveAs)) {
             $params['SaveAs'] = $saveAs;
         }
 
@@ -1324,15 +1324,15 @@ HERESHELL;
     public function getS3ListObjects(string $bucket, int $limit, string $prefix = null, string $next = null): Result
     {
         $params = [
-            'Bucket'  => $bucket,
+            'Bucket' => $bucket,
             'MaxKeys' => $limit
         ];
 
-        if (! empty($prefix)) {
+        if (!empty($prefix)) {
             $params['Prefix'] = $prefix;
         }
 
-        if (! empty($next)) {
+        if (!empty($next)) {
             $params['ContinuationToken'] = $next;
         }
 
@@ -1359,7 +1359,7 @@ HERESHELL;
                 $result = $promise->wait();
                 array_push($data, [
                     'type' => $result->get('ContentType'),
-                    'body'  => $result->get('Body')
+                    'body' => $result->get('Body')
                 ]);
 
             } catch (AwsException $exception) {
@@ -1395,8 +1395,8 @@ HERESHELL;
 //        }
 
         $cmd = $this->s3->getCommand('GetObject', [
-            'Bucket'    => $bucket,
-            'Key'       => $key
+            'Bucket' => $bucket,
+            'Key' => $key
         ]);
 
         $request = $this->s3->createPresignedRequest($cmd, '+60 minutes');
@@ -1406,7 +1406,7 @@ HERESHELL;
 
     private function createUserData(array $params, string $path): string
     {
-        if (! empty($params)) {
+        if (!empty($params)) {
 
             $formattedParams = [];
 
