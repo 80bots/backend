@@ -48,7 +48,7 @@ class UpdateInstanceSecurityGroup implements ShouldQueue
      */
     public function handle()
     {
-        Log::info("Starting UpdateInstanceSecurityGroup: $this->ip, $this->user");
+        Log::info("xStarting UpdateInstanceSecurityGroup: $this->ip, $this->user");
 
         try {
 
@@ -61,8 +61,6 @@ class UpdateInstanceSecurityGroup implements ShouldQueue
                 foreach ($instances as $instance) {
 
                     $aws->ec2Connection($instance->region->code);
-
-                    Log::info($instance);
 
                     $securityGroup = $instance->oneDetail->aws_security_group_id;
 
