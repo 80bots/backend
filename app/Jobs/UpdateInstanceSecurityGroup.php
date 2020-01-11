@@ -63,6 +63,9 @@ class UpdateInstanceSecurityGroup implements ShouldQueue
                     $aws->ec2Connection($instance->region->code);
 
                     Log::info('$instance = ' . $instance);
+                    Log::info('aws_instance_id = ' . $instance['aws_instance_id']);
+
+                    Log::info($aws->describeOneInstanceStatus($instance['aws_instance_id']));
 
                     $securityGroup = $instance->oneDetail->aws_security_group_id;
 
