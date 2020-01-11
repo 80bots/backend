@@ -37,7 +37,7 @@ class UpdateInstanceSecurityGroup implements ShouldQueue
     public function __construct(User $user, ?string $ip)
     {
         $this->user = $user;
-        $this->ip   = $ip;
+        $this->ip = $ip;
     }
 
     /**
@@ -48,7 +48,7 @@ class UpdateInstanceSecurityGroup implements ShouldQueue
      */
     public function handle()
     {
-        Log::info('Starting UpdateInstanceSecurityGroup');
+        Log::info("Starting UpdateInstanceSecurityGroup: $this->ip, $this->user");
 
         try {
 
@@ -61,6 +61,8 @@ class UpdateInstanceSecurityGroup implements ShouldQueue
                 foreach ($instances as $instance) {
 
                     $aws->ec2Connection($instance->region->code);
+
+                    Log::info($instance);
 
                     $securityGroup = $instance->oneDetail->aws_security_group_id;
 
@@ -78,17 +80,17 @@ class UpdateInstanceSecurityGroup implements ShouldQueue
                         if ($ipPermissions->isNotEmpty()) {
                             $ipRanges = $ipPermissions->map(function ($item, $key) {
                                 return [
-                                    'port'  => $item['ToPort'],
-                                    'ip'    => collect($item['IpRanges'])->map(function ($item, $key) {
-                                                return $item['CidrIp'];
-                                            })->toArray()
+                                    'port' => $item['ToPort'],
+                                    'ip' => collect($item['IpRanges'])->map(function ($item, $key) {
+                                        return $item['CidrIp'];
+                                    })->toArray()
                                 ];
                             })->toArray();
 
                             sort($ipRanges);
 
                             foreach ($ipRanges as $ipRange) {
-                                if (! in_array("{$this->ip}/32", $ipRange['ip'])) {
+                                if (!in_array("{$this->ip}/32", $ipRange['ip'])) {
                                     $result = $aws->updateSecretGroupIngress($ipRange['port'], $this->ip, 'tcp', $securityGroup);
                                 }
                             }

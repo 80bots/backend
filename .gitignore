@@ -18,3 +18,5 @@ storage/framework/cache/*
 /node_modules
 
 laravel-echo-server.lock
+
+.DS_Store
