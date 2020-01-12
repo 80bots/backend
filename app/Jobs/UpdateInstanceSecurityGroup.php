@@ -83,7 +83,7 @@ class UpdateInstanceSecurityGroup implements ShouldQueue
             unset($now);
             Log::info('Completed UpdateInstanceSecurityGroup');
         } catch (Throwable $throwable) {
-            //Log::error($throwable->getMessage());
+            Log::info($throwable->getMessage());
         }
     }
 }
