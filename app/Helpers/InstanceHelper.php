@@ -29,7 +29,7 @@ class InstanceHelper
 {
     const LIMIT_S3_LIST_OBJECTS = 1000;
     const LIMIT_S3_OBJECTS_INFO = 2;
-    const DATA_STREAMER_FOLDER  = "streamer-data";
+    const DATA_STREAMER_FOLDER = "streamer-data";
 
     /**
      * @param SchedulingInstancesDetails $detail
@@ -55,12 +55,12 @@ class InstanceHelper
      */
     public static function getScheduleInstancesIds($schedulers, $now): array
     {
-        $instancesIds   = [];
-        $insertHistory  = [];
+        $instancesIds = [];
+        $insertHistory = [];
 
         foreach ($schedulers as $scheduler) {
 
-            if (! empty($scheduler->details)) {
+            if (!empty($scheduler->details)) {
 
                 foreach ($scheduler->details as $detail) {
 
@@ -70,17 +70,17 @@ class InstanceHelper
 
                     if (self::isScheduleInstance($detail, $currentTime)) {
 
-                        if (! empty($scheduler->instance->aws_instance_id)) {
+                        if (!empty($scheduler->instance->aws_instance_id)) {
 
                             $tz = CarbonTimeZone::create($detail->time_zone);
 
                             array_push($insertHistory, [
-                                'scheduling_instances_id'   => $scheduler->id,
-                                'user_id'                   => $scheduler->user_id,
-                                'schedule_type'             => $detail->schedule_type,
-                                'cron_data'                 => $detail->cron_data,
-                                'current_time_zone'         => $tz->toRegionName(),
-                                'selected_time'             => $detail->selected_time,
+                                'scheduling_instances_id' => $scheduler->id,
+                                'user_id' => $scheduler->user_id,
+                                'schedule_type' => $detail->schedule_type,
+                                'cron_data' => $detail->cron_data,
+                                'current_time_zone' => $tz->toRegionName(),
+                                'selected_time' => $detail->selected_time,
                             ]);
 
                             array_push($instancesIds, $scheduler->instance->aws_instance_id);
@@ -90,7 +90,7 @@ class InstanceHelper
             }
         }
 
-        if (! empty($insertHistory)) {
+        if (!empty($insertHistory)) {
             //Save the session history
             InstanceSessionsHistory::insert($insertHistory);
         }
@@ -110,13 +110,13 @@ class InstanceHelper
 
         return $details->map(function ($object) {
             return [
-                'id'            => $object->id ?? null,
-                'day'           => $object->day ?? '',
-                'time'          => $object->selected_time ? (new Carbon($object->selected_time))->format('H:i') : '',
-                'cron_data'     => $object->cron_data ?? '',
-                'type'          => $object->schedule_type ?? '',
-                'status'        => $object->status ?? '',
-                'created_at'    => $object->created_at->format('Y-m-d H:m:i') ?? '',
+                'id' => $object->id ?? null,
+                'day' => $object->day ?? '',
+                'time' => $object->selected_time ? (new Carbon($object->selected_time))->format('H:i') : '',
+                'cron_data' => $object->cron_data ?? '',
+                'type' => $object->schedule_type ?? '',
+                'status' => $object->status ?? '',
+                'created_at' => $object->created_at->format('Y-m-d H:m:i') ?? '',
             ];
         })->toArray();
     }
@@ -143,7 +143,7 @@ class InstanceHelper
 
                     $user = User::where('email', '=', $instance['tag_user_email'])->first();
 
-                    if (! empty($user)) {
+                    if (!empty($user)) {
 
                         $status = $statusKey === 'stopping' ? BotInstance::STATUS_STOPPED : $statusKey;
 
@@ -154,7 +154,7 @@ class InstanceHelper
                             ->orWhere('tag_name', '=', $instance['tag_name'])
                             ->first();
 
-                        if (! empty($botInstance)) {
+                        if (!empty($botInstance)) {
                             self::syncInstancesUpdateStatus($botInstance, $status, $instance, $currentDate);
                         } else {
 
@@ -183,12 +183,12 @@ class InstanceHelper
             ]);
 
             $detail->fill([
-                'start_time'                => $instance['aws_launch_time'],
-                'aws_public_dns'            => $instance['aws_public_ip'],
-                'aws_instance_type'         => $instance['aws_instance_type'],
-                'aws_image_id'              => $instance['aws_image_id'],
-                'aws_security_group_id'     => $instance['aws_security_group_id'],
-                'aws_security_group_name'   => $instance['aws_security_group_name'],
+                'start_time' => $instance['aws_launch_time'],
+                'aws_public_dns' => $instance['aws_public_ip'],
+                'aws_instance_type' => $instance['aws_instance_type'],
+                'aws_image_id' => $instance['aws_image_id'],
+                'aws_security_group_id' => $instance['aws_security_group_id'],
+                'aws_security_group_name' => $instance['aws_security_group_name'],
             ]);
 
             $detail->save();
@@ -198,15 +198,15 @@ class InstanceHelper
 
         $botInstance->update([
             'aws_public_ip' => $instance['aws_public_ip'],
-            'aws_status'    => $status
+            'aws_status' => $status
         ]);
 
         $detail->update([
-            'aws_instance_type'         => $instance['aws_instance_type'],
-            'aws_image_id'              => $instance['aws_image_id'],
-            'aws_security_group_id'     => $instance['aws_security_group_id'],
-            'aws_security_group_name'   => $instance['aws_security_group_name'],
-            'aws_public_dns'            => $instance['aws_public_dns'],
+            'aws_instance_type' => $instance['aws_instance_type'],
+            'aws_image_id' => $instance['aws_image_id'],
+            'aws_security_group_id' => $instance['aws_security_group_id'],
+            'aws_security_group_name' => $instance['aws_security_group_name'],
+            'aws_public_dns' => $instance['aws_public_dns'],
         ]);
 
         if ($status === BotInstance::STATUS_TERMINATED) {
@@ -244,27 +244,27 @@ class InstanceHelper
                 if ($volumeSize > 0) {
 
                     $newInstance = BotInstance::create([
-                        'user_id'           => $user->id,
-                        'bot_id'            => $bot->id ?? null,
-                        'tag_name'          => $instance['tag_name'],
-                        'tag_user_email'    => $instance['tag_user_email'],
-                        'aws_instance_id'   => $instance['aws_instance_id'],
-                        'aws_public_ip'     => $instance['aws_public_ip'],
-                        'aws_region_id'     => $region->id ?? null,
-                        'aws_status'        => $status,
-                        'start_time'        => $instance['created_at']
+                        'user_id' => $user->id,
+                        'bot_id' => $bot->id ?? null,
+                        'tag_name' => $instance['tag_name'],
+                        'tag_user_email' => $instance['tag_user_email'],
+                        'aws_instance_id' => $instance['aws_instance_id'],
+                        'aws_public_ip' => $instance['aws_public_ip'],
+                        'aws_region_id' => $region->id ?? null,
+                        'aws_status' => $status,
+                        'start_time' => $instance['created_at']
                     ]);
 
                     $newInstance->details()->create([
-                        'aws_instance_type'         => $instance['aws_instance_type'],
-                        'aws_storage_gb'            => $volumeSize,
-                        'aws_image_id'              => $instance['aws_image_id'],
-                        'aws_security_group_id'     => $instance['aws_security_group_id'],
-                        'aws_security_group_name'   => $instance['aws_security_group_name'],
-                        'aws_public_dns'            => $instance['aws_public_dns'],
-                        'aws_pem_file_path'         => "keys/{$instance['aws_key_name']}.pem",
-                        'is_in_queue'               => 0,
-                        'start_time'                => $instance['created_at']
+                        'aws_instance_type' => $instance['aws_instance_type'],
+                        'aws_storage_gb' => $volumeSize,
+                        'aws_image_id' => $instance['aws_image_id'],
+                        'aws_security_group_id' => $instance['aws_security_group_id'],
+                        'aws_security_group_name' => $instance['aws_security_group_name'],
+                        'aws_public_dns' => $instance['aws_public_dns'],
+                        'aws_pem_file_path' => "keys/{$instance['aws_key_name']}.pem",
+                        'is_in_queue' => 0,
+                        'start_time' => $instance['created_at']
                     ]);
 
                     $newInstance->region->increment('created_instances');
@@ -283,17 +283,17 @@ class InstanceHelper
         $diffTime = CommonHelper::diffTimeInMinutes($detail->start_time, $currentDate);
 
         $detail->update([
-            'end_time'      => $currentDate,
-            'total_time'    => $diffTime
+            'end_time' => $currentDate,
+            'total_time' => $diffTime
         ]);
 
         $upTime = $diffTime + $instance->total_up_time;
 
         $instance->update([
-            'cron_up_time'  => 0,
+            'cron_up_time' => 0,
             'total_up_time' => $upTime,
-            'up_time'       => $upTime,
-            'used_credit'   => CommonHelper::calculateUsedCredit($upTime)
+            'up_time' => $upTime,
+            'used_credit' => CommonHelper::calculateUsedCredit($upTime)
         ]);
     }
 
@@ -305,13 +305,13 @@ class InstanceHelper
     public static function cleanUpTerminatedInstanceData(Aws $aws, $details): void
     {
         //
-        if(preg_match('/^keys\/(.*)\.pem$/s', $details->aws_pem_file_path ?? '', $matches)) {
+        if (preg_match('/^keys\/(.*)\.pem$/s', $details->aws_pem_file_path ?? '', $matches)) {
             $aws->deleteKeyPair($matches[1]);
             $aws->deleteS3KeyPair($details->aws_pem_file_path ?? '');
         }
         DeleteSecurityGroup::create([
-            'group_id'      => $details->aws_security_group_id ?? '',
-            'group_name'    => $details->aws_security_group_name ?? '',
+            'group_id' => $details->aws_security_group_id ?? '',
+            'group_name' => $details->aws_security_group_name ?? '',
         ]);
     }
 
@@ -340,14 +340,14 @@ class InstanceHelper
     {
         $dates = [];
 
-        if (! empty($instance->created_at)) {
-            $created    = Carbon::parse($instance->created_at);
-            $now        = Carbon::now();
+        if (!empty($instance->created_at)) {
+            $created = Carbon::parse($instance->created_at);
+            $now = Carbon::now();
 
             $diffTime = $created->diffInDays($now);
 
             for ($i = $diffTime; $i >= 0; $i--) {
-                if ($i==0) {
+                if ($i == 0) {
                     array_push($dates, $created->toDateString());
                 } else {
                     array_push($dates, $created->copy()->addDays($i)->toDateString());
@@ -402,20 +402,20 @@ class InstanceHelper
     public static function saveS3Objects(BotInstance $instance, string $type, string $date)
     {
         $credentials = [
-            'key'    => config('aws.iam.access_key'),
+            'key' => config('aws.iam.access_key'),
             'secret' => config('aws.iam.secret_key')
         ];
 
         $aws = new Aws;
         $aws->s3Connection('', $credentials);
 
-        $next   = '';
+        $next = '';
 
         $folder = config('aws.streamer.folder');
 
         $prefix = "{$folder}/{$instance->tag_name}/{$type}/{$date}";
 
-        $links  = [];
+        $links = [];
 
         do {
 
@@ -443,20 +443,20 @@ class InstanceHelper
                 }
             }
 
-        } while (! empty($next));
+        } while (!empty($next));
 
-        if (! empty($links)) {
+        if (!empty($links)) {
 
             $objects = [];
 
             foreach ($links as $link) {
 
                 $data = [
-                    'instance_id'   => $instance->id ?? null,
-                    'folder'        => $date,
-                    'link'          => $link,
-                    'expires'       => Carbon::now()->addHour()->toDateTimeString(),
-                    'type'          => $type
+                    'instance_id' => $instance->id ?? null,
+                    'folder' => $date,
+                    'link' => $link,
+                    'expires' => Carbon::now()->addHour()->toDateTimeString(),
+                    'type' => $type
                 ];
 
                 array_push($objects, $data);
@@ -472,7 +472,7 @@ class InstanceHelper
     public static function saveS3Logs(BotInstance $instance)
     {
         $credentials = [
-            'key'    => config('aws.iam.access_key'),
+            'key' => config('aws.iam.access_key'),
             'secret' => config('aws.iam.secret_key')
         ];
 
@@ -490,16 +490,16 @@ class InstanceHelper
 
                 $objects = [
                     [
-                        'instance_id'   => $instance->id ?? null,
-                        'link'          => $init,
-                        'expires'       => Carbon::now()->addHour()->toDateTimeString(),
-                        'type'          => S3Object::TYPE_LOGS
+                        'instance_id' => $instance->id ?? null,
+                        'link' => $init,
+                        'expires' => Carbon::now()->addHour()->toDateTimeString(),
+                        'type' => S3Object::TYPE_LOGS
                     ],
                     [
-                        'instance_id'   => $instance->id ?? null,
-                        'link'          => $work,
-                        'expires'       => Carbon::now()->addHour()->toDateTimeString(),
-                        'type'          => S3Object::TYPE_LOGS
+                        'instance_id' => $instance->id ?? null,
+                        'link' => $work,
+                        'expires' => Carbon::now()->addHour()->toDateTimeString(),
+                        'type' => S3Object::TYPE_LOGS
                     ]
                 ];
 
@@ -523,17 +523,17 @@ class InstanceHelper
     {
         $result = $aws->getS3ListObjects($aws->getS3Bucket(), 2, $prefix);
 
-        if (! $result->hasKey('Contents')) {
+        if (!$result->hasKey('Contents')) {
             return [];
         }
 
         $contents = collect($result->get('Contents'))->map(function ($item, $key) {
             return [
-                'key'       => $item['Key'],
-                'modified'  => $item['LastModified']->getTimestamp()
+                'key' => $item['Key'],
+                'modified' => $item['LastModified']->getTimestamp()
             ];
         })->filter(function ($item, $key) use ($prefix) {
-            return $item['key'] !== "{$prefix}/" ;
+            return $item['key'] !== "{$prefix}/";
         });
 
         if ($contents->count() === 0) {
@@ -550,19 +550,19 @@ class InstanceHelper
             $name = $date;
         }
 
-        if (! empty($thumbnail['key'])) {
-            $info       = pathinfo($thumbnail['key']);
-            $thumbnail  = $aws->getPresignedLink($aws->getS3Bucket(), $thumbnail['key']);
+        if (!empty($thumbnail['key'])) {
+            $info = pathinfo($thumbnail['key']);
+            $thumbnail = $aws->getPresignedLink($aws->getS3Bucket(), $thumbnail['key']);
         } else {
-            $thumbnail  = '';
-            $info       = '';
+            $thumbnail = '';
+            $info = '';
         }
 
         return [
-            "name"      => $name,
+            "name" => $name,
             "thumbnail" => [
-                'url'   => $thumbnail,
-                'name'  => $info['filename'] ?? ''
+                'url' => $thumbnail,
+                'name' => $info['filename'] ?? ''
             ]
         ];
     }
@@ -570,19 +570,19 @@ class InstanceHelper
     public static function getObjectByPath($instanceId, string $path): S3Object
     {
         $path = trim($path, '/');
-        $pathInfo   = pathinfo($path);
+        $pathInfo = pathinfo($path);
         $parentPath = $pathInfo['dirname'];
-        $filename   = $pathInfo['filename'];
-        $entity     = !empty($pathInfo['extension']) ? S3Object::ENTITY_FILE : S3Object::ENTITY_FOLDER;
-        $type       = self::getTypeS3ObjectByExtension($pathInfo['extension'] ?? null, $path);
+        $filename = $pathInfo['filename'];
+        $entity = !empty($pathInfo['extension']) ? S3Object::ENTITY_FILE : S3Object::ENTITY_FOLDER;
+        $type = self::getTypeS3ObjectByExtension($pathInfo['extension'] ?? null, $path);
 
-        if($parentPath === '.') {
+        if ($parentPath === '.') {
             $object = S3Object::firstOrCreate([
-                'instance_id'   => $instanceId,
-                'path'          => $path,
-                'name'          => $filename,
-                'entity'        => $entity,
-                'type'          => $type
+                'instance_id' => $instanceId,
+                'path' => $path,
+                'name' => $filename,
+                'entity' => $entity,
+                'type' => $type
             ]);
         } else {
             $object = S3Object::wherePath($path)
@@ -590,14 +590,14 @@ class InstanceHelper
                 ->whereEntity($entity)
                 ->first();
 
-            if (! $object) {
+            if (!$object) {
                 $parent = self::getObjectByPath($instanceId, $parentPath);
                 $object = $parent->children()->create([
-                    'instance_id'   => $instanceId,
-                    'path'          => $path,
-                    'name'          => $filename,
-                    'entity'        => $entity,
-                    'type'          => $type
+                    'instance_id' => $instanceId,
+                    'path' => $path,
+                    'name' => $filename,
+                    'entity' => $entity,
+                    'type' => $type
                 ]);
             }
         }
@@ -612,7 +612,7 @@ class InstanceHelper
             case 'jpeg':
             case 'jpg':
             case 'png':
-                if (strpos($path, 'screenshots') !== false){
+                if (strpos($path, 'screenshots') !== false) {
                     return S3Object::TYPE_SCREENSHOTS;
                 } else {
                     return S3Object::TYPE_IMAGES;
@@ -636,7 +636,7 @@ class InstanceHelper
         $expires = Carbon::now()->addMinutes(10)->toDateTimeString();
 
         $credentials = [
-            'key'    => config('aws.iam.access_key'),
+            'key' => config('aws.iam.access_key'),
             'secret' => config('aws.iam.secret_key')
         ];
 
@@ -659,8 +659,8 @@ class InstanceHelper
         foreach ($objects as $object) {
             $prefix = "{$instance->baseS3Dir}/{$object->path}";
             $object->update([
-                'expires'   => Carbon::now()->addHour()->toDateTimeString(),
-                'link'      => $aws->getPresignedLink($aws->getS3Bucket(), $prefix)
+                'expires' => Carbon::now()->addHour()->toDateTimeString(),
+                'link' => $aws->getPresignedLink($aws->getS3Bucket(), $prefix)
             ]);
         }
 
@@ -670,7 +670,7 @@ class InstanceHelper
     public static function getFreshLink(S3Object $object): string
     {
         $credentials = [
-            'key'    => config('aws.iam.access_key'),
+            'key' => config('aws.iam.access_key'),
             'secret' => config('aws.iam.secret_key')
         ];
 
@@ -690,20 +690,20 @@ class InstanceHelper
      */
     public static function createAwsKeyAndGroup(Aws $aws, ?string $ip): ?array
     {
-        $tagName        = self::createTagName();
-        $keyPair        = $aws->createKeyPair(config('aws.bucket'));
-        $securityGroup  = $aws->createSecretGroup($ip);
+        $tagName = self::createTagName();
+        $keyPair = $aws->createKeyPair(config('aws.bucket'));
+        $securityGroup = $aws->createSecretGroup($ip);
 
         if (empty($keyPair) || empty($tagName) || empty($securityGroup)) {
             return null;
         }
 
         return [
-            'tagName'       => $tagName,
-            'keyPairName'   => $keyPair['keyName'],
-            'keyPairPath'   => $keyPair['path'],
-            'groupId'       => $securityGroup['securityGroupId'],
-            'groupName'     => $securityGroup['securityGroupName'],
+            'tagName' => $tagName,
+            'keyPairName' => $keyPair['keyName'],
+            'keyPairPath' => $keyPair['path'],
+            'groupId' => $securityGroup['securityGroupId'],
+            'groupName' => $securityGroup['securityGroupName'],
         ];
     }
 
@@ -718,7 +718,7 @@ class InstanceHelper
             new VideoGameName()
         ]);
 
-        return strtolower(preg_replace('/[^a-z\d]/ui', '', $generator->getName())) . rand(100,999);
+        return strtolower(preg_replace('/[^a-z\d]/ui', '', $generator->getName())) . rand(100, 999);
     }
 
     /**
@@ -732,11 +732,13 @@ class InstanceHelper
         $query = BotInstance::where('id', '=', $id)
             ->orWhere('aws_instance_id', '=', $id);
 
-        if($withTrashed) {
+        if ($withTrashed) {
             $query->withTrashed();
         }
 
-        if (! Auth::user()->isAdmin()) {
+        Log::info(Auth::user());
+
+        if (!Auth::user()->isAdmin()) {
             $query->where('user_id', '=', Auth::id());
         }
 
@@ -761,8 +763,8 @@ class InstanceHelper
             return false;
         }
 
-        $user   = User::find(Auth::id());
-        $aws    = new Aws;
+        $user = User::find(Auth::id());
+        $aws = new Aws;
 
         //
         $instance->clearPublicIp();
@@ -774,7 +776,7 @@ class InstanceHelper
                 $instance->region->code
             );
 
-            if (! $describeInstancesResponse->hasKey('Reservations') || self::checkTerminatedStatus($describeInstancesResponse)) {
+            if (!$describeInstancesResponse->hasKey('Reservations') || self::checkTerminatedStatus($describeInstancesResponse)) {
                 $instance->setAwsStatusTerminated();
 
                 if ($instance->region->created_instances > 0) {
