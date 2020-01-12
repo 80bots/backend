@@ -1023,6 +1023,7 @@ class Aws
      */
     protected function startupScript(string $params = '', string $path = ''): string
     {
+        $params = escapeshellarg($params);
         // scripts performing after reloading server
         $shell = <<<HERESHELL
 ############## Output to startup.sh file ###############
@@ -1076,7 +1077,7 @@ su - \$username -c 'echo "starting script {$path}"'
 su - \$username -c 'rm -rf ~/.screenshots/*'
 su - \$username -c 'cd ~/puppeteer && git pull'
 cat > \$file <<EOF
-{escapeshellarg($params)}
+{$params}
 EOF
 su - \$username -c 'cd ~/puppeteer && yarn && mkdir logs && DISPLAY=:1 node {$path} > /dev/null'
 HERESHELL;
