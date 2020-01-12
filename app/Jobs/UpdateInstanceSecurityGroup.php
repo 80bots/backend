@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Services\Aws;
 use App\User;
 use App\Visitor;
+use App\Http\Controllers\Common\Instances\InstanceController;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -14,7 +15,8 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
-class UpdateInstanceSecurityGroup implements ShouldQueue
+
+class UpdateInstanceSecurityGroup extends InstanceController implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -51,7 +53,7 @@ class UpdateInstanceSecurityGroup implements ShouldQueue
      */
     public function handle()
     {
-        Log::info("Starting UpdateInstanceSecurityGroup: $this->ip, $this->user, $this->resource->aws_instance_id");
+        Log::info("Starting UpdateInstanceSecurityGroup: $this->ip, $this->user, $this->resource['aws_instance_id']");
 
         try {
 
@@ -59,9 +61,10 @@ class UpdateInstanceSecurityGroup implements ShouldQueue
             $aws = new Aws;
 
             if ($this->resource->aws_instance_id && $this->resource->aws_status == 'running') {
-                $result = $aws->describeOneInstanceStatus($this->resource->aws_instance_id);
-                Log::info($result);
-                $aws->updateSecretGroupIngress($ports[0], $this->ip);
+                $instance = $this->getInstanceWithCheckUser($this->resource->aws_instance_id);
+                $instanceDetail = $instance->details()->latest()->first();
+                Log::info($instanceDetail);
+                $aws->updateSecretGroupIngress($ports[0], $this->ip, 'tcp', $instanceDetail->aws_security_group_id);
             }
 
             $now = Carbon::now()->toDateTimeString();
