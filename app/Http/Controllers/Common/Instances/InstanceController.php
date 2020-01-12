@@ -11,6 +11,7 @@ use App\Helpers\QueryHelper;
 use App\Http\Controllers\AppController;
 use App\Http\Resources\BotInstanceCollection;
 use App\Http\Resources\BotInstanceResource;
+use App\Jobs\UpdateInstanceSecurityGroup;
 use App\S3Object;
 use App\Services\Aws;
 use App\Services\GitHub;
@@ -20,7 +21,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
-class InstanceController extends AppController {
+class InstanceController extends AppController
+{
     const PAGINATE = 1;
 
     /**
@@ -33,20 +35,20 @@ class InstanceController extends AppController {
         try {
             $limit = $request->query('limit') ?? self::PAGINATE;
             $search = $request->input('search');
-            $sort   = $request->input('sort');
-            $order  = $request->input('order') ?? 'asc';
-            $list  = $request->input('list') ?? 'all';
+            $sort = $request->input('sort');
+            $order = $request->input('order') ?? 'asc';
+            $list = $request->input('list') ?? 'all';
             $resource = BotInstance::withTrashed();
-            if(!Auth::user()->isAdmin() || $list === 'my') {
+            if (!Auth::user()->isAdmin() || $list === 'my') {
                 $resource->findByUserId(Auth::id());
             }
-            if (! empty($search)) {
+            if (!empty($search)) {
                 $resource->where('bot_instances.tag_name', 'like', "%{$search}%")
                     ->orWhere('bot_instances.tag_user_email', 'like', "%{$search}%");
             }
 
             $resource->when($sort, function ($query, $sort) use ($order) {
-                if (! empty(BotInstance::ORDER_FIELDS[$sort])) {
+                if (!empty(BotInstance::ORDER_FIELDS[$sort])) {
                     return QueryHelper::orderBotInstance($query, BotInstance::ORDER_FIELDS[$sort], $order);
                 } else {
                     return $query->orderBy('aws_status', 'asc')->orderBy('start_time', 'desc');
@@ -55,11 +57,11 @@ class InstanceController extends AppController {
                 return $query->orderBy('aws_status', 'asc')->orderBy('start_time', 'desc');
             });
 
-            $bots   = (new BotInstanceCollection($resource->paginate($limit)))->response()->getData();
-            $meta   = $bots->meta ?? null;
+            $bots = (new BotInstanceCollection($resource->paginate($limit)))->response()->getData();
+            $meta = $bots->meta ?? null;
 
             $response = [
-                'data'  => $bots->data ?? [],
+                'data' => $bots->data ?? [],
                 'total' => $meta->total ?? 0
             ];
 
@@ -190,7 +192,10 @@ class InstanceController extends AppController {
     public function show(Request $request, $id)
     {
         $resource = BotInstance::withTrashed()->find($id);
-        if(!empty($resource)) {
+        if (!empty($resource)) {
+            $user = Auth::user();
+            $ip = $request->ip();
+            dispatch(new UpdateInstanceSecurityGroup($user, $ip));
             return $this->success((new BotInstanceResource($resource))->toArray($request));
         } else {
             $this->error('Not found', __('admin.bots.not_found'));
@@ -225,11 +230,11 @@ class InstanceController extends AppController {
                 return $this->notFound(__('user.not_found'), __('user.instances.not_found'));
             }
 
-            $running    = BotInstance::STATUS_RUNNING;
-            $stopped    = BotInstance::STATUS_STOPPED;
+            $running = BotInstance::STATUS_RUNNING;
+            $stopped = BotInstance::STATUS_STOPPED;
             $terminated = BotInstance::STATUS_TERMINATED;
 
-            if (! empty($request->input('update'))) {
+            if (!empty($request->input('update'))) {
                 $updateData = $request->validate([
                     'update.status' => "in:{$running},{$stopped},{$terminated}"
                 ]);
@@ -258,7 +263,7 @@ class InstanceController extends AppController {
 
             return $this->error(__('user.server_error'), __('user.instances.not_updated'));
 
-        } catch (Throwable $throwable){
+        } catch (Throwable $throwable) {
             return $this->error(__('user.server_error'), $throwable->getMessage());
         }
     }
@@ -266,7 +271,7 @@ class InstanceController extends AppController {
     /**
      * Remove the specified resource from storage.
      *
-     * @param  BotInstance  $userInstances
+     * @param BotInstance $userInstances
      * @return Response
      */
     public function destroy(BotInstance $userInstances)
@@ -281,9 +286,9 @@ class InstanceController extends AppController {
      */
     public function reportIssue(Request $request, $id)
     {
-        $screenshots    = $request->input('screenshots');
-        $message        = $request->input('message');
-        $instance       = BotInstance::withTrashed()->find($id);
+        $screenshots = $request->input('screenshots');
+        $message = $request->input('message');
+        $instance = BotInstance::withTrashed()->find($id);
 
         if (empty($instance)) {
             return $this->error(__('keywords.not_found'), __('keywords.bots.not_found'));
@@ -304,25 +309,25 @@ class InstanceController extends AppController {
                 $sources = [];
 
                 foreach ($objects as $object) {
-                    $pathInfo   = pathinfo($object->path);
-                    $sources[]  = [
-                        'source'    => $object->getS3Path(),
-                        'path'      => "screenshots/{$object->instance->aws_instance_id}/{$pathInfo['basename']}"
+                    $pathInfo = pathinfo($object->path);
+                    $sources[] = [
+                        'source' => $object->getS3Path(),
+                        'path' => "screenshots/{$object->instance->aws_instance_id}/{$pathInfo['basename']}"
                     ];
                 }
 
-                $aws    = new Aws();
-                $urls   = $aws->copyIssuedObject($sources);
+                $aws = new Aws();
+                $urls = $aws->copyIssuedObject($sources);
 
                 $body = "User: {$request->user()->email}\nInstance ID: {$instance->aws_instance_id}\nBot Name: {$instance->bot->name}
                 \nMessage: {$message}";
 
                 Log::debug($body);
 
-                if (! empty($urls)) {
+                if (!empty($urls)) {
                     $screenshots = '';
                     foreach ($urls as $url) {
-                        $pathInfo   = pathinfo($url);
+                        $pathInfo = pathinfo($url);
                         $screenshots .= " ![{$pathInfo['basename']}]({$url})\n";
                     }
                     $body = $body . "\n{$screenshots}";
@@ -357,7 +362,7 @@ class InstanceController extends AppController {
             $query->withTrashed();
         }
 
-        if (! Auth::user()->isAdmin()) {
+        if (!Auth::user()->isAdmin()) {
             $query->where('user_id', '=', Auth::id());
         }
 
