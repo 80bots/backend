@@ -736,7 +736,8 @@ class InstanceHelper
             $query->withTrashed();
         }
 
-        Log::info(Auth::user());
+        Log::info('Auth::user() = ' . Auth::user());
+        Log::info('Auth::id() = ' . Auth::id());
 
         if (!Auth::user()->isAdmin()) {
             $query->where('user_id', '=', Auth::id());
