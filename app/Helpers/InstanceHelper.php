@@ -739,7 +739,7 @@ class InstanceHelper
         Log::info('Auth::user() = ' . Auth::user());
         Log::info('Auth::id() = ' . Auth::id());
 
-        if (!Auth::user()->isAdmin()) {
+        if (!is_null(Auth::user()) && !Auth::user()->isAdmin()) {
             $query->where('user_id', '=', Auth::id());
         }
 
