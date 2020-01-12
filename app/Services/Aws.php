@@ -1076,7 +1076,7 @@ su - \$username -c 'echo "starting script {$path}"'
 su - \$username -c 'rm -rf ~/.screenshots/*'
 su - \$username -c 'cd ~/puppeteer && git pull'
 cat > \$file <<EOF
-{$params}
+{escapeshellarg($params)}
 EOF
 su - \$username -c 'cd ~/puppeteer && yarn && mkdir logs && DISPLAY=:1 node {$path} > /dev/null'
 HERESHELL;
