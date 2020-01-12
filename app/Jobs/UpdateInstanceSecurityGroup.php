@@ -60,12 +60,12 @@ class UpdateInstanceSecurityGroup implements ShouldQueue
 
                 foreach ($instances as $instance) {
 
-                    if ($instance->aws_status == 'active') {
-
-                        $aws->ec2Connection($instance->region->code);
+                    if ($instance['aws_status'] == 'active') {
 
                         Log::info('$instance = ' . $instance);
                         Log::info('aws_instance_id = ' . $instance['aws_instance_id']);
+
+                        $aws->ec2Connection($instance->region->code);
 
                         // $securityGroup = $instance->oneDetail->aws_security_group_id;
 
