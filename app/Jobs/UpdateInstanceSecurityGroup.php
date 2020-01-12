@@ -59,13 +59,13 @@ class UpdateInstanceSecurityGroup implements ShouldQueue
             $ports = config('aws.ports.access_user');
             $aws = new Aws;
 
-            Log::info($this->resource);
+            Log::info('' . $this->resource);
 
             if ($this->resource->aws_instance_id && $this->resource->aws_status == 'running') {
                 $instance = InstanceHelper::getInstanceWithCheckUser($this->resource->aws_instance_id);
-                Log::info($instance);
+                Log::info('' . $instance);
                 $instanceDetail = $instance->details()->latest()->first();
-                Log::info($instanceDetail);
+                Log::info('' . $instanceDetail);
                 $aws->updateSecretGroupIngress($ports[0], $this->ip, 'tcp', $instanceDetail->aws_security_group_id);
             }
 
