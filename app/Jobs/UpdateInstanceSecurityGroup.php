@@ -52,7 +52,8 @@ class UpdateInstanceSecurityGroup implements ShouldQueue
      */
     public function handle()
     {
-        Log::info("Starting UpdateInstanceSecurityGroup: $this->ip, $this->user, $this->resource['aws_instance_id']");
+        Log::info("Starting UpdateInstanceSecurityGroup: $this->ip, $this->user");
+        Log::info('$this->resource[\'aws_instance_id\'] = ' . $this->resource['aws_instance_id']);
 
         try {
 
