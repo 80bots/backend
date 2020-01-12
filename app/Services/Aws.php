@@ -1023,7 +1023,6 @@ class Aws
      */
     protected function startupScript(string $params = '', string $path = ''): string
     {
-        $params = str_replace($params, '\$', '$'); // escape $ sign
         // scripts performing after reloading server
         $shell = <<<HERESHELL
 ############## Output to startup.sh file ###############
@@ -1076,9 +1075,9 @@ echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo s
 su - \$username -c 'echo "starting script {$path}"'
 su - \$username -c 'rm -rf ~/.screenshots/*'
 su - \$username -c 'cd ~/puppeteer && git pull'
-cat > \$file <<EOF
+cat > \$file << 'EOF'
 {$params}
-EOF
+'EOF'
 su - \$username -c 'cd ~/puppeteer && yarn && mkdir logs && DISPLAY=:1 node {$path} > /dev/null'
 HERESHELL;
     }
