@@ -60,46 +60,49 @@ class UpdateInstanceSecurityGroup implements ShouldQueue
 
                 foreach ($instances as $instance) {
 
-                    $aws->ec2Connection($instance->region->code);
+                    if ($instance->aws_status == 'active') {
 
-                    Log::info('$instance = ' . $instance);
-                    Log::info('aws_instance_id = ' . $instance['aws_instance_id']);
+                        $aws->ec2Connection($instance->region->code);
 
-                    // $securityGroup = $instance->oneDetail->aws_security_group_id;
+                        Log::info('$instance = ' . $instance);
+                        Log::info('aws_instance_id = ' . $instance['aws_instance_id']);
 
-                    $result = $aws->describeOneInstanceStatus($instance['aws_instance_id']);
+                        // $securityGroup = $instance->oneDetail->aws_security_group_id;
 
-                    if ($result->hasKey('SecurityGroups')) {
+                        $result = $aws->describeOneInstanceStatus($instance['aws_instance_id']);
 
-                        $securityGroups = $result->get('SecurityGroups');
-                        Log::info('$securityGroups = ' . $securityGroups);
+                        if ($result->hasKey('SecurityGroups')) {
 
-                        $ipPermissions = collect($securityGroups[0]['IpPermissions']);
+                            $securityGroups = $result->get('SecurityGroups');
+                            Log::info('$securityGroups = ' . $securityGroups);
 
-                        $ipPermissions = $ipPermissions->filter(function ($item, $key) use ($ports) {
-                            return in_array($item['FromPort'], $ports);
-                        });
+                            $ipPermissions = collect($securityGroups[0]['IpPermissions']);
 
-                        if ($ipPermissions->isNotEmpty()) {
-                            $ipRanges = $ipPermissions->map(function ($item, $key) {
-                                return [
-                                    'port' => $item['ToPort'],
-                                    'ip' => collect($item['IpRanges'])->map(function ($item, $key) {
-                                        return $item['CidrIp'];
-                                    })->toArray()
-                                ];
-                            })->toArray();
+                            $ipPermissions = $ipPermissions->filter(function ($item, $key) use ($ports) {
+                                return in_array($item['FromPort'], $ports);
+                            });
 
-                            sort($ipRanges);
+                            if ($ipPermissions->isNotEmpty()) {
+                                $ipRanges = $ipPermissions->map(function ($item, $key) {
+                                    return [
+                                        'port' => $item['ToPort'],
+                                        'ip' => collect($item['IpRanges'])->map(function ($item, $key) {
+                                            return $item['CidrIp'];
+                                        })->toArray()
+                                    ];
+                                })->toArray();
 
-                            foreach ($ipRanges as $ipRange) {
-                                if (!in_array("{$this->ip}/32", $ipRange['ip'])) {
-                                    $result = $aws->updateSecretGroupIngress($ipRange['port'], $this->ip, 'tcp', $securityGroup);
+                                sort($ipRanges);
+
+                                foreach ($ipRanges as $ipRange) {
+                                    if (!in_array("{$this->ip}/32", $ipRange['ip'])) {
+                                        $result = $aws->updateSecretGroupIngress($ipRange['port'], $this->ip, 'tcp', $securityGroup);
+                                    }
                                 }
+                                unset($ipRanges);
                             }
-                            unset($ipRanges);
+                            unset($securityGroups, $ipPermissions, $result, $securityGroup);
                         }
-                        unset($securityGroups, $ipPermissions, $result, $securityGroup);
                     }
                 }
             });
