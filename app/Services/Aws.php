@@ -1023,7 +1023,7 @@ class Aws
      */
     protected function startupScript(string $params = '', string $path = ''): string
     {
-        $params = escapeshellarg($params);
+        $params = str_replace($params, '\$', '$'); // escape $ sign
         // scripts performing after reloading server
         $shell = <<<HERESHELL
 ############## Output to startup.sh file ###############
