@@ -53,13 +53,12 @@ class UpdateInstanceSecurityGroup implements ShouldQueue
         try {
 
             $ports = config('aws.ports.access_user');
-
             $aws = new Aws;
 
             $this->user->instances()->chunk(10, function ($instances) use ($aws, $ports) {
 
                 foreach ($instances as $instance) {
-
+                    Log::info($instance);
                     if ($instance['aws_status'] == 'active') {
 
                         Log::info('$instance = ' . $instance);
