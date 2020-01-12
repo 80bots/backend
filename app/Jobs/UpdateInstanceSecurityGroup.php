@@ -63,6 +63,7 @@ class UpdateInstanceSecurityGroup implements ShouldQueue
             Log::info('$this->resource = ' . $this->resource);
 
             if ($this->resource->aws_instance_id && $this->resource->aws_status == 'running') {
+                Log::info('$this->resource->aws_instance_id = ' . $this->resource->aws_instance_id);
                 $instance = InstanceHelper::getInstanceWithCheckUser($this->resource->aws_instance_id);
                 Log::info('$instance = ' . $instance);
                 $instanceDetail = $instance->details()->latest()->first();
