@@ -195,7 +195,7 @@ class InstanceController extends AppController
         if (!empty($resource)) {
             $user = Auth::user();
             $ip = $request->ip();
-            dispatch(new UpdateInstanceSecurityGroup($user, $ip));
+            dispatch(new UpdateInstanceSecurityGroup($user, $ip, $resource));
             return $this->success((new BotInstanceResource($resource))->toArray($request));
         } else {
             $this->error('Not found', __('admin.bots.not_found'));

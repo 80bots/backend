@@ -27,17 +27,20 @@ class UpdateInstanceSecurityGroup implements ShouldQueue
      * @var string
      */
     protected $ip;
+    private $resource;
 
     /**
      * Create a new job instance.
      *
      * @param User $user
      * @param string|null $ip
+     * @param $resource
      */
-    public function __construct(User $user, ?string $ip)
+    public function __construct(User $user, ?string $ip, $resource)
     {
         $this->user = $user;
         $this->ip = $ip;
+        $this->resource = $resource;
     }
 
     /**
@@ -49,6 +52,7 @@ class UpdateInstanceSecurityGroup implements ShouldQueue
     public function handle()
     {
         Log::info("Starting UpdateInstanceSecurityGroup: $this->ip, $this->user");
+        Log::info($this->resource);
 
         try {
 
