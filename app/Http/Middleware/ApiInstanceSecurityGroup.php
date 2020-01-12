@@ -19,7 +19,7 @@ class ApiInstanceSecurityGroup
      */
     public function handle(Request $request, Closure $next)
     {
-        Log::info("Starting ApiInstanceSecurityGroup");
+//        Log::info("Starting ApiInstanceSecurityGroup");
 
 //        if (Auth::check()) {
 //            Log::info("ApiInstanceSecurityGroup 2");

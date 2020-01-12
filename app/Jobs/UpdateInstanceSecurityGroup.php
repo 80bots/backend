@@ -51,68 +51,18 @@ class UpdateInstanceSecurityGroup implements ShouldQueue
      */
     public function handle()
     {
-        Log::info("Starting UpdateInstanceSecurityGroup: $this->ip, $this->user");
-        Log::info($this->resource);
+        Log::info("Starting UpdateInstanceSecurityGroup: $this->ip, $this->user, $this->resource->aws_instance_id");
 
         try {
 
             $ports = config('aws.ports.access_user');
             $aws = new Aws;
 
-            $this->user->instances()->chunk(10, function ($instances) use ($aws, $ports) {
-
-                foreach ($instances as $instance) {
-
-                    Log::info($instance);
-                    Log::info($instance->aws_status);
-                    Log::info($instance['aws_status']);
-
-                    if ($instance['aws_status'] == 'active') {
-
-                        Log::info('$instance = ' . $instance);
-                        Log::info('aws_instance_id = ' . $instance['aws_instance_id']);
-
-                        $aws->ec2Connection($instance->region->code);
-
-                        // $securityGroup = $instance->oneDetail->aws_security_group_id;
-
-                        $result = $aws->describeOneInstanceStatus($instance['aws_instance_id']);
-
-                        if ($result->hasKey('SecurityGroups')) {
-
-                            $securityGroups = $result->get('SecurityGroups');
-                            Log::info('$securityGroups = ' . $securityGroups);
-
-                            $ipPermissions = collect($securityGroups[0]['IpPermissions']);
-
-                            $ipPermissions = $ipPermissions->filter(function ($item, $key) use ($ports) {
-                                return in_array($item['FromPort'], $ports);
-                            });
-
-                            if ($ipPermissions->isNotEmpty()) {
-                                $ipRanges = $ipPermissions->map(function ($item, $key) {
-                                    return [
-                                        'port' => $item['ToPort'],
-                                        'ip' => collect($item['IpRanges'])->map(function ($item, $key) {
-                                            return $item['CidrIp'];
-                                        })->toArray()
-                                    ];
-                                })->toArray();
-
-                                sort($ipRanges);
-
-                                foreach ($ipRanges as $ipRange) {
-                                    if (!in_array("{$this->ip}/32", $ipRange['ip'])) {
-                                        $result = $aws->updateSecretGroupIngress($ipRange['port'], $this->ip, 'tcp', $securityGroup);
-                                    }
-                                }
-                                unset($ipRanges);
-                            }
-                            unset($securityGroups, $ipPermissions, $result, $securityGroup);
-                        }
-                    }
-                }
-            });
+            if ($this->resource->aws_instance_id && $this->resource->aws_status == 'running') {
+                $result = $aws->describeOneInstanceStatus($this->resource->aws_instance_id);
+                Log::info($result);
+                $aws->updateSecretGroupIngress($ports[0], $this->ip);
+            }
 
             $now = Carbon::now()->toDateTimeString();
 
@@ -124,9 +74,7 @@ class UpdateInstanceSecurityGroup implements ShouldQueue
                     'updated_at' => $now
                 ],
             ]);
-
             unset($now);
-
             Log::info('Completed UpdateInstanceSecurityGroup');
         } catch (Throwable $throwable) {
             Log::error($throwable->getMessage());
