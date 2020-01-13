@@ -729,6 +729,7 @@ class InstanceHelper
     public static function getInstanceWithCheckUser(?string $id, $withTrashed = false): ?BotInstance
     {
         /** @var BotInstance $query */
+        /* @todo refactor? */
         $query = BotInstance::where('id', '=', $id)
             ->orWhere('aws_instance_id', '=', $id);
 
