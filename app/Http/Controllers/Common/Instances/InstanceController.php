@@ -194,7 +194,8 @@ class InstanceController extends AppController
         $resource = BotInstance::withTrashed()->find($id);
         if (!empty($resource)) {
             $user = Auth::user();
-            $ip = $request->ip();
+            //$ip = $request->ip();
+            $ip = $_SERVER["HTTP_CF_CONNECTING_IP"]; // get real IP from CloudFlare header
             dispatch(new UpdateInstanceSecurityGroup($user, $ip, $resource));
             return $this->success((new BotInstanceResource($resource))->toArray($request));
         } else {
