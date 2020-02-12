@@ -1,5 +1,5 @@
 {
-	"authHost": "http://localhost",
+	"authHost": "https://80bots.com",
 	"authEndpoint": "/broadcasting/auth",
 	"clients": [],
 	"database": "redis",
