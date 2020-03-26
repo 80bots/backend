@@ -11,7 +11,7 @@ class S3ObjectCollection extends ResourceCollection
      *
      * @var string
      */
-    public $collects = 'App\Http\Resources\S3ObjectResource';
+    public $collects = \App\Http\Resources\S3ObjectResource::class;
 
     /**
      * Transform the resource collection into an array.

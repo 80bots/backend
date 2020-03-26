@@ -11,7 +11,7 @@ class InstanceSessionsHistoryCollection extends ResourceCollection
      *
      * @var string
      */
-    public $collects = 'App\Http\Resources\Admin\InstanceSessionsHistoryResource';
+    public $collects = \App\Http\Resources\Admin\InstanceSessionsHistoryResource::class;
 
     /**
      * Transform the resource collection into an array.

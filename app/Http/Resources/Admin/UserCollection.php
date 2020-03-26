@@ -11,7 +11,7 @@ class UserCollection extends ResourceCollection
      *
      * @var string
      */
-    public $collects = 'App\Http\Resources\Admin\UserResource';
+    public $collects = \App\Http\Resources\Admin\UserResource::class;
 
     /**
      * Transform the resource collection into an array.
