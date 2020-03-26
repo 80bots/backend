@@ -1,0 +1,381 @@
+<html>
+
+<head>
+    <title>80bots</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.8.0/css/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.8.0/css/theme/black.min.css">
+    <style>
+        @import url("https://fonts.googleapis.com/css?family=Anonymous+Pro:400,400i,700,700i&display=swap");
+
+        .navigate-up,
+        .navigate-down {
+            display: none;
+        }
+
+        .logo {
+            position: absolute;
+            margin: 5px 0 0 5px;
+        }
+
+        .reveal .controls {
+            right: 25px;
+            color: #7dffff;
+        }
+
+        input:focus {
+            outline: 0;
+        }
+
+        input::-webkit-input-placeholder {
+            color: #ff7d7d;
+        }
+
+        input::-moz-placeholder {
+            color: #ff7d7d;
+        }
+
+        input:-ms-input-placeholder {
+            color: #ff7d7d;
+        }
+
+        input::-ms-input-placeholder {
+            color: #ff7d7d;
+        }
+
+        input::placeholder {
+            color: #ff7d7d;
+        }
+
+        input {
+            background: transparent;
+            border: none;
+            font-size: 50px;
+            color: #7dffff;
+            width: 100%;
+        }
+
+        * {
+            font-family: "Anonymous Pro", monospace;
+        }
+
+        section {
+            font-size: 35px;
+        }
+
+        p {
+            text-align: left;
+        }
+
+        li {
+            text-align: left;
+        }
+
+        .buttons button {
+            width: 20em;
+            background: none;
+            border: 0;
+            box-sizing: border-box;
+            margin: 1em;
+            padding: 1em 2em;
+            box-shadow: inset 0 0 0 2px #ff7d7d;
+            color: #ff7d7d;
+            font-family: "Anonymous Pro", monospace;
+            font-size: 25px;
+            font-weight: 800;
+            position: relative;
+            vertical-align: middle;
+        }
+
+        .buttons button::before, .buttons button::after {
+            box-sizing: inherit;
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .buttons .draw {
+            -webkit-transition: color 0.25s;
+            transition: color 0.25s;
+        }
+
+        .buttons .draw::before, .buttons .draw::after {
+            border: 2px solid transparent;
+            width: 0;
+            height: 0;
+        }
+
+        .buttons .draw::before {
+            top: 0;
+            left: 0;
+        }
+
+        .buttons .draw::after {
+            bottom: 0;
+            right: 0;
+        }
+
+        .buttons .draw:hover {
+            color: #7dffff;
+        }
+
+        .buttons .draw:hover::before, .buttons .draw:hover::after {
+            width: 100%;
+            height: 100%;
+        }
+
+        .buttons .draw:hover::before {
+            border-top-color: #7dffff;
+            border-right-color: #7dffff;
+            -webkit-transition: width 0.25s ease-out, height 0.25s ease-out 0.25s;
+            transition: width 0.25s ease-out, height 0.25s ease-out 0.25s;
+        }
+
+        .buttons .draw:hover::after {
+            border-bottom-color: #7dffff;
+            border-left-color: #7dffff;
+            -webkit-transition: border-color 0s ease-out 0.5s, width 0.25s ease-out 0.5s, height 0.25s ease-out 0.75s;
+            transition: border-color 0s ease-out 0.5s, width 0.25s ease-out 0.5s, height 0.25s ease-out 0.75s;
+        }
+
+        .buttons .meet:hover {
+            color: #7dffff;
+        }
+
+        .buttons .meet::after {
+            top: 0;
+            left: 0;
+        }
+
+        .buttons .meet:hover::before {
+            border-top-color: #7dffff;
+            border-right-color: #7dffff;
+        }
+
+        .buttons .meet:hover::after {
+            border-bottom-color: #7dffff;
+            border-left-color: #7dffff;
+            -webkit-transition: height 0.25s ease-out, width 0.25s ease-out 0.25s;
+            transition: height 0.25s ease-out, width 0.25s ease-out 0.25s;
+        }
+
+        .buttons.top {
+            position: absolute;
+            z-index: 999;
+            background-color: transparent;
+        }
+
+        .buttons.top button {
+            font-size: 15px;
+            width: auto;
+        }
+
+        .buttons .active {
+            color: #7dffff;
+        }
+
+        /* Page styling */
+        html {
+            background: #333;
+        }
+
+        body {
+            background: #333;
+            color: #fff;
+            font-family: "Anonymous Pro", monospace;
+            font-size: 15px;
+            text-align: center;
+        }
+
+        div.buttons {
+            isolation: isolate;
+        }
+
+        h1 {
+            font-weight: 300;
+            font-size: 2.5em;
+        }
+
+        @media (max-width: 799px) {
+            .buttons.top {
+                margin-top: 80px;
+                margin-bottom: -80px;
+            }
+
+            .buttons.top button {
+                font-size: 75%;
+            }
+        }
+
+    </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.8.0/js/reveal.min.js"></script>
+    <script>
+        function hideTop() {
+            document.getElementsByClassName("controls")[0].style.display = "none";
+            document.getElementsByClassName("top")[0].style.display = "none";
+        }
+
+        function showTop() {
+            document.getElementsByClassName("controls")[0].style.display = "block";
+            document.getElementsByClassName("top")[0].style.display = "block";
+        }
+
+        function iAmTechnical() {
+            document.getElementsByClassName("technical")[0].classList.add('active');
+            document.getElementsByClassName("not")[0].classList.remove('active');
+        }
+
+        function iAmNot() {
+            document.getElementsByClassName("technical")[0].classList.remove('active');
+            document.getElementsByClassName("not")[0].classList.add('active');
+        }
+
+        document.addEventListener("DOMContentLoaded", function (event) {
+            Reveal.initialize({
+                navigationMode: "grid",
+                controls: true,
+                progress: false,
+                history: true,
+                center: true,
+                // width: '100%',
+                // height: '100%',
+                dependencies: [
+                    {
+                        src:
+                            "https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.8.0/plugin/markdown/marked.js"
+                    },
+                    {
+                        src:
+                            "https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.8.0/plugin/markdown/markdown.js"
+                    },
+                    {
+                        src: "https://joelellis.github.io/RevealJS-notes/notes.js",
+                        async: true
+                    },
+                    {
+                        src:
+                            "https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.8.0/plugin/highlight/highlight.js",
+                        async: true
+                    }
+                ]
+            });
+
+            Reveal.addEventListener("ready", function (event) {
+                if (Reveal.isFirstSlide()) hideTop();
+                else showTop();
+            });
+
+            Reveal.addEventListener("slidechanged", function (event) {
+                if (Reveal.isFirstSlide()) hideTop();
+                else showTop();
+                if (event.indexv == 0) iAmNot();
+                else iAmTechnical();
+                if (Reveal.isLastSlide()) hideTop();
+            });
+        })
+    </script>
+</head>
+
+<div class="logo">
+    <object type="image/svg+xml" data="https://80bots.com/images/80bots-logo.svg" class="jsx-775368732 logo"
+            style="width:200px;height:auto;"></object>
+</div>
+
+<div class="buttons top" style="position:relative;">
+    <div style="position:absolute;left:0;right:0">
+        <button class="draw meet technical" onclick="iAmTechnical();Reveal.down();">I'm technical</button>
+        <button class="draw meet not" onclick="iAmNot();Reveal.up();">I'm not</button>
+    </div>
+</div>
+
+<div class="reveal">
+    <div class="slides">
+        <section>
+            <div class="buttons">
+                <button class="draw meet" onclick="iAmTechnical();Reveal.slide( 1, 1);">I'm technical</button>
+                <button class="draw meet" onclick="iAmNot();Reveal.slide( 1, 0);">I'm not</button>
+            </div>
+        </section>
+        <section>
+            <section>
+                <p>80bots is an open-source, cloud-native, Robotic Process Automation platform for the web.</p>
+            </section>
+            <section>
+                <p>80bots is an open-source framework that helps you develop, launch and manage Puppeteer bots
+                    efficiently.</p>
+            </section>
+        </section>
+        <section>
+            <section>
+                <p>80bots make the following possible:</p>
+                <ul>
+                    <li>Get a bot made to your requirements that run through a slightly more complex set of tasks than
+                        something like Zapier.
+                    </li>
+                    <li>See what the bot is doing in real-time.</li>
+                    <li>Launch multiple bots & manage a digital workforce.</li>
+                </ul>
+            </section>
+            <section>
+                <p>80bots make the following convenient for automation devs:</p>
+                <ul>
+                    <li>Everything runs WITH head.</li>
+                    <li>Automatic screenshots every X seconds for a complete log trail, useful for debugging.</li>
+                    <li>Launch as many bots on AWS as you want. Each bot is an EC2.</li>
+                    <li>Real-time VNC connection to the bot. You can even take control of it then give control back.
+                    </li>
+                </ul>
+            </section>
+        </section>
+        <section>
+            <section>
+                <p>Non-technical 2</p>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore
+                    et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+                    aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+                    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
+                    culpa qui officia deserunt mollit anim id est laborum.</p>
+            </section>
+            <section>
+                <p>Technical 2</p>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore
+                    et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+                    aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+                    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
+                    culpa qui officia deserunt mollit anim id est laborum.</p>
+            </section>
+        </section>
+        <section>
+            <section>
+                <p style="text-align:center">Non-technical Explainer</p>
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/c9SJAPxU5bs" frameborder="0"
+                        allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen></iframe>
+            </section>
+            <section>
+                <p style="text-align:center">Technical Explainer</p>
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/c9SJAPxU5bs" frameborder="0"
+                        allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen></iframe>
+            </section>
+        </section>
+        <section>
+            <section>
+                <p style="font-size: 50px">Get in touch</p>
+                <p style="font-size: 50px">hello@80bots.com</p>
+                <form
+                    action="https://80bots.us4.list-manage.com/subscribe/post?u=105560c1c79f5eb1cf278f471&amp;amp;id=21583f32e6"
+                    method="post" target="_blank" novalidate="" class="jsx-775368732"><input type="email" name="EMAIL"
+                                                                                             placeholder="enter email here to subscribe"
+                                                                                             autofocus=""
+                                                                                             class="jsx-775368732">
+                    <div class="buttons">
+                        <button class="draw meet" type="submit" style="float:left;margin-left:0;">Subscribe</button>
+                    </div>
+                </form>
+            </section>
+        </section>
+    </div>
+</div>
+</html>
