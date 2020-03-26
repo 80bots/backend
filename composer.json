@@ -29,7 +29,8 @@
         "php-http/guzzle6-adapter": "1.1.1",
         "predis/predis": "^1.1",
         "sentry/sentry-laravel": "^1.6",
-        "stripe/stripe-php": "^6.41"
+        "stripe/stripe-php": "^6.41",
+        "laravel/ui": "^2.0"
     },
     "require-dev": {
         "aws/aws-sdk-php-laravel": "~3.0",
