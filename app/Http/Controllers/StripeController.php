@@ -36,7 +36,7 @@ class StripeController extends Controller
             $token  = StripeModel::CreateStripeToken($request);
 
             if (! empty($token)) {
-                $user->newSubscription(config('services.stripe.product'), $planId)->create($token->id);
+                $user->newSubscription(config('settings.stripe.product'), $planId)->create($token->id);
                 $user->updateCredit($plan->credit);
                 session()->flash('success', 'Subscribed Successfully');
             } else {
@@ -72,7 +72,7 @@ class StripeController extends Controller
 
         try{
             $user   = Auth::user();
-            $subscription = $user->subscription(config('services.stripe.product'));
+            $subscription = $user->subscription(config('settings.stripe.product'));
 
             if (! empty($subscription)) {
                 $subscription->noProrate()->swap($planId);

@@ -26,9 +26,9 @@ class SubscriptionController extends Controller
         $subscriptionEnded  = true;
         $activePlan         = null;
 
-        if ($user->subscribed(config('services.stripe.product'))) {
-            $subscription       = $user->subscription(config('services.stripe.product'));
-            $subscriptionEnded  = $user->subscription(config('services.stripe.product'))->ended();
+        if ($user->subscribed(config('settings.stripe.product'))) {
+            $subscription       = $user->subscription(config('settings.stripe.product'));
+            $subscriptionEnded  = $user->subscription(config('settings.stripe.product'))->ended();
             $activePlan         = (
                 new SubscriptionPlanResource(
                     SubscriptionPlan::where('stripe_plan', '=', $subscription->stripe_plan ?? null)->first()
@@ -82,26 +82,26 @@ class SubscriptionController extends Controller
         $user->updateDefaultPaymentMethod($paymentMethod);
 
         // If we have a subscription and the user selected the same plan
-        if ($user->subscription(config('services.stripe.product')) && $user->subscribed(config('services.stripe.product'), $plan->stripe_plan)) {
+        if ($user->subscription(config('settings.stripe.product')) && $user->subscribed(config('settings.stripe.product'), $plan->stripe_plan)) {
             return $this->error('Bad Request', 'You are already at this plan');
         }
 
         // If the user doesn't have a subscription in the plan's list
-        if (! $user->subscription(config('services.stripe.product'))) {
+        if (! $user->subscription(config('settings.stripe.product'))) {
 
-            if (! $user->subscribedToPlan(config('services.stripe.product'), $plan->stripe_plan)) {
-                $user->newSubscription(config('services.stripe.product'), $plan->stripe_plan)->create();
+            if (! $user->subscribedToPlan(config('settings.stripe.product'), $plan->stripe_plan)) {
+                $user->newSubscription(config('settings.stripe.product'), $plan->stripe_plan)->create();
                 $credits = $plan->credit ?? 0;
             } else {
                 return $this->error('Bad Request', 'Bad Request');
             }
 
-        } else if (! $user->subscribed(config('services.stripe.product'), $plan->stripe_plan)) {
+        } else if (! $user->subscribed(config('settings.stripe.product'), $plan->stripe_plan)) {
             // If the user has a subscription, but for another plan,
             // we change to the selected one (Upgrading and Downgrading Plans)
 
             if ($plan->credit > $oldPlanCredits) {
-                $user->subscription(config('services.stripe.product'))
+                $user->subscription(config('settings.stripe.product'))
                     ->swapAndInvoice($plan->stripe_plan);
                 $credits = $plan->credit - $oldPlanCredits;
             } else {
@@ -109,7 +109,7 @@ class SubscriptionController extends Controller
                 $difference = $oldPlanCredits - $plan->credit;
 
                 if ($difference > 0 && ($user->credits - $difference) > 0) {
-                    $user->subscription(config('services.stripe.product'))
+                    $user->subscription(config('settings.stripe.product'))
                         ->swapAndInvoice($plan->stripe_plan);
 
                     $credits = 0 - $difference;

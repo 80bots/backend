@@ -16,7 +16,7 @@ class SubscriptionPlansTableSeeder extends Seeder
      */
     public function run()
     {
-        Stripe::setApiKey(config('services.stripe.secret'));
+        Stripe::setApiKey(config('settings.stripe.secret'));
 
         $defaultPlans = [
             ['name' => 'Pro', 'credits' => 70, 'price' => 70],
@@ -25,10 +25,10 @@ class SubscriptionPlansTableSeeder extends Seeder
         ];
 
         try {
-            $product = Product::retrieve(config('services.stripe.product'));
+            $product = Product::retrieve(config('settings.stripe.product'));
         } catch (Exception $exception) {
             $product = Product::create([
-                'id'        => config('services.stripe.product'),
+                'id'        => config('settings.stripe.product'),
                 'name'      => '80bots Credits',
                 'type'      => 'service'
             ]);
