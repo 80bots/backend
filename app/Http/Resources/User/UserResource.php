@@ -22,7 +22,7 @@ class UserResource extends JsonResource
             'credits'       => $this->credits ?? 0,
             'timezone'      => $this->timezone->timezone ?? '',
             'region'        => $this->region->name ?? '',
-            'subscription'  => $this->subscription(config('services.stripe.product')) ?? []
+            'subscription'  => $this->subscription(config('settings.stripe.product')) ?? []
         ];
     }
 }

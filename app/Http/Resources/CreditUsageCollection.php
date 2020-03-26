@@ -11,7 +11,7 @@ class CreditUsageCollection extends ResourceCollection
      *
      * @var string
      */
-    public $collects = 'App\Http\Resources\CreditUsageResource';
+    public $collects = \App\Http\Resources\CreditUsageResource::class;
 
     /**
      * Transform the resource collection into an array.

@@ -11,7 +11,7 @@ class PostCollection extends ResourceCollection
      *
      * @var string
      */
-    public $collects = 'App\Http\Resources\PostResource';
+    public $collects = \App\Http\Resources\PostResource::class;
 
     /**
      * Transform the resource collection into an array.

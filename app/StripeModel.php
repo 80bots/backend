@@ -18,7 +18,7 @@ class StripeModel extends BaseModel
     public static function StripeConnection()
     {
         try{
-            Stripe::setApiKey(config('services.stripe.secret'));
+            Stripe::setApiKey(config('settings.stripe.secret'));
         } catch (ApiConnection $exception){
             Log::error($exception->getMessage());
         }

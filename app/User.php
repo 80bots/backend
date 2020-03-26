@@ -252,7 +252,7 @@ class User extends Authenticatable
 
     public function createPaymentMethod($token)
     {
-        Stripe::setApiKey(config('services.stripe.key'));
+        Stripe::setApiKey(config('settings.stripe.key'));
 
         return PaymentMethod::create([
             'type' => 'card',

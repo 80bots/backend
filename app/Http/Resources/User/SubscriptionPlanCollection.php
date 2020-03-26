@@ -11,7 +11,7 @@ class SubscriptionPlanCollection extends ResourceCollection
      *
      * @var string
      */
-    public $collects = 'App\Http\Resources\User\SubscriptionPlanResource';
+    public $collects = \App\Http\Resources\User\SubscriptionPlanResource::class;
 
     /**
      * Transform the resource collection into an array.

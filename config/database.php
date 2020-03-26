@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Str;
+
 return [
 
     /*
@@ -35,6 +37,7 @@ return [
 
         'sqlite' => [
             'driver' => 'sqlite',
+            'url' => env('DATABASE_URL'),
             'database' => env('DB_DATABASE', database_path('database.sqlite')),
             'prefix' => '',
             'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
@@ -42,6 +45,7 @@ return [
 
         'mysql' => [
             'driver' => 'mysql',
+            'url' => env('DATABASE_URL'),
             'host' => env('DB_HOST', '127.0.0.1'),
             'port' => env('DB_PORT', '3306'),
             'database' => env('DB_DATABASE', 'forge'),
@@ -61,6 +65,7 @@ return [
 
         'pgsql' => [
             'driver' => 'pgsql',
+            'url' => env('DATABASE_URL'),
             'host' => env('DB_HOST', '127.0.0.1'),
             'port' => env('DB_PORT', '5432'),
             'database' => env('DB_DATABASE', 'forge'),
@@ -75,6 +80,7 @@ return [
 
         'sqlsrv' => [
             'driver' => 'sqlsrv',
+            'url' => env('DATABASE_URL'),
             'host' => env('DB_HOST', 'localhost'),
             'port' => env('DB_PORT', '1433'),
             'database' => env('DB_DATABASE', 'forge'),
@@ -83,30 +89,6 @@ return [
             'charset' => 'utf8',
             'prefix' => '',
             'prefix_indexes' => true,
-        ],
-
-        'mongodb' => [
-            'driver'   => 'mongodb',
-            'host'     => env('MONGO_DB_HOST', 'localhost'),
-            'port'     => env('MONGO_DB_PORT', 27017),
-            'database' => env('MONGO_DB_DATABASE', 'saas'),
-            'username' => env('MONGO_DB_USERNAME', 'saas'),
-            'password' => env('MONGO_DB_PASSWORD', ''),
-            'options' => [
-                'ssl' => true,
-            ],
-            /**
-             * Add custom options for the DocumentDB, check app/Providers/MongodbServiceProvider.php
-             */
-            'document_db_options' => [
-                'ssl' => [
-                    'cafile' => storage_path(env('MONGO_RDS_PEM', 'rds-combined-ca-bundle.pem')),
-                    'allow_self_signed' => true,
-                    'verify_peer' => true,
-                    'verify_peer_name' => true,
-                    'verify_expiry' => true,
-                ]
-            ],
         ],
 
     ],
@@ -137,24 +119,27 @@ return [
 
     'redis' => [
 
-        'client' => env('REDIS_CLIENT', 'predis'),
+        'client' => env('REDIS_CLIENT', 'phpredis'),
 
         'options' => [
-            'cluster' => env('REDIS_CLUSTER', 'predis'),
+            'cluster' => env('REDIS_CLUSTER', 'redis'),
+            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_database_'),
         ],
 
         'default' => [
+            'url' => env('REDIS_URL'),
             'host' => env('REDIS_HOST', '127.0.0.1'),
             'password' => env('REDIS_PASSWORD', null),
-            'port' => env('REDIS_PORT', 6379),
-            'database' => env('REDIS_DB', 0),
+            'port' => env('REDIS_PORT', '6379'),
+            'database' => env('REDIS_DB', '0'),
         ],
 
         'cache' => [
+            'url' => env('REDIS_URL'),
             'host' => env('REDIS_HOST', '127.0.0.1'),
             'password' => env('REDIS_PASSWORD', null),
-            'port' => env('REDIS_PORT', 6379),
-            'database' => env('REDIS_CACHE_DB', 1),
+            'port' => env('REDIS_PORT', '6379'),
+            'database' => env('REDIS_CACHE_DB', '1'),
         ],
 
     ],

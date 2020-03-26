@@ -11,7 +11,7 @@ class MessageCollection extends ResourceCollection
      *
      * @var string
      */
-    public $collects = 'App\Http\Resources\Admin\MessageResource';
+    public $collects = \App\Http\Resources\Admin\MessageResource::class;
 
     /**
      * Transform the resource collection into an array.

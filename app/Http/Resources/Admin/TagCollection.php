@@ -11,7 +11,7 @@ class TagCollection extends ResourceCollection
      *
      * @var string
      */
-    public $collects = 'App\Http\Resources\Admin\TagResource';
+    public $collects = \App\Http\Resources\Admin\TagResource::class;
 
     /**
      * Transform the resource collection into an array.

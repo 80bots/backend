@@ -11,7 +11,7 @@ class TimezoneCollection extends ResourceCollection
      *
      * @var string
      */
-    public $collects = 'App\Http\Resources\User\TimezoneResource';
+    public $collects = \App\Http\Resources\User\TimezoneResource::class;
 
     /**
      * Transform the resource collection into an array.

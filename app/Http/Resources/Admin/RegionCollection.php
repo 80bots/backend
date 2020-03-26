@@ -11,7 +11,7 @@ class RegionCollection extends ResourceCollection
      *
      * @var string
      */
-    public $collects = 'App\Http\Resources\Admin\RegionResource';
+    public $collects = \App\Http\Resources\Admin\RegionResource::class;
 
     /**
      * Transform the resource collection into an array.

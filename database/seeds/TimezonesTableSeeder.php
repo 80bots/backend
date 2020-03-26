@@ -11,7 +11,7 @@ class TimezonesTableSeeder extends Seeder
      */
     public function run()
     {
-        $timezones = array(
+        $timezones = [
             'America/Adak' => '(GMT-10:00) America/Adak (Hawaii-Aleutian Standard Time)',
             'America/Atka' => '(GMT-10:00) America/Atka (Hawaii-Aleutian Standard Time)',
             'America/Anchorage' => '(GMT-9:00) America/Anchorage (Alaska Standard Time)',
@@ -412,7 +412,7 @@ class TimezonesTableSeeder extends Seeder
             'Antarctica/South_Pole' => '(GMT+12:00) Antarctica/South_Pole (New Zealand Standard Time)',
             'Asia/Anadyr' => '(GMT+12:00) Asia/Anadyr (Anadyr Time)',
             'Asia/Kamchatka' => '(GMT+12:00) Asia/Kamchatka (Petropavlovsk-Kamchatski Time)'
-        );
+        ];
 
         foreach($timezones as $key => $value)
         {

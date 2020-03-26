@@ -11,7 +11,7 @@ class AwsSettingCollection extends ResourceCollection
      *
      * @var string
      */
-    public $collects = 'App\Http\Resources\Admin\AwsSettingResource';
+    public $collects = \App\Http\Resources\Admin\AwsSettingResource::class;
 
     /**
      * Transform the resource collection into an array.

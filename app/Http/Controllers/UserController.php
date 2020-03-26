@@ -30,8 +30,8 @@ class UserController extends AppController
             $user = User::find(Auth::id());
             $plan = null;
 
-            if ($user->subscribed(config('services.stripe.product'))) {
-                $subscription = $user->subscription(config('services.stripe.product'));
+            if ($user->subscribed(config('settings.stripe.product'))) {
+                $subscription = $user->subscription(config('settings.stripe.product'));
                 $plan = SubscriptionPlan::where('stripe_plan', $subscription->stripe_plan)->first();
             }
 

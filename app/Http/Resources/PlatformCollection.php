@@ -11,7 +11,7 @@ class PlatformCollection extends ResourceCollection
      *
      * @var string
      */
-    public $collects = 'App\Http\Resources\PlatformResource';
+    public $collects = \App\Http\Resources\PlatformResource::class;
 
     /**
      * Transform the resource collection into an array.

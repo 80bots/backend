@@ -92,7 +92,7 @@ class CreditUsageHelper
         $subscription = $user->subscriptions()->latest()->first();
         if (! empty($subscription)) {
             try {
-                Stripe::setApiKey(config('services.stripe.secret'));
+                Stripe::setApiKey(config('settings.stripe.secret'));
                 return StripePlan::retrieve($subscription->stripe_plan);
             } catch (Throwable $throwable) {
                 Log::error($throwable->getMessage());
