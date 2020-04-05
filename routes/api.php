@@ -13,18 +13,18 @@ Route::group(['prefix' => 'posts', 'as' => 'posts.'], function () {
 
 
 // Authentication Routes. Auth::routes() is not used to not provide unneeded routes
-Route::group(['prefix' => 'auth', 'as' => 'auth.', 'namespace' => 'Auth'], function() {
+Route::group(['prefix' => 'auth', 'as' => 'auth.', 'namespace' => 'Auth'], function () {
     Route::post('login', 'LoginController@apiLogin')->name('login');
     Route::post('register', 'RegisterController@apiRegister')->name('register');
     Route::post('password/email', 'ForgotPasswordController@sendResetLinkEmail')->name('password.email');
     Route::post('password/reset', 'ResetPasswordController@reset')->name('password.reset');
 });
 
-Route::group(['middleware' => ['auth:api', 'api.sentry', 'api.instance']], function() {
+Route::group(['middleware' => ['auth:api', 'api.sentry', 'api.instance']], function () {
 
     Route::get('/auth/login', 'CheckController@apiCheckLogin')->name('check');
 
-    Route::group(['prefix' => 'user', 'as' => 'user.'], function() {
+    Route::group(['prefix' => 'user', 'as' => 'user.'], function () {
         Route::get('/profile', 'UserController@show')->name('profile');
         Route::put('/profile', 'UserController@update')->name('update.profile');
         Route::get('/timezone', 'UserController@getTimezones')->name('timezones');
@@ -66,12 +66,12 @@ Route::group(['middleware' => ['auth:api', 'api.sentry', 'api.instance']], funct
         Route::post('/subscribe', 'SubscriptionController@subscribe')->name('subscribe');
     });
 
-    Route::group(['prefix' => 'platform', 'as' => 'platform.'], function() {
-       Route::get('/types', 'PlatformController@getInstanceTypes');
+    Route::group(['prefix' => 'platform', 'as' => 'platform.'], function () {
+        Route::get('/types', 'PlatformController@getInstanceTypes');
     });
 
-    Route::group(['prefix' => 'history', 'as' => 'history.'], function() {
-       Route::get('/credits', 'HistoryController@getCreditUsage');
+    Route::group(['prefix' => 'history', 'as' => 'history.'], function () {
+        Route::get('/credits', 'HistoryController@getCreditUsage');
     });
 
     Route::group(['prefix' => 'posts', 'as' => 'posts.'], function () {
@@ -91,8 +91,8 @@ Route::group(['middleware' => ['auth:api', 'api.sentry', 'api.instance']], funct
 Route::group([
     'prefix' => 'admin',
     'namespace' => 'Admin',
-    'middleware' => [ 'auth:api', 'api.admin' ],
-], function() {
+    'middleware' => ['auth:api', 'api.admin'],
+], function () {
 
     Route::group(['prefix' => 'aws', 'as' => 'aws.'], function () {
         Route::get('/', 'AwsSettingController@index')->name('aws');
@@ -121,17 +121,17 @@ Route::group([
         Route::get('/{id}', 'BotInstanceController@show')->name('show');
     });
 
-    Route::group(['prefix' => 'history', 'as' => 'history.'], function() {
+    Route::group(['prefix' => 'history', 'as' => 'history.'], function () {
         Route::get('/credits', 'HistoryController@getCreditUsage');
     });
 
     Route::resources([
-        'aws'           => 'AwsSettingController',
-        'user'          => 'UserController',
-        'bots'          => 'BotController',
-        'schedule'      => 'ScheduleInstanceController',
-        'notification'  => 'NotificationController',
-        'subscription'  => 'SubscriptionController',
-        'session'       => 'InstanceSessionController'
+        'aws' => 'AwsSettingController',
+        'user' => 'UserController',
+        'bots' => 'BotController',
+        'schedule' => 'ScheduleInstanceController',
+        'notification' => 'NotificationController',
+        'subscription' => 'SubscriptionController',
+        'session' => 'InstanceSessionController'
     ]);
 });
