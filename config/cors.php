@@ -15,6 +15,7 @@ return [
     |
     */
 
+    // commented out since the CORS header was doubling up
 //    'paths' => ['api/*'],
 //
 //    'allowed_methods' => ['*'],

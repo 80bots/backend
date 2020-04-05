@@ -25,16 +25,16 @@ class ScheduleController extends Controller
     {
         try {
 
-            $limit  = $request->query('limit') ?? self::PAGINATE;
+            $limit = $request->query('limit') ?? self::PAGINATE;
             $search = $request->input('search');
-            $sort   = $request->input('sort');
-            $order  = $request->input('order') ?? 'asc';
+            $sort = $request->input('sort');
+            $order = $request->input('order') ?? 'asc';
 
             $resource = SchedulingInstance::findByUserId(Auth::id());
 
             // TODO: Add Filters
 
-            if (! empty($search)) {
+            if (!empty($search)) {
                 $resource->whereHas('instance', function (Builder $query) use ($search) {
                     $query->where('tag_name', 'like', "%{$search}%");
                 });
@@ -42,7 +42,7 @@ class ScheduleController extends Controller
 
             //
             $resource->when($sort, function ($query, $sort) use ($order) {
-                if (! empty(SchedulingInstance::ORDER_FIELDS[$sort])) {
+                if (!empty(SchedulingInstance::ORDER_FIELDS[$sort])) {
                     return QueryHelper::orderBotScheduling($query, SchedulingInstance::ORDER_FIELDS[$sort], $order);
                 } else {
                     return $query->orderBy('created_at', 'desc');
@@ -51,11 +51,11 @@ class ScheduleController extends Controller
                 return $query->orderBy('created_at', 'desc');
             });
 
-            $schedules  = (new ScheduleCollection($resource->paginate($limit)))->response()->getData();
-            $meta       = $schedules->meta ?? null;
+            $schedules = (new ScheduleCollection($resource->paginate($limit)))->response()->getData();
+            $meta = $schedules->meta ?? null;
 
             $response = [
-                'data'  => $schedules->data ?? [],
+                'data' => $schedules->data ?? [],
                 'total' => $meta->total ?? 0
             ];
 
@@ -76,7 +76,7 @@ class ScheduleController extends Controller
      */
     public function deleteSchedulerDetails(Request $request): JsonResponse
     {
-        if (! empty($request->input('ids'))) {
+        if (!empty($request->input('ids'))) {
 
             try {
 
@@ -89,7 +89,7 @@ class ScheduleController extends Controller
                 }
 
                 return $this->error(__('user.error'), __('user.delete_error'));
-            } catch(Throwable $throwable) {
+            } catch (Throwable $throwable) {
                 return $this->error(__('user.server_error'), $throwable->getMessage());
             }
         }
@@ -107,13 +107,13 @@ class ScheduleController extends Controller
         try {
 
             $data = $request->validate([
-               'instance_id' => 'required|string'
+                'instance_id' => 'required|string'
             ]);
 
             $instance = BotInstance::findByInstanceId($data['instance_id'])->first();
 
             if (empty($instance)) {
-                return $this->error(__('user.server_error'), 'Such bot does not exists');
+                return $this->error(__('user.server_error'), 'Such bot does not exist');
             }
 
             $schedule = SchedulingInstance::findByUserInstanceId($instance->id, Auth::id())
@@ -121,8 +121,8 @@ class ScheduleController extends Controller
 
             if (empty($schedule)) {
                 $schedule = SchedulingInstance::create([
-                    'user_id'       => Auth::id(),
-                    'instance_id'   => $instance->id,
+                    'user_id' => Auth::id(),
+                    'instance_id' => $instance->id,
                 ]);
             }
 
@@ -140,18 +140,18 @@ class ScheduleController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
     public function show($id)
     {
-        if (! empty($id)) {
+        if (!empty($id)) {
             try {
 
                 $instance = SchedulingInstance::with('userInstance')->where('user_id', '=', Auth::id())
                     ->where('id', '=', $id)->first();
 
-                if (! empty($instance)) {
+                if (!empty($instance)) {
                     $resource = new ScheduleResource($instance);
 
                     return $this->success([
@@ -172,7 +172,7 @@ class ScheduleController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
@@ -183,13 +183,13 @@ class ScheduleController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param \Illuminate\Http\Request $request
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
     {
-        try{
+        try {
             $instance = SchedulingInstance::where('user_id', '=', Auth::id())
                 ->where('id', '=', $id)->first();
 
@@ -197,20 +197,20 @@ class ScheduleController extends Controller
                 return $this->notFound(__('user.not_found'), __('user.scheduling.not_found'));
             }
 
-            $active     = SchedulingInstance::STATUS_ACTIVE;
-            $inactive   = SchedulingInstance::STATUS_INACTIVE;
+            $active = SchedulingInstance::STATUS_ACTIVE;
+            $inactive = SchedulingInstance::STATUS_INACTIVE;
 
-            if (! empty($request->input('update'))) {
+            if (!empty($request->input('update'))) {
                 $updateData = $request->validate([
-                    'update.status'     => "in:{$active},{$inactive}",
-                    'update.details'    => 'array',
+                    'update.status' => "in:{$active},{$inactive}",
+                    'update.details' => 'array',
                 ]);
                 return $this->updateSimpleInfo($request, $updateData, $instance);
             } else {
                 return $this->updateFullInfo($request, $instance);
             }
 
-        } catch (Throwable $throwable){
+        } catch (Throwable $throwable) {
             return $this->error(__('user.server_error'), $throwable->getMessage());
         }
     }
@@ -251,7 +251,7 @@ class ScheduleController extends Controller
      */
     public function destroy($id)
     {
-        try{
+        try {
 
             $instance = SchedulingInstance::where('user_id', '=', Auth::id())
                 ->where('id', '=', $id)->first();
@@ -266,7 +266,7 @@ class ScheduleController extends Controller
 
             return $this->error(__('user.error'), __('user.scheduling.not_deleted'));
 
-        } catch (Throwable $throwable){
+        } catch (Throwable $throwable) {
             return $this->error(__('user.server_error'), $throwable->getMessage());
         }
     }
@@ -280,7 +280,7 @@ class ScheduleController extends Controller
     private function updateOrCreateSchedulingInstancesDetails(SchedulingInstance $instance, array $details, $timezone): void
     {
         // Delete all
-        SchedulingInstancesDetails::whereHas('schedulingInstance', function(Builder $query) {
+        SchedulingInstancesDetails::whereHas('schedulingInstance', function (Builder $query) {
             $query->where('user_id', '=', Auth::id());
         })->where('scheduling_id', '=', $instance->id ?? null)->delete();
 
@@ -306,12 +306,12 @@ class ScheduleController extends Controller
 
             SchedulingInstancesDetails::create([
                 'scheduling_id' => $instance->id ?? null,
-                'day'           => $detail['day'] ?? '',
+                'day' => $detail['day'] ?? '',
                 'selected_time' => $selectedTime->format('h:i A'),
-                'time_zone'     => $timezone,
-                'cron_data'     => "{$selectedTime->format('D h:i A')} {$timezone}",
+                'time_zone' => $timezone,
+                'cron_data' => "{$selectedTime->format('D h:i A')} {$timezone}",
                 'schedule_type' => $type,
-                'status'        => SchedulingInstancesDetails::STATUS_ACTIVE
+                'status' => SchedulingInstancesDetails::STATUS_ACTIVE
             ]);
         }
     }
