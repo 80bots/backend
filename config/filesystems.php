@@ -57,11 +57,11 @@ return [
 
         's3' => [
             'driver' => 's3',
-            'key' => env('AWS_ACCESS_KEY_ID'),
-            'secret' => env('AWS_SECRET_ACCESS_KEY'),
-            'region' => env('AWS_DEFAULT_REGION'),
-            'bucket' => env('AWS_BUCKET'),
-            'endpoint' => env('AWS_URL'),
+            'key' => env('AKIAQOGPXKZ2MCMXDOUU'),
+            'secret' => env('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'),
+            'region' => env('us-east-2'),
+            'bucket' => env('80bots'),
+            'endpoint' => env('https://d265x1r7kc6w9r.cloudfront.net'),
         ],
 
     ],

@@ -20,8 +20,8 @@ return [
      * IAM User 80bots ( Access key ID - AKIAQOGPXKZ2M7RQB6GR / Secret key - 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 )
      */
     'credentials' => [
-        'key'    => env('AWS_ACCESS_KEY_ID', 'AKIAQOGPXKZ2M7RQB6GR'),
-        'secret' => env('AWS_SECRET_ACCESS_KEY', '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'),
+        'key'    => env('AWS_ACCESS_KEY_ID', 'AKIAQOGPXKZ2MCMXDOUU'),
+        'secret' => env('AWS_SECRET_ACCESS_KEY', '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'),
     ],
     'region' => env('AWS_REGION', 'us-east-2'),
     'version' => 'latest',
