@@ -51,19 +51,18 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => env('APP_URL').'/storage',
+            'url' => env('APP_URL') . '/storage',
             'visibility' => 'public',
         ],
 
         's3' => [
             'driver' => 's3',
-            'key' => env('AKIAQOGPXKZ2MCMXDOUU'),
-            'secret' => env('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'),
-            'region' => env('us-east-2'),
-            'bucket' => env('80bots'),
-            'endpoint' => env('https://d265x1r7kc6w9r.cloudfront.net'),
+            'key' => env('AWS_ACCESS_KEY_ID', 'AKIAQOGPXKZ2MCMXDOUU'),
+            'secret' => env('AWS_SECRET_ACCESS_KEY', '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'),
+            'region' => env('AWS_REGION', 'us-east-2'),
+            'bucket' => env('AWS_BUCKET', '80bots'),
+            'endpoint' => env('AWS_URL', 'https://d265x1r7kc6w9r.cloudfront.net')
         ],
-
     ],
 
     /*
