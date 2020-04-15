@@ -1355,7 +1355,6 @@ HERESHELL;
             ]);
 
             try {
-
                 $result = $promise->wait();
                 array_push($data, [
                     'type' => $result->get('ContentType'),
