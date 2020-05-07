@@ -32,35 +32,32 @@ The functionality performed in the background by schedule (CRON)
 1) AwsSyncAmis ( aws:sync-amis ) is launched every 30 min 
 Synchronizes AMI's list, which are available in each region for selecting in the region settings 
 
-2) AwsSyncRegions ( aws:sync-regions ) is launched once a day .
-Synchronizes the list of available EC2 regions for instances creation 
-
-3) CalculateInstancesUpTime ( instance:calculate-up-time ) is launched every 10 min 
+2) CalculateInstancesUpTime ( instance:calculate-up-time ) is launched every 10 min 
 Calculates the Uptime time of all launched instances and how many credits the current instance requires (the payment is hourly charged, one credit is charged for every next hour) 
 
-4) CalculateUserCreditScore ( instance:calculate-user-credit-score ) is launched every 10 min 
+3) CalculateUserCreditScore ( instance:calculate-user-credit-score ) is launched every 10 min 
 Checks for the number of credits the user has in his account and charges credits for using the instances. If the user lacks credits - all of his instances are stopped 
 
-5) CleanUpUnused ( instance:clean ) - is launched hourly 
+4) CleanUpUnused ( instance:clean ) - is launched hourly 
 Cleans up unused AWS security groups
 
-6) InstanceStartScheduling ( instance:start ) is launched per minute 
+5) InstanceStartScheduling ( instance:start ) is launched per minute 
 Runs users' instances, which are specified for a scheduled launch considering the time and time zone chosen by the user 
 
-7) InstanceStopScheduling ( instance:stop ) is launched per minute 
+6) InstanceStopScheduling ( instance:stop ) is launched per minute 
 Stops users' instances, which are specified for a scheduled stop considering the time and time zone chosen by the user 
 
-8) InstanceSyncScheduling ( instance:sync ) is launched every 5 min 
+7) InstanceSyncScheduling ( instance:sync ) is launched every 5 min 
 
 - Synchronizes all instances in all regions 
 - If the user's email is specified in the tags and such instance is missing in DB - we create it 
 - Remove all the instances with no data (if the issue occurred and the instance wasn't created on AWS) 
 - Apply Terminated status - if such instance exists in our DB, but was removed on AWS 
 
-9) SyncDataFolders ( sync:folders ) is launched per minute 
+8) SyncDataFolders ( sync:folders ) is launched per minute 
 Synchronizes the structure of folders, screenshots, logs and JSON files stored on AWS S3 with our DB 
 
-10) SyncLocalBots ( bots:sync-local ) is launched once a day 
+9) SyncLocalBots ( bots:sync-local ) is launched once a day 
 Synchronizes bots list and their parameters using puppeteer GIT repo, which is set up on the project 
 
 =====================================
@@ -73,7 +70,6 @@ to get old data from AWS S3)
 3) StoreUserInstance - creates and starts an instance on AWS 
 4) SyncBotInstances - manual start of all instances syncing
 5) SyncLocalBots - manual start of all bots syncing
-6) SyncRegions - manual start of all regions syncing
-7) SyncS3Objects - syncing our database with objects on AWS S3 (Screenshots, logs and JSON files)
-8) UpdateInstanceSecurityGroup - adding user's IP, which he used for entering,
+6) SyncS3Objects - syncing our database with objects on AWS S3 (Screenshots, logs and JSON files)
+7) UpdateInstanceSecurityGroup - adding user's IP, which he used for entering,
 to his instances Security Group on AWS 

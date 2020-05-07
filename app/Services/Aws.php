@@ -141,57 +141,6 @@ class Aws
     }
 
     /**
-     * @return array
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     */
-    public function getEc2RegionsWithName(): array
-    {
-        $regions = self::getEc2Regions();
-
-        if (!empty($regions)) {
-
-            try {
-
-                $client = new Client;
-                $res = $client->request('GET', 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html', []);
-
-                if ($res->getStatusCode() === 200) {
-
-                    $content = $res->getBody()->getContents();
-
-                    $pattern = '/<p><code class="code">(.*)<\/code><\/p>\s*<\/td>\s*<td>\s*<p>(.*)<\/p>/im';
-
-                    if (preg_match_all($pattern, $content, $matches)) {
-                        $codes = $matches[1];
-                        $names = $matches[2];
-
-                        $result = [];
-
-                        foreach ($codes as $key => $code) {
-                            if (in_array($code, $regions)) {
-                                $result[] = [
-                                    'code' => $code,
-                                    'name' => $names[$key]
-                                ];
-                            }
-                        }
-
-                        return $result;
-                    }
-
-                    return [];
-                }
-
-            } catch (Throwable $throwable) {
-                Log::error($throwable->getMessage());
-                return [];
-            }
-        }
-
-        return [];
-    }
-
-    /**
      * @param string $name
      * @param string $email
      * @return array|null
