@@ -72,4 +72,24 @@ to get old data from AWS S3)
 5) SyncLocalBots - manual start of all bots syncing
 6) SyncS3Objects - syncing our database with objects on AWS S3 (Screenshots, logs and JSON files)
 7) UpdateInstanceSecurityGroup - adding user's IP, which he used for entering,
-to his instances Security Group on AWS 
+to his instances Security Group on AWS
+
+=====================================
+
+Laravel Echo Server Setup
+
+In order to start Laravel Echo Server, a config file should be generated. 
+
+1) Specify Laravel Echo Server constants in .env config file, a list of possible config constants can be found here: /saas-laravel/config/echo-server.php
+You can find a full list of Laravel Echo Server settings here: https://github.com/tlaverdure/laravel-echo-server
+
+2)  Run the commands after specifying the necessary settings in order to generate laravel-echo-server.json file:
+```
+cd saas-laravel
+php artisan echo-server:init
+```
+3) The config file laravel-echo-server.json will be generated in the project root directory. 
+4) Start the server with the current settings.
+```
+laravel-echo-server start
+```

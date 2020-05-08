@@ -17,6 +17,7 @@ storage/logs/*
 storage/framework/cache/*
 /node_modules
 
+laravel-echo-server.json
 laravel-echo-server.lock
 
 .DS_Store

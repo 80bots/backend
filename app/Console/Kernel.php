@@ -8,6 +8,7 @@ use App\Console\Commands\CacheRefresh;
 use App\Console\Commands\CalculateInstancesUpTime;
 use App\Console\Commands\CalculateUserCreditScore;
 use App\Console\Commands\CleanUpUnused;
+use App\Console\Commands\EchoServerInit;
 use App\Console\Commands\InstanceStartScheduling;
 use App\Console\Commands\InstanceStopScheduling;
 use App\Console\Commands\InstanceSyncScheduling;
@@ -37,6 +38,7 @@ class Kernel extends ConsoleKernel
         SyncLocalBots::class,
         AddUser::class,
         SyncDataFolders::class,
+        EchoServerInit::class,
     ];
 
     /**
