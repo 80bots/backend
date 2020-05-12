@@ -75,7 +75,7 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "scripts": {
-        "pre-install-cmd": [
+        "post-install-cmd": [
             "php artisan echo-server:init"
         ],
         "post-autoload-dump": [
