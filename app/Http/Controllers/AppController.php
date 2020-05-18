@@ -6,6 +6,7 @@ use App\AwsRegion;
 use App\Helpers\CommonHelper;
 use App\User;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
 
 class AppController extends Controller
 {
@@ -14,6 +15,13 @@ class AppController extends Controller
     public function __construct()
     {
         $this->credit = CommonHelper::calculateCredit();
+    }
+
+    public function ping(Request $request)
+    {
+        return response()->json([
+            'status' => 'Available'
+        ]);
     }
 
     public function apiEmpty()
