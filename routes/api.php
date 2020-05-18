@@ -92,16 +92,17 @@ Route::group([
     'prefix' => 'admin',
     'namespace' => 'Admin',
     'middleware' => ['auth:api', 'api.admin'],
+    'as' => 'admin.'
 ], function () {
 
     Route::group(['prefix' => 'aws', 'as' => 'aws.'], function () {
         Route::get('/', 'AwsSettingController@index')->name('aws');
-        Route::put('/{setting}', 'AwsSettingController@update')->name('update');
+        Route::put('/{setting}', 'AwsSettingController@update')->name('update.settings');
     });
 
     Route::group(['prefix' => 'bots', 'as' => 'bots.'], function () {
         Route::get('/running', 'BotInstanceController@index')->name('running');
-        Route::get('/tags', 'BotController@getTags')->name('running');
+        Route::get('/tags', 'BotController@getTags')->name('tags');
         Route::get('/sync', 'BotController@syncBots')->name('sync');
     });
 
