@@ -21,3 +21,5 @@ laravel-echo-server.json
 laravel-echo-server.lock
 
 .DS_Store
+
+**/*.swp
