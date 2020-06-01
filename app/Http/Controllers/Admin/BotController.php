@@ -12,6 +12,7 @@ use App\Http\Resources\PlatformCollection;
 use App\Http\Resources\Admin\TagCollection;
 use App\Jobs\SyncLocalBots;
 use App\Platform;
+use App\Services\BotParser;
 use App\Tag;
 use App\User;
 use Illuminate\Http\Request;
@@ -105,6 +106,17 @@ class BotController extends AppController
     {
         try{
 
+            $content = $request['aws_custom_script'];
+            $result = BotParser::getBotInfo($content);
+            $i = 0;
+            foreach($result['params'] as $key => $val) {
+                $val->order = $i;
+                $result['params']->$key = $val;
+                $i++;
+            }
+
+            $parameters = $result && $result['params'] ? json_encode($result['params']) : null;
+
             $bot = Bot::create([
                 'name'                  => $request->input('name'),
                 'platform_id'           => $this->getPlatformId($request->input('platform')),
@@ -115,7 +127,8 @@ class BotController extends AppController
                 'aws_startup_script'    => $request->input('aws_startup_script'),
                 'aws_custom_script'     => $request->input('aws_custom_script'),
                 'aws_storage_gb'        => $request->input('aws_storage_gb'),
-                'type'                  => $request->input('type')
+                'type'                  => $request->input('type'),
+                'parameters'            => $parameters
             ]);
 
             if (empty($bot)) {
