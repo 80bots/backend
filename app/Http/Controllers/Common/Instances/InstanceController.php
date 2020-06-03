@@ -15,6 +15,7 @@ use App\Jobs\UpdateInstanceSecurityGroup;
 use App\S3Object;
 use App\Services\Aws;
 use App\Services\GitHub;
+use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -187,20 +188,20 @@ class InstanceController extends AppController
      *
      * @param Request $request
      * @param $id
-     * @return Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function show(Request $request, $id)
     {
+        /** @var User $user */
+        $user = Auth::user();
         $resource = BotInstance::withTrashed()->find($id);
-        if (!empty($resource)) {
-            $user = Auth::user();
-            /* get real IP from CloudFlare header */
-            $ip = isset($_SERVER["HTTP_CF_CONNECTING_IP"]) ? $_SERVER["HTTP_CF_CONNECTING_IP"] : $_SERVER['REMOTE_ADDR'];
-            dispatch(new UpdateInstanceSecurityGroup($user, $ip, $resource));
-            return $this->success((new BotInstanceResource($resource))->toArray($request));
-        } else {
+        if(!$resource) {
             $this->error('Not found', __('admin.bots.not_found'));
         }
+
+        $ip = $this->getIp();
+        dispatch(new UpdateInstanceSecurityGroup($user, $ip, $resource));
+        return $this->success((new BotInstanceResource($resource))->toArray($request));
     }
 
     /**
