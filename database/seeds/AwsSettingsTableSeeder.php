@@ -12,20 +12,24 @@ class AwsSettingsTableSeeder extends Seeder
      */
     public function run()
     {
+
         // moved to /etc/rc.local file
         //cd /home/\$username/
         //su - \$username -c 'cd ~/data-streamer && git pull && cp .env.example .env && yarn && yarn build && pm2 start --name "data-streamer" yarn -- start'
-        $url = config('app.url');
-        $parsed = parse_url($url);
-        $script = <<<HERESHELL
-file="puppeteer/params/params.json"
-username="kabas"
-cd /home/\$username/
-su - \$username -c 'cd ~/data-streamer && git pull && cp .env.example .env'
-su - \$username -c 'cd ~/data-streamer && echo "SOCKET_SERVER_HOST=http://{$parsed['host']}:6001" >> ./.env'
-su - \$username -c 'cd ~/data-streamer && echo "API_URL=http://{$parsed['host']}" >> ./.env'
-su - \$username -c 'cd ~/data-streamer && yarn && yarn build && pm2 start --name "data-streamer" yarn -- start'
-HERESHELL;
+
+        $API_URL = config('bot_instance.api_url');
+        $SOCKET_SERVER_HOST = config('bot_instance.socket_url');
+
+        $script =
+        <<<HERESHELL
+            file="puppeteer/params/params.json"
+            username="kabas"
+            cd /home/\$username/
+            su - \$username -c 'cd ~/data-streamer && git pull && cp .env.example .env'
+            su - \$username -c 'cd ~/data-streamer && echo "SOCKET_SERVER_HOST={$SOCKET_SERVER_HOST}" >> ./.env'
+            su - \$username -c 'cd ~/data-streamer && echo "API_URL={$API_URL}" >> ./.env'
+            su - \$username -c 'cd ~/data-streamer && yarn && yarn build && pm2 start --name "data-streamer" yarn -- start'
+        HERESHELL;
 
         AwsSetting::create([
             'image_id'  => config('aws.image_id', 'ami-0a15d2bfc04351315'),
