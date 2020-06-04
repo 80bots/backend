@@ -1013,10 +1013,24 @@ chown \$username:\$username \$credentialsFile
 HERESHELL;
 
         $settings = AwsSetting::isDefault()->first();
-// run data-streamer first ($settings->script)
+        // This script overwrites the API and SOCKETS endpoint in order
+        // to fix them if the project is locally deployed
+        $extraScript        = '';
+        $isLocalEnv         = config('app.env') === 'local';
+        $API_HOST           = config('bot_instance.api_url');
+        $SOCKET_HOST        = config('bot_instance.socket_url');
+        if($isLocalEnv && $API_HOST && $SOCKET_HOST) {
+            $extraScript =
+<<<HERESHELL
+su - \$username -c 'cd ~/data-streamer && echo "SOCKET_SERVER_HOST={$SOCKET_HOST}" >> ./.env'
+su - \$username -c 'cd ~/data-streamer && echo "API_URL={$API_HOST}" >> ./.env'
+HERESHELL;
+        }
+
         return <<<HERESHELL
 echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
 {$settings->script}
+{$extraScript}
 {$shell}
 {$rc}
 {$credentials}
