@@ -570,6 +570,10 @@ class Aws
             $userData = base64_encode("#!/bin/bash\n{$this->startupScript(json_encode($formattedParams), $bot->path ?? '')}");
         }
 
+        if ($bot->aws_custom_script) {
+            $userData = base64_encode("#!/bin/bash\n{$this->customStartupScript($bot->aws_custom_script ?? '')}");
+        }
+
         if (empty($this->ec2)) {
             $this->ec2Connection($region);
         }
@@ -963,6 +967,19 @@ class Aws
 //
 //        return $returnArr;
         return [];
+    }
+
+    /**
+     * @param string $script
+     * @return string
+     */
+    protected function customStartupScript(string $script = ''): string
+    {
+        return <<<HERESHELL
+cat > /home/\$username/custom-bot.js << 'EOF'
+{$script}
+EOF
+HERESHELL;
     }
 
     /**
