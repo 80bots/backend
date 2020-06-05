@@ -115,6 +115,11 @@ class BotController extends AppController
                 $i++;
             }
 
+            $path = $request['path'];
+            if(!$path) {
+                $path = 'custom_bot.js';
+            }
+
             $parameters = $result && $result['params'] ? json_encode($result['params']) : null;
 
             $bot = Bot::create([
@@ -128,7 +133,8 @@ class BotController extends AppController
                 'aws_custom_script'     => $request->input('aws_custom_script'),
                 'aws_storage_gb'        => $request->input('aws_storage_gb'),
                 'type'                  => $request->input('type'),
-                'parameters'            => $parameters
+                'parameters'            => $parameters,
+                'path'                  => $path
             ]);
 
             if (empty($bot)) {
