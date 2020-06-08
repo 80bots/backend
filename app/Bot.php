@@ -45,6 +45,7 @@ class Bot extends BaseModel
         'path',
         'aws_startup_script',
         'aws_custom_script',
+        'aws_custom_package_json',
         'status',
         'type'
     ];

@@ -23,6 +23,7 @@ class CreateBotsTable extends Migration
             $table->text('path')->nullable();
             $table->text('aws_startup_script')->nullable();
             $table->text('aws_custom_script')->nullable();
+            $table->json('aws_custom_package_json')->nullable();
 
             $table->enum('status', [
                 Bot::STATUS_ACTIVE,

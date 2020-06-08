@@ -15,6 +15,7 @@ use App\Platform;
 use App\Services\BotParser;
 use App\Tag;
 use App\User;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
@@ -107,6 +108,9 @@ class BotController extends AppController
         try{
 
             $content = $request['aws_custom_script'];
+            $path = $request['path'];
+            $name = $request['name'];
+
             $result = BotParser::getBotInfo($content);
             $i = 0;
             foreach($result['params'] as $key => $val) {
@@ -115,26 +119,26 @@ class BotController extends AppController
                 $i++;
             }
 
-            $path = $request['path'];
             if(!$path) {
-                $path = 'custom_bot.js';
+                $path = Str::slug($name, '_') . '.custom.js';
             }
 
             $parameters = $result && $result['params'] ? json_encode($result['params']) : null;
 
             $bot = Bot::create([
-                'name'                  => $request->input('name'),
-                'platform_id'           => $this->getPlatformId($request->input('platform')),
-                'description'           => $request->input('description'),
-                'aws_ami_image_id'      => $request->input('aws_ami_image_id'),
-                'aws_ami_name'          => $request->input('aws_ami_name'),
-                'aws_instance_type'     => $request->input('aws_instance_type'),
-                'aws_startup_script'    => $request->input('aws_startup_script'),
-                'aws_custom_script'     => $request->input('aws_custom_script'),
-                'aws_storage_gb'        => $request->input('aws_storage_gb'),
-                'type'                  => $request->input('type'),
-                'parameters'            => $parameters,
-                'path'                  => $path
+                'name'                      => $name,
+                'platform_id'               => $this->getPlatformId($request->input('platform')),
+                'description'               => $request->input('description'),
+                'aws_ami_image_id'          => $request->input('aws_ami_image_id'),
+                'aws_ami_name'              => $request->input('aws_ami_name'),
+                'aws_instance_type'         => $request->input('aws_instance_type'),
+                'aws_startup_script'        => $request->input('aws_startup_script'),
+                'aws_custom_script'         => $request->input('aws_custom_script'),
+                'aws_custom_package_json'   => $request->input('aws_custom_package_json'),
+                'aws_storage_gb'            => $request->input('aws_storage_gb'),
+                'type'                      => $request->input('type'),
+                'parameters'                => $parameters,
+                'path'                      => $path
             ]);
 
             if (empty($bot)) {
