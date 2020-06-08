@@ -570,8 +570,8 @@ class Aws
             $userData = base64_encode("#!/bin/bash\n{$this->startupScript(json_encode($formattedParams), $bot->path ?? '')}");
         }
 
-        if ($bot->aws_custom_script) {
-            $userData = base64_encode("#!/bin/bash\n{$this->customStartupScript($bot->aws_custom_script ?? '')}");
+        if ($bot->aws_custom_script && $bot->aws_custom_package_json) {
+            $userData = base64_encode("#!/bin/bash\n{$this->customStartupScript($bot->aws_custom_script ?? '', $bot->aws_custom_package_json ?? '', )}");
         }
 
         if (empty($this->ec2)) {
@@ -971,14 +971,56 @@ class Aws
 
     /**
      * @param string $script
+     * @param $packageJson
      * @return string
      */
-    protected function customStartupScript(string $script = ''): string
+    protected function customStartupScript(string $script = '', $packageJson)
     {
+        $environment = <<<HERESHELL
+USER_NAME="kabas"
+HOME="/home/\$USER_NAME"
+WORK_DIR="\$HOME/custom"
+LOGS_DIR="\$WORK_DIR/logs"
+OUTPUT_JSON_DIR="\$WORK_DIR/output/json"
+INIT_FILE="\$WORK_DIR/index.js"
+CONF_FILE="\$WORK_DIR/package.json"
+HERESHELL;
+
         return <<<HERESHELL
-cat > /home/\$username/custom-bot.js << 'EOF'
+# - Init environment -
+{$environment}
+
+# - Init work dir -
+mkdir -p \$WORK_DIR
+
+# - Init logs dir -
+mkdir -p \$LOGS_DIR
+
+# -Init output dir -
+mkdir -p \$OUTPUT_JSON_DIR
+
+# - Init bot -
+cat > \$INIT_FILE << 'EOF'
 {$script}
 EOF
+cat > \$CONF_FILE << 'EOF'
+{$packageJson}
+EOF
+
+# - Fix the streamer ENV -
+su - \$USER_NAME -c 'cd ~/data-streamer && echo "OUTPUT_FOLDER=/home/kabas/custom/output/json" >> ./.env'
+su - \$USER_NAME -c 'cd ~/data-streamer && echo "LOG_PATH=/home/kabas/custom/logs" >> ./.env'
+
+# - Setup permissions -
+chown -R \$USER_NAME:\$USER_NAME \$WORK_DIR
+
+# - Setup dependencies -
+su - \$USER_NAME -c 'cd ~/custom && yarn'
+
+# - RUN BOT -
+su - \$USER_NAME  -c 'cd ~/data-streamer && git pull && yarn && yarn build && pm2 start --name "data-streamer" yarn -- start'
+su - \$USER_NAME  -c 'cd ~/custom && DISPLAY=:1 node ./index.js > /dev/null'
+
 HERESHELL;
     }
 
