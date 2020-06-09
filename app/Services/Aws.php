@@ -571,7 +571,10 @@ class Aws
         }
 
         if ($bot->aws_custom_script && $bot->aws_custom_package_json) {
-            $userData = base64_encode("#!/bin/bash\n{$this->customStartupScript($bot->aws_custom_script ?? '', $bot->aws_custom_package_json ?? '', )}");
+            $params = json_encode($formattedParams);
+            $script = $bot->aws_custom_script ?? '';
+            $package = $bot->aws_custom_package_json ?? '';
+            $userData = base64_encode("#!/bin/bash\n{$this->customStartupScript($script, $package, $params)}");
         }
 
         if (empty($this->ec2)) {
@@ -972,18 +975,42 @@ class Aws
     /**
      * @param string $script
      * @param $packageJson
+     * @param string $params
      * @return string
      */
-    protected function customStartupScript(string $script = '', $packageJson)
+    protected function customStartupScript(string $script, $packageJson, string $params = '')
     {
+        // Init environment.
         $environment = <<<HERESHELL
 USER_NAME="kabas"
 HOME="/home/\$USER_NAME"
 WORK_DIR="\$HOME/custom"
 LOGS_DIR="\$WORK_DIR/logs"
-OUTPUT_JSON_DIR="\$WORK_DIR/output/json"
+OUTPUT_DIR="\$WORK_DIR/output"
 INIT_FILE="\$WORK_DIR/index.js"
 CONF_FILE="\$WORK_DIR/package.json"
+RC_FILE="/etc/rc.local"
+STARTUP_FILE="\$HOME/startup.sh"
+HERESHELL;
+
+        // Init startup file.
+        $startupScript = <<<HERESHELL
+cat > \$STARTUP_FILE <<EOF
+#!/bin/bash
+su - \$USER_NAME  -c 'cd ~/data-streamer && git pull && yarn && yarn build && pm2 start --name "data-streamer" yarn -- start'
+su - \$USER_NAME  -c 'cd ~/custom && pm2 start index.js --name "custom" --no-autorestart'
+EOF
+chmod +x \$STARTUP_FILE && chown \$USER_NAME:\$USER_NAME \$STARTUP_FILE
+HERESHELL;
+
+        //Init rc file
+        $rcFile = <<<HERESHELL
+cat > \$RC_FILE <<EOF
+#!/bin/bash
+\$STARTUP_FILE
+exit 0
+EOF
+chmod +x \$RC_FILE
 HERESHELL;
 
         return <<<HERESHELL
@@ -997,7 +1024,7 @@ mkdir -p \$WORK_DIR
 mkdir -p \$LOGS_DIR
 
 # -Init output dir -
-mkdir -p \$OUTPUT_JSON_DIR
+mkdir -p \$OUTPUT_DIR
 
 # - Init bot -
 cat > \$INIT_FILE << 'EOF'
@@ -1008,7 +1035,7 @@ cat > \$CONF_FILE << 'EOF'
 EOF
 
 # - Fix the streamer ENV -
-su - \$USER_NAME -c 'cd ~/data-streamer && echo "OUTPUT_FOLDER=/home/kabas/custom/output/json" >> ./.env'
+su - \$USER_NAME -c 'cd ~/data-streamer && echo "OUTPUT_FOLDER=/home/kabas/custom/output" >> ./.env'
 su - \$USER_NAME -c 'cd ~/data-streamer && echo "LOG_PATH=/home/kabas/custom/logs" >> ./.env'
 
 # - Setup permissions -
@@ -1017,9 +1044,15 @@ chown -R \$USER_NAME:\$USER_NAME \$WORK_DIR
 # - Setup dependencies -
 su - \$USER_NAME -c 'cd ~/custom && yarn'
 
-# - RUN BOT -
+# - Run data-streamer -
 su - \$USER_NAME  -c 'cd ~/data-streamer && git pull && yarn && yarn build && pm2 start --name "data-streamer" yarn -- start'
-su - \$USER_NAME  -c 'cd ~/custom && DISPLAY=:1 node ./index.js > /dev/null'
+
+# - Run bot -
+su - \$USER_NAME  -c 'cd ~/custom && pm2 start index.js --name "custom" --no-autorestart'
+
+{$startupScript}
+
+{$rcFile}
 
 HERESHELL;
     }
