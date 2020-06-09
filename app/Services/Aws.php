@@ -978,7 +978,7 @@ class Aws
      * @param string $params
      * @return string
      */
-    protected function customStartupScript(string $script, $packageJson, string $params = '')
+    protected function customStartupScript(string $script, $packageJson, string $params = '{}')
     {
         // Init environment.
         $environment = <<<HERESHELL
@@ -989,6 +989,7 @@ LOGS_DIR="\$WORK_DIR/logs"
 OUTPUT_DIR="\$WORK_DIR/output"
 INIT_FILE="\$WORK_DIR/index.js"
 CONF_FILE="\$WORK_DIR/package.json"
+PARAMS_FILE="\$WORK_DIR/params.json"
 RC_FILE="/etc/rc.local"
 STARTUP_FILE="\$HOME/startup.sh"
 HERESHELL;
@@ -1028,10 +1029,21 @@ mkdir -p \$OUTPUT_DIR
 
 # - Init bot -
 cat > \$INIT_FILE << 'EOF'
+let params = {}
+try {
+  params = require('./params.json');
+} catch (e) {
+  params = {}
+  console.log('Params is not defined');
+  console.log(e)
+}
 {$script}
 EOF
 cat > \$CONF_FILE << 'EOF'
 {$packageJson}
+EOF
+cat > \$PARAMS_FILE << 'EOF'
+{$params}
 EOF
 
 # - Fix the streamer ENV -
