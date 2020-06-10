@@ -111,20 +111,11 @@ class BotController extends AppController
             $path = $request['path'];
             $name = $request['name'];
 
-            $result = BotParser::getBotInfo($content);
-            $i = 0;
-            foreach($result['params'] as $key => $val) {
-                $val->order = $i;
-                $result['params']->$key = $val;
-                $i++;
-            }
+            $parameters = $this->extractParamsFromScript($content);
 
             if(!$path) {
                 $path = Str::slug($name, '_') . '.custom.js';
             }
-
-            $parameters = $result && $result['params'] ? json_encode($result['params']) : null;
-
             $bot = Bot::create([
                 'name'                      => $name,
                 'platform_id'               => $this->getPlatformId($request->input('platform')),
@@ -232,18 +223,19 @@ class BotController extends AppController
 
             if (! empty($request->input('update'))) {
                 $updateData = $request->validate([
-                    'update.status'             => "in:{$active},{$inactive}",
-                    'update.name'               => 'string',
-                    'update.aws_custom_script'  => 'string|nullable',
-                    'update.description'        => 'string',
-                    'update.platform'           => 'string',
-                    'update.tags'               => 'array',
-                    'update.type'               => 'in:private,public',
-                    'update.users'              => 'array',
+                    'update.status'                     => "in:{$active},{$inactive}",
+                    'update.name'                       => 'string',
+                    'update.aws_custom_script'          => 'string|nullable',
+                    'update.aws_custom_package_json'    => 'json|nullable',
+                    'update.description'                => 'string',
+                    'update.platform'                   => 'string',
+                    'update.tags'                       => 'array',
+                    'update.type'                       => 'in:private,public',
+                    'update.users'                      => 'array',
                 ]);
 
                 $updateData = $updateData['update'];
-
+                $updateData['parameters'] =  $parameters = $this->extractParamsFromScript($updateData['aws_custom_script']);
                 $bot->fill($updateData);
 
                 if ($bot->save()) {
@@ -422,5 +414,16 @@ class BotController extends AppController
         }
 
         return $platform->id ?? null;
+    }
+
+    private function extractParamsFromScript (string $script) {
+        $result = BotParser::getBotInfo($script);
+        $i = 0;
+        foreach($result['params'] as $key => $val) {
+            $val->order = $i;
+            $result['params']->$key = $val;
+            $i++;
+        }
+        return $result && $result['params'] ? json_encode($result['params']) : null;
     }
 }
