@@ -986,7 +986,7 @@ USER_NAME="kabas"
 HOME="/home/\$USER_NAME"
 WORK_DIR="\$HOME/custom"
 LOGS_DIR="\$WORK_DIR/logs"
-OUTPUT_DIR="\$WORK_DIR/output"
+OUTPUT_DIR="\$WORK_DIR/output/json"
 INIT_FILE="\$WORK_DIR/index.js"
 CONF_FILE="\$WORK_DIR/package.json"
 PARAMS_FILE="\$WORK_DIR/params.json"
@@ -998,8 +998,8 @@ HERESHELL;
         $startupScript = <<<HERESHELL
 cat > \$STARTUP_FILE <<EOF
 #!/bin/bash
-su - \$USER_NAME  -c 'cd ~/data-streamer && git pull && yarn && yarn build && pm2 start --name "data-streamer" yarn -- start'
-su - \$USER_NAME  -c 'cd ~/custom && pm2 start index.js --name "custom" --no-autorestart'
+cd ~/data-streamer && git pull && yarn && yarn build && pm2 start --name "data-streamer" yarn -- start
+cd ~/custom && pm2 start index.js --name "custom" --no-autorestart
 EOF
 chmod +x \$STARTUP_FILE && chown \$USER_NAME:\$USER_NAME \$STARTUP_FILE
 HERESHELL;
@@ -1008,7 +1008,7 @@ HERESHELL;
         $rcFile = <<<HERESHELL
 cat > \$RC_FILE <<EOF
 #!/bin/bash
-\$STARTUP_FILE
+su - \$USER_NAME  -c '/home/kabas/startup.sh'
 exit 0
 EOF
 chmod +x \$RC_FILE
