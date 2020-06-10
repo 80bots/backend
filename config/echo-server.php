@@ -22,6 +22,7 @@ return [
             'host' => env('REDIS_HOST', '127.0.0.1'),
             'port' => env('REDIS_PORT', '6379'),
             'password' => env('REDIS_PASSWORD', 'root'),
+            'keyPrefix' => env('REDIS_PREFIX', '')
         ],
         'sqlite' => [
             'databasePath' => env('SQLITE_DB_PATH', '/database/laravel-echo-server.sqlite'),
