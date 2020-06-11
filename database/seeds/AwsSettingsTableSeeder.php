@@ -22,13 +22,10 @@ class AwsSettingsTableSeeder extends Seeder
 
         $script =
         <<<HERESHELL
-            file="puppeteer/params/params.json"
-            username="kabas"
-            cd /home/\$username/
-            su - \$username -c 'cd ~/data-streamer && git pull && cp .env.example .env'
-            su - \$username -c 'cd ~/data-streamer && echo "SOCKET_SERVER_HOST={$SOCKET_SERVER_HOST}" >> ./.env'
-            su - \$username -c 'cd ~/data-streamer && echo "API_URL={$API_URL}" >> ./.env'
-            su - \$username -c 'cd ~/data-streamer && yarn && yarn build && pm2 start --name "data-streamer" yarn -- start'
+            # Note! When APP_ENV=local, the startupScript will automatically re-write these params by actual host data
+
+            su - \$USER_NAME -c 'cd ~/data-streamer && echo "SOCKET_SERVER_HOST={$SOCKET_SERVER_HOST}" >> ./.env'
+            su - \$USER_NAME -c 'cd ~/data-streamer && echo "API_URL={$API_URL}" >> ./.env'
         HERESHELL;
 
         AwsSetting::create([
