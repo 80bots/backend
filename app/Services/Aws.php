@@ -1050,8 +1050,7 @@ HERESHELL;
         if($isLocalEnv && $API_HOST && $SOCKET_HOST) {
             $localAdjustment =
 <<<HERESHELL
-{$environment}
-su - {$user} -c 'cd \$STREAMER_DIR && echo "SOCKET_SERVER_HOST={$SOCKET_HOST}" >> ./.env && echo "API_URL={$API_HOST}" >> ./.env'
+su - {$user} -c 'cd ~/{$streamerDir} && echo "SOCKET_SERVER_HOST={$SOCKET_HOST}" >> ./.env && echo "API_URL={$API_HOST}" >> ./.env'
 HERESHELL;
         }
 
