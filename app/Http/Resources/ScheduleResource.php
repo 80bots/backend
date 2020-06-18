@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Helpers\InstanceHelper;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Auth;
 
@@ -11,7 +12,7 @@ class ScheduleResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      * @return array
      */
     public function toArray($request)

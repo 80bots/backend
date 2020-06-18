@@ -10,11 +10,11 @@ use App\SchedulingInstance;
 use App\SchedulingInstancesDetails;
 use App\BotInstance;
 use Carbon\Carbon;
-use DateTime;
-use DateTimeZone;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
 
@@ -22,6 +22,10 @@ class ScheduleInstanceController extends AppController
 {
     const PAGINATE = 1;
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function index(Request $request)
     {
         try {
@@ -34,19 +38,16 @@ class ScheduleInstanceController extends AppController
 
             $resource = SchedulingInstance::query();
 
-            // TODO: Add Filters
             if ($list === 'my') {
                 $resource->findByUserId(Auth::id());
             }
 
-            //
             if (! empty($search)) {
                 $resource->whereHas('instance', function (Builder $query) use ($search) {
                     $query->where('tag_name', 'like', "%{$search}%");
                 });
             }
 
-            //
             $resource->when($sort, function ($query, $sort) use ($order) {
                 if (! empty(SchedulingInstance::ORDER_FIELDS[$sort])) {
                     return QueryHelper::orderBotScheduling($query, SchedulingInstance::ORDER_FIELDS[$sort], $order);
@@ -70,10 +71,6 @@ class ScheduleInstanceController extends AppController
         } catch (Throwable $throwable) {
             return $this->error(__('admin.server_error'), $throwable->getMessage());
         }
-    }
-
-    public function create()
-    {
     }
 
     /**
@@ -101,6 +98,10 @@ class ScheduleInstanceController extends AppController
         return $this->error(__('user.error'), __('user.parameters_incorrect'));
     }
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function store(Request $request)
     {
         try {
@@ -141,7 +142,7 @@ class ScheduleInstanceController extends AppController
      * Display the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return JsonResponse|Response
      */
     public function show($id)
     {
@@ -170,22 +171,11 @@ class ScheduleInstanceController extends AppController
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-
-    }
-
-    /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param Request $request
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return JsonResponse|Response
      */
     public function update(Request $request, $id)
     {
@@ -214,6 +204,12 @@ class ScheduleInstanceController extends AppController
         }
     }
 
+    /**
+     * @param Request $request
+     * @param array $updateData
+     * @param SchedulingInstance $instance
+     * @return JsonResponse
+     */
     private function updateSimpleInfo(Request $request, array $updateData, SchedulingInstance $instance)
     {
         foreach ($updateData['update'] as $key => $value) {
@@ -237,6 +233,11 @@ class ScheduleInstanceController extends AppController
         return $this->error(__('admin.error'), __('admin.parameters_incorrect'));
     }
 
+    /**
+     * @param Request $request
+     * @param SchedulingInstance $instance
+     * @return JsonResponse
+     */
     private function updateFullInfo(Request $request, SchedulingInstance $instance)
     {
         return $this->error(__('admin.error'), __('admin.parameters_incorrect'));
@@ -246,7 +247,7 @@ class ScheduleInstanceController extends AppController
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return JsonResponse|Response
      */
     public function destroy($id)
     {
@@ -274,6 +275,7 @@ class ScheduleInstanceController extends AppController
      * @param array $details
      * @param string $timezone
      * @return void
+     * @throws Exception
      */
     private function updateOrCreateSchedulingInstancesDetails(SchedulingInstance $instance, array $details, $timezone): void
     {

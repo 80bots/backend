@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Helpers;
 
 // standard api response
@@ -15,6 +14,9 @@ class ApiResponse
        $this->message   = $message;
     }
 
+    /**
+     * @return array
+     */
     public function get()
     {
         $response = [];
@@ -32,6 +34,9 @@ class ApiResponse
         return $response;
     }
 
+    /**
+     * @return array
+     */
     public function getError()
     {
         return [

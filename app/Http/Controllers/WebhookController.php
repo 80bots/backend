@@ -28,8 +28,8 @@ class WebhookController extends Controller
     /**
      * Handle a Stripe webhook call.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @param Request $request
+     * @return Response
      */
     public function handleWebhook(Request $request)
     {
@@ -47,7 +47,7 @@ class WebhookController extends Controller
      * Handle customer subscription updated.
      *
      * @param  array $payload
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
     protected function handleCustomerSubscriptionUpdated(array $payload)
     {
@@ -96,7 +96,7 @@ class WebhookController extends Controller
      * Handle a cancelled customer from a Stripe subscription.
      *
      * @param  array  $payload
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
     protected function handleCustomerSubscriptionDeleted(array $payload)
     {
@@ -117,7 +117,7 @@ class WebhookController extends Controller
      * Handle customer updated.
      *
      * @param  array $payload
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
     protected function handleCustomerUpdated(array $payload)
     {
@@ -132,7 +132,7 @@ class WebhookController extends Controller
      * Handle customer source deleted.
      *
      * @param  array $payload
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
     protected function handleCustomerSourceDeleted(array $payload)
     {
@@ -147,7 +147,7 @@ class WebhookController extends Controller
      * Handle deleted customer.
      *
      * @param  array $payload
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
     protected function handleCustomerDeleted(array $payload)
     {
@@ -186,7 +186,7 @@ class WebhookController extends Controller
      * Handle calls to missing methods on the controller.
      *
      * @param  array  $parameters
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
     public function missingMethod($parameters = [])
     {

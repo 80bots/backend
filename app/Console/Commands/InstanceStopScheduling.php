@@ -10,6 +10,7 @@ use App\Services\Aws;
 use App\BotInstance;
 use App\BotInstancesDetails;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -78,6 +79,11 @@ class InstanceStopScheduling extends Command
         }
     }
 
+    /**
+     * @param array $instancesIds
+     * @return void
+     * @throws Exception
+     */
     private function stopInstances(array $instancesIds)
     {
         if (count($instancesIds) > 0) {

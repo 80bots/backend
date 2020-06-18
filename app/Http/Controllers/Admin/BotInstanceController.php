@@ -14,23 +14,23 @@ use App\Http\Resources\BotInstanceResource;
 use App\Http\Resources\Admin\RegionResource;
 use App\Jobs\SyncBotInstances;
 use App\Jobs\SyncRegions;
-use App\S3Object;
 use App\Services\Aws;
 use App\BotInstance;
+use Illuminate\Contracts\Routing\ResponseFactory;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class BotInstanceController extends InstanceController
 {
     const PAGINATE = 1;
-    const SYNC_LIMIT = 5;
 
     /**
      * Display a listing of the resource.
      * @param Request $request
-     * @return BotInstanceCollection|\Illuminate\Http\JsonResponse
+     * @return BotInstanceCollection|JsonResponse
      */
     public function index(Request $request)
     {
@@ -44,19 +44,15 @@ class BotInstanceController extends InstanceController
 
             $resource = BotInstance::withTrashed();
 
-            // TODO: Add Filters
-
             if ($list === 'my') {
                 $resource->findByUserId(Auth::id());
             }
 
-            //
             if (! empty($search)) {
                 $resource->where('bot_instances.tag_name', 'like', "%{$search}%")
                     ->orWhere('bot_instances.tag_user_email', 'like', "%{$search}%");
             }
 
-            //
             $resource->when($sort, function ($query, $sort) use ($order) {
                 if (! empty(BotInstance::ORDER_FIELDS[$sort])) {
                     return QueryHelper::orderBotInstance($query, BotInstance::ORDER_FIELDS[$sort], $order);
@@ -85,7 +81,7 @@ class BotInstanceController extends InstanceController
     /**
      * @param Request $request
      * @param $id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function show(Request $request, $id)
     {
@@ -97,6 +93,10 @@ class BotInstanceController extends InstanceController
         }
     }
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function regions(Request $request)
     {
         $limit  = $request->query('limit') ?? self::PAGINATE;
@@ -106,13 +106,11 @@ class BotInstanceController extends InstanceController
 
         $resource = AwsRegion::onlyEc2();
 
-        //
         if (! empty($search)) {
             $resource->where('code', 'like', "%{$search}%")
                 ->orWhere('name', 'like', "%{$search}%");
         }
 
-        //
         $resource->when($sort, function ($query, $sort) use ($order) {
             if (! empty(AwsRegion::ORDER_FIELDS[$sort])) {
                 return QueryHelper::orderAwsRegion($query, AwsRegion::ORDER_FIELDS[$sort], $order);
@@ -134,6 +132,11 @@ class BotInstanceController extends InstanceController
         return $this->success($response);
     }
 
+    /**
+     * @param Request $request
+     * @param $id
+     * @return JsonResponse
+     */
     public function updateRegion(Request $request, $id)
     {
         try {
@@ -161,6 +164,10 @@ class BotInstanceController extends InstanceController
         }
     }
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function syncRegions(Request $request)
     {
         try {
@@ -171,6 +178,10 @@ class BotInstanceController extends InstanceController
         }
     }
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function amis(Request $request)
     {
         $region = $request->query('region');
@@ -193,7 +204,7 @@ class BotInstanceController extends InstanceController
 
     /**
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function syncInstances(Request $request)
     {
@@ -205,6 +216,11 @@ class BotInstanceController extends InstanceController
         }
     }
 
+    /**
+     * @param Request $request
+     * @param $id
+     * @return JsonResponse
+     */
     public function update(Request $request, $id)
     {
         try {
@@ -255,7 +271,7 @@ class BotInstanceController extends InstanceController
 
     /**
      * @param Request $request
-     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\JsonResponse|\Illuminate\Http\Response
+     * @return ResponseFactory|JsonResponse|Response
      */
     public function getInstancePemFile(Request $request)
     {

@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\CommonHelper;
 use App\Helpers\QueryHelper;
 use App\Http\Resources\ScheduleCollection;
 use App\Http\Resources\ScheduleResource;
-use App\Http\Resources\BotInstanceCollection;
 use App\SchedulingInstance;
 use App\SchedulingInstancesDetails;
 use App\BotInstance;
@@ -14,6 +12,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
 
@@ -32,15 +31,12 @@ class ScheduleController extends Controller
 
             $resource = SchedulingInstance::findByUserId(Auth::id());
 
-            // TODO: Add Filters
-
             if (!empty($search)) {
                 $resource->whereHas('instance', function (Builder $query) use ($search) {
                     $query->where('tag_name', 'like', "%{$search}%");
                 });
             }
 
-            //
             $resource->when($sort, function ($query, $sort) use ($order) {
                 if (!empty(SchedulingInstance::ORDER_FIELDS[$sort])) {
                     return QueryHelper::orderBotScheduling($query, SchedulingInstance::ORDER_FIELDS[$sort], $order);
@@ -64,10 +60,6 @@ class ScheduleController extends Controller
         } catch (Throwable $throwable) {
             return $this->error(__('user.server_error'), $throwable->getMessage());
         }
-    }
-
-    public function create()
-    {
     }
 
     /**
@@ -141,7 +133,7 @@ class ScheduleController extends Controller
      * Display the specified resource.
      *
      * @param int $id
-     * @return \Illuminate\Http\Response
+     * @return JsonResponse
      */
     public function show($id)
     {
@@ -173,7 +165,7 @@ class ScheduleController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param int $id
-     * @return \Illuminate\Http\Response
+     * @return JsonResponse
      */
     public function edit($id)
     {
@@ -183,9 +175,9 @@ class ScheduleController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param Request $request
      * @param int $id
-     * @return \Illuminate\Http\Response
+     * @return JsonResponse
      */
     public function update(Request $request, $id)
     {

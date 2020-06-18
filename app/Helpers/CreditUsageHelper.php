@@ -12,6 +12,11 @@ use Throwable;
 
 class CreditUsageHelper
 {
+    /**
+     * @param User $user
+     * @param int $credits
+     * @return void
+     */
     public static function adminAddCredit(User $user, int $credits)
     {
         try {
@@ -27,6 +32,11 @@ class CreditUsageHelper
         }
     }
 
+    /**
+     * @param User $user
+     * @param int $credits
+     * @return void
+     */
     public static function receivedBySubscription(User $user, int $credits)
     {
         if($credits > 0) {
@@ -41,7 +51,6 @@ class CreditUsageHelper
 
         $action = $credits > 0 ? CreditUsage::ACTION_ADDED : CreditUsage::ACTION_USED;
 
-        // TODO:
         CreditUsage::create([
             'user_id'   => $user->id,
             'credits'   => $credits,
@@ -51,6 +60,13 @@ class CreditUsageHelper
         ]);
     }
 
+    /**
+     * @param User $user
+     * @param Bot $bot
+     * @param int $instanceId
+     * @param int $credits
+     * @return void
+     */
     public static function usingTheBot(User $user, Bot $bot, int $instanceId, int $credits)
     {
         if ($user->isUser()) {
@@ -67,6 +83,13 @@ class CreditUsageHelper
         ]);
     }
 
+    /**
+     * @param User $user
+     * @param int $credits
+     * @param int $instanceId
+     * @param string $name
+     * @return void
+     */
     public static function startInstance(User $user, int $credits, int $instanceId, string $name)
     {
         if ($user->isUser()) {

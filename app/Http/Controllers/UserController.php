@@ -4,12 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\User\TimezoneCollection;
 use App\Mail\Support;
-use App\Services\Aws;
 use App\SubscriptionPlan;
 use App\Timezone;
 use App\User;
-use DOMDocument;
-use GuzzleHttp\Client;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -47,6 +44,10 @@ class UserController extends AppController
         }
     }
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function update(Request $request)
     {
         try {

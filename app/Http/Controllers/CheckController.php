@@ -4,11 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\User\UserResource;
 use App\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class CheckController extends Controller
 {
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function apiCheckLogin(Request $request)
     {
         if(Auth::check()) {

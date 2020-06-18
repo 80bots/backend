@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Blog;
 use App\Http\Controllers\Controller;
 use App\Message;
 use App\Post;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
@@ -13,11 +14,10 @@ class MessageController extends Controller
 {
     const PAGINATE = 10;
 
-    public function index(Request $request)
-    {
-
-    }
-
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function store(Request $request)
     {
         try {
@@ -50,24 +50,14 @@ class MessageController extends Controller
         }
     }
 
+    /**
+     * @param Request $request
+     * @param $postId
+     * @return JsonResponse
+     */
     public function postMessages(Request $request, $postId)
     {
         try {
-
-//            $resource = Message::where('post_id', '=', $postId)
-//                ->where('status', '=', Message::STATUS_ACTIVE)
-//                ->isModerated()
-//                ->orderBy('created_at', 'asc');
-//
-//            $messages   = (new MessageCollection($resource->paginate(self::PAGINATE)))->response()->getData();
-//            $meta       = $messages->meta ?? null;
-//
-//            $response = [
-//                'data'  => $messages->data ?? [],
-//                'total' => $meta->total ?? 0
-//            ];
-//
-//            return $this->success($response);
 
             return $this->success();
 

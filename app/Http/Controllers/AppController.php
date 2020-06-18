@@ -5,8 +5,12 @@ namespace App\Http\Controllers;
 use App\AwsRegion;
 use App\Helpers\CommonHelper;
 use App\User;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Redirector;
 
 class AppController extends Controller
 {
@@ -17,6 +21,10 @@ class AppController extends Controller
         $this->credit = CommonHelper::calculateCredit();
     }
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function ping(Request $request)
     {
         return response()->json([
@@ -24,6 +32,9 @@ class AppController extends Controller
         ]);
     }
 
+    /**
+     * @return JsonResponse
+     */
     public function apiEmpty()
     {
         return response()->json([]);
@@ -58,6 +69,10 @@ class AppController extends Controller
         return !empty($result) ? $result->id === $region->id : false;
     }
 
+    /**
+     * @param $id
+     * @return Application|RedirectResponse|Redirector
+     */
     public function UserActivation($id)
     {
         $checkActivationToken = User::where('verification_token', $id)->first();

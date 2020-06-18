@@ -6,6 +6,7 @@ use App\CreditUsage;
 use App\Helpers\QueryHelper;
 use App\Http\Resources\CreditUsageCollection;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
@@ -14,6 +15,10 @@ class HistoryController extends Controller
 {
     const PAGINATE = 1;
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function getCreditUsage(Request $request)
     {
         try {
@@ -24,8 +29,6 @@ class HistoryController extends Controller
             $instanceId = $request->input('instanceId');
 
             $resource = CreditUsage::with('user')->findByUserId(Auth::id());
-
-            // TODO: Add Filters
 
             if (! empty($instanceId)) {
                 $resource->whereHas('instance', function (Builder $query) use ($instanceId) {

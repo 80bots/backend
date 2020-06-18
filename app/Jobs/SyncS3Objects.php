@@ -50,7 +50,9 @@ class SyncS3Objects implements ShouldQueue
      * @return void
      */
     public function handle()
-    {
+    {    /**
+     * @return
+     */
         $now = Carbon::now()->toDateTimeString();
 
         $aws = new Aws;

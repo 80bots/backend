@@ -91,7 +91,7 @@ class CalculateInstancesUpTime extends Command
                                     unset($reservations, $awsInstancesInfo, $awsInstance);
 
                                 } else {
-                                    //
+
                                     Log::debug('instance id ' . $instance->aws_instance_id . ' already terminated');
                                     $instance->setAwsStatusTerminated();
 

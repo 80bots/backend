@@ -14,8 +14,8 @@ class VerifyInstance
      * Handle an incoming request.
      * If request's headers contains bot-instance-id property, then we try to authorize the instance using owner's data
      *
-     * @param \Illuminate\Http\Request $request
-     * @param \Closure $next
+     * @param Request $request
+     * @param Closure $next
      * @return mixed
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */

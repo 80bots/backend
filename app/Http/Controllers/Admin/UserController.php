@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\CreditUsage;
 use App\Helpers\CreditUsageHelper;
 use App\Helpers\MailHelper;
 use App\Helpers\QueryHelper;
@@ -12,8 +11,8 @@ use App\Http\Resources\Admin\UserResource;
 use App\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
-use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
 
@@ -25,7 +24,7 @@ class UserController extends AppController
      * Display a listing of the resource.
      *
      * @param Request $request
-     * @return UserCollection
+     * @return UserCollection|JsonResponse
      */
     public function index(Request $request)
     {
@@ -38,8 +37,6 @@ class UserController extends AppController
 
             $resource = User::query();
 
-            // TODO: Add Filters
-
             switch ($request->input('role')) {
                 case 'users':
                     $resource->onlyUsers();
@@ -49,7 +46,6 @@ class UserController extends AppController
                     break;
             }
 
-            //
             if (! empty($search)) {
                 $resource->where('users.name', 'like', "%{$search}%")
                     ->orWhere('users.email', 'like', "%{$search}%");
@@ -59,14 +55,11 @@ class UserController extends AppController
                 if (! empty(User::ORDER_FIELDS[$sort])) {
                     $result = QueryHelper::orderUser($query, User::ORDER_FIELDS[$sort], $order);
                     return $result->where('users.id', '!=', Auth::id());
-                    //return $result;
                 } else {
                     return $query->where('id', '!=', Auth::id())->orderBy('created_at', 'desc');
-                    //return $query->orderBy('created_at', 'desc');
                 }
             }, function ($query) {
                 return $query->where('id', '!=', Auth::id())->orderBy('created_at', 'desc');
-                //return $query->orderBy('created_at', 'desc');
             });
 
             $users  = (new UserCollection($resource->paginate($limit)))->response()->getData();
@@ -85,54 +78,11 @@ class UserController extends AppController
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param Request $request
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return JsonResponse|Response
      */
     public function update(Request $request, $id)
     {
@@ -180,17 +130,6 @@ class UserController extends AppController
         } catch (\Exception $exception){
             return $this->error('System Error', $exception->getMessage());
         }
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
     }
 
     /**

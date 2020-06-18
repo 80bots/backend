@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Support\Facades\Auth;
@@ -13,6 +14,9 @@ class LoginController extends Controller
 {
     use AuthenticatesUsers;
 
+    /**
+     * @return string
+     */
     protected function redirectTo()
     {
         if(Auth::user()->isAdmin()) {
@@ -22,11 +26,17 @@ class LoginController extends Controller
         }
     }
 
+    /**
+     */
     public function __construct()
     {
         $this->middleware('guest')->except('logout');
     }
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function apiLogin(Request $request)
     {
         $data = $request->only('email', 'password');

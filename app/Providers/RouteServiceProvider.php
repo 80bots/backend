@@ -45,10 +45,6 @@ class RouteServiceProvider extends ServiceProvider
         $this->mapInstanceRoutes();
         $this->mapApiRoutes();
 
-//        disable web routes
-//        $this->mapWebRoutes();
-
-        //
     }
 
     /**

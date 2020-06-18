@@ -4,7 +4,13 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\AppController;
 use App\SubscriptionPlan;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Routing\Redirector;
 use Illuminate\View\View;
 
 class SubscriptionController extends AppController
@@ -12,7 +18,7 @@ class SubscriptionController extends AppController
     /**
      * Display a listing of the resource.
      *
-     * @return View
+     * @return JsonResponse|View
      */
     public function index()
     {
@@ -27,19 +33,18 @@ class SubscriptionController extends AppController
     /**
      * Show the form for creating a new resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Application|RedirectResponse|Response|Redirector
      */
     public function create()
     {
         return redirect('admin/plan');
-        //return view('admin.subscription.create');
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @return void
      */
     public function store(Request $request)
     {
@@ -63,21 +68,10 @@ class SubscriptionController extends AppController
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param  \App\SubscriptionPlan  $subscriptionPlan
-     * @return \Illuminate\Http\Response
-     */
-    public function show(SubscriptionPlan $subscriptionPlan)
-    {
-        //
-    }
-
-    /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\SubscriptionPlan  $subscriptionPlan
-     * @return \Illuminate\Http\Response
+     * @param $id
+     * @return Application|Factory|RedirectResponse|Response|View
      */
     public function edit($id)
     {
@@ -97,9 +91,9 @@ class SubscriptionController extends AppController
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\SubscriptionPlan  $subscriptionPlan
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @param $id
+     * @return JsonResponse|Response
      */
     public function update(Request $request, $id)
     {
@@ -141,7 +135,7 @@ class SubscriptionController extends AppController
      * Remove the specified resource from storage.
      *
      * @param $id
-     * @return \Illuminate\Http\Response
+     * @return JsonResponse|Response
      */
     public function destroy($id)
     {

@@ -12,6 +12,7 @@ use App\Jobs\StoreUserInstance;
 use App\Services\Aws;
 use App\User;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -22,7 +23,7 @@ class ManageController extends InstanceController {
      * Launch EC2 Instances
      *
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     protected function launchInstances(Request $request)
     {
@@ -116,7 +117,7 @@ class ManageController extends InstanceController {
     /**
      * Restore EC2 Instance
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     protected function restoreInstance(Request $request)
     {
@@ -196,6 +197,10 @@ class ManageController extends InstanceController {
         return true;
     }
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function copy(Request $request)
     {
         try {

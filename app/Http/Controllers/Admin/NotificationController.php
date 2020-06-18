@@ -5,10 +5,20 @@ namespace App\Http\Controllers\Admin;
 use App\CreditPercentage;
 use App\Http\Controllers\AppController;
 use Exception;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\Routing\ResponseFactory;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\View\View;
 
 class NotificationController extends AppController
 {
+    /**
+     * @return JsonResponse
+     */
 	public function index()
     {
 		$percentages = CreditPercentage::all();
@@ -16,15 +26,21 @@ class NotificationController extends AppController
 	}
 
 	/* display form to add credit percentage */
+    /**
+     * @return Application|Factory|View
+     */
     public function create()
     {
     	return view('admin.notification.add');
     }
 
     /* store percentage */
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function store(Request $request)
     {
-
 		$data = $request->validate([
 		    'percentage' => 'required|unique:credit_percentages',
 		]);
@@ -36,16 +52,13 @@ class NotificationController extends AppController
 		} else {
             return $this->error('System Error', 'Cannot add notification right now');
 		}
-
-    }
-
-    /* show credit percentage */
-    public function show($id)
-    {
-
     }
 
     /* display edit form */
+    /**
+     * @param $id
+     * @return Application|Factory|View
+     */
     public function edit($id)
     {
 		$percentage = CreditPercentage::findOrFail($id);
@@ -53,6 +66,10 @@ class NotificationController extends AppController
     }
 
     /* update credit percentage */
+    /**
+     * @param Request $request
+     * @return RedirectResponse
+     */
     public function update(Request $request)
     {
 		$request->validate([
@@ -67,6 +84,10 @@ class NotificationController extends AppController
     }
 
     /* delete credit percentages */
+    /**
+     * @param $id
+     * @return Application|ResponseFactory|JsonResponse|Response
+     */
     public function destroy($id)
     {
     	try {

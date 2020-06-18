@@ -213,6 +213,9 @@ class StoreUserInstance implements ShouldQueue
         broadcast(new InstanceLaunched($this->instance, $this->user));
     }
 
+    /**
+     * @return void
+     */
     private function removeInstance()
     {
         Log::debug("removeInstance");
@@ -223,6 +226,9 @@ class StoreUserInstance implements ShouldQueue
         }
     }
 
+    /**
+     * @return void
+     */
     private function addInstanceInfoToMongoDb()
     {
         try {

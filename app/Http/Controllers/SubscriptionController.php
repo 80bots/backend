@@ -8,7 +8,9 @@ use App\Http\Resources\User\SubscriptionPlanResource;
 use App\Http\Resources\User\UserResource;
 use App\SubscriptionPlan;
 use App\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
 class SubscriptionController extends Controller
@@ -16,7 +18,7 @@ class SubscriptionController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return JsonResponse
      */
     public function index()
     {
@@ -48,6 +50,10 @@ class SubscriptionController extends Controller
         return $this->success($response);
     }
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function subscribe(Request $request)
     {
         $data = $request->validate([
@@ -69,7 +75,6 @@ class SubscriptionController extends Controller
             ]);
         }
 
-        $credits        = 0;
         $oldPlanCredits = 0;
 
         $stripePlan = CreditUsageHelper::retrieveStripePlan($user);

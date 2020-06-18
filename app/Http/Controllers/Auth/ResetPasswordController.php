@@ -4,8 +4,12 @@ namespace App\Http\Controllers\Auth;
 
 use App\Helpers\UserHelper;
 use App\Http\Controllers\Controller;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Foundation\Auth\ResetsPasswords;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Auth;
 
 class ResetPasswordController extends Controller
@@ -40,6 +44,11 @@ class ResetPasswordController extends Controller
         $this->middleware('guest');
     }
 
+    /**
+     * @param Request $request
+     * @param $response
+     * @return Application|JsonResponse|RedirectResponse|Redirector
+     */
     protected function sendResetResponse(Request $request, $response)
     {
         if ($request->wantsJson()) {
@@ -51,6 +60,11 @@ class ResetPasswordController extends Controller
         }
     }
 
+    /**
+     * @param Request $request
+     * @param $response
+     * @return JsonResponse|RedirectResponse
+     */
     protected function sendResetFailedResponse(Request $request, $response)
     {
         if ($request->wantsJson()) {

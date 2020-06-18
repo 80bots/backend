@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\ApiResponse;
 use App\Http\Resources\PlatformCollection;
 use App\Platform;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Throwable;
 
@@ -16,7 +16,7 @@ class PlatformController extends AppController
      * Display a listing of the resource.
      *
      * @param Request $request
-     * @return ApiResponse
+     * @return JsonResponse
      */
     public function index(Request $request)
     {
@@ -29,14 +29,10 @@ class PlatformController extends AppController
 
             $resource = Platform::where('status', '=', 'active');
 
-            // TODO: Add Filters
-
-            //
             if (! empty($search)) {
                 $resource->where('name', 'like', "%{$search}%");
             }
 
-            //
             if (!empty($sort)) {
                 $resource->orderBy($sort, $order);
             }
@@ -56,75 +52,11 @@ class PlatformController extends AppController
         }
     }
 
+    /**
+     * @return JsonResponse
+     */
     public function getInstanceTypes()
     {
-        // TODO: receive through AWS Pricing API
         return $this->success(['t2.micro', 't2.small']);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Platform  $platforms
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Platform $platforms)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Platform  $platforms
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Platform $platforms)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Platform  $platforms
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Platform $platforms)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Platform  $platforms
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Platform $platforms)
-    {
-        //
     }
 }
