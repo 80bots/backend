@@ -2,10 +2,12 @@
 
 namespace App\Traits;
 use Aws\Ec2\Ec2Client;
-use App\Bot;
 
 trait AWSInstances
 {
+    /**
+     * @return array
+     */
     public function sync()
     {
         $ec2Client = new Ec2Client([
@@ -16,7 +18,6 @@ trait AWSInstances
 
         $result = $ec2Client->describeInstances();
         $reservations = $result->get('Reservations');
-
 
         $instancesByStatus = [];
         foreach ($reservations as $reservation) {
@@ -59,7 +60,6 @@ trait AWSInstances
                 }
             }
         }
-
         return $instancesByStatus;
     }
 }
