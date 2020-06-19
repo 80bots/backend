@@ -51,6 +51,10 @@ class BotParser
     private static $regexParams = '/\/\*\*\s*PARAMS[\r\n|\r|\n](.*)\*\//sU';
     private static $regexAbout  = '/\/\*\*\s*ABOUT[\r\n|\r|\n](.*)\*\/[\r\n|\r|\n]+\//sU';
 
+    /**
+     * @param string $text
+     * @return string
+     */
     private static function removeCommentsAndNewLines(string $text): string
     {
         // remove single line comments
@@ -60,6 +64,10 @@ class BotParser
         return trim(preg_replace('/[\r\n|\r|\n]+/', ' ', $json));
     }
 
+    /**
+     * @param $fileContent
+     * @return array[]
+     */
     public static function getBotInfo($fileContent)
     {
         $result = [
