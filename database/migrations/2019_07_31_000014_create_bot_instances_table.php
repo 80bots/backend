@@ -23,7 +23,6 @@ class CreateBotInstancesTable extends Migration
             $table->string('aws_instance_id')->nullable();
             $table->string('aws_public_ip')->nullable();
             $table->unsignedInteger('aws_region_id')->nullable();
-            $table->unsignedInteger('used_credit')->default(0);
             $table->unsignedInteger('up_time')->default(0);
             $table->unsignedInteger('total_up_time')->default(0);
             $table->unsignedInteger('cron_up_time')->default(0);

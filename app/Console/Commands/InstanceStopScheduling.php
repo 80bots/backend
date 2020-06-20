@@ -127,7 +127,6 @@ class InstanceStopScheduling extends Command
                                 'cron_up_time'  => 0,
                                 'total_up_time' => $upTime,
                                 'up_time'       => $upTime,
-                                'used_credit'   => CommonHelper::calculateUsedCredit($upTime),
                                 'aws_status'    => BotInstance::STATUS_STOPPED,
                             ]);
                         } else {

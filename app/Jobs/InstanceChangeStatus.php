@@ -285,7 +285,6 @@ class InstanceChangeStatus implements ShouldQueue
             'cron_up_time'  => 0,
             'total_up_time' => $upTime,
             'up_time'       => $upTime,
-            'used_credit'   => CommonHelper::calculateUsedCredit($upTime)
         ]);
     }
 }

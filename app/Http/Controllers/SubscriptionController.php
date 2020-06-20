@@ -77,10 +77,10 @@ class SubscriptionController extends Controller
 
         $oldPlanCredits = 0;
 
-        $stripePlan = CreditUsageHelper::retrieveStripePlan($user);
-        if (! empty($stripePlan)) {
-            $oldPlanCredits = intval($stripePlan->metadata->credits ?? 0);
-        }
+//        $stripePlan = CreditUsageHelper::retrieveStripePlan($user);
+//        if (! empty($stripePlan)) {
+//            $oldPlanCredits = intval($stripePlan->metadata->credits ?? 0);
+//        }
 
         $user->deletePaymentMethods();
         $paymentMethod = $user->createPaymentMethod($data['token_id']);
@@ -128,8 +128,6 @@ class SubscriptionController extends Controller
         } else {
             return $this->error('Bad Request', 'Bad Request');
         }
-
-        CreditUsageHelper::receivedBySubscription($user, $credits);
 
         $resource = (new UserResource($user))->response()->getData();
 

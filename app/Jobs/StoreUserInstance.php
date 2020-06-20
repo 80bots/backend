@@ -135,13 +135,6 @@ class StoreUserInstance implements ShouldQueue
 
                 Log::info('wait until instance ' . $instanceId);
 
-                CreditUsageHelper::startInstance(
-                    $this->user,
-                    self::START_INSTANCE_CREDIT,
-                    $this->instance->id,
-                    $awsData['tagName']
-                );
-
                 $describeInstancesResponse = $aws->describeInstances([$instanceId], $this->region);
 
                 Log::info('describe instances ' . $instanceId);

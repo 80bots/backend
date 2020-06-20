@@ -30,7 +30,6 @@ class BotInstanceResource extends JsonResource
             'bot_name'          => $this->bot->name ?? '',
             'parameters'        => $this->bot->parameters ?? '',
             'launched_at'       => $details->start_time ?? '',
-            'used_credit'       => $this->used_credit ?? 0,
             'uptime'            => $uptime,
             'total_up_time'     => $this->total_up_time ?? 0,
             'cron_up_time'      => $this->cron_up_time ?? 0,

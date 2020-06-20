@@ -70,10 +70,6 @@ Route::group(['middleware' => ['auth:api', 'api.sentry', 'api.instance']], funct
         Route::get('/types', 'PlatformController@getInstanceTypes');
     });
 
-    Route::group(['prefix' => 'history', 'as' => 'history.'], function () {
-        Route::get('/credits', 'HistoryController@getCreditUsage');
-    });
-
     Route::group(['prefix' => 'posts', 'as' => 'posts.'], function () {
         Route::get('/', 'PostController@index')->name('posts');
         Route::post('/', 'PostController@store')->name('store');
@@ -120,10 +116,6 @@ Route::group([
         Route::get('/sync', 'BotInstanceController@syncInstances')->name('sync');
         Route::put('/{id}', 'BotInstanceController@update')->name('update');
         Route::get('/{id}', 'BotInstanceController@show')->name('show');
-    });
-
-    Route::group(['prefix' => 'history', 'as' => 'history.'], function () {
-        Route::get('/credits', 'HistoryController@getCreditUsage');
     });
 
     Route::resources([
