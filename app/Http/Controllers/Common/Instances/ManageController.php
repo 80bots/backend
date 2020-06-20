@@ -32,8 +32,6 @@ class ManageController extends InstanceController {
             $botId = $request->input('bot_id');
             $params = collect($request->input('params'));
 
-            $credit = config('app.credit');
-
             if ($params->isEmpty()) {
                 return $this->error(__('keywords.error'), __('keywords.instance.parameters_incorrect'));
             }
@@ -44,11 +42,6 @@ class ManageController extends InstanceController {
              */
             $user = User::find(Auth::id()); // Get "App\User" object
 
-            if ($user->isUser() && $user->credits < ($credit*$params->count())) {
-                return $this->error(__('keywords.error'), __('keywords.instance.credits_error'));
-            }
-
-            //
             $region = $user->region ?? null;
 
             Log::debug("AwsRegion ISSET");
@@ -164,7 +157,6 @@ class ManageController extends InstanceController {
         $user   = User::find(Auth::id());
         $aws    = new Aws;
 
-        //
         $instance->clearPublicIp();
 
         try {
@@ -222,7 +214,6 @@ class ManageController extends InstanceController {
                 'aws_region_id'     => $user->region->id,
                 'aws_instance_id'   => null,
                 'aws_public_ip'     => null,
-                'used_credit'       => 0,
                 'up_time'           => 0,
                 'cron_up_time'      => 0,
                 'total_up_time'     => 0,

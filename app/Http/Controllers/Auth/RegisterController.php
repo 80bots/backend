@@ -77,7 +77,6 @@ class RegisterController extends Controller
             'timezone_id'           => $timezone->id ?? null,
             'verification_token'    => Str::random(16),
             'role_id'               => Role::getUserRole()->id ?? null,
-            'credits'               => config('auth.register.credits'),
         ]);
 
         if (! empty($user)) {

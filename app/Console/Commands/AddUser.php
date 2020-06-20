@@ -63,7 +63,6 @@ class AddUser extends Command
         $user->email = "$emailParts[0]+$suffix@$emailParts[1]";
         $user->password = bcrypt($pass);
         $user->status = 'active';
-        $user->credits = 100;
         $user->save();
         $this->comment('User has been successfully created');
     }

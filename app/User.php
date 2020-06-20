@@ -5,17 +5,18 @@ namespace App;
 use App\Helpers\QueryHelper;
 use App\Notifications\SaasVerifyEmail;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Cashier\Billable;
 use Laravel\Passport\HasApiTokens;
-use Stripe\PaymentMethod;
-use Stripe\Stripe;
 
 class User extends Authenticatable
 {
-    use Billable, Notifiable, SoftDeletes, HasApiTokens;
+    use Notifiable, SoftDeletes, HasApiTokens;
 
     const STATUS_PENDING    = 'pending';
     const STATUS_ACTIVE     = 'active';
@@ -36,10 +37,6 @@ class User extends Authenticatable
         'email' => [
             'entity'    => QueryHelper::ENTITY_USER,
             'field'     => 'email'
-        ],
-        'credits' => [
-            'entity'    => QueryHelper::ENTITY_USER,
-            'field'     => 'credits'
         ],
         'date' => [
             'entity'    => QueryHelper::ENTITY_USER,
@@ -65,11 +62,6 @@ class User extends Authenticatable
         'timezone_id',
         'region_id',
         'verification_token',
-        'credits',
-        'stripe_id',
-        'card_brand',
-        'card_last_four',
-        'trial_ends_at',
     ];
 
     /**
@@ -95,7 +87,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function instances()
     {
@@ -103,7 +95,7 @@ class User extends Authenticatable
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function visitors()
     {
@@ -111,7 +103,7 @@ class User extends Authenticatable
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function orders()
     {
@@ -126,49 +118,31 @@ class User extends Authenticatable
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function role()
     {
         return $this->belongsTo(Role::class);
     }
 
+    /**
+     * @return BelongsTo
+     */
     public function timezone()
     {
         return $this->belongsTo(Timezone::class);
     }
 
+    /**
+     * @return BelongsTo
+     */
     public function region()
     {
         return $this->belongsTo(AwsRegion::class);
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function UserSubscriptionPlan()
-    {
-        return $this->hasMany(UserSubscriptionPlan::class,'user_id');
-    }
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function DiscussionLikes()
-    {
-        return $this->hasMany(DiscussionLikes::class,'user_id');
-    }
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function DiscussionDislikes()
-    {
-        return $this->hasMany(DiscussionDislikes::class,'user_id');
-    }
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * @return BelongsToMany
      */
     public function privateBots()
     {
@@ -190,6 +164,7 @@ class User extends Authenticatable
     /**
      * Return users with user role
      * @param $query
+     * @return array
      */
     public function scopeOnlyUsers($query)
     {
@@ -201,6 +176,7 @@ class User extends Authenticatable
     /**
      * Return users with admin role
      * @param $query
+     * @return array
      */
     public function scopeOnlyAdmins($query)
     {
@@ -228,8 +204,8 @@ class User extends Authenticatable
     }
 
     /**
-     * TODO:
-     * @return User[]|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection
+     *
+     * @return User[]|Builder[]|Collection
      */
     public static function findUserInstances()
     {
@@ -246,21 +222,9 @@ class User extends Authenticatable
      */
     public function sendPasswordResetNotification($token)
     {
-        //$this->notify(new ResetPasswordNotification($token));
         $this->notify(new SaasVerifyEmail($token));
     }
 
-    public function createPaymentMethod($token)
-    {
-        Stripe::setApiKey(config('settings.stripe.key'));
-
-        return PaymentMethod::create([
-            'type' => 'card',
-            'card' => [
-                'token' => $token
-            ]
-        ]);
-    }
 
     /**
      * Checking access of the authenticated user to specified instance

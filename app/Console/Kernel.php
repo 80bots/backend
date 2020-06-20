@@ -6,7 +6,6 @@ use App\Console\Commands\AddUser;
 use App\Console\Commands\AwsSyncAmis;
 use App\Console\Commands\CacheRefresh;
 use App\Console\Commands\CalculateInstancesUpTime;
-use App\Console\Commands\CalculateUserCreditScore;
 use App\Console\Commands\CleanUpUnused;
 use App\Console\Commands\EchoServerInit;
 use App\Console\Commands\InstanceStartScheduling;
@@ -31,7 +30,6 @@ class Kernel extends ConsoleKernel
         InstanceStopScheduling::class,
         InstanceSyncScheduling::class,
         CalculateInstancesUpTime::class,
-        CalculateUserCreditScore::class,
         CleanUpUnused::class,
         RefreshDatabase::class,
         AwsSyncAmis::class,
@@ -44,7 +42,7 @@ class Kernel extends ConsoleKernel
     /**
      * Define the application's command schedule.
      *
-     * @param  \Illuminate\Console\Scheduling\Schedule  $schedule
+     * @param Schedule $schedule
      * @return void
      */
     protected function schedule(Schedule $schedule)
@@ -54,7 +52,6 @@ class Kernel extends ConsoleKernel
         $schedule->command('instance:start')->everyMinute();
         $schedule->command('instance:stop')->everyMinute();
         $schedule->command('instance:calculate-up-time')->everyTenMinutes();
-        $schedule->command('instance:calculate-user-credit-score')->everyTenMinutes();
         $schedule->command('instance:clean')->hourly();
         $schedule->command('aws:sync-amis')->everyThirtyMinutes();
         $schedule->command('bots:sync-local')->daily();
