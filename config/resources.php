@@ -6,7 +6,6 @@ return [
     ],
     'instance' => [
         'id'                => 'id',
-        'used_credit'       => 'used_credit',
         'uptime'            => 'up_time',
         'total_up_time'     => 'total_up_time',
         'cron_up_time'      => 'cron_up_time',

@@ -179,11 +179,6 @@ class BotInstance extends BaseModel
         return $this->belongsTo(AwsRegion::class, 'aws_region_id');
     }
 
-    public function order()
-    {
-        return $this->hasOne(Order::class,'instance_id', 'id');
-    }
-
     public function s3Objects()
     {
         return $this->hasMany(S3Object::class, 'instance_id', 'id');

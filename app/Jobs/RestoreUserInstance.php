@@ -18,8 +18,6 @@ class RestoreUserInstance implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    const START_INSTANCE_CREDIT = 1;
-
     /**
      * @var BotInstance
      */
