@@ -76,7 +76,3 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin'], 'namespace
 });
 
 Route::get('/user/activation/{token}', 'AppController@UserActivation')->name('user-activation');
-
-// Stripe routes
-Route::post('/stripe/webhook', 'WebhookController@handleWebhook');
-Route::get('/stripe-payment', 'StripeController@SendPayment')->name('stripe-payment');
