@@ -121,7 +121,7 @@ class InstanceChangeStatus implements ShouldQueue
 
     private function setStatusRunning(Aws $aws)
     {
-        if ($this->user->isUser() && $this->user->credits < 1) {
+        if ($this->user->isUser()) {
             broadcast(new InstanceLaunched($this->instance, $this->user));
         }
 

@@ -9,7 +9,6 @@ class Order extends BaseModel
     protected $fillable = [
         'user_id',
         'instance_id',
-        'credits'
     ];
 
     public function user()

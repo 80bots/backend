@@ -17,7 +17,6 @@ class CreateOrdersTable extends Migration
             $table->bigIncrements('id');
             $table->unsignedInteger('user_id');
             $table->unsignedBigInteger('instance_id');
-            $table->unsignedInteger('credits')->default(0);
             $table->timestamps();
 
             $table->foreign('user_id')

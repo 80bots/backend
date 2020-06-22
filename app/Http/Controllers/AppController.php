@@ -14,11 +14,8 @@ use Illuminate\Routing\Redirector;
 
 class AppController extends Controller
 {
-    protected $credit;
-
     public function __construct()
     {
-        $this->credit = CommonHelper::calculateCredit();
     }
 
     /**

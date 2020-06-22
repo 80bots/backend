@@ -37,7 +37,7 @@ class StripeController extends Controller
 
             if (! empty($token)) {
                 $user->newSubscription(config('settings.stripe.product'), $planId)->create($token->id);
-                $user->updateCredit($plan->credit);
+//                $user->updateCredit($plan->credit);
                 session()->flash('success', 'Subscribed Successfully');
             } else {
                 session()->flash('error', 'Subscribed Error');
@@ -76,7 +76,7 @@ class StripeController extends Controller
 
             if (! empty($subscription)) {
                 $subscription->noProrate()->swap($planId);
-                $user->updateCredit($plan->credit);
+//                $user->updateCredit($plan->credit);
                 session()->flash('success', 'Changed Subscription Successfully');
             } else {
                 session()->flash('error', 'Subscription not found');

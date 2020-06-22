@@ -16,7 +16,6 @@ class QueryHelper
     const ENTITY_BOT                    = 'ENTITY_BOT';
     const ENTITY_PLATFORM               = 'ENTITY_PLATFORM';
     const ENTITY_SCHEDULING             = 'ENTITY_SCHEDULING';
-    const ENTITY_CREDIT_USAGE           = 'ENTITY_CREDIT_USAGE';
 
     /**
      * @param Builder $query
@@ -103,23 +102,6 @@ class QueryHelper
                 })
                     ->orderBy("users.{$sort['field']}", $order)
                     ->select('scheduling_instances.*');
-                break;
-        }
-
-        return $query;
-    }
-
-    /**
-     * @param Builder $query
-     * @param array $sort
-     * @param string $order
-     * @return Builder
-     */
-    public static function orderCreditHistory(Builder $query, array $sort, string $order): Builder
-    {
-        switch ($sort['entity']) {
-            case self::ENTITY_CREDIT_USAGE:
-                $query->orderBy("{$sort['field']}", $order);
                 break;
         }
 

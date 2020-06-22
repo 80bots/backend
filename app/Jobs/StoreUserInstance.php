@@ -6,7 +6,6 @@ use App\Bot;
 use App\BotInstance;
 use App\BotInstancesDetails;
 use App\Events\InstanceLaunched;
-use App\Helpers\CreditUsageHelper;
 use App\Helpers\InstanceHelper;
 use App\MongoInstance;
 use App\Services\Aws;
@@ -24,8 +23,6 @@ use function Psy\debug;
 class StoreUserInstance implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
-    const START_INSTANCE_CREDIT = 1;
 
     /**
      * @var Bot

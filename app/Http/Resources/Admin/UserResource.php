@@ -23,7 +23,6 @@ class UserResource extends JsonResource
         ];
 
         if ($request->user()->isAdmin()) {
-            $array['credits']       = $this->credits ?? 0;
             $array['created_at']    = $this->created_at ?? '';
             $array['status']        = $this->status ?? '';
         }

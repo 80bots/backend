@@ -4,7 +4,6 @@ namespace App\Jobs;
 
 use App\BotInstance;
 use App\Events\InstanceLaunched;
-use App\Helpers\CreditUsageHelper;
 use App\Helpers\InstanceHelper;
 use App\Services\Aws;
 use App\User;
