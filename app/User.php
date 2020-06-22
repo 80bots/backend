@@ -204,17 +204,6 @@ class User extends Authenticatable
     }
 
     /**
-     *
-     * @return User[]|Builder[]|Collection
-     */
-    public static function findUserInstances()
-    {
-        return self::with(['UserSubscriptionPlan' => function($query){
-            return $query->orderBy('id', 'desc')->first();
-        }])->whereHas('instances')->get();
-    }
-
-    /**
      * Send the email verification notification.
      *
      * @param $token
