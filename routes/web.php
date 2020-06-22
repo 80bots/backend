@@ -73,7 +73,6 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin'], 'namespace
     Route::group(['prefix' => 'subscription', 'as' => 'subscription.'], function () {
     });
 
-    Route::resource('notification', 'NotificationController');
     Route::resource('bots', 'BotsController');
     Route::resource('scheduling', 'SchedulingInstancesController');
 });

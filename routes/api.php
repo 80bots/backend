@@ -118,7 +118,6 @@ Route::group([
         'user' => 'UserController',
         'bots' => 'BotController',
         'schedule' => 'ScheduleInstanceController',
-        'notification' => 'NotificationController',
         'session' => 'InstanceSessionController'
     ]);
 });
