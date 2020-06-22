@@ -38,7 +38,6 @@ Route::group(['middleware' => ['auth', 'user']], function () {
         Route::post('/', 'BotInstanceController@storeBotIdInSession')->name('create');
     });
 
-    Route::resource('subscription', 'SubscriptionController');
     Route::resource('scheduling', 'ScheduleController');
 });
 
@@ -72,11 +71,9 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin'], 'namespace
     });
 
     Route::group(['prefix' => 'subscription', 'as' => 'subscription.'], function () {
-        Route::put('/{id}/status', 'SubscriptionController@changeStatus')->name('update.status');
     });
 
     Route::resource('notification', 'NotificationController');
-    Route::resource('subscription', 'SubscriptionController');
     Route::resource('bots', 'BotsController');
     Route::resource('scheduling', 'SchedulingInstancesController');
 });

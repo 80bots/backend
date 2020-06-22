@@ -33,12 +33,6 @@ class CreateUserSubscriptionPlansTable extends Migration
                 ->on('users')
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
-
-            $table->foreign('plans_id')
-                ->references('id')
-                ->on('subscription_plans')
-                ->onUpdate('cascade')
-                ->onDelete('cascade');
         });
     }
 

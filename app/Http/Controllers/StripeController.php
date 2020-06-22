@@ -24,11 +24,11 @@ class StripeController extends Controller
             return redirect('user/subscription-plans')->with('message', 'Subscription plan can not added successfully');
         }
 
-        $plan = SubscriptionPlan::where('stripe_plan', $planId)->first();
+//        $plan = SubscriptionPlan::where('stripe_plan', $planId)->first();
 
-        if (empty($plan)) {
-            return redirect('user/subscription-plans')->with('message', 'Plan not found');
-        }
+//        if (empty($plan)) {
+//            return redirect('user/subscription-plans')->with('message', 'Plan not found');
+//        }
 
         try{
 
@@ -64,11 +64,11 @@ class StripeController extends Controller
             return redirect('user/subscription-plans')->with('message', 'Subscription plan can not added successfully');
         }
 
-        $plan = SubscriptionPlan::where('stripe_plan', $planId)->first();
-
-        if (empty($plan)) {
-            return redirect('user/subscription-plans')->with('message', 'Plan not found');
-        }
+//        $plan = SubscriptionPlan::where('stripe_plan', $planId)->first();
+//
+//        if (empty($plan)) {
+//            return redirect('user/subscription-plans')->with('message', 'Plan not found');
+//        }
 
         try{
             $user   = Auth::user();

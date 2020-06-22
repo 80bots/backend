@@ -13,7 +13,6 @@ class DatabaseSeeder extends Seeder
     {
          $this->call([
              RolesTableseeder::class,
-             SubscriptionPlansTableSeeder::class,
              AwsRegionsTableSeeder::class,
              TimezonesTableSeeder::class,
              AddUserSeeder::class,

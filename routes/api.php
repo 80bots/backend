@@ -61,11 +61,6 @@ Route::group(['middleware' => ['auth:api', 'api.sentry', 'api.instance']], funct
         Route::delete('/details/delete', 'ScheduleController@deleteSchedulerDetails')->name('details.delete');
     });
 
-    Route::group(['prefix' => 'subscriptions', 'as' => 'subscriptions.'], function () {
-        Route::get('/', 'SubscriptionController@index')->name('index');
-        Route::post('/subscribe', 'SubscriptionController@subscribe')->name('subscribe');
-    });
-
     Route::group(['prefix' => 'platform', 'as' => 'platform.'], function () {
         Route::get('/types', 'PlatformController@getInstanceTypes');
     });
@@ -124,7 +119,6 @@ Route::group([
         'bots' => 'BotController',
         'schedule' => 'ScheduleInstanceController',
         'notification' => 'NotificationController',
-        'subscription' => 'SubscriptionController',
         'session' => 'InstanceSessionController'
     ]);
 });
