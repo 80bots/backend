@@ -2,12 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\DeleteSecurityGroup;
-use App\Services\Aws;
-use Carbon\Carbon;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Log;
-use Throwable;
 
 class RefreshDatabase extends Command
 {

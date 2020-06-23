@@ -9,8 +9,12 @@ use App\Role;
 use App\Timezone;
 use App\User;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Foundation\Auth\RegistersUsers;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -23,6 +27,7 @@ class RegisterController extends Controller
     /**
      * Where to redirect users after registration.
      *
+     * @return string
      * @var string
      */
     protected function redirectTo(){
@@ -57,7 +62,7 @@ class RegisterController extends Controller
      * Create a new user instance after a valid registration.
      *
      * @param  array  $data
-     * @return \App\User
+     * @return User
      */
     protected function create(array $data)
     {
@@ -72,7 +77,6 @@ class RegisterController extends Controller
             'timezone_id'           => $timezone->id ?? null,
             'verification_token'    => Str::random(16),
             'role_id'               => Role::getUserRole()->id ?? null,
-            'credits'               => config('auth.register.credits'),
         ]);
 
         if (! empty($user)) {
@@ -82,6 +86,10 @@ class RegisterController extends Controller
         return $user;
     }
 
+    /**
+     * @param Request $request
+     * @return Application|JsonResponse|RedirectResponse|Redirector
+     */
     public function register(Request $request)
     {
         $this->validator($request->all())->validate();
@@ -94,6 +102,10 @@ class RegisterController extends Controller
         }
     }
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function apiRegister(Request $request)
     {
         $validator = $this->validator($request->all());

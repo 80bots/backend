@@ -82,7 +82,6 @@ class CalculateInstancesUpTime extends Command
                                         $instance->update([
                                             'cron_up_time'  => $cronUpTime,
                                             'up_time'       => $cronUpTime + $instance->total_up_time ?? 0,
-                                            'used_credit'   => CommonHelper::calculateUsedCredit($cronUpTime + $instance->total_up_time ?? 0)
                                         ]);
 
                                         Log::debug('instance id ' . $instance->aws_instance_id . ' Cron Up Time is ' . $cronUpTime);
@@ -91,7 +90,7 @@ class CalculateInstancesUpTime extends Command
                                     unset($reservations, $awsInstancesInfo, $awsInstance);
 
                                 } else {
-                                    //
+
                                     Log::debug('instance id ' . $instance->aws_instance_id . ' already terminated');
                                     $instance->setAwsStatusTerminated();
 

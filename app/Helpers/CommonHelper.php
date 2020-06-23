@@ -15,14 +15,6 @@ class CommonHelper
     }
 
     /**
-     * @return float
-     */
-    public static function calculateCredit()
-    {
-        return round((config('app.credit') * 10) / config('app.up_time'),2);
-    }
-
-    /**
      *
      *
      * @param $startTime
@@ -41,31 +33,6 @@ class CommonHelper
         $start  = Carbon::parse($startTime);
         $end    = Carbon::parse($endTime);
         return $end->diffInHours($start);
-    }
-
-    /**
-     * @param $upTime
-     * @return int
-     */
-    public static function calculateUsedCredit($upTime): int
-    {
-        if ($upTime >= 0 && $upTime <= 60) {
-            return 1;
-        } elseif ($upTime > 60) {
-
-            $now  = Carbon::now();
-            $realHours = $now->diffInRealHours($now->copy()->addMinutes($upTime));
-            $floatHours = $now->floatDiffInHours($now->copy()->addMinutes($upTime));
-
-            if ($floatHours > $realHours) {
-                return ($realHours+1) * intval(config('app.credit'));
-            } else {
-                return $realHours * intval(config('app.credit'));
-            }
-
-        } else {
-            return 0;
-        }
     }
 
     /**

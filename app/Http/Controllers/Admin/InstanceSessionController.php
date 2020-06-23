@@ -6,6 +6,7 @@ use App\Http\Controllers\AppController;
 use App\Http\Resources\Admin\InstanceSessionsHistoryCollection;
 use App\InstanceSessionsHistory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Throwable;
 
@@ -17,7 +18,7 @@ class InstanceSessionController extends AppController
      * Handle the incoming request.
      *
      * @param Request $request
-     * @return InstanceSessionsHistoryCollection|\Illuminate\Http\JsonResponse
+     * @return InstanceSessionsHistoryCollection|JsonResponse
      */
     public function index(Request $request)
     {
@@ -30,10 +31,8 @@ class InstanceSessionController extends AppController
 
             $resource = InstanceSessionsHistory::query();
 
-            // TODO: Add Filters
             $resource->with(['schedulingInstance.userInstance', 'user']);
 
-            //
             if (! empty($search)) {
                 $resource->whereHas('user', function (Builder $query) use ($search) {
                     $query->where('email', 'like', "%{$search}%");

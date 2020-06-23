@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Bot;
 use App\Http\Resources\BotCollection;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Throwable;
 
@@ -12,6 +13,10 @@ class BotController extends Controller
 {
     const PAGINATE = 1;
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function index(Request $request)
     {
         try {
@@ -24,22 +29,17 @@ class BotController extends Controller
 
             $resource = Bot::query();
 
-            // TODO: Add Filters
-
-            //
             if (! empty($platform)) {
                 $resource->whereHas('platform', function (Builder $query) use ($platform) {
                     $query->where('name', '=', $platform);
                 });
             }
 
-            //
             if (! empty($search)) {
                 $resource->where('name', 'like', "%{$search}%")
                     ->orWhere('description', 'like', "%{$search}%");
             }
 
-            //
             if (! empty($sort)) {
                 $resource->orderBy($sort, $order);
             }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Admin;
 
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class AwsSettingResource extends JsonResource
@@ -9,7 +10,7 @@ class AwsSettingResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      * @return array
      */
     public function toArray($request)

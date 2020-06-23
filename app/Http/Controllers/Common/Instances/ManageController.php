@@ -12,6 +12,7 @@ use App\Jobs\StoreUserInstance;
 use App\Services\Aws;
 use App\User;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -22,7 +23,7 @@ class ManageController extends InstanceController {
      * Launch EC2 Instances
      *
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     protected function launchInstances(Request $request)
     {
@@ -30,8 +31,6 @@ class ManageController extends InstanceController {
 
             $botId = $request->input('bot_id');
             $params = collect($request->input('params'));
-
-            $credit = config('app.credit');
 
             if ($params->isEmpty()) {
                 return $this->error(__('keywords.error'), __('keywords.instance.parameters_incorrect'));
@@ -43,11 +42,6 @@ class ManageController extends InstanceController {
              */
             $user = User::find(Auth::id()); // Get "App\User" object
 
-            if ($user->isUser() && $user->credits < ($credit*$params->count())) {
-                return $this->error(__('keywords.error'), __('keywords.instance.credits_error'));
-            }
-
-            //
             $region = $user->region ?? null;
 
             Log::debug("AwsRegion ISSET");
@@ -116,7 +110,7 @@ class ManageController extends InstanceController {
     /**
      * Restore EC2 Instance
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     protected function restoreInstance(Request $request)
     {
@@ -163,7 +157,6 @@ class ManageController extends InstanceController {
         $user   = User::find(Auth::id());
         $aws    = new Aws;
 
-        //
         $instance->clearPublicIp();
 
         try {
@@ -196,6 +189,10 @@ class ManageController extends InstanceController {
         return true;
     }
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function copy(Request $request)
     {
         try {
@@ -217,7 +214,6 @@ class ManageController extends InstanceController {
                 'aws_region_id'     => $user->region->id,
                 'aws_instance_id'   => null,
                 'aws_public_ip'     => null,
-                'used_credit'       => 0,
                 'up_time'           => 0,
                 'cron_up_time'      => 0,
                 'total_up_time'     => 0,

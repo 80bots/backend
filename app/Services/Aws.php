@@ -927,42 +927,6 @@ class Aws
      */
     public function runStartUpScript(): array
     {
-//        if (empty($this->ec2)) {
-//            $this->ec2Connection();
-//        }
-
-//        $cred = [
-//            'credentials' => config('aws.credentials'),
-//            //'service' => 'ec2',
-//            'region'  => config('aws.region', 'us-east-2'),
-//            'version' => config('aws.version', 'latest')
-//        ];
-
-//        $ec2 = new Ec2Client($cred);
-//        //$client = new AwsClient($cred);
-//
-//        $instanceIds = ['i-0554762900be26c9a'];
-//
-//        $result = $ec2->getApi();
-//
-//        Log::debug(print_r($result['operations'], true));
-//
-//        dd($result['operations']);
-
-//        exec('mkdir -p Shell');
-//        chdir('Shell');
-//        $returnArr['status'] = [];
-//
-//        foreach ($StartUpScript as $script) {
-//            exec($script, $output, $return);
-//            if (! $return) {
-//                array_push($returnArr['status'], 'Success');
-//            } else {
-//                array_push($returnArr['status'], 'Fail');
-//            }
-//        }
-//
-//        return $returnArr;
         return [];
     }
 
@@ -1395,10 +1359,6 @@ HERESHELL;
      */
     public function getPresignedLink(string $bucket, string $key): string
     {
-//        if (! $this->s3->doesObjectExist($bucket, $key)) {
-//            return '';
-//        }
-
         $cmd = $this->s3->getCommand('GetObject', [
             'Bucket' => $bucket,
             'Key' => $key
@@ -1409,6 +1369,11 @@ HERESHELL;
         return (string)$request->getUri();
     }
 
+    /**
+     * @param array $params
+     * @param string $path
+     * @return string
+     */
     private function createUserData(array $params, string $path): string
     {
         if (!empty($params)) {
@@ -1423,7 +1388,6 @@ HERESHELL;
 
             return base64_encode("#!/bin/bash\n{$this->startupScript(json_encode($formattedParams), $path ?? '')}");
         }
-
         return '';
     }
 }

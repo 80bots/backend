@@ -6,7 +6,6 @@ use App\Bot;
 use App\BotInstance;
 use App\BotInstancesDetails;
 use App\Events\InstanceLaunched;
-use App\Helpers\CreditUsageHelper;
 use App\Helpers\InstanceHelper;
 use App\MongoInstance;
 use App\Services\Aws;
@@ -24,8 +23,6 @@ use function Psy\debug;
 class StoreUserInstance implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
-    const START_INSTANCE_CREDIT = 1;
 
     /**
      * @var Bot
@@ -135,13 +132,6 @@ class StoreUserInstance implements ShouldQueue
 
                 Log::info('wait until instance ' . $instanceId);
 
-                CreditUsageHelper::startInstance(
-                    $this->user,
-                    self::START_INSTANCE_CREDIT,
-                    $this->instance->id,
-                    $awsData['tagName']
-                );
-
                 $describeInstancesResponse = $aws->describeInstances([$instanceId], $this->region);
 
                 Log::info('describe instances ' . $instanceId);
@@ -213,6 +203,9 @@ class StoreUserInstance implements ShouldQueue
         broadcast(new InstanceLaunched($this->instance, $this->user));
     }
 
+    /**
+     * @return void
+     */
     private function removeInstance()
     {
         Log::debug("removeInstance");
@@ -223,6 +216,9 @@ class StoreUserInstance implements ShouldQueue
         }
     }
 
+    /**
+     * @return void
+     */
     private function addInstanceInfoToMongoDb()
     {
         try {

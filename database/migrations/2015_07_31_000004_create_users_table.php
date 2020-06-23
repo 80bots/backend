@@ -27,7 +27,6 @@ class CreateUsersTable extends Migration
             $table->string('password_reset_token')->nullable();
             $table->string('auth_token')->nullable();
             $table->rememberToken();
-            $table->integer('credits')->default(0);
 
             $table->enum('status', [
                 User::STATUS_PENDING,

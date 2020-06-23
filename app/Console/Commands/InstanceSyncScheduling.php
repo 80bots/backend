@@ -94,6 +94,11 @@ class InstanceSyncScheduling extends Command
         }
     }
 
+    /**
+     * @param Aws $aws
+     * @param AwsRegion $region
+     * @return void
+     */
     private function checkNotTerminatedInstances(Aws $aws, AwsRegion $region): void
     {
         Log::info('checkNotTerminatedInstances started at ' . date('Y-m-d h:i:s'));
@@ -184,7 +189,7 @@ class InstanceSyncScheduling extends Command
     }
 
     /**
-     *
+     * @return void
      */
     private function clearTerminatedInstances(): void
     {

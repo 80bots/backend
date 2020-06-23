@@ -16,8 +16,13 @@ class QueryHelper
     const ENTITY_BOT                    = 'ENTITY_BOT';
     const ENTITY_PLATFORM               = 'ENTITY_PLATFORM';
     const ENTITY_SCHEDULING             = 'ENTITY_SCHEDULING';
-    const ENTITY_CREDIT_USAGE           = 'ENTITY_CREDIT_USAGE';
 
+    /**
+     * @param Builder $query
+     * @param array $sort
+     * @param string $order
+     * @return Builder
+     */
     public static function orderBotInstance(Builder $query, array $sort, string $order): Builder
     {
         switch ($sort['entity']) {
@@ -42,18 +47,18 @@ class QueryHelper
                 $query->orderBy(DB::raw("`total_up_time` + `cron_up_time`"), $order);
                 break;
             case self::ENTITY_BOT_INSTANCES_DETAILS:
-
-//                $query->leftJoin('bot_instances_details', function ($join) {
-//                    $join->on('bot_instances.id', '=', 'bot_instances_details.instance_id');
-//                })
-//                ->orderBy("bot_instances_details.{$sort['field']}", $order);
-
                 break;
         }
 
         return $query;
     }
 
+    /**
+     * @param Builder $query
+     * @param array $sort
+     * @param string $order
+     * @return Builder
+     */
     public static function orderBot(Builder $query, array $sort, string $order): Builder
     {
         switch ($sort['entity']) {
@@ -72,6 +77,12 @@ class QueryHelper
         return $query;
     }
 
+    /**
+     * @param Builder $query
+     * @param array $sort
+     * @param string $order
+     * @return Builder
+     */
     public static function orderBotScheduling(Builder $query, array $sort, string $order): Builder
     {
         switch ($sort['entity']) {
@@ -97,17 +108,12 @@ class QueryHelper
         return $query;
     }
 
-    public static function orderCreditHistory(Builder $query, array $sort, string $order): Builder
-    {
-        switch ($sort['entity']) {
-            case self::ENTITY_CREDIT_USAGE:
-                $query->orderBy("{$sort['field']}", $order);
-                break;
-        }
-
-        return $query;
-    }
-
+    /**
+     * @param Builder $query
+     * @param array $sort
+     * @param string $order
+     * @return Builder
+     */
     public static function orderAwsRegion(Builder $query, array $sort, string $order): Builder
     {
         switch ($sort['entity']) {
@@ -119,6 +125,12 @@ class QueryHelper
         return $query;
     }
 
+    /**
+     * @param Builder $query
+     * @param array $sort
+     * @param string $order
+     * @return Builder
+     */
     public static function orderUser(Builder $query, array $sort, string $order): Builder
     {
         switch ($sort['entity']) {

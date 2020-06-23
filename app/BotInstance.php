@@ -61,7 +61,6 @@ class BotInstance extends BaseModel
         'aws_instance_id',
         'aws_public_ip',
         'aws_region_id',
-        'used_credit',
         'up_time',
         'total_up_time',
         'cron_up_time',
@@ -178,16 +177,6 @@ class BotInstance extends BaseModel
     public function region()
     {
         return $this->belongsTo(AwsRegion::class, 'aws_region_id');
-    }
-
-    public function order()
-    {
-        return $this->hasOne(Order::class,'instance_id', 'id');
-    }
-
-    public function creditsUsage()
-    {
-        return $this->hasMany(CreditUsage::class, 'instance_id', 'id');
     }
 
     public function s3Objects()

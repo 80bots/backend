@@ -4,7 +4,6 @@ namespace App\Jobs;
 
 use App\BotInstance;
 use App\Events\InstanceLaunched;
-use App\Helpers\CreditUsageHelper;
 use App\Helpers\InstanceHelper;
 use App\Services\Aws;
 use App\User;
@@ -18,8 +17,6 @@ use Illuminate\Support\Facades\Log;
 class RestoreUserInstance implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
-    const START_INSTANCE_CREDIT = 1;
 
     /**
      * @var BotInstance
@@ -99,13 +96,6 @@ class RestoreUserInstance implements ShouldQueue
             $aws->waitUntil([$instanceId]);
 
             Log::info('wait until instance ' . $instanceId);
-
-            CreditUsageHelper::startInstance(
-                $this->user,
-                self::START_INSTANCE_CREDIT,
-                $this->instance->id,
-                $awsData['tagName']
-            );
 
             $describeInstancesResponse = $aws->describeInstances([$instanceId], $mongoInstance->aws_region);
 

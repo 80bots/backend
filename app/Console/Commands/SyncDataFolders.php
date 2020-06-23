@@ -2,8 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\BotInstance;
-use App\Jobs\SyncS3Objects;
 use Illuminate\Console\Command;
 
 class SyncDataFolders extends Command
@@ -39,10 +37,6 @@ class SyncDataFolders extends Command
      */
     public function handle()
     {
-//        BotInstance::chunkById(1000, function ($instances) {
-//            foreach ($instances as $instance) {
-//                dispatch(new SyncS3Objects($instance));
-//            }
-//        });
+    //
     }
 }

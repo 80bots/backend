@@ -6,6 +6,7 @@ use App\AwsAmi;
 use App\AwsRegion;
 use App\Services\Aws;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
@@ -39,6 +40,7 @@ class AwsSyncAmis extends Command
      * Execute the console command.
      *
      * @return void
+     * @throws Exception
      */
     public function handle()
     {
@@ -68,6 +70,7 @@ class AwsSyncAmis extends Command
     /**
      * @param int $regionId
      * @param array $images
+     * @throws Exception
      */
     private function saveImages(int $regionId, array $images): void
     {

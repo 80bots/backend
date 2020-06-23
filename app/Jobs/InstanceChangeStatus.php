@@ -11,6 +11,7 @@ use App\Helpers\InstanceHelper;
 use App\Services\Aws;
 use App\User;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
@@ -75,7 +76,7 @@ class InstanceChangeStatus implements ShouldQueue
      * Execute the job.
      *
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     public function handle()
     {
@@ -120,8 +121,7 @@ class InstanceChangeStatus implements ShouldQueue
 
     private function setStatusRunning(Aws $aws)
     {
-        if ($this->user->isUser() && $this->user->credits < 1) {
-            // TODO: Add a message notifying the user about credits lack for changing the status
+        if ($this->user->isUser()) {
             broadcast(new InstanceLaunched($this->instance, $this->user));
         }
 
@@ -209,7 +209,7 @@ class InstanceChangeStatus implements ShouldQueue
 
     /**
      * @param Aws $aws
-     * @throws \Exception
+     * @throws Exception
      */
     private function setStatusTerminated(Aws $aws)
     {
@@ -266,6 +266,10 @@ class InstanceChangeStatus implements ShouldQueue
         return collect([]);
     }
 
+    /**
+     * @return void
+     * @throws Exception
+     */
     private function updateUpTime(): void
     {
         $diffTime = CommonHelper::diffTimeInMinutes($this->details->start_time, $this->currentDate);
@@ -281,7 +285,6 @@ class InstanceChangeStatus implements ShouldQueue
             'cron_up_time'  => 0,
             'total_up_time' => $upTime,
             'up_time'       => $upTime,
-            'used_credit'   => CommonHelper::calculateUsedCredit($upTime)
         ]);
     }
 }

@@ -7,11 +7,6 @@ Route::get('ping', 'AppController@ping');
 Route::get('password/show', 'AppController@apiEmpty')->name('password.reset');
 //Route::get('user', 'AppController@apiEmpty')->name('login');
 
-Route::group(['prefix' => 'posts', 'as' => 'posts.'], function () {
-    Route::get('/show', 'PostController@showBySlug')->name('slug');
-});
-
-
 // Authentication Routes. Auth::routes() is not used to not provide unneeded routes
 Route::group(['prefix' => 'auth', 'as' => 'auth.', 'namespace' => 'Auth'], function () {
     Route::post('login', 'LoginController@apiLogin')->name('login');
@@ -61,25 +56,8 @@ Route::group(['middleware' => ['auth:api', 'api.sentry', 'api.instance']], funct
         Route::delete('/details/delete', 'ScheduleController@deleteSchedulerDetails')->name('details.delete');
     });
 
-    Route::group(['prefix' => 'subscriptions', 'as' => 'subscriptions.'], function () {
-        Route::get('/', 'SubscriptionController@index')->name('index');
-        Route::post('/subscribe', 'SubscriptionController@subscribe')->name('subscribe');
-    });
-
     Route::group(['prefix' => 'platform', 'as' => 'platform.'], function () {
         Route::get('/types', 'PlatformController@getInstanceTypes');
-    });
-
-    Route::group(['prefix' => 'history', 'as' => 'history.'], function () {
-        Route::get('/credits', 'HistoryController@getCreditUsage');
-    });
-
-    Route::group(['prefix' => 'posts', 'as' => 'posts.'], function () {
-        Route::get('/', 'PostController@index')->name('posts');
-        Route::post('/', 'PostController@store')->name('store');
-        Route::put('/{id}', 'PostController@update')->name('update');
-        Route::delete('/{id}', 'PostController@delete')->name('delete');
-        Route::get('/{id}', 'PostController@show')->name('show');
     });
 
     Route::resources([
@@ -122,17 +100,11 @@ Route::group([
         Route::get('/{id}', 'BotInstanceController@show')->name('show');
     });
 
-    Route::group(['prefix' => 'history', 'as' => 'history.'], function () {
-        Route::get('/credits', 'HistoryController@getCreditUsage');
-    });
-
     Route::resources([
         'aws' => 'AwsSettingController',
         'user' => 'UserController',
         'bots' => 'BotController',
         'schedule' => 'ScheduleInstanceController',
-        'notification' => 'NotificationController',
-        'subscription' => 'SubscriptionController',
         'session' => 'InstanceSessionController'
     ]);
 });

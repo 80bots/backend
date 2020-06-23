@@ -73,6 +73,10 @@ class InstanceStartScheduling extends Command
         }
     }
 
+    /**
+     * @param array $instancesIds
+     * @return void
+     */
     private function startInstances(array $instancesIds)
     {
         if (count($instancesIds) > 0) {

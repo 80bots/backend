@@ -43,7 +43,6 @@ class AddUserSeeder extends Seeder
                 'email'         => "$emailParts[0]+admin@$emailParts[1]",
                 'password'      => bcrypt($user['passwords'][0]),
                 'status'        => 'active',
-                'credits'       => 100
             ]);
 
             DB::table('users')->insert([
@@ -54,7 +53,6 @@ class AddUserSeeder extends Seeder
                 'email'         => "$emailParts[0]+user@$emailParts[1]",
                 'password'      => bcrypt($user['passwords'][1]),
                 'status'        => 'active',
-                'credits'       => 100
             ]);
         }
     }

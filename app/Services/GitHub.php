@@ -6,6 +6,7 @@ use GrahamCampbell\GitHub\Facades\GitHub as GitHubApi;
 
 class GitHub
 {
+
     public static function me()
     {
         return GitHubApi::me();
@@ -17,6 +18,11 @@ class GitHub
             ['state' => 'open']);
     }
 
+    /**
+     * @param $title
+     * @param $body
+     * @return array
+     */
     public static function createIssue($title, $body)
     {
         return GitHubApi::issues()->create(config('github.organization'), config('github.repo'),

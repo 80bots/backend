@@ -22,7 +22,6 @@ Route::group(['middleware' => ['auth', 'user']], function () {
     Route::group(['prefix' => 'user', 'as' => 'user.'], function() {
         Route::get('/', 'UserController@index')->name('index');
         Route::put('/{id}/status', 'UserController@changeStatus')->name('update.status');
-        Route::put('/credit', 'UserController@updateCredit')->name('update.credit');
         Route::put('/{id}/timezone', 'UserController@updateTimezone')->name('update.timezone');
     });
 
@@ -38,7 +37,6 @@ Route::group(['middleware' => ['auth', 'user']], function () {
         Route::post('/', 'BotInstanceController@storeBotIdInSession')->name('create');
     });
 
-    Route::resource('subscription', 'SubscriptionController');
     Route::resource('scheduling', 'ScheduleController');
 });
 
@@ -62,7 +60,6 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin'], 'namespace
     Route::group(['prefix' => 'user', 'as' => 'user.'], function() {
         Route::get('/', 'UserController@index')->name('index');
         Route::put('/{id}/status', 'UserController@changeStatus')->name('update.status');
-        Route::put('/credit', 'UserController@updateCredit')->name('update.credit');
         Route::put('/{id}/timezone', 'UserController@updateTimezone')->name('update.timezone');
     });
 
@@ -72,18 +69,10 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin'], 'namespace
     });
 
     Route::group(['prefix' => 'subscription', 'as' => 'subscription.'], function () {
-        Route::put('/{id}/status', 'SubscriptionController@changeStatus')->name('update.status');
     });
 
-    Route::resource('notification', 'NotificationController');
-    Route::resource('subscription', 'SubscriptionController');
     Route::resource('bots', 'BotsController');
     Route::resource('scheduling', 'SchedulingInstancesController');
 });
 
-Route::get('/user/credits', 'AppController@CalUserCreditScore')->name('CreditScoreEmail');
 Route::get('/user/activation/{token}', 'AppController@UserActivation')->name('user-activation');
-
-// Stripe routes
-Route::post('/stripe/webhook', 'WebhookController@handleWebhook');
-Route::get('/stripe-payment', 'StripeController@SendPayment')->name('stripe-payment');
