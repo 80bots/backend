@@ -227,7 +227,7 @@ class BotController extends AppController
                     'update.name'                       => 'string',
                     'update.aws_custom_script'          => 'string|nullable',
                     'update.aws_custom_package_json'    => 'json|nullable',
-                    'update.description'                => 'string',
+                    'update.description'                => 'string|nullable',
                     'update.platform'                   => 'string',
                     'update.tags'                       => 'array',
                     'update.type'                       => 'in:private,public',
@@ -235,6 +235,10 @@ class BotController extends AppController
                 ]);
 
                 $updateData = $updateData['update'];
+
+                $name = $request['update.name'];
+
+                $updateData['path'] = Str::slug($name, '_') . '.custom.js';
                 $updateData['parameters'] =  $parameters = $this->extractParamsFromScript($updateData['aws_custom_script']);
                 $bot->fill($updateData);
 
