@@ -16,7 +16,6 @@ class CreateMessagesTable extends Migration
     {
         Schema::create('messages', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('post_id');
             $table->unsignedBigInteger('parent_id')->nullable();
             $table->unsignedInteger('author_id');
             $table->text('content')->nullable();
@@ -29,12 +28,6 @@ class CreateMessagesTable extends Migration
             $table->boolean('moderation')->default(false);
 
             $table->timestamps();
-
-            $table->foreign('post_id')
-                ->references('id')
-                ->on('posts')
-                ->onUpdate('cascade')
-                ->onDelete('cascade');
 
             $table->foreign('parent_id')
                 ->references('id')
@@ -58,7 +51,7 @@ class CreateMessagesTable extends Migration
     public function down()
     {
         Schema::table('messages', function (Blueprint $table) {
-            $table->dropForeign(['post_id', 'parent_id', 'author_id']);
+            $table->dropForeign(['parent_id', 'author_id']);
         });
 
         Schema::dropIfExists('messages');

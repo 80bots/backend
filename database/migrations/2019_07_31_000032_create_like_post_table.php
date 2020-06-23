@@ -15,14 +15,7 @@ class CreateLikePostTable extends Migration
     {
         Schema::create('like_post', function (Blueprint $table) {
 
-            $table->unsignedBigInteger('post_id')->nullable();
             $table->unsignedInteger('user_id')->nullable();
-
-            $table->foreign('post_id')
-                ->references('id')
-                ->on('posts')
-                ->onUpdate('cascade')
-                ->onDelete('cascade');
 
             $table->foreign('user_id')
                 ->references('id')
@@ -40,7 +33,7 @@ class CreateLikePostTable extends Migration
     public function down()
     {
         Schema::table('like_post', function (Blueprint $table) {
-            $table->dropForeign(['post_id', 'user_id']);
+            $table->dropForeign(['user_id']);
         });
 
         Schema::dropIfExists('like_post');

@@ -10,7 +10,6 @@ class Message extends BaseModel
     protected $table = "messages";
 
     protected $fillable = [
-        'post_id',
         'parent_id',
         'author_id',
         'content',
