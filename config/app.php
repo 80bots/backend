@@ -58,7 +58,7 @@ return [
 
     'asset_url' => env('ASSET_URL', null),
 
-    'react_url' => env('REACT_URL', 'http://localhost:8080'),
+    'web_client_url' => env('WEB_CLIENT_URL', 'http://localhost:8080'),
 
     /*
     |--------------------------------------------------------------------------
