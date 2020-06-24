@@ -944,8 +944,7 @@ class Aws
         $scriptDir              = $isCustom ? 'custom' : 'puppeteer';
         $streamerDir            = 'data-streamer';
         $streamerCommand        = "git pull && yarn && yarn build && pm2 start --name \"data-streamer\" yarn -- start";
-        $customCommand          = "yarn && pm2 start {$path} --name \"{$path}\" --no-autorestart";
-        $puppeteerCommand       = "yarn && mkdir logs && DISPLAY=:1 node {$path} > /dev/null";
+        $scriptCommand          = "yarn && mkdir logs && DISPLAY=:1 node {$path} > /dev/null";
 
         $environment = <<<HERESHELL
 USER_NAME="{$user}"
@@ -1000,7 +999,6 @@ echo "LOG_PATH=/home/{$user}/{$scriptDir}/logs" >> ./\$STREAMER_DIR/.env
 chown -R \$USER_NAME:\$USER_NAME \$SCRIPT_DIR
 HERESHELL;
 
-        $scriptCommand = $isCustom ? $customCommand : $puppeteerCommand;
         $beforeRun = $isCustom ? $customBeforeRun : $commonBeforeRun;
         $globalSettings = AwsSetting::isDefault()->first();
         $globalSettingsScript = $globalSettings ? $globalSettings->script : '';
