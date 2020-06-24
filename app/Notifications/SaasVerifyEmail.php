@@ -47,7 +47,7 @@ class SaasVerifyEmail extends Notification
      */
     public function toMail($notifiable)
     {
-        $url = config('app.react_url') . "/reset?token={$this->token}&email={$notifiable->getEmailForPasswordReset()}";
+        $url = config('app.web_client_url') . "/reset?token={$this->token}&email={$notifiable->getEmailForPasswordReset()}";
 
         return (new MailMessage)
             ->subject(Lang::get('Reset Password Notification'))
