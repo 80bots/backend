@@ -179,10 +179,6 @@ return [
          * Package Service Providers...
          */
         Sentry\Laravel\ServiceProvider::class,
-        // TODO: Switch once the issue https://github.com/jenssegers/laravel-mongodb/issues/1709
-        // will be fixed
-//        Jenssegers\Mongodb\MongodbServiceProvider::class,
-        App\Providers\MongodbServiceProvider::class,
 
         /*
          * Application Service Providers...

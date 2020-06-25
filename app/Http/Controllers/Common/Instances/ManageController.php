@@ -200,7 +200,7 @@ class ManageController extends InstanceController {
             if (empty($instance)) {
                 return $this->notFound(__('keywords.not_found'), __('keywords.instance.not_found'));
             }
-            if (empty($instance->mongodb)) {
+            if (empty($instance->about)) {
                 return $this->error(__('keywords.server_error'), __('keywords.bots.error_parameters'));
             }
             $instanceDetail = $instance->details()->latest()->first();
@@ -228,7 +228,8 @@ class ManageController extends InstanceController {
                     'aws_storage_gb'    => $instanceDetail->aws_storage_gb,
                     'aws_image_id'      => $instanceDetail->aws_image_id
                 ]);
-                dispatch(new StoreUserInstance($copy->bot, $copy, $user, $instance->mongodb->params, $request->ip()));
+                $instance_params = json_decode(''.$instance->about->params, true);
+                dispatch(new StoreUserInstance($copy->bot, $copy, $user, $instance_params, $request->ip()));
                 return $this->success([
                     'instance_id' => $copy->id ?? null
                 ], __('keywords.instance.launch_success'));

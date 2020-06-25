@@ -59,16 +59,16 @@ class RestoreUserInstance implements ShouldQueue
             return;
         }
 
-        $mongoInstance = $this->instance->mongodb;
+        $aboutInstance = $this->instance->about;
 
-        if (empty($mongoInstance)) {
+        if (empty($aboutInstance)) {
             return;
         }
 
         $aws = new Aws;
-        $aws->ec2Connection($mongoInstance->aws_region);
+        $aws->ec2Connection($aboutInstance->aws_region);
 
-        Log::debug("Connect to region: {$mongoInstance->aws_region}");
+        Log::debug("Connect to region: {$aboutInstance->aws_region}");
 
         $awsData = InstanceHelper::createAwsKeyAndGroup($aws, $this->ip);
 
@@ -78,7 +78,7 @@ class RestoreUserInstance implements ShouldQueue
 
         // Instance Restore
         $restoreInstanceResponse = $aws->restoreInstance(
-            $mongoInstance,
+            $aboutInstance,
             $awsData['keyPairName'],
             $awsData['groupName']
         );
@@ -97,7 +97,7 @@ class RestoreUserInstance implements ShouldQueue
 
             Log::info('wait until instance ' . $instanceId);
 
-            $describeInstancesResponse = $aws->describeInstances([$instanceId], $mongoInstance->aws_region);
+            $describeInstancesResponse = $aws->describeInstances([$instanceId], $aboutInstance->aws_region);
 
             Log::info('describe instances ' . $instanceId);
 
@@ -119,9 +119,9 @@ class RestoreUserInstance implements ShouldQueue
                     'aws_public_dns'            => $instanceArray['PublicDnsName'] ?? '',
                     'aws_pem_file_path'         => $awsData['keyPairPath'],
                     'start_time'                => $launchTime->format('Y-m-d H:i:s'),
-                    'aws_instance_type'         => $mongoInstance->aws_instance_type,
-                    'aws_storage_gb'            => $mongoInstance->aws_storage_gb,
-                    'aws_image_id'              => $mongoInstance->aws_image_id
+                    'aws_instance_type'         => $aboutInstance->aws_instance_type,
+                    'aws_storage_gb'            => $aboutInstance->aws_storage_gb,
+                    'aws_image_id'              => $aboutInstance->aws_image_id
                 ]);
 
                 if ($awsStatus === BotInstance::STATUS_RUNNING) {

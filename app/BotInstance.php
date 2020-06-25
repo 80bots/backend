@@ -5,11 +5,10 @@ namespace App;
 use App\Helpers\InstanceHelper;
 use App\Helpers\QueryHelper;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Jenssegers\Mongodb\Eloquent\HybridRelations;
 
 class BotInstance extends BaseModel
 {
-    use SoftDeletes, HybridRelations;
+    use SoftDeletes;
 
     const STATUS_PENDING    = 'pending';
     const STATUS_TERMINATED = 'terminated';
@@ -149,9 +148,9 @@ class BotInstance extends BaseModel
         return $this->aws_status !== self::STATUS_TERMINATED;
     }
 
-    public function mongodb()
+    public function about()
     {
-        return $this->hasOne(MongoInstance::class, 'instance_id','id');
+        return $this->hasOne(AboutInstance::class, 'instance_id','id');
     }
 
     public function details()
