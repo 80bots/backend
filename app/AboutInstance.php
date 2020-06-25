@@ -2,13 +2,9 @@
 
 namespace App;
 
-use Jenssegers\Mongodb\Eloquent\Model as Eloquent;
-
-class MongoInstance extends Eloquent
+class AboutInstance extends BaseModel
 {
-    protected $connection = 'mongodb';
-
-    protected $collection = 'instances';
+    protected $table = 'about_instances';
 
     protected $fillable = [
         'instance_id',
@@ -20,7 +16,9 @@ class MongoInstance extends Eloquent
         'aws_instance_type',
         'aws_storage_gb',
         'aws_image_id',
-        'params'
+        'params',
+        'aws_custom_script',
+        'aws_custom_package_json'
     ];
 
     public function instance()

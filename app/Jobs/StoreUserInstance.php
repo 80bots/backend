@@ -7,7 +7,7 @@ use App\BotInstance;
 use App\BotInstancesDetails;
 use App\Events\InstanceLaunched;
 use App\Helpers\InstanceHelper;
-use App\MongoInstance;
+use App\AboutInstance;
 use App\Services\Aws;
 use App\User;
 use GuzzleHttp\Exception\GuzzleException;
@@ -163,7 +163,7 @@ class StoreUserInstance implements ShouldQueue
                     ]);
 
                     //
-                    $this->addInstanceInfoToMongoDb();
+                    $this->addInstanceInfo();
 
                     if ($awsStatus === BotInstance::STATUS_RUNNING) {
                         $this->instance->setAwsStatusRunning();
@@ -219,29 +219,31 @@ class StoreUserInstance implements ShouldQueue
     /**
      * @return void
      */
-    private function addInstanceInfoToMongoDb()
+    private function addInstanceInfo()
     {
         try {
 
-            Log::debug("Start addInstanceInfoToMongoDb");
+            Log::debug("Start addInstanceInfo");
 
             $details = $this->instanceDetail->only('aws_instance_type', 'aws_storage_gb', 'aws_image_id');
-
+            $parameters = json_encode($this->params);
             $data = array_merge([
-                'instance_id'       => $this->instance->id,
-                'tag_name'          => $this->instance->tag_name,
-                'tag_user_email'    => $this->instance->tag_user_email,
-                'bot_path'          => $this->bot->path,
-                'bot_name'          => $this->bot->name,
-                'params'            => $this->params,
-                'aws_region'        => $this->instance->region->code,
+                'instance_id'               => $this->instance->id,
+                'tag_name'                  => $this->instance->tag_name,
+                'tag_user_email'            => $this->instance->tag_user_email,
+                'bot_path'                  => $this->bot->path,
+                'bot_name'                  => $this->bot->name,
+                'params'                    => $parameters,
+                'aws_region'                => $this->instance->region->code,
+                'aws_custom_script'         => $this->bot->aws_custom_script,
+                'aws_custom_package_json'   => $this->bot->aws_custom_package_json,
             ], $details);
 
             Log::debug(print_r($data, true));
 
-            MongoInstance::create($data);
+            AboutInstance::create($data);
 
-            Log::debug("Completed addInstanceInfoToMongoDb");
+            Log::debug("Completed addInstanceInfo");
 
         } catch (Throwable $throwable) {
             Log::error($throwable->getMessage());

@@ -6,7 +6,7 @@ use App\AwsSetting;
 use App\Bot;
 use App\BotInstance;
 use App\Helpers\GeneratorID;
-use App\MongoInstance;
+use App\AboutInstance;
 use App\User;
 use Aws\CommandPool;
 use Aws\Ec2\Ec2Client;
@@ -607,23 +607,27 @@ class Aws
     }
 
     /**
-     * @param MongoInstance $instance
+     * @param AboutInstance $instance
      * @param string $keyPairName
      * @param string $securityGroupName
      * @return Result
      */
-    public function restoreInstance(MongoInstance $instance, string $keyPairName, string $securityGroupName): Result
+    public function restoreInstance(AboutInstance $instance, string $keyPairName, string $securityGroupName): Result
     {
         if (empty($this->ec2)) {
             $this->ec2Connection($instance->aws_region);
         }
 
+        $script = $instance->aws_custom_script ?? '';
+        $package = $instance->aws_custom_package_json ?? '{}';
+        $instance_params = json_decode(''.$instance->params, true);
+
         $params = array_merge([
             'userEmail' => $instance->tag_user_email ?? '',
             'instanceId' => $instance->instance_id ?? '',
-        ], $instance->params);
+        ], $instance_params);
 
-        $userData = $this->createUserData($params, $instance->bot_path);
+        $userData = $this->createUserData($instance->bot_path, $params, $script, $package);
 
         $tags = [
             [
@@ -1368,11 +1372,13 @@ HERESHELL;
     }
 
     /**
-     * @param array $params
      * @param string $path
+     * @param array $params
+     * @param $script
+     * @param $package
      * @return string
      */
-    private function createUserData(array $params, string $path): string
+    private function createUserData(string $path, array $params, $script, $package): string
     {
         if (!empty($params)) {
 
@@ -1384,7 +1390,7 @@ HERESHELL;
                 ];
             }
 
-            return base64_encode("#!/bin/bash\n{$this->startupScript(json_encode($formattedParams), $path ?? '')}");
+            return base64_encode("#!/bin/bash\n{$this->startupScript($path ?? '', json_encode($formattedParams), $script, $package)}");
         }
         return '';
     }
