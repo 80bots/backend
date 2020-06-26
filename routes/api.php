@@ -66,10 +66,11 @@ Route::group(['middleware' => ['auth:api', 'api.sentry', 'api.instance']], funct
     ]);
 });
 
+// Admin
 Route::group([
     'prefix' => 'admin',
     'namespace' => 'Admin',
-    'middleware' => ['auth:api', 'api.admin'],
+    'middleware' => ['auth:api'],
     'as' => 'admin.'
 ], function () {
 
