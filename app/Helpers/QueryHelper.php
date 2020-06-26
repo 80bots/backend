@@ -124,28 +124,4 @@ class QueryHelper
 
         return $query;
     }
-
-    /**
-     * @param Builder $query
-     * @param array $sort
-     * @param string $order
-     * @return Builder
-     */
-    public static function orderUser(Builder $query, array $sort, string $order): Builder
-    {
-        switch ($sort['entity']) {
-            case self::ENTITY_USER:
-                $query->orderBy("{$sort['field']}", $order);
-                break;
-            case self::ENTITY_ROLE:
-                $query->leftJoin('roles', function ($join) {
-                    $join->on('users.role_id', '=', 'roles.id');
-                })
-                    ->orderBy("roles.{$sort['field']}", $order)
-                    ->select('users.*');
-                break;
-        }
-
-        return $query;
-    }
 }

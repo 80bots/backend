@@ -19,14 +19,6 @@ Route::group(['middleware' => ['auth:api', 'api.sentry', 'api.instance']], funct
 
     Route::get('/auth/login', 'CheckController@apiCheckLogin')->name('check');
 
-    Route::group(['prefix' => 'user', 'as' => 'user.'], function () {
-        Route::get('/profile', 'UserController@show')->name('profile');
-        Route::put('/profile', 'UserController@update')->name('update.profile');
-        Route::get('/timezone', 'UserController@getTimezones')->name('timezones');
-        Route::post('/profile/timezone', 'UserController@updateTimezone')->name('profile.timezone');
-        Route::post('/feedback', 'UserController@feedback')->name('feedback');
-    });
-
     // User bots
     Route::group(['prefix' => 'bots', 'as' => 'bots.'], function () {
         Route::get('/', 'BotController@index')->name('running');
@@ -103,9 +95,34 @@ Route::group([
 
     Route::resources([
         'aws' => 'AwsSettingController',
-        'user' => 'UserController',
         'bots' => 'BotController',
         'schedule' => 'ScheduleInstanceController',
         'session' => 'InstanceSessionController'
     ]);
+});
+
+// Updated
+Route::group([
+    'namespace' => 'Admin',
+    'middleware' => ['auth:api'],
+    'as' => 'user.'
+], function () {
+
+});
+
+//
+Route::group([
+    'middleware' => ['auth:api'],
+    'prefix' => 'user',
+    'as' => 'user.'
+], function () {
+
+    Route::get('/', 'UserController@index')->name('index');
+    Route::put('/{user}', 'UserController@updateStatus')->name('update.status');
+    Route::get('/profile', 'UserController@show')->name('profile');
+    Route::put('/profile', 'UserController@update')->name('update.profile');
+    Route::get('/timezone', 'UserController@getTimezones')->name('timezones');
+    Route::post('/profile/timezone', 'UserController@updateTimezone')->name('profile.timezone');
+    Route::post('/feedback', 'UserController@feedback')->name('feedback');
+
 });

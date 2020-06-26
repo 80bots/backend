@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources\Admin;
+namespace App\Http\Resources\User;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
@@ -12,7 +12,7 @@ class UserCollection extends ResourceCollection
      *
      * @var string
      */
-    public $collects = \App\Http\Resources\Admin\UserResource::class;
+    public $collects = \App\Http\Resources\User\UsersResource::class;
 
     /**
      * Transform the resource collection into an array.
