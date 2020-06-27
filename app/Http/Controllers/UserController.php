@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\QueryHelper;
 use App\Http\Resources\User\UserCollection;
 use App\Http\Resources\User\UsersResource;
 use App\Http\Resources\User\TimezoneCollection;

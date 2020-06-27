@@ -43,17 +43,13 @@ Route::group(['middleware' => ['auth:api', 'api.sentry', 'api.instance']], funct
     });
 
     // User schedules
-    Route::group(['prefix' => 'schedules', 'as' => 'schedules.'], function () {
-        Route::put('/status', 'ScheduleController@changeSchedulingStatus')->name('update.status');
-        Route::delete('/details/delete', 'ScheduleController@deleteSchedulerDetails')->name('details.delete');
-    });
+
 
     Route::group(['prefix' => 'platform', 'as' => 'platform.'], function () {
         Route::get('/types', 'PlatformController@getInstanceTypes');
     });
 
     Route::resources([
-        'schedule' => 'ScheduleController',
         'platform' => 'PlatformController'
     ]);
 });
@@ -96,33 +92,31 @@ Route::group([
     Route::resources([
         'aws' => 'AwsSettingController',
         'bots' => 'BotController',
-        'schedule' => 'ScheduleInstanceController',
         'session' => 'InstanceSessionController'
     ]);
-});
-
-// Updated
-Route::group([
-    'namespace' => 'Admin',
-    'middleware' => ['auth:api'],
-    'as' => 'user.'
-], function () {
-
 });
 
 //
 Route::group([
     'middleware' => ['auth:api'],
-    'prefix' => 'user',
-    'as' => 'user.'
 ], function () {
 
-    Route::get('/', 'UserController@index')->name('index');
-    Route::put('/{user}', 'UserController@updateStatus')->name('update.status');
-    Route::get('/profile', 'UserController@show')->name('profile');
-    Route::put('/profile', 'UserController@update')->name('update.profile');
-    Route::get('/timezone', 'UserController@getTimezones')->name('timezones');
-    Route::post('/profile/timezone', 'UserController@updateTimezone')->name('profile.timezone');
-    Route::post('/feedback', 'UserController@feedback')->name('feedback');
+    Route::group(['prefix' => 'user', 'as' => 'user.'], function () {
+        Route::get('/', 'UserController@index')->name('index');
+        Route::put('/{user}', 'UserController@updateStatus')->name('update.status');
+        Route::get('/profile', 'UserController@show')->name('profile');
+        Route::put('/profile', 'UserController@update')->name('update.profile');
+        Route::get('/timezone', 'UserController@getTimezones')->name('timezones');
+        Route::post('/profile/timezone', 'UserController@updateTimezone')->name('profile.timezone');
+        Route::post('/feedback', 'UserController@feedback')->name('feedback');
+    });
 
+    Route::group(['prefix' => 'schedules', 'as' => 'schedules.'], function () {
+        Route::put('/status', 'ScheduleController@changeSchedulingStatus')->name('update.status');
+        Route::delete('/details/delete', 'ScheduleController@deleteSchedulerDetails')->name('details.delete');
+    });
+
+    Route::resources([
+        'schedule' => 'ScheduleController',
+    ]);
 });
