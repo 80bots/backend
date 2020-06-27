@@ -1,10 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers;
 
 use App\AwsSetting;
-use App\Http\Controllers\AppController;
-use App\Http\Resources\Admin\AwsSettingResource;
+use App\Http\Resources\AwsSettingResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 

@@ -2,22 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::get('ping', 'AppController@ping');
-
-Route::get('password/show', 'AppController@apiEmpty')->name('password.reset');
 //Route::get('user', 'AppController@apiEmpty')->name('login');
 
-// Authentication Routes. Auth::routes() is not used to not provide unneeded routes
-Route::group(['prefix' => 'auth', 'as' => 'auth.', 'namespace' => 'Auth'], function () {
-    Route::post('login', 'LoginController@apiLogin')->name('login');
-    Route::post('register', 'RegisterController@apiRegister')->name('register');
-    Route::post('password/email', 'ForgotPasswordController@sendResetLinkEmail')->name('password.email');
-    Route::post('password/reset', 'ResetPasswordController@reset')->name('password.reset');
-});
-
 Route::group(['middleware' => ['auth:api', 'api.sentry', 'api.instance']], function () {
-
-    Route::get('/auth/login', 'CheckController@apiCheckLogin')->name('check');
 
     // User bots
     Route::group(['prefix' => 'bots', 'as' => 'bots.'], function () {
@@ -41,17 +28,6 @@ Route::group(['middleware' => ['auth:api', 'api.sentry', 'api.instance']], funct
         Route::get('/{instance_id}/objects/{id}', 'FileSystemController@getS3Object');
 
     });
-
-    // User schedules
-
-
-    Route::group(['prefix' => 'platform', 'as' => 'platform.'], function () {
-        Route::get('/types', 'PlatformController@getInstanceTypes');
-    });
-
-    Route::resources([
-        'platform' => 'PlatformController'
-    ]);
 });
 
 // Admin
@@ -61,11 +37,6 @@ Route::group([
     'middleware' => ['auth:api'],
     'as' => 'admin.'
 ], function () {
-
-    Route::group(['prefix' => 'aws', 'as' => 'aws.'], function () {
-        Route::get('/', 'AwsSettingController@index')->name('aws');
-        Route::put('/{setting}', 'AwsSettingController@update')->name('update.settings');
-    });
 
     Route::group(['prefix' => 'bots', 'as' => 'bots.'], function () {
         Route::get('/running', 'BotInstanceController@index')->name('running');
@@ -90,15 +61,29 @@ Route::group([
     });
 
     Route::resources([
-        'aws' => 'AwsSettingController',
         'bots' => 'BotController',
     ]);
 });
 
-// new routes
+// Updated routes
+
+Route::get('ping', 'AppController@ping');
+
+Route::get('password/show', 'AppController@apiEmpty')->name('password.reset');
+
+// Authentication Routes. Auth::routes() is not used to not provide unneeded routes
+Route::group(['prefix' => 'auth', 'as' => 'auth.', 'namespace' => 'Auth'], function () {
+    Route::post('login', 'LoginController@apiLogin')->name('login');
+    Route::post('register', 'RegisterController@apiRegister')->name('register');
+    Route::post('password/email', 'ForgotPasswordController@sendResetLinkEmail')->name('password.email');
+    Route::post('password/reset', 'ResetPasswordController@reset')->name('password.reset');
+});
+
 Route::group([
-    'middleware' => ['auth:api'],
+    'middleware' => ['auth:api', 'api.sentry', 'api.instance']
 ], function () {
+
+    Route::get('/auth/login', 'CheckController@apiCheckLogin')->name('check');
 
     Route::group(['prefix' => 'user', 'as' => 'user.'], function () {
         Route::get('/profile', 'UserController@show')->name('profile');
@@ -113,9 +98,19 @@ Route::group([
         Route::delete('/details/delete', 'ScheduleController@deleteSchedulerDetails')->name('details.delete');
     });
 
+    Route::group(['prefix' => 'platform', 'as' => 'platform.'], function () {
+        Route::get('/types', 'PlatformController@getInstanceTypes');
+    });
+
+    Route::group(['prefix' => 'aws', 'as' => 'aws.'], function () {
+        Route::get('/', 'AwsSettingController@index')->name('aws');
+        Route::put('/{setting}', 'AwsSettingController@update')->name('update.settings');
+    });
+
     Route::resources([
         'user'      => 'UserController',
         'schedule'  => 'ScheduleController',
-        'session'   => 'InstanceSessionController'
+        'session'   => 'InstanceSessionController',
+        'platform'  => 'PlatformController',
     ]);
 });
