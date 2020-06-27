@@ -92,18 +92,15 @@ Route::group([
     Route::resources([
         'aws' => 'AwsSettingController',
         'bots' => 'BotController',
-        'session' => 'InstanceSessionController'
     ]);
 });
 
-//
+// new routes
 Route::group([
     'middleware' => ['auth:api'],
 ], function () {
 
     Route::group(['prefix' => 'user', 'as' => 'user.'], function () {
-        Route::get('/', 'UserController@index')->name('index');
-        Route::put('/{user}', 'UserController@updateStatus')->name('update.status');
         Route::get('/profile', 'UserController@show')->name('profile');
         Route::put('/profile', 'UserController@update')->name('update.profile');
         Route::get('/timezone', 'UserController@getTimezones')->name('timezones');
@@ -117,6 +114,8 @@ Route::group([
     });
 
     Route::resources([
-        'schedule' => 'ScheduleController',
+        'user'      => 'UserController',
+        'schedule'  => 'ScheduleController',
+        'session'   => 'InstanceSessionController'
     ]);
 });
