@@ -1,74 +1,74 @@
 <?php
+
 return [
-    'dashboard' => [
-        'title' => 'title',
-        'logged_in' => 'You are logged in!',
-        'welcome' => 'Welcome, User',
-    ],
-    'profile' => [
-        'title' => 'Profile',
-        'subtitle' => 'User Profile',
-        'email' => 'Email',
-        'credit_used' => 'Credit Used',
-        'credit_remaining' => 'Credit Remaining',
-        'active_plan' => 'Active Plan',
-        'my_timezone' => 'My Timezone',
-        'timezone' => 'Timezone',
-        'select_timezone' => 'Select Timezone',
-        'update_timezone_success' => 'Timezone update was successful',
-        'update_timezone_error' => 'Timezone update failed',
-    ],
     'bots' => [
-        'title' => 'Bots List',
-        'all' => 'All Bots',
-        'process_in_queue' => 'Process in queue',
-        'running' => [
-            'title' => 'My Bots'
-        ],
-        'sessions' => [
-            'title' => 'Bots Sessions',
-            'user' => 'User',
-            'instance_id' => 'Instance ID',
-            'type' => 'Type',
-            'date_time' => 'Date & Time'
-        ]
+        'title' => 'All Bots',
+        'create_title' => 'Bots Create',
+        'edit_title' => 'Bots Edit',
+        'view_title' => 'Bots View',
+        'bots_list' => 'Bots Listing',
+        'list' => 'List',
+        'add_bot' => 'Add Bot',
+        'update_bot' => 'Update Bot',
+        'platform' => 'Platform',
+        'placeholder' => 'Placeholder',
+        'view_bot' => 'View Bot',
+        'error_create' => 'Error creating bot',
+        'success_create' => 'Bot Added Successfully',
+        'success_update' => 'Bot update successfully',
+        'success_delete' => 'Bot delete Successfully',
+        'not_found' => 'Bot not found',
+        'not_updated' => 'Bot can not updated successfully',
+        'not_deleted' => 'Bot can not deleted successfully',
     ],
     'instances' => [
-        'not_updated' => '',
-        'not_found' => '',
+        'success_sync' => 'Instances sync was successfully',
+        'error_sync' => 'Instances sync failed',
+        'key_pair_not_found' => 'File is unavailable as the current instance was removed',
+        'not_found' => 'Instance Not Found',
+        'not_updated' => ''
     ],
-    'subscription' => [
-        'title' => 'Subscription Plans',
-        'button' => 'Select',
-        'credits' => [
-            'singular' => 'Credit',
-            'plural' => 'Credits'
-        ],
-        'card' => [
-            'name' => 'Name',
-            'number' => 'Credit Card Number',
-            'expiry_month' => 'Expiry Month',
-            'expiry_year' => 'Expiry Year',
-            'cvv' => 'CVV'
-        ]
+    'regions' => [
+        'not_found' => 'Region not found',
+        'update_success' => 'AMI for a region was successfully installed',
+        'update_error' => 'Cannot update AMI at this moment',
+        'success_sync'  => 'Regions synchronization was successfully performed',
+        'error_sync'  => 'Regions synchronization failed'
     ],
     'scheduling' => [
-        'list' => 'Scheduling List',
-        'view_title' => 'Bots View',
-        'view_bot' => 'View Bot',
-        'create_scheduler' => 'Create Scheduler For',
-        'status_success' => '',
-        'status_error' => '',
-        'success_create' => '',
-        'error_create' => '',
-        'not_found' => 'Scheduling not found',
-        'not_deleted' => 'Scheduling can not deleted successfully',
-        'not_update' => '',
+        'title' => 'Scheduling List',
+        'not_found' => 'No scheduling found!',
+        'all_scheduling' => 'All scheduling',
+        'my_scheduling' => 'My scheduling',
+        'user' => 'User',
+        'instance_id' => 'Instance Id',
+        'bot_name' => 'Bot Name',
+        'status' => 'Status',
+        'details' => 'Details',
+        'actions' => 'Actions',
+        'not_updated' => '',
+        'not_deleted' => '',
     ],
-    'server_error' => 'Server error',
-    'error' => 'Error',
-    'parameters_incorrect' => 'Passed parameters are incorrect',
-    'delete_error' => '',
-    'delete_success' => '',
+    'users' => [
+        'title' => 'Users',
+        'name' => 'Name',
+        'email' => 'Email',
+        'register_date' => 'Register Date',
+        'status' => 'Status',
+        'action' => 'Action',
+        'list_all' => 'List Of All Instances',
+    ],
+    'dashboard' => [
+        'title' => 'Dashboard',
+    ],
+    'posts' => [
+        'not_found' => 'Not found',
+    ],
     'not_found' => 'Not found',
+    'active' => 'Active',
+    'inactive' => 'Inactive',
+    'server_error' => 'Server error',
+    'delete_error' => '',
+    'parameters_incorrect' => 'Passed parameters are incorrect',
+    'access_denied' => 'Access Denied',
 ];

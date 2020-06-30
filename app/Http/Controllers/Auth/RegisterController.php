@@ -75,7 +75,6 @@ class RegisterController extends Controller
             'password'              => bcrypt($data['password']),
             'timezone_id'           => $timezone->id ?? null,
             'verification_token'    => Str::random(16),
-            'role_id'               => Role::getUserRole()->id ?? null,
         ]);
 
         if (! empty($user)) {

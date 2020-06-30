@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\DB;
 class QueryHelper
 {
     const ENTITY_USER                   = 'ENTITY_USER';
-    const ENTITY_ROLE                   = 'ENTITY_ROLE';
     const ENTITY_BOT_INSTANCES          = 'ENTITY_BOT_INSTANCES';
     const ENTITY_BOT_INSTANCES_UPTIME   = 'ENTITY_BOT_INSTANCES_UPTIME';
     const ENTITY_BOT_INSTANCES_DETAILS  = 'ENTITY_BOT_INSTANCES_DETAILS';

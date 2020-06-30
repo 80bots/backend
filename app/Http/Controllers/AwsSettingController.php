@@ -38,6 +38,6 @@ class AwsSettingController extends AppController
             return $this->success((new AwsSettingResource($settings))->toArray($request));
         }
 
-        return $this->notFound(__('admin.not_found'), __('admin.not_found'));
+        return $this->notFound(__('user.not_found'), __('user.not_found'));
     }
 }

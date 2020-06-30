@@ -50,7 +50,7 @@ class UserController extends AppController
             return $this->success($response);
 
         } catch (Throwable $throwable) {
-            return $this->error(__('admin.server_error'), $throwable->getMessage());
+            return $this->error(__('user.server_error'), $throwable->getMessage());
         }
     }
 

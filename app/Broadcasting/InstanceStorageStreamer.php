@@ -13,7 +13,6 @@ class InstanceStorageStreamer
      */
     public function __construct()
     {
-        //
     }
 
     /**

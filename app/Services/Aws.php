@@ -487,7 +487,6 @@ class Aws
         $userIp = "{$ip}/32";
 
         $userPorts = config('aws.ports.access_user');
-        $adminPorts = config('aws.ports.access_admin');
 
         $ipPermissions = [];
 
@@ -498,17 +497,6 @@ class Aws
                 'ToPort' => $port,
                 'IpRanges' => [
                     ['CidrIp' => $userIp]
-                ],
-            ]);
-        }
-
-        foreach ($adminPorts as $adminPort) {
-            array_push($ipPermissions, [
-                'IpProtocol' => 'tcp',
-                'FromPort' => $adminPort,
-                'ToPort' => $adminPort,
-                'IpRanges' => [
-                    ['CidrIp' => '0.0.0.0/0'] // TODO: add admin IP
                 ],
             ]);
         }
