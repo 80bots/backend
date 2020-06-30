@@ -90,7 +90,7 @@ class BotController extends AppController
             ]);
 
         } catch (Throwable $throwable){
-            return $this->error(__('admin.server_error'), $throwable->getMessage());
+            return $this->error(__('user.server_error'), $throwable->getMessage());
         }
     }
 
@@ -130,7 +130,7 @@ class BotController extends AppController
             ]);
 
             if (empty($bot)) {
-                return $this->error(__('admin.server_error'), __('admin.bots.error_create'));
+                return $this->error(__('user.server_error'), __('user.bots.error_create'));
             }
 
             $this->addTagsToBot($bot, $request->input('tags'));
@@ -138,10 +138,10 @@ class BotController extends AppController
 
             return $this->success([
                 'id' => $bot->id ?? null
-            ], __('admin.bots.success_create'));
+            ], __('user.bots.success_create'));
 
         } catch(Throwable $throwable) {
-            return $this->error(__('admin.server_error'), $throwable->getMessage());
+            return $this->error(__('user.server_error'), $throwable->getMessage());
         }
     }
 
@@ -158,13 +158,13 @@ class BotController extends AppController
             $bot = Bot::find($id);
 
             if (empty($bot)) {
-                return $this->notFound(__('admin.not_found'), __('admin.bots.not_found'));
+                return $this->notFound(__('user.not_found'), __('user.bots.not_found'));
             }
 
             return new BotResource($bot);
 
         } catch (Throwable $throwable){
-            return $this->error(__('admin.server_error'), $throwable->getMessage());
+            return $this->error(__('user.server_error'), $throwable->getMessage());
         }
     }
 
@@ -180,7 +180,7 @@ class BotController extends AppController
             $bot = Bot::find($id);
 
             if (empty($bot)) {
-                return $this->notFound(__('admin.not_found'), __('admin.bots.not_found'));
+                return $this->notFound(__('user.not_found'), __('user.bots.not_found'));
             }
 
             $platforms  = (new PlatformCollection(Platform::get()))->response()->getData();
@@ -194,7 +194,7 @@ class BotController extends AppController
             ]);
 
         } catch (Throwable $throwable){
-            return $this->error(__('admin.server_error'), $throwable->getMessage());
+            return $this->error(__('user.server_error'), $throwable->getMessage());
         }
     }
 
@@ -212,7 +212,7 @@ class BotController extends AppController
             $bot = Bot::find($id);
 
             if (empty($bot)) {
-                return $this->notFound(__('admin.not_found'), __('admin.bots.not_found'));
+                return $this->notFound(__('user.not_found'), __('user.bots.not_found'));
             }
 
             $active     = Bot::STATUS_ACTIVE;
@@ -235,8 +235,11 @@ class BotController extends AppController
 
                 $name = $request['update.name'];
 
-                $updateData['path'] = Str::slug($name, '_') . '.custom.js';
-                $updateData['parameters'] =  $parameters = $this->extractParamsFromScript($updateData['aws_custom_script']);
+                if(! empty($request['update.aws_custom_script'])) {
+                    $updateData['path'] = Str::slug($name, '_') . '.custom.js';
+                    $updateData['parameters'] =  $parameters = $this->extractParamsFromScript($updateData['aws_custom_script']);
+                }
+
                 $bot->fill($updateData);
 
                 if ($bot->save()) {
@@ -247,7 +250,7 @@ class BotController extends AppController
             }
 
         } catch (Throwable $throwable){
-            return $this->error(__('admin.server_error'), $throwable->getMessage());
+            return $this->error(__('user.server_error'), $throwable->getMessage());
         }
     }
 
@@ -264,17 +267,17 @@ class BotController extends AppController
             $bot = Bot::find($id);
 
             if (empty($bot)) {
-                return $this->notFound(__('admin.not_found'), __('admin.bots.not_found'));
+                return $this->notFound(__('user.not_found'), __('user.bots.not_found'));
             }
 
             if ($bot->delete()) {
-                return $this->success(null, __('admin.bots.success_delete'));
+                return $this->success(null, __('user.bots.success_delete'));
             }
 
-            return $this->error(__('admin.error'), __('admin.bots.not_deleted'));
+            return $this->error(__('user.error'), __('user.bots.not_deleted'));
 
         } catch (Throwable $throwable){
-            return $this->error(__('admin.server_error'), $throwable->getMessage());
+            return $this->error(__('user.server_error'), $throwable->getMessage());
         }
     }
 
@@ -292,7 +295,7 @@ class BotController extends AppController
 
         $platforms = $platforms->hasBots($this->limit, $platformId)->paginate(5);
 
-        return view('admin.bots.list', compact('platforms'));
+        return view('user.bots.list', compact('platforms'));
     }
 
     /**
@@ -310,7 +313,7 @@ class BotController extends AppController
             session()->flash('error', 'Instance Not Found');
         }
 
-        return view('admin.instance.my-bots', compact('userInstances', 'bots'));
+        return view('user.instance.my-bots', compact('userInstances', 'bots'));
     }
 
     /**
@@ -360,9 +363,9 @@ class BotController extends AppController
     {
         try {
             dispatch(new SyncLocalBots($request->user()));
-            return $this->success([], __('admin.instances.success_sync'));
+            return $this->success([], __('user.instances.success_sync'));
         } catch (Throwable $throwable) {
-            return $this->error(__('admin.server_error'), $throwable->getMessage());
+            return $this->error(__('user.server_error'), $throwable->getMessage());
         }
     }
 

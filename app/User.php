@@ -5,7 +5,6 @@ namespace App;
 use App\Helpers\QueryHelper;
 use App\Notifications\SaasVerifyEmail;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -22,14 +21,7 @@ class User extends Authenticatable
     const STATUS_ACTIVE     = 'active';
     const STATUS_INACTIVE   = 'inactive';
 
-    const ROLE_NAME_USER    = 'User';
-    const ROLE_NAME_ADMIN   = 'Admin';
-
     const ORDER_FIELDS      = [
-        'role' => [
-            'entity'    => QueryHelper::ENTITY_ROLE,
-            'field'     => 'name'
-        ],
         'name' => [
             'entity'    => QueryHelper::ENTITY_USER,
             'field'     => 'name'
@@ -58,7 +50,6 @@ class User extends Authenticatable
         'email',
         'visitor',
         'password',
-        'role_id',
         'timezone_id',
         'region_id',
         'verification_token',
@@ -117,13 +108,6 @@ class User extends Authenticatable
         })->get();
     }
 
-    /**
-     * @return BelongsTo
-     */
-    public function role()
-    {
-        return $this->belongsTo(Role::class);
-    }
 
     /**
      * @return BelongsTo
@@ -150,60 +134,6 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if User has a Role associated.
-     *
-     * @param string $name The role to check.
-     *
-     * @return bool
-     */
-    public function hasRole(string $name): bool
-    {
-        return $this->role()->pluck('name')->first() === $name;
-    }
-
-    /**
-     * Return users with user role
-     * @param $query
-     * @return array
-     */
-    public function scopeOnlyUsers($query)
-    {
-        return $query->whereHas('role', function (Builder $query) {
-            $query->where('name', '=', self::ROLE_NAME_USER);
-        });
-    }
-
-    /**
-     * Return users with admin role
-     * @param $query
-     * @return array
-     */
-    public function scopeOnlyAdmins($query)
-    {
-        return $query->whereHas('role', function (Builder $query) {
-            $query->where('name', '=', self::ROLE_NAME_ADMIN);
-        });
-    }
-
-    /**
-     * Check whether user has admin role
-     * @return bool
-     */
-    public function isAdmin(): bool
-    {
-        return $this->role()->pluck('name')->first() === self::ROLE_NAME_ADMIN;
-    }
-
-    /**
-     * Check whether user has user role
-     * @return bool
-     */
-    public function isUser(): bool
-    {
-        return $this->role()->pluck('name')->first() === self::ROLE_NAME_USER;
-    }
-
-    /**
      * Send the email verification notification.
      *
      * @param $token
@@ -221,8 +151,7 @@ class User extends Authenticatable
      * @return bool
      */
     public function hasAccessToInstance ($aws_instance_id) {
-        return $this->isAdmin() ||
-            $this
+        return $this
                 ->instances()
                 ->withTrashed()
                 ->whereAwsInstanceId($aws_instance_id)

@@ -43,7 +43,6 @@ class StoreS3Objects implements ShouldQueue
         $this->key          = $key;
     }
 
-
     /**
      * Execute the job.
      *
@@ -53,10 +52,6 @@ class StoreS3Objects implements ShouldQueue
     {
         $query = BotInstance::where('id', '=', $this->instance_id)
             ->orWhere('aws_instance_id', '=', $this->instance_id);
-
-        if (! $this->user->isAdmin()) {
-            $query->where('user_id', '=', $this->user->id);
-        }
 
         $instance = $query->first();
 
