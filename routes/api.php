@@ -2,60 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 
-//Route::get('user', 'AppController@apiEmpty')->name('login');
-
-Route::group(['middleware' => ['auth:api', 'api.sentry', 'api.instance']], function () {
-
-    // User bots
-    Route::group(['prefix' => 'bots', 'as' => 'bots.'], function () {
-        Route::put('/running/status', 'BotInstanceController@changeStatus')->name('running.update.status');
-    });
-
-    Route::group(['prefix' => 'instances', 'as' => 'instances.', 'namespace' => 'Common\Instances'], function () {
-        Route::get('/', 'InstanceController@index')->name('running');
-        Route::get('/regions', 'InstanceController@regions')->name('regions');
-        Route::post('/launch', 'ManageController@launchInstances')->name('launch');
-        Route::post('/restore', 'ManageController@restoreInstance')->name('restore');
-        Route::post('/copy', 'ManageController@copy')->name('copy');
-
-        Route::put('/{id}', 'InstanceController@update')->name('update');
-        Route::get('/{id}', 'InstanceController@show')->name('get');
-        Route::post('/{id}/report', 'InstanceController@reportIssue')->name('report');
-
-        Route::get('/{instance_id}/objects', 'FileSystemController@getS3Objects');
-        Route::get('/{instance_id}/objects/{id}', 'FileSystemController@getS3Object');
-
-    });
-});
-
-// Admin
-Route::group([
-    'prefix' => 'admin',
-    'namespace' => 'Admin',
-    'middleware' => ['auth:api'],
-    'as' => 'admin.'
-], function () {
-
-    Route::group([
-        'prefix' => 'instances',
-        'as' => 'instances.',
-    ], function () {
-        Route::get('/regions', 'BotInstanceController@regions')->name('regions');
-        Route::put('/regions/{id}', 'BotInstanceController@updateRegion')->name('update.region');
-        Route::get('/regions/sync', 'BotInstanceController@syncRegions')->name('sync.regions');
-        Route::get('/amis', 'BotInstanceController@amis')->name('amis');
-        Route::get('/pem', 'BotInstanceController@getInstancePemFile')->name('pem');
-        Route::post('/launch', 'BotInstanceController@launchInstances')->name('launch');
-        Route::post('/restore', 'BotInstanceController@restoreInstance')->name('restore');
-        Route::get('/sync', 'BotInstanceController@syncInstances')->name('sync');
-        Route::put('/{id}', 'BotInstanceController@update')->name('update');
-        Route::get('/{id}', 'BotInstanceController@show')->name('show');
-    });
-
-});
-
-// Updated routes
-
 Route::get('ping', 'AppController@ping');
 
 Route::get('password/show', 'AppController@apiEmpty')->name('password.reset');
@@ -97,9 +43,35 @@ Route::group([
     });
 
     Route::group(['prefix' => 'bots', 'as' => 'bots.'], function () {
-        Route::get('/running', 'BotInstanceController@index')->name('running');
+        Route::get('/', 'BotController@index')->name('running');
         Route::get('/tags', 'BotController@getTags')->name('tags');
         Route::get('/sync', 'BotController@syncBots')->name('sync');
+
+        Route::group([
+            'prefix' => 'instances',
+            'as' => 'instances.',
+        ], function () {
+            Route::get('/pem', 'BotInstanceController@getInstancePemFile')->name('pem');
+            Route::get('/sync', 'BotInstanceController@syncInstances')->name('sync');
+            Route::get('/regions', 'BotInstanceController@regions')->name('regions');
+            Route::put('/regions/{id}', 'BotInstanceController@updateRegion')->name('update.region');
+        });
+    });
+
+    Route::group(['prefix' => 'instances', 'as' => 'instances.', 'namespace' => 'Common\Instances'], function () {
+        Route::get('/', 'InstanceController@index')->name('running');
+        Route::get('/regions', 'InstanceController@regions')->name('regions');
+        Route::post('/launch', 'ManageController@launchInstances')->name('launch');
+        Route::post('/restore', 'ManageController@restoreInstance')->name('restore');
+        Route::post('/copy', 'ManageController@copy')->name('copy');
+
+        Route::put('/{id}', 'InstanceController@update')->name('update');
+        Route::get('/{id}', 'InstanceController@show')->name('get');
+        Route::post('/{id}/report', 'InstanceController@reportIssue')->name('report');
+
+        Route::get('/{instance_id}/objects', 'FileSystemController@getS3Objects');
+        Route::get('/{instance_id}/objects/{id}', 'FileSystemController@getS3Object');
+
     });
 
     Route::resources([

@@ -105,7 +105,7 @@ class InstanceController extends AppController
         $user = Auth::user();
         $resource = BotInstance::withTrashed()->find($id);
         if(!$resource) {
-            $this->error('Not found', __('admin.bots.not_found'));
+            $this->error('Not found', __('user.bots.not_found'));
         }
 
         $ip = $this->getIp();
@@ -249,10 +249,6 @@ class InstanceController extends AppController
 
         if ($withTrashed) {
             $query->withTrashed();
-        }
-
-        if (!Auth::user()->isAdmin()) {
-            $query->where('user_id', '=', Auth::id());
         }
 
         return $query->first();

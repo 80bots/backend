@@ -2,68 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\AwsAmi;
 use App\AwsRegion;
-use App\BotInstance;
-use App\Events\InstanceStatusUpdated;
-use App\Helpers\ApiResponse;
+use App\Helpers\InstanceHelper;
 use App\Helpers\QueryHelper;
-use App\Http\Resources\BotInstanceCollection;
-use App\Http\Resources\BotInstanceResource;
+use App\Http\Controllers\Common\Instances\InstanceController;
+use App\Http\Resources\Admin\RegionCollection;
+use App\Http\Resources\Admin\RegionResource;
+use App\Jobs\SyncBotInstances;
 use App\Services\Aws;
-use App\Services\GitHub;
+use App\BotInstance;
+use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Response;
 use Throwable;
 
-class BotInstanceController extends AppController
+class BotInstanceController extends InstanceController
 {
     const PAGINATE = 1;
-
-    /**
-     * Display a listing of the resource.
-     * @param Request $request
-     * @return JsonResponse
-     */
-    public function index(Request $request)
-    {
-        try {
-            $limit = $request->query('limit') ?? self::PAGINATE;
-            $search = $request->input('search');
-            $sort   = $request->input('sort');
-            $order  = $request->input('order') ?? 'asc';
-
-            $resource = BotInstance::withTrashed()->findByUserId(Auth::id());
-
-            if (! empty($search)) {
-                $resource->where('bot_instances.tag_name', 'like', "%{$search}%")
-                    ->orWhere('bot_instances.tag_user_email', 'like', "%{$search}%");
-            }
-
-            $resource->when($sort, function ($query, $sort) use ($order) {
-                if (! empty(BotInstance::ORDER_FIELDS[$sort])) {
-                    return QueryHelper::orderBotInstance($query, BotInstance::ORDER_FIELDS[$sort], $order);
-                } else {
-                    return $query->orderBy('aws_status', 'asc')->orderBy('start_time', 'desc');
-                }
-            }, function ($query) {
-                return $query->orderBy('aws_status', 'asc')->orderBy('start_time', 'desc');
-            });
-
-            $bots   = (new BotInstanceCollection($resource->paginate($limit)))->response()->getData();
-            $meta   = $bots->meta ?? null;
-
-            $response = [
-                'data'  => $bots->data ?? [],
-                'total' => $meta->total ?? 0
-            ];
-
-            return $this->success($response);
-
-        } catch (Throwable $throwable) {
-            return $this->error(__('keywords.server_error'), $throwable->getMessage());
-        }
-    }
 
     /**
      * @param Request $request
@@ -71,170 +28,170 @@ class BotInstanceController extends AppController
      */
     public function regions(Request $request)
     {
-        $regions = AwsRegion::onlyEc2()->pluck('id', 'name')->toArray();
-        $result = [];
+        $limit  = $request->query('limit') ?? self::PAGINATE;
+        $search = $request->input('search');
+        $sort   = $request->input('sort');
+        $order  = $request->input('order') ?? 'asc';
 
-        foreach ($regions as $name => $id) {
-            array_push($result, ['name' => $name, 'id' => $id]);
+        $resource = AwsRegion::onlyEc2();
+
+        if (! empty($search)) {
+            $resource->where('code', 'like', "%{$search}%")
+                ->orWhere('name', 'like', "%{$search}%");
         }
 
-        return $this->success([
-            'data' => $result
-        ]);
+        $resource->when($sort, function ($query, $sort) use ($order) {
+            if (! empty(AwsRegion::ORDER_FIELDS[$sort])) {
+                return QueryHelper::orderAwsRegion($query, AwsRegion::ORDER_FIELDS[$sort], $order);
+            } else {
+                return $query->orderBy('name', 'asc');
+            }
+        }, function ($query) {
+            return $query->orderBy('name', 'asc');
+        });
+
+        $regions    = (new RegionCollection($resource->paginate($limit)))->response()->getData();
+        $meta       = $regions->meta ?? null;
+
+        $response = [
+            'data'  => $regions->data ?? [],
+            'total' => $meta->total ?? 0
+        ];
+
+        return $this->success($response);
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return JsonResponse
-     */
-    public function create()
-    {
-        return $this->success();
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param Request $request
-     * @return JsonResponse
-     */
-    public function store(Request $request)
-    {
-        return $this->success();
-    }
-
-    /**
-     * Display the specified resource.
-     *
      * @param Request $request
      * @param $id
      * @return JsonResponse
      */
-    public function show(Request $request, $id) {
-        $resource = BotInstance::withTrashed()->find($id);
-        if(!empty($resource)) {
-            return $this->success((new BotInstanceResource($resource))->toArray($request));
-        } else {
-            return $this->error('Not found', __('admin.bots.not_found'));
-        }
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param BotInstance $userInstances
-     * @return JsonResponse
-     */
-    public function edit(BotInstance $userInstances)
-    {
-        return $this->success();
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param Request $request
-     * @param $id
-     * @return JsonResponse
-     */
-    public function update(Request $request, $id)
+    public function updateRegion(Request $request, $id)
     {
         try {
+            $update = $request->input('update');
+            $region = AwsRegion::find($id);
 
-            $instance = BotInstance::where([
-                ['id', '=', $id],
-                ['user_id', '=', Auth::id()]
-            ])->first();
-
-            if (empty($instance)) {
-                return $this->notFound(__('user.not_found'), __('user.instances.not_found'));
+            if (empty($region)) {
+                return $this->notFound(__('user.not_found'), __('user.regions.not_found'));
             }
 
-            $running    = BotInstance::STATUS_RUNNING;
-            $stopped    = BotInstance::STATUS_STOPPED;
-            $terminated = BotInstance::STATUS_TERMINATED;
+            $update = $region->update([
+                'default_image_id' => $update['default_ami'] ?? ''
+            ]);
 
-            if (! empty($request->input('update'))) {
-                $updateData = $request->validate([
-                    'update.status' => "in:{$running},{$stopped},{$terminated}"
-                ]);
-
-                foreach ($updateData['update'] as $key => $value) {
-                    switch ($key) {
-                        case 'status':
-
-                            if ($this->changeStatus($value, $id)) {
-
-                                $instance = new BotInstanceResource(BotInstance::withTrashed()
-                                    ->where('id', '=', $id)->first());
-
-                                broadcast(new InstanceStatusUpdated(Auth::id()));
-
-                                return $this->success($instance->toArray($request));
-                            } else {
-                                return $this->error(__('user.server_error'), __('user.instances.not_updated'));
-                            }
-
-                            break;
-                        default:
-                            return $this->error(__('user.server_error'), __('user.instances.not_updated'));
-                            break;
-                    }
-                }
-
+            if ($update) {
+                return $this->success(
+                    (new RegionResource($region))->toArray($request),
+                    __('user.regions.update_success')
+                );
+            } else {
+                return $this->error(__('user.error'), __('user.regions.update_error'));
             }
-
-            return $this->error(__('user.server_error'), __('user.instances.not_updated'));
-
-        } catch (Throwable $throwable){
+        } catch (Throwable $throwable) {
             return $this->error(__('user.server_error'), $throwable->getMessage());
         }
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
-     * @param  BotInstance  $userInstances
+     * @param Request $request
      * @return JsonResponse
      */
-    public function destroy(BotInstance $userInstances)
+    public function amis(Request $request)
     {
-        return $this->success();
+        $region = $request->query('region');
+
+        if (! empty($region)) {
+            $amis = AwsAmi::where('aws_region_id', '=', $region)
+                ->pluck('name', 'image_id')
+                ->toArray();
+            $result = [];
+            foreach ($amis as $id => $name) {
+                $result[] = ['id' => $id, 'name' => $name];
+            }
+            return $this->success([
+                'data' => $result
+            ]);
+        }
+
+        return $this->error(__('user.server_error'), __('user.parameters_incorrect'));
     }
 
     /**
      * @param Request $request
-     * @param $id
-     * @return ApiResponse
+     * @return JsonResponse
      */
-    public function reportIssue(Request $request, $id)
+    public function syncInstances(Request $request)
     {
-        $instance = BotInstance::withTrashed()->find($id);
-        $aws = new Aws();
-        if(!empty($instance)) {
-            $resource = new BotInstanceResource($instance);
-            if(!empty($request->screenshots)) {
-                $instanceId = $resource->toArray($request)['instance_id'];
-                $botName = $resource->toArray($request)['bot_name'];
-                $urls = $aws->uploadScreenshots($instanceId, $request->screenshots);
+        try {
+            dispatch(new SyncBotInstances($request->user()));
+            return $this->success([], __('user.instances.success_sync'));
+        } catch (Throwable $throwable) {
+            return $this->error(__('user.server_error'), $throwable->getMessage());
+        }
+    }
 
-                $body = "User: {$request->user()->email}\nInstance ID: {$instanceId}\nBot Name: {$botName}
-                \nMessage: {$request->message}";
+    /**
+     * @param Request $request
+     * @return ResponseFactory|JsonResponse|Response
+     */
+    public function getInstancePemFile(Request $request)
+    {
+        $instance = $request->query('instance');
 
-                if(!empty($urls)) {
-                    $screenshots = '';
-                    for($i = 0; $i < count($urls); $i++) {
-                        $screenshots = $screenshots . " ![{$request->screenshots[$i]->getClientOriginalName()}]({$urls[$i]})";
+        if (! empty($instance)) {
+
+            try {
+
+                $instance = BotInstance::find($instance);
+
+                if (! empty($instance)) {
+
+                    $details    = $instance->details()->latest()->first();
+                    $aws        = new Aws;
+
+                    $describeInstancesResponse = $aws->describeInstances(
+                        [$instance->aws_instance_id ?? null],
+                        $instance->region->code
+                    );
+
+                    if (! $describeInstancesResponse->hasKey('Reservations') || InstanceHelper::checkTerminatedStatus($describeInstancesResponse)) {
+
+                        $instance->setAwsStatusTerminated();
+
+                        if ($instance->region->created_instances > 0) {
+                            $instance->region->decrement('created_instances');
+                        }
+
+                        InstanceHelper::cleanUpTerminatedInstanceData($aws, $details);
+
+                        return $this->error(__('user.error'), __('user.instances.key_pair_not_found'));
+
+                    } else {
+
+                        $aws->s3Connection();
+
+                        $result = $aws->getKeyPairObject($details->aws_pem_file_path ?? '');
+
+                        if (empty($result)) {
+                            return $this->error(__('user.error'), __('user.access_denied'));
+                        }
+
+                        $body = $result->get('Body');
+
+                        if (! empty($body)) {
+                            return response($body)->header('Content-Type', $result->get('ContentType'));
+                        }
+
+                        return $this->error(__('user.error'), __('user.error'));
                     }
-                    $body = $body . "\n{$screenshots}";
                 }
 
-                GitHub::createIssue('Issue Report', $body);
+            } catch (Throwable $throwable){
+                return $this->error(__('user.server_error'), $throwable->getMessage());
             }
-            return $this->success([]);
-        } else {
-            return $this->error('Not found', __('admin.bots.not_found'));
         }
+
+        return $this->error(__('user.error'), __('user.parameters_incorrect'));
     }
 }

@@ -113,11 +113,10 @@ class FileSystemController extends InstanceController
 
     private function applyBlackList($resource)
     {
-        $user = Auth::user();
-        if($user->isAdmin()) {
+        if(Auth::check()) {
             return $resource;
         }
-        $resource->where('path', 'not like', '%logs/cloud-init-output%');
+        $resource->where('path', 'not like');
         return $resource;
     }
 }
