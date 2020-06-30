@@ -8,7 +8,7 @@ use App\Helpers\QueryHelper;
 use App\Http\Resources\BotCollection;
 use App\Http\Resources\BotResource;
 use App\Http\Resources\PlatformCollection;
-use App\Http\Resources\Admin\TagCollection;
+use App\Http\Resources\TagCollection;
 use App\Jobs\SyncLocalBots;
 use App\Platform;
 use App\Services\BotParser;

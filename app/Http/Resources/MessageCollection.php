@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources\Admin;
+namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
@@ -12,7 +12,7 @@ class MessageCollection extends ResourceCollection
      *
      * @var string
      */
-    public $collects = \App\Http\Resources\Admin\MessageResource::class;
+    public $collects = \App\Http\Resources\MessageResource::class;
 
     /**
      * Transform the resource collection into an array.

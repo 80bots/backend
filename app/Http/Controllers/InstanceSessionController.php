@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\Admin\InstanceSessionsHistoryCollection;
+use App\Http\Resources\InstanceSessionsHistoryCollection;
 use App\InstanceSessionsHistory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
