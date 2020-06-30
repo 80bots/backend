@@ -56,8 +56,6 @@ class Kernel extends HttpKernel
      * @var array
      */
     protected $routeMiddleware = [
-        'admin' => \App\Http\Middleware\CheckAdmin::class,
-        'api.admin' => \App\Http\Middleware\ApiCheckAdmin::class,
         'api.instance' => \App\Http\Middleware\ApiInstanceSecurityGroup::class,
         'api.sentry' => \App\Http\Middleware\SentryContext::class,
         'auth' => \App\Http\Middleware\Authenticate::class,
@@ -68,7 +66,6 @@ class Kernel extends HttpKernel
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
-        'user' => \App\Http\Middleware\CheckUser::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class
     ];
 
