@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Auth;
 use App\Helpers\MailHelper;
 use App\Helpers\UserHelper;
 use App\Http\Controllers\Controller;
-use App\Role;
 use App\Timezone;
 use App\User;
 use Illuminate\Auth\Events\Registered;

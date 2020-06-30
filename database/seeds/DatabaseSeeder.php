@@ -12,7 +12,6 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
          $this->call([
-             RolesTableseeder::class,
              AwsRegionsTableSeeder::class,
              TimezonesTableSeeder::class,
              AddUserSeeder::class,
