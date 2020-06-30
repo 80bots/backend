@@ -8,8 +8,6 @@ Route::group(['middleware' => ['auth:api', 'api.sentry', 'api.instance']], funct
 
     // User bots
     Route::group(['prefix' => 'bots', 'as' => 'bots.'], function () {
-        Route::get('/', 'BotController@index')->name('running');
-//        Route::get('/running', 'BotInstanceController@index')->name('running');
         Route::put('/running/status', 'BotInstanceController@changeStatus')->name('running.update.status');
     });
 
@@ -38,12 +36,6 @@ Route::group([
     'as' => 'admin.'
 ], function () {
 
-    Route::group(['prefix' => 'bots', 'as' => 'bots.'], function () {
-        Route::get('/running', 'BotInstanceController@index')->name('running');
-        Route::get('/tags', 'BotController@getTags')->name('tags');
-        Route::get('/sync', 'BotController@syncBots')->name('sync');
-    });
-
     Route::group([
         'prefix' => 'instances',
         'as' => 'instances.',
@@ -60,9 +52,6 @@ Route::group([
         Route::get('/{id}', 'BotInstanceController@show')->name('show');
     });
 
-    Route::resources([
-        'bots' => 'BotController',
-    ]);
 });
 
 // Updated routes
@@ -107,10 +96,17 @@ Route::group([
         Route::put('/{setting}', 'AwsSettingController@update')->name('update.settings');
     });
 
+    Route::group(['prefix' => 'bots', 'as' => 'bots.'], function () {
+        Route::get('/running', 'BotInstanceController@index')->name('running');
+        Route::get('/tags', 'BotController@getTags')->name('tags');
+        Route::get('/sync', 'BotController@syncBots')->name('sync');
+    });
+
     Route::resources([
         'user'      => 'UserController',
         'schedule'  => 'ScheduleController',
         'session'   => 'InstanceSessionController',
         'platform'  => 'PlatformController',
+        'bots'      => 'BotController',
     ]);
 });
