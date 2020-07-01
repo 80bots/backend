@@ -40,6 +40,15 @@ class AddUserSeeder extends Seeder
                 'password'      => bcrypt($user['passwords']),
                 'status'        => 'active',
             ]);
+
+            DB::table('users')->insert([
+                'timezone_id'   => $timezone,
+                'region_id'     => $region,
+                'name'          => "$name",
+                'email'         => "$emailParts[0]+admin@$emailParts[1]",
+                'password'      => bcrypt($user['passwords']),
+                'status'        => 'active',
+            ]);
         }
     }
 }

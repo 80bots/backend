@@ -26,6 +26,7 @@ Route::group([
         Route::get('/timezone', 'UserController@getTimezones')->name('timezones');
         Route::post('/profile/timezone', 'UserController@updateTimezone')->name('profile.timezone');
         Route::post('/feedback', 'UserController@feedback')->name('feedback');
+        Route::put('/status/{id}', 'UserController@updateStatus')->name('update.status');
     });
 
     Route::group(['prefix' => 'schedules', 'as' => 'schedules.'], function () {
