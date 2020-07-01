@@ -93,14 +93,6 @@ class User extends Authenticatable
         return $this->hasMany(Visitor::class);
     }
 
-    /**
-     * @return HasMany
-     */
-    public function orders()
-    {
-        return $this->hasMany(Order::class);
-    }
-
     public function scopeRunningInstances($query)
     {
         return $query->whereHas('instances', function (Builder $query) {

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\AwsRegion;
-use App\Helpers\CommonHelper;
 use App\User;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Builder;

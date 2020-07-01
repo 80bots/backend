@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Bot;
 use App\BotInstance;
-use App\Helpers\QueryHelper;
 use App\Http\Resources\BotCollection;
 use App\Http\Resources\BotResource;
 use App\Http\Resources\PlatformCollection;
@@ -107,15 +106,21 @@ class BotController extends AppController
             $content = $request['aws_custom_script'];
             $path = $request['path'];
             $name = $request['name'];
+            $platform = $request['platform'];
 
             $parameters = $this->extractParamsFromScript($content);
 
             if(!$path) {
                 $path = Str::slug($name, '_') . '.custom.js';
             }
+
+            if($platform){
+                $platform = $this->getPlatformId($request->input('platform'));
+            }
+
             $bot = Bot::create([
                 'name'                      => $name,
-                'platform_id'               => $this->getPlatformId($request->input('platform')),
+                'platform_id'               => $platform,
                 'description'               => $request->input('description'),
                 'aws_ami_image_id'          => $request->input('aws_ami_image_id'),
                 'aws_ami_name'              => $request->input('aws_ami_name'),
@@ -225,7 +230,7 @@ class BotController extends AppController
                     'update.aws_custom_script'          => 'string|nullable',
                     'update.aws_custom_package_json'    => 'json|nullable',
                     'update.description'                => 'string|nullable',
-                    'update.platform'                   => 'string',
+                    'update.platform'                   => 'string|nullable',
                     'update.tags'                       => 'array',
                     'update.type'                       => 'in:private,public',
                     'update.users'                      => 'array',
@@ -238,6 +243,10 @@ class BotController extends AppController
                 if(! empty($request['update.aws_custom_script'])) {
                     $updateData['path'] = Str::slug($name, '_') . '.custom.js';
                     $updateData['parameters'] =  $parameters = $this->extractParamsFromScript($updateData['aws_custom_script']);
+                }
+
+                if(! empty($request['update.platform'])){
+                    $updateData['platform_id'] = $this->getPlatformId($updateData['platform']);
                 }
 
                 $bot->fill($updateData);
@@ -304,7 +313,6 @@ class BotController extends AppController
     public function mineBots()
     {
         $userId = Auth::id();
-        $instancesId = [];
 
         $userInstances = BotInstance::findByUserId($userId)->get();
         $bots = Bot::all();

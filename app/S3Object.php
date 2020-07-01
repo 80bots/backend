@@ -2,8 +2,8 @@
 
 namespace App;
 
-use App\Helpers\InstanceHelper;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Storage;
 
 class S3Object extends BaseModel
@@ -77,7 +77,7 @@ class S3Object extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function instance()
     {
