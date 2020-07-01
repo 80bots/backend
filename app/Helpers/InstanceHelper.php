@@ -314,7 +314,6 @@ class InstanceHelper
      */
     public static function cleanUpTerminatedInstanceData(Aws $aws, $details): void
     {
-        //
         if (preg_match('/^keys\/(.*)\.pem$/s', $details->aws_pem_file_path ?? '', $matches)) {
             $aws->deleteKeyPair($matches[1]);
             $aws->deleteS3KeyPair($details->aws_pem_file_path ?? '');
@@ -464,6 +463,11 @@ class InstanceHelper
         return $query->first();
     }
 
+    /**
+     * @param $status
+     * @param $id
+     * @return bool
+     */
     public static function changeInstanceStatus($status, $id): bool
     {
         $instance = self::getInstanceWithCheckUser($id);

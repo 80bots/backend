@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Bot;
 use App\BotInstance;
-use App\Helpers\QueryHelper;
 use App\Http\Resources\BotCollection;
 use App\Http\Resources\BotResource;
 use App\Http\Resources\PlatformCollection;
@@ -304,7 +303,6 @@ class BotController extends AppController
     public function mineBots()
     {
         $userId = Auth::id();
-        $instancesId = [];
 
         $userInstances = BotInstance::findByUserId($userId)->get();
         $bots = Bot::all();

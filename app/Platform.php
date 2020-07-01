@@ -18,10 +18,11 @@ class Platform extends BaseModel
     ];
 
     /**
+     * @param $query
      * @param null $limit
      * @param null $platformId
      * @param bool $status
-     * @return Platform|\Illuminate\Database\Eloquent\Builder
+     * @return Platform|Builder
      */
     public function scopeHasBots($query, $limit = null, $platformId = null, $status = false)
     {

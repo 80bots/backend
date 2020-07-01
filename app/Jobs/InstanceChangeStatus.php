@@ -119,6 +119,10 @@ class InstanceChangeStatus implements ShouldQueue
         return null;
     }
 
+    /**
+     * @param Aws $aws
+     * @return void
+     */
     private function setStatusRunning(Aws $aws)
     {
         $current = $this->getCurrentInstanceStatus($aws);
@@ -172,6 +176,7 @@ class InstanceChangeStatus implements ShouldQueue
 
     /**
      * @param Aws $aws
+     * @throws Exception
      */
     private function setStatusStopped(Aws $aws)
     {

@@ -67,50 +67,18 @@ class FileSystemController extends InstanceController
         return $this->success($response);
     }
 
+    /**
+     * @return JsonResponse
+     */
     public function getS3Object ()
     {
         return $this->success();
     }
 
-    // TODO: re-work
-    private function updateObjectsThumbnailLink(Request $request, BotInstance $instance): void
-    {
-        $page   = $request->query('page') ?? 1;
-        $limit  = $request->query('limit') ?? 10;
-        $skip   = $page === 1 ? 0 : ($page-1)*$limit;
-        $type   = $request->query('type') ?? '';
-
-        $folders = $instance->s3Objects()
-            ->whereNull('parent_id')
-            ->skip($skip)
-            ->take($limit)
-            ->get();
-
-        if ($folders->isNotEmpty()) {
-
-            $thumbnailPath = InstanceHelper::getThumbnailPathByTypeS3Object($type);
-
-            $credentials = [
-                'key'    => config('aws.iam.access_key'),
-                'secret' => config('aws.iam.secret_key')
-            ];
-
-            $aws = new Aws;
-            $aws->s3Connection('', $credentials);
-
-            foreach ($folders as $folder) {
-                $prefix = "{$instance->baseS3Dir}/{$folder->name}/{$thumbnailPath}";
-                $folder->update([
-                    'link' => $aws->getPresignedLink($aws->getS3Bucket(), $prefix)
-                ]);
-            }
-
-            unset($thumbnailPath, $credentials, $aws);
-        }
-
-        unset($page, $limit, $skip, $folders);
-    }
-
+    /**
+     * @param $resource
+     * @return resource
+     */
     private function applyBlackList($resource)
     {
         if(Auth::check()) {

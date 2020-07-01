@@ -29,7 +29,7 @@ class GeneratorID
      *
      * @var int
      */
-    private static $lastPushTime = 0;
+    private static int $lastPushTime = 0;
 
     /**
      * We generate 72-bits of randomness which get turned into 12 characters and appended to the
@@ -39,7 +39,7 @@ class GeneratorID
      *
      * @var array
      */
-    private static $lastRandChars = [];
+    private static array $lastRandChars = [];
 
     /**
      * @return string

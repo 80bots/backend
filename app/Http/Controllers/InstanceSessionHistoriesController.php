@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\InstanceSessionsHistory;
-use Auth;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 

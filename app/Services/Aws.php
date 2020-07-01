@@ -14,21 +14,15 @@ use Aws\Exception\AwsException;
 use Aws\Iam\Exception\IamException;
 use Aws\Iam\IamClient;
 use Aws\Result;
-use Aws\ResultInterface;
 use Aws\S3\Exception\S3Exception;
 use Aws\S3\S3Client;
 use Aws\S3\Transfer;
 use Aws\ServiceQuotas\ServiceQuotasClient;
-use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
-use Nubs\RandomNameGenerator\All as AllRandomName;
-use Nubs\RandomNameGenerator\Alliteration as AlliterationName;
-use Nubs\RandomNameGenerator\Vgng as VideoGameName;
 use Throwable;
-use function Zend\Diactoros\normalizeUploadedFiles;
 
 class Aws
 {
