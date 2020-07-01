@@ -1,18 +1,18 @@
 <?php
 
-namespace App\Http\Resources\Admin;
+namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
-class InstanceSessionsHistoryCollection extends ResourceCollection
+class TagCollection extends ResourceCollection
 {
     /**
      * The resource that this resource collects.
      *
      * @var string
      */
-    public $collects = \App\Http\Resources\Admin\InstanceSessionsHistoryResource::class;
+    public $collects = \App\Http\Resources\TagResource::class;
 
     /**
      * Transform the resource collection into an array.

@@ -19,8 +19,8 @@ class LoginController extends Controller
      */
     protected function redirectTo()
     {
-        if(Auth::user()->isAdmin()) {
-            return route('admin.bots.index');
+        if(Auth::check()) {
+            return route('user.bots.index');
         } else {
             return route('bots.index');
         }

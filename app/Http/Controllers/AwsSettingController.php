@@ -1,10 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers;
 
 use App\AwsSetting;
-use App\Http\Controllers\AppController;
-use App\Http\Resources\Admin\AwsSettingResource;
+use App\Http\Resources\AwsSettingResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -39,6 +38,6 @@ class AwsSettingController extends AppController
             return $this->success((new AwsSettingResource($settings))->toArray($request));
         }
 
-        return $this->notFound(__('admin.not_found'), __('admin.not_found'));
+        return $this->notFound(__('user.not_found'), __('user.not_found'));
     }
 }

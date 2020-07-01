@@ -19,7 +19,6 @@ class InstanceSessionHistoriesController extends Controller
     {
         return view('user.bots.running.session-history', [
             'sessions' => InstanceSessionsHistory::with('schedulingInstance.userInstances')->paginate(5),
-            'admin' => false
         ]);
     }
 }

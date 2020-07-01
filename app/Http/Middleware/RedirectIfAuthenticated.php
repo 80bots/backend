@@ -27,19 +27,9 @@ class RedirectIfAuthenticated
 
     private function redirectTo()
     {
-        // User role
-        $role = Auth::user()->role->name;
-        // Check user role
-        switch ($role) {
-            case 'Admin':
-                return route('admin.bots.index');
-                break;
-            case 'User':
-                return '/bots';
-                break;
-            default:
-                return '/login';
-                break;
+        if(Auth::check()){
+            return '/bots';
         }
+        return '/login';
     }
 }

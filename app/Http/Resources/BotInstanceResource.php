@@ -39,7 +39,7 @@ class BotInstanceResource extends JsonResource
             'storage_channel'   => "instances.{$this->aws_instance_id}.storage"
         ];
 
-        if (Auth::check() && Auth::user()->isAdmin()) {
+        if (Auth::check()) {
             $data = array_merge($data, [
                 'pem'           => $details->aws_pem_file_path ?? ''
             ]);

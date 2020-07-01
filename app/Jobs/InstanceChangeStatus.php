@@ -121,10 +121,6 @@ class InstanceChangeStatus implements ShouldQueue
 
     private function setStatusRunning(Aws $aws)
     {
-        if ($this->user->isUser()) {
-            broadcast(new InstanceLaunched($this->instance, $this->user));
-        }
-
         $current = $this->getCurrentInstanceStatus($aws);
 
         if ($current === BotInstance::STATUS_STOPPED) {

@@ -25,11 +25,11 @@ Broadcast::channel('bots.{user_id}', function ($user, $user_id) {
 });
 
 Broadcast::channel('instance.{instance_id}.show', function ($user, $instance_id) {
-    return $user->isAdmin() ? true : $user->id === BotInstance::find($instance_id)->user_id;
+    return true;
 });
 
 Broadcast::channel('instance-live', function ($user) {
-    return $user->isAdmin();
+    return true;
 });
 
 // Channel for the client and bot's storage collaboration using Laravel Echo server

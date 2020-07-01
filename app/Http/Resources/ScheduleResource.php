@@ -31,7 +31,7 @@ class ScheduleResource extends JsonResource
             'details'       => InstanceHelper::getSchedulingDetails($this->details ?? null),
         ];
 
-        if (Auth::check() && Auth::user()->isAdmin()) {
+        if (Auth::check()) {
             $data = array_merge($data, [
                 'user' => $this->user->email ?? ''
             ]);

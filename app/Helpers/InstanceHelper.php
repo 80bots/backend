@@ -220,7 +220,6 @@ class InstanceHelper
                 $botInstance->region->decrement('created_instances');
             }
 
-            // TODO: Check whether old status was 'running'
             self::updateUpTime($botInstance, $detail, $currentDate);
         }
 
@@ -447,7 +446,7 @@ class InstanceHelper
     public static function getInstanceWithCheckUser(?string $id, $withTrashed = false): ?BotInstance
     {
         /** @var BotInstance $query */
-        /* @todo refactor? */
+
         $query = BotInstance::where('id', '=', $id)
             ->orWhere('aws_instance_id', '=', $id);
 
@@ -458,7 +457,7 @@ class InstanceHelper
         Log::info('Auth::user() = ' . Auth::user());
         Log::info('Auth::id() = ' . Auth::id());
 
-        if (!is_null(Auth::user()) && !Auth::user()->isAdmin()) {
+        if (!is_null(Auth::user())) {
             $query->where('user_id', '=', Auth::id());
         }
 

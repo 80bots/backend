@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\DB;
 class QueryHelper
 {
     const ENTITY_USER                   = 'ENTITY_USER';
-    const ENTITY_ROLE                   = 'ENTITY_ROLE';
     const ENTITY_BOT_INSTANCES          = 'ENTITY_BOT_INSTANCES';
     const ENTITY_BOT_INSTANCES_UPTIME   = 'ENTITY_BOT_INSTANCES_UPTIME';
     const ENTITY_BOT_INSTANCES_DETAILS  = 'ENTITY_BOT_INSTANCES_DETAILS';
@@ -119,30 +118,6 @@ class QueryHelper
         switch ($sort['entity']) {
             case self::ENTITY_AWS_REGION:
                 $query->orderBy("{$sort['field']}", $order);
-                break;
-        }
-
-        return $query;
-    }
-
-    /**
-     * @param Builder $query
-     * @param array $sort
-     * @param string $order
-     * @return Builder
-     */
-    public static function orderUser(Builder $query, array $sort, string $order): Builder
-    {
-        switch ($sort['entity']) {
-            case self::ENTITY_USER:
-                $query->orderBy("{$sort['field']}", $order);
-                break;
-            case self::ENTITY_ROLE:
-                $query->leftJoin('roles', function ($join) {
-                    $join->on('users.role_id', '=', 'roles.id');
-                })
-                    ->orderBy("roles.{$sort['field']}", $order)
-                    ->select('users.*');
                 break;
         }
 

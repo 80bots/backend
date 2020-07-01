@@ -53,12 +53,9 @@ return [
     ],
     'ports' => [
         'access_user' => [
-            6080
-        ],
-        'access_admin' => [
             6002,
             22
-        ],
+        ]
     ],
     'streamer' => [
         'folder' => 'streamer-data'

@@ -9,6 +9,7 @@ use App\SchedulingInstance;
 use App\SchedulingInstancesDetails;
 use App\BotInstance;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,20 +17,29 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
 
-class ScheduleController extends Controller
+class ScheduleController extends AppController
 {
     const PAGINATE = 1;
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function index(Request $request)
     {
         try {
 
-            $limit = $request->query('limit') ?? self::PAGINATE;
+            $limit  = $request->query('limit') ?? self::PAGINATE;
+            $list   = $request->input('list');
             $search = $request->input('search');
-            $sort = $request->input('sort');
-            $order = $request->input('order') ?? 'asc';
+            $sort   = $request->input('sort');
+            $order  = $request->input('order') ?? 'asc';
 
-            $resource = SchedulingInstance::findByUserId(Auth::id());
+            $resource = SchedulingInstance::query();
+
+            if ($list === 'my') {
+                $resource->findByUserId(Auth::id());
+            }
 
             if (!empty($search)) {
                 $resource->whereHas('instance', function (Builder $query) use ($search) {
@@ -47,11 +57,11 @@ class ScheduleController extends Controller
                 return $query->orderBy('created_at', 'desc');
             });
 
-            $schedules = (new ScheduleCollection($resource->paginate($limit)))->response()->getData();
-            $meta = $schedules->meta ?? null;
+            $instances  = (new ScheduleCollection($resource->paginate($limit)))->response()->getData();
+            $meta       = $instances->meta ?? null;
 
             $response = [
-                'data' => $schedules->data ?? [],
+                'data'  => $instances->data ?? [],
                 'total' => $meta->total ?? 0
             ];
 
@@ -72,16 +82,14 @@ class ScheduleController extends Controller
 
             try {
 
-                $count = SchedulingInstancesDetails::whereHas('schedulingInstance', function (Builder $query) {
-                    $query->where('user_id', '=', Auth::id());
-                })->whereIn('id', $request->input('ids'))->delete();
+                $count = SchedulingInstancesDetails::whereIn('id', $request->input('ids'))->delete();
 
                 if ($count) {
                     return $this->success();
                 }
 
                 return $this->error(__('user.error'), __('user.delete_error'));
-            } catch (Throwable $throwable) {
+            } catch(Throwable $throwable) {
                 return $this->error(__('user.server_error'), $throwable->getMessage());
             }
         }
@@ -90,7 +98,6 @@ class ScheduleController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
      * @param Request $request
      * @return JsonResponse
      */
@@ -113,13 +120,13 @@ class ScheduleController extends Controller
 
             if (empty($schedule)) {
                 $schedule = SchedulingInstance::create([
-                    'user_id' => Auth::id(),
-                    'instance_id' => $instance->id,
+                    'user_id'       => Auth::id(),
+                    'instance_id'   => $instance->id,
                 ]);
-            }
 
-            if ($schedule) {
-                return $this->success();
+                if ($schedule) {
+                    return $this->success();
+                }
             }
 
             return $this->error(__('user.error'), __('user.parameters_incorrect'));
@@ -132,15 +139,15 @@ class ScheduleController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param int $id
-     * @return JsonResponse
+     * @param  int  $id
+     * @return JsonResponse|Response
      */
     public function show($id)
     {
         if (!empty($id)) {
             try {
 
-                $instance = SchedulingInstance::with('userInstance')->where('user_id', '=', Auth::id())
+                $instance = SchedulingInstance::with('userInstance')
                     ->where('id', '=', $id)->first();
 
                 if (!empty($instance)) {
@@ -162,40 +169,28 @@ class ScheduleController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param int $id
-     * @return JsonResponse
-     */
-    public function edit($id)
-    {
-        return $this->success();
-    }
-
-    /**
      * Update the specified resource in storage.
      *
      * @param Request $request
-     * @param int $id
-     * @return JsonResponse
+     * @param  int  $id
+     * @return JsonResponse|Response
      */
     public function update(Request $request, $id)
     {
-        try {
-            $instance = SchedulingInstance::where('user_id', '=', Auth::id())
-                ->where('id', '=', $id)->first();
+        try{
+            $instance = SchedulingInstance::find($id);
 
             if (empty($instance)) {
                 return $this->notFound(__('user.not_found'), __('user.scheduling.not_found'));
             }
 
-            $active = SchedulingInstance::STATUS_ACTIVE;
-            $inactive = SchedulingInstance::STATUS_INACTIVE;
+            $active     = SchedulingInstance::STATUS_ACTIVE;
+            $inactive   = SchedulingInstance::STATUS_INACTIVE;
 
             if (!empty($request->input('update'))) {
                 $updateData = $request->validate([
-                    'update.status' => "in:{$active},{$inactive}",
-                    'update.details' => 'array',
+                    'update.status'     => "in:{$active},{$inactive}",
+                    'update.details'    => 'array',
                 ]);
                 return $this->updateSimpleInfo($request, $updateData, $instance);
             } else {
@@ -207,6 +202,13 @@ class ScheduleController extends Controller
         }
     }
 
+    /**
+     * @param Request $request
+     * @param array $updateData
+     * @param SchedulingInstance $instance
+     * @return JsonResponse
+     * @throws Exception
+     */
     private function updateSimpleInfo(Request $request, array $updateData, SchedulingInstance $instance)
     {
         foreach ($updateData['update'] as $key => $value) {
@@ -230,6 +232,11 @@ class ScheduleController extends Controller
         return $this->error(__('user.error'), __('user.parameters_incorrect'));
     }
 
+    /**
+     * @param Request $request
+     * @param SchedulingInstance $instance
+     * @return JsonResponse
+     */
     private function updateFullInfo(Request $request, SchedulingInstance $instance)
     {
         return $this->error(__('user.error'), __('user.parameters_incorrect'));
@@ -238,15 +245,14 @@ class ScheduleController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param $id
-     * @return JsonResponse
+     * @param  int  $id
+     * @return JsonResponse|Response
      */
     public function destroy($id)
     {
         try {
 
-            $instance = SchedulingInstance::where('user_id', '=', Auth::id())
-                ->where('id', '=', $id)->first();
+            $instance = SchedulingInstance::find($id);
 
             if (empty($instance)) {
                 return $this->notFound(__('user.not_found'), __('user.scheduling.not_found'));
@@ -268,13 +274,12 @@ class ScheduleController extends Controller
      * @param array $details
      * @param string $timezone
      * @return void
+     * @throws Exception
      */
     private function updateOrCreateSchedulingInstancesDetails(SchedulingInstance $instance, array $details, $timezone): void
     {
         // Delete all
-        SchedulingInstancesDetails::whereHas('schedulingInstance', function (Builder $query) {
-            $query->where('user_id', '=', Auth::id());
-        })->where('scheduling_id', '=', $instance->id ?? null)->delete();
+        SchedulingInstancesDetails::where('scheduling_id', '=', $instance->id ?? null)->delete();
 
         /**
          * details[0][type] = stop | start
@@ -298,12 +303,12 @@ class ScheduleController extends Controller
 
             SchedulingInstancesDetails::create([
                 'scheduling_id' => $instance->id ?? null,
-                'day' => $detail['day'] ?? '',
+                'day'           => $detail['day'] ?? '',
                 'selected_time' => $selectedTime->format('h:i A'),
-                'time_zone' => $timezone,
-                'cron_data' => "{$selectedTime->format('D h:i A')} {$timezone}",
+                'time_zone'     => $timezone,
+                'cron_data'     => "{$selectedTime->format('D h:i A')} {$timezone}",
                 'schedule_type' => $type,
-                'status' => SchedulingInstancesDetails::STATUS_ACTIVE
+                'status'        => SchedulingInstancesDetails::STATUS_ACTIVE
             ]);
         }
     }

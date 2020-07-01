@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\AppController;
-use App\Http\Resources\Admin\InstanceSessionsHistoryCollection;
+use App\Http\Resources\InstanceSessionsHistoryCollection;
 use App\InstanceSessionsHistory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -57,7 +56,7 @@ class InstanceSessionController extends AppController
             return $this->success($response);
 
         } catch (Throwable $throwable) {
-            return $this->error(__('admin.server_error'), $throwable->getMessage());
+            return $this->error(__('user.server_error'), $throwable->getMessage());
         }
     }
 }

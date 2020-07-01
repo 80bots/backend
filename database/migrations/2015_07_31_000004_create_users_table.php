@@ -16,7 +16,6 @@ class CreateUsersTable extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedTinyInteger('role_id');
             $table->unsignedInteger('timezone_id')->nullable();
             $table->unsignedInteger('region_id')->nullable();
             $table->string('name')->nullable();
@@ -38,10 +37,6 @@ class CreateUsersTable extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-            $table->foreign('role_id')
-                ->references('id')->on('roles')
-                ->onDelete('cascade')->onUpdate('cascade');
-
             $table->foreign('timezone_id')
                 ->references('id')->on('timezones')
                 ->onDelete('no action')->onUpdate('no action');
@@ -60,7 +55,7 @@ class CreateUsersTable extends Migration
     public function down()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropForeign(['role_id', 'timezone_id', 'region_id']);
+            $table->dropForeign(['timezone_id', 'region_id']);
         });
 
         Schema::dropIfExists('users');

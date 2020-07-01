@@ -2,6 +2,8 @@
 
 namespace App;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
 class AwsAmi extends BaseModel
 {
     const VISIBILITY_PUBLIC     = 'public';
@@ -30,7 +32,7 @@ class AwsAmi extends BaseModel
     ];
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function region()
     {

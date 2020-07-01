@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Auth;
 use App\Helpers\MailHelper;
 use App\Helpers\UserHelper;
 use App\Http\Controllers\Controller;
-use App\Role;
 use App\Timezone;
 use App\User;
 use Illuminate\Auth\Events\Registered;
@@ -76,7 +75,6 @@ class RegisterController extends Controller
             'password'              => bcrypt($data['password']),
             'timezone_id'           => $timezone->id ?? null,
             'verification_token'    => Str::random(16),
-            'role_id'               => Role::getUserRole()->id ?? null,
         ]);
 
         if (! empty($user)) {
