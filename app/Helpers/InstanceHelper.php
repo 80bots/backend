@@ -37,7 +37,8 @@ class InstanceHelper
     public static function isScheduleInstance(SchedulingInstancesDetails $detail, int $currentTime): bool
     {
         try {
-            $tz = CarbonTimeZone::create($detail->time_zone);
+            $currentTimeZone = explode(' ', $detail->time_zone);
+            $tz = CarbonTimeZone::create($currentTimeZone[1]);
             $ct = Carbon::createFromFormat('D h:i A', "{$detail->day} {$detail->selected_time}", $tz);
             return $currentTime === $ct->getTimestamp();
         } catch (Throwable $throwable) {
@@ -62,15 +63,17 @@ class InstanceHelper
 
                 foreach ($scheduler->details as $detail) {
 
+                    $currentTimeZone = explode(' ', $detail->time_zone);
                     $currentTime = Carbon::parse($now->format('D h:i A'))
-                        ->setTimezone($detail->time_zone)
+                        ->setTimezone($currentTimeZone[1])
                         ->getTimestamp();
 
                     if (self::isScheduleInstance($detail, $currentTime)) {
 
                         if (!empty($scheduler->instance->aws_instance_id)) {
 
-                            $tz = CarbonTimeZone::create($detail->time_zone);
+                            $tz = CarbonTimeZone::create($currentTimeZone[1]);
+                            $ct = Carbon::createFromFormat('D h:i A', "{$detail->day} {$detail->selected_time}", $tz);
 
                             array_push($insertHistory, [
                                 'scheduling_instances_id' => $scheduler->id,
@@ -78,7 +81,7 @@ class InstanceHelper
                                 'schedule_type' => $detail->schedule_type,
                                 'cron_data' => $detail->cron_data,
                                 'current_time_zone' => $tz->toRegionName(),
-                                'selected_time' => $detail->selected_time,
+                                'selected_time' => $ct->toDateTimeString(),
                             ]);
 
                             array_push($instancesIds, $scheduler->instance->aws_instance_id);

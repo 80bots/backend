@@ -30,17 +30,16 @@ class InstanceSessionController extends AppController
 
             $resource = InstanceSessionsHistory::query();
 
-            $resource->with(['schedulingInstance.userInstance', 'user']);
+            $resource->with(['schedulingInstance.instance', 'user']);
 
             if (! empty($search)) {
                 $resource->whereHas('user', function (Builder $query) use ($search) {
                     $query->where('email', 'like', "%{$search}%");
-                })->orWhereHas('schedulingInstance.userInstance', function (Builder $query) use ($search) {
+                })->orWhereHas('schedulingInstance.instance', function (Builder $query) use ($search) {
                     $query->where('aws_instance_id', 'like', "%{$search}%");
                 });
             }
 
-            //
             if (! empty($sort)) {
                 $resource->orderBy($sort, $order);
             }
@@ -50,7 +49,7 @@ class InstanceSessionController extends AppController
 
             $response = [
                 'data'  => $histories->data ?? [],
-                'total' => $meta->total ?? 0
+                'total' => $meta->total ?? 0,
             ];
 
             return $this->success($response);

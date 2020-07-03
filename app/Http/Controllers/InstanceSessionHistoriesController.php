@@ -17,7 +17,7 @@ class InstanceSessionHistoriesController extends Controller
     public function index(Request $request)
     {
         return view('user.bots.running.session-history', [
-            'sessions' => InstanceSessionsHistory::with('schedulingInstance.userInstances')->paginate(5),
+            'sessions' => InstanceSessionsHistory::with('schedulingInstance.instance')->paginate(5),
         ]);
     }
 }
