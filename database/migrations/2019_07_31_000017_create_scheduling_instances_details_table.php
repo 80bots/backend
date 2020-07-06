@@ -17,20 +17,17 @@ class CreateSchedulingInstancesDetailsTable extends Migration
         Schema::create('scheduling_instances_details', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('scheduling_id');
+            $table->string('time');
             $table->string('day');
-            $table->string('selected_time');
+            $table->string('week');
+            $table->string('month');
+            $table->string('year');
             $table->string('time_zone');
-            $table->string('cron_data');
 
             $table->enum('schedule_type', [
                 SchedulingInstancesDetails::TYPE_START,
                 SchedulingInstancesDetails::TYPE_STOP
             ])->default(SchedulingInstancesDetails::TYPE_START);
-
-            $table->enum('status', [
-                SchedulingInstancesDetails::STATUS_ACTIVE,
-                SchedulingInstancesDetails::STATUS_INACTIVE
-            ])->default(SchedulingInstancesDetails::STATUS_ACTIVE);
 
             $table->timestamps();
             $table->softDeletes();

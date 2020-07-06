@@ -5,6 +5,8 @@ namespace App\Providers;
 use Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
+use App\Observers\SchedulingDetailsObserver;
+use App\SchedulingInstancesDetails;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -28,5 +30,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         Schema::defaultStringLength(191);
+        SchedulingInstancesDetails::observe(SchedulingDetailsObserver::class);
     }
 }
