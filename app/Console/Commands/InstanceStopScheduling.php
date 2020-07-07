@@ -94,9 +94,9 @@ class InstanceStopScheduling extends Command
 
             if ($result->hasKey('StoppingInstances')) {
 
-                $startInstance = $result->get('StoppingInstances');
+                $stopInstance = $result->get('StoppingInstances');
 
-                foreach ($startInstance as $instanceDetail) {
+                foreach ($stopInstance as $instanceDetail) {
 
                     $currentState   = $instanceDetail['CurrentState'];
                     $instanceId     = $instanceDetail['InstanceId'];

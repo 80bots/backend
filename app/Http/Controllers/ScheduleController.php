@@ -6,7 +6,9 @@ use App\Helpers\QueryHelper;
 use App\Http\Resources\ScheduleCollection;
 use App\Http\Resources\ScheduleResource;
 use App\SchedulingInstance;
+use App\SchedulingInstancesDetails;
 use App\BotInstance;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -68,6 +70,31 @@ class ScheduleController extends AppController
         } catch (Throwable $throwable) {
             return $this->error(__('user.server_error'), $throwable->getMessage());
         }
+    }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function deleteSchedulerDetails(Request $request): JsonResponse
+    {
+        if (!empty($request->input('ids'))) {
+
+            try {
+
+                $count = SchedulingInstancesDetails::whereIn('id', $request->input('ids'))->delete();
+
+                if ($count) {
+                    return $this->success();
+                }
+
+                return $this->error(__('user.error'), __('user.delete_error'));
+            } catch(Throwable $throwable) {
+                return $this->error(__('user.server_error'), $throwable->getMessage());
+            }
+        }
+
+        return $this->error(__('user.error'), __('user.parameters_incorrect'));
     }
 
     /**
@@ -193,6 +220,10 @@ class ScheduleController extends AppController
                     } else {
                         return $this->error(__('user.server_error'), __('user.scheduling.not_updated'));
                     }
+                case 'details':
+                    $this->updateOrCreateSchedulingInstancesDetails($instance, $value,
+                        $request->user()->timezone->value ?? '+00:00');
+                    return $this->success((new ScheduleResource($instance))->toArray($request));
                 default:
                     return $this->error(__('user.server_error'), __('user.scheduling.not_updated'));
             }
@@ -235,6 +266,50 @@ class ScheduleController extends AppController
 
         } catch (Throwable $throwable) {
             return $this->error(__('user.server_error'), $throwable->getMessage());
+        }
+    }
+
+    /**
+     * @param SchedulingInstance $instance
+     * @param array $details
+     * @param string $timezone
+     * @return void
+     * @throws Exception
+     */
+    private function updateOrCreateSchedulingInstancesDetails(SchedulingInstance $instance, array $details, $timezone): void
+    {
+        // Delete all
+        SchedulingInstancesDetails::where('scheduling_id', '=', $instance->id ?? null)->delete();
+
+        /**
+         * details[0][type] = stop | start
+         * details[0][time] = 6:00 PM
+         * details[0][day] = Friday
+         */
+
+        foreach ($details as $detail) {
+
+            switch ($detail['type']) {
+                case SchedulingInstancesDetails::TYPE_START:
+                case SchedulingInstancesDetails::TYPE_STOP:
+                    $type = $detail['type'];
+                    break;
+                default:
+                    $type = SchedulingInstancesDetails::TYPE_STOP;
+                    break;
+            }
+
+            $selectedTime = Carbon::parse("{$detail['day']} {$detail['time']}");
+
+            SchedulingInstancesDetails::create([
+                'scheduling_id' => $instance->id ?? null,
+                'day'           => $detail['day'] ?? '',
+                'selected_time' => $selectedTime->format('h:i A'),
+                'time_zone'     => $timezone,
+                'cron_data'     => "{$selectedTime->format('D h:i A')} {$timezone}",
+                'schedule_type' => $type,
+                'status'        => SchedulingInstancesDetails::STATUS_ACTIVE
+            ]);
         }
     }
 }

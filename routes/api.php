@@ -31,6 +31,7 @@ Route::group([
 
     Route::group(['prefix' => 'schedules', 'as' => 'schedules.'], function () {
         Route::put('/status', 'ScheduleController@changeSchedulingStatus')->name('update.status');
+        Route::delete('/details/delete', 'ScheduleController@deleteSchedulerDetails')->name('details.delete');
     });
 
     Route::group(['prefix' => 'platform', 'as' => 'platform.'], function () {
@@ -75,11 +76,10 @@ Route::group([
     });
 
     Route::resources([
-        'user'              => 'UserController',
-        'schedule'          => 'ScheduleController',
-        'session'           => 'InstanceSessionController',
-        'platform'          => 'PlatformController',
-        'bots'              => 'BotController',
-        'schedule.details'  => 'ScheduleDetailController',
+        'user'      => 'UserController',
+        'schedule'  => 'ScheduleController',
+        'session'   => 'InstanceSessionController',
+        'platform'  => 'PlatformController',
+        'bots'      => 'BotController',
     ]);
 });
