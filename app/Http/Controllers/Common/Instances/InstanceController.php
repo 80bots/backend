@@ -140,13 +140,14 @@ class InstanceController extends AppController
                 foreach ($updateData['update'] as $key => $value) {
                     switch ($key) {
                         case 'status':
+                            $user_id = Auth::id();
 
-                            if (InstanceHelper::changeInstanceStatus($value, $id)) {
+                            if (InstanceHelper::changeInstanceStatus($value, $id, $user_id)) {
 
                                 $instance = new BotInstanceResource(BotInstance::withTrashed()
                                     ->where('id', '=', $id)->first());
 
-                                broadcast(new InstanceStatusUpdated(Auth::id()));
+                                broadcast(new InstanceStatusUpdated($user_id));
 
                                 return $this->success($instance->toArray($request));
                             } else {

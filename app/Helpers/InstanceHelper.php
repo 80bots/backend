@@ -78,13 +78,17 @@ class InstanceHelper
                             array_push($insertHistory, [
                                 'scheduling_instances_id' => $scheduler->id,
                                 'user_id' => $scheduler->user_id,
-                                'schedule_type' => $detail->schedule_type,
+                                'schedule_type' => $detail->status,
                                 'cron_data' => $detail->cron_data,
                                 'current_time_zone' => $tz->toRegionName(),
                                 'selected_time' => $ct->toDateTimeString(),
                             ]);
 
-                            array_push($instancesIds, $scheduler->instance->aws_instance_id);
+                            array_push($instancesIds, [
+                                'instances_id' => $scheduler->instance_id,
+                                'user_id' => $scheduler->user_id,
+                                'status' => $detail->status,
+                            ]);
                         }
                     }
                 }
@@ -115,7 +119,7 @@ class InstanceHelper
                 'day' => $object->day ?? '',
                 'time' => $object->selected_time ? (new Carbon($object->selected_time))->format('H:i') : '',
                 'cron_data' => $object->cron_data ?? '',
-                'type' => $object->schedule_type ?? '',
+                'type' => $object->status ?? '',
                 'status' => $object->status ?? '',
                 'created_at' => $object->created_at->format('Y-m-d H:m:i') ?? '',
             ];
@@ -469,9 +473,10 @@ class InstanceHelper
     /**
      * @param $status
      * @param $id
+     * @param $user_id
      * @return bool
      */
-    public static function changeInstanceStatus($status, $id): bool
+    public static function changeInstanceStatus($status, $id, $user_id): bool
     {
         $instance = self::getInstanceWithCheckUser($id);
 
@@ -489,7 +494,7 @@ class InstanceHelper
             return false;
         }
 
-        $user = User::find(Auth::id());
+        $user = User::find($user_id);
         $aws = new Aws;
 
         $instance->clearPublicIp();
