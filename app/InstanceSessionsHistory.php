@@ -7,8 +7,8 @@ class InstanceSessionsHistory extends BaseModel
     const STATUS_FAILED     = 'failed';
     const STATUS_SUCCEED    = 'succeed';
 
-    const TYPE_START        = 'start';
-    const TYPE_STOP         = 'stop';
+    const STATUS_RUNNING    = 'running';
+    const STATUS_STOPPED    = 'stopped';
 
     protected $table = 'instance_sessions_history';
 

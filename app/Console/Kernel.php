@@ -8,8 +8,7 @@ use App\Console\Commands\CacheRefresh;
 use App\Console\Commands\CalculateInstancesUpTime;
 use App\Console\Commands\CleanUpUnused;
 use App\Console\Commands\EchoServerInit;
-use App\Console\Commands\InstanceStartScheduling;
-use App\Console\Commands\InstanceStopScheduling;
+use App\Console\Commands\InstanceScheduling;
 use App\Console\Commands\InstanceSyncScheduling;
 use App\Console\Commands\RefreshDatabase;
 use App\Console\Commands\SyncDataFolders;
@@ -26,8 +25,7 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         CacheRefresh::class,
-        InstanceStartScheduling::class,
-        InstanceStopScheduling::class,
+        InstanceScheduling::class,
         InstanceSyncScheduling::class,
         CalculateInstancesUpTime::class,
         CleanUpUnused::class,
@@ -49,8 +47,7 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('horizon:snapshot')->everyFiveMinutes();
         $schedule->command('instance:sync')->everyFiveMinutes();
-        $schedule->command('instance:start')->everyMinute();
-        $schedule->command('instance:stop')->everyMinute();
+        $schedule->command('instance:scheduling')->everyMinute();
         $schedule->command('instance:calculate-up-time')->everyTenMinutes();
         $schedule->command('instance:clean')->hourly();
         $schedule->command('aws:sync-amis')->everyThirtyMinutes();
