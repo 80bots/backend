@@ -930,7 +930,7 @@ class Aws
         $scriptDir              = $isCustom ? 'custom' : 'puppeteer';
         $streamerDir            = 'data-streamer';
         $streamerCommand        = "git pull && yarn && yarn build && pm2 start --name \"data-streamer\" yarn -- start";
-        $scriptCommand          = "yarn && mkdir logs && DISPLAY=:1 node {$path} > /dev/null";
+        $scriptCommand          = "yarn && DISPLAY=:1 node {$path} > /dev/null";
 
         $environment = <<<HERESHELL
 USER_NAME="{$user}"

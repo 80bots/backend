@@ -282,20 +282,20 @@ class ScheduleController extends AppController
         SchedulingInstancesDetails::where('scheduling_id', '=', $instance->id ?? null)->delete();
 
         /**
-         * details[0][type] = stop | start
+         * details[0][status] = running | stopped
          * details[0][time] = 6:00 PM
          * details[0][day] = Friday
          */
 
         foreach ($details as $detail) {
 
-            switch ($detail['type']) {
-                case SchedulingInstancesDetails::TYPE_START:
-                case SchedulingInstancesDetails::TYPE_STOP:
-                    $type = $detail['type'];
+            switch ($detail['status']) {
+                case SchedulingInstancesDetails::STATUS_RUNNING:
+                case SchedulingInstancesDetails::STATUS_STOPPED:
+                    $status = $detail['status'];
                     break;
                 default:
-                    $type = SchedulingInstancesDetails::TYPE_STOP;
+                    $status = SchedulingInstancesDetails::STATUS_STOPPED;
                     break;
             }
 
@@ -307,8 +307,7 @@ class ScheduleController extends AppController
                 'selected_time' => $selectedTime->format('h:i A'),
                 'time_zone'     => $timezone,
                 'cron_data'     => "{$selectedTime->format('D h:i A')} {$timezone}",
-                'schedule_type' => $type,
-                'status'        => SchedulingInstancesDetails::STATUS_ACTIVE
+                'status'        => $status,
             ]);
         }
     }

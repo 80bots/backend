@@ -20,8 +20,8 @@ class CreateInstanceSessionsHistoryTable extends Migration
             $table->unsignedInteger('user_id');
 
             $table->enum('schedule_type', [
-                InstanceSessionsHistory::TYPE_START,
-                InstanceSessionsHistory::TYPE_STOP
+                InstanceSessionsHistory::STATUS_RUNNING,
+                InstanceSessionsHistory::STATUS_STOPPED
             ]);
 
             $table->string('selected_time');

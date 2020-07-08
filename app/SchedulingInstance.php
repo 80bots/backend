@@ -53,11 +53,11 @@ class SchedulingInstance extends BaseModel
         return $query->where('instance_id', $id)->with('details');
     }
 
-    public function scopeScheduling($query, $type)
+    public function scopeScheduling($query, $status)
     {
         return $query->where('status', '=', 'active')
-            ->with(['details' => function ($query) use ($type) {
-                $query->where('schedule_type', '=', $type);
+            ->with(['details' => function ($query) use ($status) {
+                $query->where('status', '=', $status);
             }, 'instance']);
     }
 

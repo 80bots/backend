@@ -25,22 +25,19 @@
   3. CleanUpUnused ( instance:clean ) - is launched hourly 
   (Cleans up unused AWS security groups);
 
-  4. InstanceStartScheduling ( instance:start ) is launched per minute 
-  (Runs users' instances, which are specified for a scheduled launch considering the time and time zone chosen by the user); 
+  4. InstanceScheduling ( instance:start ) is launched per minute 
+  (Runs and Stops users' instances, which are specified for a scheduled launch or stop considering the time and time zone chosen by the user);
 
-  5. InstanceStopScheduling ( instance:stop ) is launched per minute 
-  (Stops users' instances, which are specified for a scheduled stop considering the time and time zone chosen by the user);
-
-  6. InstanceSyncScheduling ( instance:sync ) is launched every 5 min: 
+  5. InstanceSyncScheduling ( instance:sync ) is launched every 5 min: 
   - Synchronizes all instances in all regions; 
   - If the user's email is specified in the tags and such instance is missing in DB - we create it;
   - Remove all the instances with no data (if the issue occurred and the instance wasn't created on AWS);
   - Apply Terminated status - if such instance exists in our DB, but was removed on AWS; 
 
-  7. SyncDataFolders ( sync:folders ) is launched per minute 
+  6. SyncDataFolders ( sync:folders ) is launched per minute 
   (Synchronizes the structure of folders, screenshots, logs and JSON files stored on AWS S3 with our DB);
 
-  8. SyncLocalBots ( bots:sync-local ) is launched once a day 
+  7. SyncLocalBots ( bots:sync-local ) is launched once a day 
   (Synchronizes bots list and their parameters using puppeteer GIT repo, which is set up on the project); 
 
 ####The functionality performed in the background ( JOBS ):

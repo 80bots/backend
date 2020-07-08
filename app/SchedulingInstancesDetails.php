@@ -4,11 +4,8 @@ namespace App;
 
 class SchedulingInstancesDetails extends BaseModel
 {
-    const STATUS_ACTIVE     = 'active';
-    const STATUS_INACTIVE   = 'inactive';
-
-    const TYPE_START        = 'start';
-    const TYPE_STOP         = 'stop';
+    const STATUS_RUNNING    = 'running';
+    const STATUS_STOPPED    = 'stopped';
 
     protected $table = 'scheduling_instances_details';
 
@@ -18,7 +15,6 @@ class SchedulingInstancesDetails extends BaseModel
         'selected_time',
         'time_zone',
         'cron_data',
-        'schedule_type',
         'status',
     ];
 
