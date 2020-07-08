@@ -22,15 +22,10 @@ class CreateSchedulingInstancesDetailsTable extends Migration
             $table->string('time_zone');
             $table->string('cron_data');
 
-            $table->enum('schedule_type', [
-                SchedulingInstancesDetails::TYPE_START,
-                SchedulingInstancesDetails::TYPE_STOP
-            ])->default(SchedulingInstancesDetails::TYPE_START);
-
             $table->enum('status', [
-                SchedulingInstancesDetails::STATUS_ACTIVE,
-                SchedulingInstancesDetails::STATUS_INACTIVE
-            ])->default(SchedulingInstancesDetails::STATUS_ACTIVE);
+                SchedulingInstancesDetails::STATUS_RUNNING,
+                SchedulingInstancesDetails::STATUS_STOPPED
+            ])->default(SchedulingInstancesDetails::STATUS_RUNNING);
 
             $table->timestamps();
             $table->softDeletes();
