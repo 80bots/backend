@@ -117,7 +117,8 @@ class InstanceHelper
             return [
                 'id' => $object->id ?? null,
                 'day' => $object->day ?? '',
-                'time' => $object->selected_time ? (new Carbon($object->selected_time))->format('H:i') : '',
+                'time' => $object->selected_time ?? '',
+                'timezone' => $object->time_zone ?? '',
                 'cron_data' => $object->cron_data ?? '',
                 'type' => $object->status ?? '',
                 'status' => $object->status ?? '',

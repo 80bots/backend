@@ -222,7 +222,7 @@ class ScheduleController extends AppController
                     }
                 case 'details':
                     $this->updateOrCreateSchedulingInstancesDetails($instance, $value,
-                        $request->user()->timezone->value ?? '+00:00');
+                        $request->user()->timezone->timezone ?? '+00:00');
                     return $this->success((new ScheduleResource($instance))->toArray($request));
                 default:
                     return $this->error(__('user.server_error'), __('user.scheduling.not_updated'));
@@ -301,7 +301,7 @@ class ScheduleController extends AppController
 
             $selectedTime = Carbon::parse("{$detail['day']} {$detail['time']}");
 
-            SchedulingInstancesDetails::create([
+            SchedulingInstancesDetails::updateOrCreate([
                 'scheduling_id' => $instance->id ?? null,
                 'day'           => $detail['day'] ?? '',
                 'selected_time' => $selectedTime->format('h:i A'),
