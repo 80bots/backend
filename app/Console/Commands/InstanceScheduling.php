@@ -53,13 +53,11 @@ class InstanceScheduling extends Command
         Log::info("InstanceScheduling => cron call scheduling => {$this->now->toDateTimeString()}");
 
         try {
-
             $statuses = ['running', 'stopped'];
             foreach ($statuses as $status) {
                 SchedulingInstance::has('details')
                     ->scheduling($status)
                     ->chunkById(100, function ($schedulers) {
-
                         $instances = InstanceHelper::getScheduleInstancesIds(
                             $schedulers,
                             $this->now
