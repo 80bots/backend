@@ -3,6 +3,8 @@
 namespace App;
 
 use App\Helpers\QueryHelper;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Bot extends BaseModel
 {
@@ -50,16 +52,25 @@ class Bot extends BaseModel
         'type'
     ];
 
+    /**
+     * @return BelongsTo
+     */
     public function platform()
     {
         return $this->belongsTo(Platform::class, 'platform_id');
     }
 
+    /**
+     * @return BelongsToMany
+     */
     public function tags()
     {
         return $this->belongsToMany(Tag::class, 'bot_tag');
     }
 
+    /**
+     * @return BelongsToMany
+     */
     public function users()
     {
         return $this->belongsToMany(User::class, 'bot_user');

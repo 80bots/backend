@@ -14,6 +14,10 @@ class AwsSetting extends BaseModel
         'default'
     ];
 
+    /**
+     * @param $query
+     * @return array
+     */
     public function scopeIsDefault($query)
     {
         return $query->where('default', '=', true);

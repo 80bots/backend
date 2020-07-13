@@ -2,6 +2,8 @@
 
 namespace App;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
 class AboutInstance extends BaseModel
 {
     protected $table = 'about_instances';
@@ -21,6 +23,9 @@ class AboutInstance extends BaseModel
         'aws_custom_package_json'
     ];
 
+    /**
+     * @return BelongsTo
+     */
     public function instance()
     {
         return $this->belongsTo(BotInstance::class, 'instance_id', 'id');

@@ -7,8 +7,6 @@ use Carbon\Carbon;
 class CommonHelper
 {
     /**
-     *
-     *
      * @param $startTime
      * @param $endTime
      * @return int
@@ -19,5 +17,4 @@ class CommonHelper
         $end    = Carbon::parse($endTime);
         return $end->diffInMinutes($start);
     }
-
 }

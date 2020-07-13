@@ -2,6 +2,8 @@
 
 namespace App;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
 class SchedulingInstancesDetails extends BaseModel
 {
     const STATUS_RUNNING    = 'running';
@@ -18,11 +20,19 @@ class SchedulingInstancesDetails extends BaseModel
         'status',
     ];
 
+    /**
+     * @param $query
+     * @param $id
+     * @return array
+     */
     public function scopeFindBySchedulingInstancesId($query, $id)
     {
         return $query->where('scheduling_id', '=', $id);
     }
 
+    /**
+     * @return BelongsTo
+     */
     public function schedulingInstance()
     {
         return $this->belongsTo(SchedulingInstance::class, 'scheduling_id', 'id');

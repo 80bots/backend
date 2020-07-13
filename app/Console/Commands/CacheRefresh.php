@@ -12,12 +12,14 @@ class CacheRefresh extends Command
      * @var string
      */
     protected $signature = 'cache:refresh';
+
     /**
      * The console command description.
      *
      * @var string
      */
     protected $description = 'Clears caches and doing dump autoload';
+
     /**
      * Create a new command instance.
      *
@@ -27,6 +29,7 @@ class CacheRefresh extends Command
     {
         parent::__construct();
     }
+
     /**
      * Execute the console command.
      *

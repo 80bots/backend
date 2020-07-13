@@ -2,6 +2,8 @@
 
 namespace App;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
 class BotInstancesDetails extends BaseModel
 {
 
@@ -27,6 +29,9 @@ class BotInstancesDetails extends BaseModel
         'aws_pem_file_path'
     ];
 
+    /**
+     * @return BelongsTo
+     */
     public function instance()
     {
         return $this->belongsTo(BotInstance::class, 'instance_id', 'id');
