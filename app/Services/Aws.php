@@ -490,7 +490,7 @@ class Aws
                 'FromPort' => $port,
                 'ToPort' => $port,
                 'IpRanges' => [
-                    ['CidrIp' => '0.0.0.0/0'] // TODO: add admin IP
+                    ['CidrIp' => $userIp]
                 ],
             ]);
         }
