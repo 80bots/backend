@@ -72,15 +72,13 @@ class InstanceHelper
 
                         if (!empty($scheduler->instance->aws_instance_id)) {
 
-                            $ct = Carbon::createFromFormat('Y-m-d H:i', "{$detail->schedule_time}");
-
                             array_push($insertHistory, [
                                 'scheduling_instances_id' => $scheduler->id,
                                 'user_id' => $scheduler->user_id,
                                 'schedule_type' => $detail->status,
-                                'cron_data' => $detail->cron_data,
+                                'cron_data' => $detail->schedule_time,
                                 'current_time_zone' => $detail->time_zone,
-                                'selected_time' => $ct,
+                                'selected_time' => $detail->platform_time,
                             ]);
 
                             array_push($instancesIds, [
