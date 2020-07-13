@@ -11,8 +11,8 @@ class SchedulingInstancesDetails extends BaseModel
 
     protected $fillable = [
         'scheduling_id',
-        'day',
-        'selected_time',
+        'platform_time',
+        'schedule_time',
         'time_zone',
         'cron_data',
         'status',

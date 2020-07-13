@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\User\UserCollection;
+use App\Http\Resources\User\UserResource;
 use App\Http\Resources\User\UsersResource;
 use App\Http\Resources\User\TimezoneCollection;
 use App\Mail\Support;
@@ -99,9 +100,9 @@ class UserController extends AppController
             }
 
             if ($request->user()->save()) {
-                return $this->success();
+                $user = (new UserResource(User::find(Auth::id())))->response()->getData();
+                return $this->success([ 'user' => $user->data ?? null ]);
             }
-
 
             return $this->error('System Error', 'Cannot update profile at this moment');
         } catch (\Exception $exception){

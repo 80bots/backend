@@ -37,9 +37,10 @@ class InstanceHelper
     public static function isScheduleInstance(SchedulingInstancesDetails $detail, int $currentTime): bool
     {
         try {
-            $currentTimeZone = explode(' ', $detail->time_zone);
-            $tz = CarbonTimeZone::create($currentTimeZone[1]);
-            $ct = Carbon::createFromFormat('D h:i A', "{$detail->day} {$detail->selected_time}", $tz);
+            $ct = Carbon::createFromFormat('Y-m-d H:i', "{$detail->schedule_time}");
+            Log::info(print_r($currentTime, true));
+            Log::info(print_r($ct->getTimestamp(), true));
+
             return $currentTime === $ct->getTimestamp();
         } catch (Throwable $throwable) {
             Log::error("Throwable isScheduleInstance: {$throwable->getMessage()}");
@@ -63,25 +64,23 @@ class InstanceHelper
 
                 foreach ($scheduler->details as $detail) {
 
-                    $currentTimeZone = explode(' ', $detail->time_zone);
                     $currentTime = Carbon::parse($now->format('D h:i A'))
-                        ->setTimezone($currentTimeZone[1])
+                        ->setTimezone($detail->time_zone)
                         ->getTimestamp();
 
                     if (self::isScheduleInstance($detail, $currentTime)) {
 
                         if (!empty($scheduler->instance->aws_instance_id)) {
 
-                            $tz = CarbonTimeZone::create($currentTimeZone[1]);
-                            $ct = Carbon::createFromFormat('D h:i A', "{$detail->day} {$detail->selected_time}", $tz);
+                            $ct = Carbon::createFromFormat('Y-m-d H:i', "{$detail->schedule_time}");
 
                             array_push($insertHistory, [
                                 'scheduling_instances_id' => $scheduler->id,
                                 'user_id' => $scheduler->user_id,
                                 'schedule_type' => $detail->status,
                                 'cron_data' => $detail->cron_data,
-                                'current_time_zone' => $tz->toRegionName(),
-                                'selected_time' => $ct->toDateTimeString(),
+                                'current_time_zone' => $detail->time_zone,
+                                'selected_time' => $ct,
                             ]);
 
                             array_push($instancesIds, [
@@ -116,8 +115,9 @@ class InstanceHelper
         return $details->map(function ($object) {
             return [
                 'id' => $object->id ?? null,
-                'day' => $object->day ?? '',
-                'time' => $object->selected_time ? (new Carbon($object->selected_time))->format('H:i') : '',
+                'platform_time' => $object->platform_time ?? '',
+                'schedule_time' => $object->schedule_time ?? '',
+                'timezone' => $object->time_zone ?? '',
                 'cron_data' => $object->cron_data ?? '',
                 'type' => $object->status ?? '',
                 'status' => $object->status ?? '',
