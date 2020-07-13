@@ -2,6 +2,8 @@
 
 namespace App;
 
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+
 class Tag extends BaseModel
 {
     const STATUS_ACTIVE     = 'active';
@@ -14,12 +16,18 @@ class Tag extends BaseModel
         'status',
     ];
 
-    //
+    /**
+     * @param $name
+     * @return array
+     */
     public static function findByName($name)
     {
         return self::where('name' , $name)->first();
     }
 
+    /**
+     * @return BelongsToMany
+     */
     public function bots()
     {
         return $this->belongsToMany(Bot::class, 'bot_tag');

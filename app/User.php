@@ -93,13 +93,16 @@ class User extends Authenticatable
         return $this->hasMany(Visitor::class);
     }
 
+    /**
+     * @param $query
+     * @return array
+     */
     public function scopeRunningInstances($query)
     {
         return $query->whereHas('instances', function (Builder $query) {
             $query->where('aws_status', '=', BotInstance::STATUS_RUNNING);
         })->get();
     }
-
 
     /**
      * @return BelongsTo

@@ -15,6 +15,7 @@ use Faker\Generator as Faker;
 |
 */
 
+/** @var TYPE_NAME $factory */
 $factory->define(User::class, function (Faker $faker) {
     return [
         'name' => $faker->name,

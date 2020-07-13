@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Helpers\MailHelper;
 use App\Helpers\UserHelper;
 use App\Http\Controllers\Controller;
 use App\Timezone;
@@ -77,10 +76,6 @@ class RegisterController extends Controller
             'verification_token'    => Str::random(16),
         ]);
 
-        if (! empty($user)) {
-            MailHelper::welcomeEmail($user);
-        }
-
         return $user;
     }
 
@@ -93,11 +88,7 @@ class RegisterController extends Controller
         $this->validator($request->all())->validate();
         event(new Registered($user = $this->create($request->all())));
 
-        if (! $request->wantsJson()) {
-            return redirect($this->redirectPath())->with('success', 'Please check your Mail for activate your account');
-        } else {
-            return $this->success(null, __('auth.registered'));
-        }
+        return $this->success(null, __('auth.registered'));
     }
 
     /**

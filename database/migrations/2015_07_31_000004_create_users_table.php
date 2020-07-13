@@ -33,7 +33,6 @@ class CreateUsersTable extends Migration
                 User::STATUS_INACTIVE
             ])->default(User::STATUS_PENDING);
 
-            $table->boolean('sent_email_status')->default(false);
             $table->timestamps();
             $table->softDeletes();
 

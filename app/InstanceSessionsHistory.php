@@ -2,6 +2,8 @@
 
 namespace App;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
 class InstanceSessionsHistory extends BaseModel
 {
     const STATUS_FAILED     = 'failed';
@@ -22,11 +24,17 @@ class InstanceSessionsHistory extends BaseModel
         'status',
     ];
 
+    /**
+     * @return BelongsTo
+     */
     public function user()
     {
         return $this->belongsTo(User::class,'user_id');
     }
 
+    /**
+     * @return BelongsTo
+     */
     public function schedulingInstance()
     {
         return $this->belongsTo(SchedulingInstance::class,'scheduling_instances_id');

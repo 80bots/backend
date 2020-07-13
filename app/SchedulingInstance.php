@@ -3,6 +3,8 @@
 namespace App;
 
 use App\Helpers\QueryHelper;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SchedulingInstance extends BaseModel
 {
@@ -36,11 +38,22 @@ class SchedulingInstance extends BaseModel
         'status',
     ];
 
+    /**
+     * @param $query
+     * @param $user_id
+     * @return array
+     */
    	public function scopeFindByUserId($query, $user_id)
     {
         return $query->with('instance.bot')->where('scheduling_instances.user_id' , $user_id);
     }
 
+    /**
+     * @param $query
+     * @param $instanceId
+     * @param $userId
+     * @return array
+     */
     public function scopeFindByUserInstanceId($query, $instanceId, $userId)
     {
    	    return $query->where('instance_id', '=', $instanceId)
@@ -48,11 +61,21 @@ class SchedulingInstance extends BaseModel
             ->with('details');
     }
 
+    /**
+     * @param $query
+     * @param $id
+     * @return array
+     */
     public function scopeByInstanceId($query, $id)
     {
         return $query->where('instance_id', $id)->with('details');
     }
 
+    /**
+     * @param $query
+     * @param $status
+     * @return array
+     */
     public function scopeScheduling($query, $status)
     {
         return $query->where('status', '=', 'active')
@@ -61,21 +84,33 @@ class SchedulingInstance extends BaseModel
             }, 'instance']);
     }
 
+    /**
+     * @return BelongsTo
+     */
     public function user()
     {
         return $this->belongsTo(User::class,'user_id');
     }
 
+    /**
+     * @return BelongsTo
+     */
     public function instance()
     {
         return $this->belongsTo(BotInstance::class,'instance_id');
     }
 
+    /**
+     * @return HasMany
+     */
     public function details()
     {
    	    return $this->hasMany(SchedulingInstancesDetails::class,'scheduling_id','id');
     }
 
+    /**
+     * @return HasMany
+     */
     public function history()
     {
         return $this->hasMany(InstanceSessionsHistory::class,'scheduling_id');

@@ -15,7 +15,6 @@ use App\Services\Aws;
 use App\User;
 use Aws\Result;
 use Carbon\Carbon;
-use Carbon\CarbonTimeZone;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;

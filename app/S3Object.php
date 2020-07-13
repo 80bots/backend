@@ -4,7 +4,8 @@ namespace App;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Storage;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 class S3Object extends BaseModel
 {
@@ -30,12 +31,18 @@ class S3Object extends BaseModel
         'type',
     ];
 
+    /**
+     * @return string
+     */
     public function getS3Path()
     {
         $rootDir = $this->instance->baseS3Dir;
         return $rootDir . '/' . $this->attributes['path'];
     }
 
+    /**
+     * @return string
+     */
     public function getLinkAttribute ()
     {
         $expires = Carbon::now()->addMinutes(10);
@@ -52,23 +59,40 @@ class S3Object extends BaseModel
         return $cdn . $path  . '?' . $query;
     }
 
+    /**
+     * @param $query
+     * @return array
+     */
     public function scopeFolders ($query)
     {
         return $query->whereNull('parent_id');
     }
 
+    /**
+     * @param $query
+     * @return array
+     */
     public function scopeLogs ($query)
     {
         return $query->whereNotNull('parent_id')
             ->where('path', 'like', '%logs%');
     }
 
+    /**
+     * @param $query
+     * @return array
+     */
     public function scopeWorkLogs ($query)
     {
         return $query->logs()
             ->where('path', 'like', '%bot-work.log%');
     }
 
+    /**
+     * @param $query
+     * @param $instance_id
+     * @return array
+     */
     public function scopeScreenshots ($query, $instance_id)
     {
         return $query->where('instance_id', $instance_id)
@@ -84,11 +108,17 @@ class S3Object extends BaseModel
         return $this->belongsTo(BotInstance::class, 'instance_id', 'id');
     }
 
+    /**
+     * @return BelongsTo
+     */
     public function parent()
     {
         return $this->belongsTo(S3Object::class, 'parent_id');
     }
 
+    /**
+     * @return HasMany
+     */
     public function children()
     {
         return $this->hasMany(S3Object::class, 'parent_id');

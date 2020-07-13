@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Auth;
 
 class Platform extends BaseModel
@@ -45,21 +46,35 @@ class Platform extends BaseModel
         return $query;
     }
 
+    /**
+     * @param $query
+     * @param string $name
+     * @return array
+     */
     public function scopeFindByName($query, string $name)
     {
         return $query->where('name', $name);
     }
 
+    /**
+     * @return HasMany
+     */
     public function bots()
     {
         return $this->hasMany(Bot::class,'platform_id', 'id');
     }
 
+    /**
+     * @return HasMany
+     */
     public function activeBots()
     {
         return $this->bots()->where('status', '=', Bot::STATUS_ACTIVE);
     }
 
+    /**
+     * @return HasMany
+     */
     public function activeBotsWithPrivate()
     {
         return $this->bots()
@@ -72,6 +87,9 @@ class Platform extends BaseModel
             });
     }
 
+    /**
+     * @return HasMany
+     */
     public function botsWithPrivate()
     {
         return $this->bots()
