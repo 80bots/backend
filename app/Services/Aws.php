@@ -478,8 +478,6 @@ class Aws
             $this->ec2Connection();
         }
 
-        $userIp = "{$ip}/32";
-
         $userPorts = config('aws.ports.access_user');
 
         $ipPermissions = [];
@@ -490,7 +488,7 @@ class Aws
                 'FromPort' => $port,
                 'ToPort' => $port,
                 'IpRanges' => [
-                    ['CidrIp' => $userIp]
+                    ['CidrIp' => '0.0.0.0/0']
                 ],
             ]);
         }
