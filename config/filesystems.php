@@ -61,7 +61,7 @@ return [
             'secret' => env('AWS_SECRET_ACCESS_KEY'),
             'region' => env('AWS_REGION'),
             'bucket' => env('AWS_BUCKET'),
-            'url' => env('AWS_URL'),
+            'url' => env('AWS_CLOUDFRONT_INSTANCES_HOST'),
             'endpoint' => env('AWS_ENDPOINT'),
         ],
     ],
