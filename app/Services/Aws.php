@@ -168,11 +168,6 @@ class Aws
                     'UserName' => $name
                 ]);
 
-                $this->iam->addUserToGroup([
-                    'GroupName' => config('aws.iam.group', 'saas-s3'),
-                    'UserName' => $name,
-                ]);
-
                 $result = $this->iam->createAccessKey([
                     'UserName' => $name,
                 ]);

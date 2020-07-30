@@ -37,8 +37,8 @@ class SyncS3Objects implements ShouldQueue
     public function __construct(BotInstance $instance)
     {
         $this->credentials = [
-            'key'    => config('aws.iam.access_key'),
-            'secret' => config('aws.iam.secret_key')
+            'key'    => config('aws.credentials.key'),
+            'secret' => config('aws.credentials.secret')
         ];
 
         $this->instance = $instance;
@@ -50,9 +50,10 @@ class SyncS3Objects implements ShouldQueue
      * @return void
      */
     public function handle()
-    {    /**
-     * @return
-     */
+    {
+        /**
+         * @return
+         */
         $now = Carbon::now()->toDateTimeString();
 
         $aws = new Aws;

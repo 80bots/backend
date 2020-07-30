@@ -21,19 +21,19 @@ return [
         'key'    => env('AWS_ACCESS_KEY_ID'),
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
     ],
-    'region' => env('AWS_REGION', 'us-east-2'),
+    'region' => env('AWS_REGION'),
     'version' => 'latest',
-    'bucket' => env('AWS_BUCKET', '80bots'),
+    'bucket' => env('AWS_BUCKET'),
     'instance_cloudfront' => env('AWS_CLOUDFRONT_INSTANCES_HOST'),
-    'screenshotsBucket' => env('AWS_SCREENSHOTS_BUCKET', '80bots-issued-screenshots'),
+    'screenshotsBucket' => env('AWS_SCREENSHOTS_BUCKET'),
     'ua_append' => [
         'L5MOD/' . AwsServiceProvider::VERSION,
     ],
-    'image_id' => env('AWS_IMAGE_ID', 'ami-0f7ac8e6b58f47535'),
-    'instance_type' => env('AWS_INSTANCE_TYPE', 't3.medium'),
-    'volume_size' => env('AWS_VOLUME_SIZE', '32'),
-    'instance_metadata' => env('AWS_INSTANCE_METADATA', 'http://169.254.169.254/latest/meta-data/'),
-    'instance_ignore' =>  ['SaaS', 'kabas', 'kabas2'],
+    'image_id' => env('AWS_IMAGE_ID'),
+    'instance_type' => env('AWS_INSTANCE_TYPE'),
+    'volume_size' => env('AWS_VOLUME_SIZE'),
+    'instance_metadata' => env('AWS_INSTANCE_METADATA'),
+    'instance_ignore' => ['SaaS', 'kabas', 'kabas2'],
     'owners' => ['030500410996'],
     'quota' => [
         'code_t3_medium' => 'L-D54D8763'
@@ -42,12 +42,6 @@ return [
         'ec2' => [
             'code' => 'ec2'
         ]
-    ],
-    'iam' => [
-        'user'  => 'saas-s3',
-        'group' => 'saas-s3',
-        'access_key' => env('AWS_IAM_S3_ACCESS_KEY', 'AKIAQOGPXKZ2F3RBT65W'),
-        'secret_key' => env('AWS_IAM_S3_SECRET_KEY', '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'),
     ],
     'ports' => [
         'access_user' => [

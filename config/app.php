@@ -127,12 +127,6 @@ return [
 
     'cipher' => 'AES-256-CBC',
 
-    'up_time' => env('UP_TIME_MINUTES', '60'),
-
-    'currency_code' => env('APP_CURRENCY_CODE', 'USD'),
-
-    'currency_symbol' => env('APP_CURRENCY_SYMBOL', '$'),
-
     'access_token_lifetime_days' => env('APP_ACCESS_TOKEN_LIFETIME_DAYS', 3),
 
     /*
