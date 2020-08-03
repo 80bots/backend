@@ -984,14 +984,26 @@ HERESHELL;
 
         // This script overwrites the API and SOCKETS endpoint in order
         // to fix them if the project is locally deployed
-        $localAdjustment = '';
-        $isLocalEnv         = config('app.env') === 'local';
-        $API_HOST           = config('bot_instance.api_url');
-        $SOCKET_HOST        = config('bot_instance.socket_url');
+        $localAdjustment                = '';
+        $isLocalEnv                     = config('app.env') === 'local';
+        $API_HOST                       = config('bot_instance.api_url');
+        $SOCKET_HOST                    = config('bot_instance.socket_url');
+        $AWS_ACCESS_KEY_ID              = config('aws.credentials.key');
+        $AWS_SECRET_ACCESS_KEY          = config('aws.credentials.secret');
+        $AWS_BUCKET                     = config('aws.bucket');
+        $AWS_CLOUDFRONT_INSTANCES_HOST  = config('aws.instance_cloudfront');
+        $AWS_REGION                     = config('aws.region');
         if($isLocalEnv && $API_HOST && $SOCKET_HOST) {
             $localAdjustment =
 <<<HERESHELL
-su - {$user} -c 'cd ~/{$streamerDir} && echo "SOCKET_SERVER_HOST={$SOCKET_HOST}" >> ./.env && echo "API_URL={$API_HOST}" >> ./.env'
+su - {$user} -c 'cd ~/{$streamerDir} &&
+echo "SOCKET_SERVER_HOST={$SOCKET_HOST}" >> ./.env &&
+echo "API_URL={$API_HOST}" >> ./.env &&
+echo "AWS_ACCESS_KEY_ID={$AWS_ACCESS_KEY_ID}" >> ./.env &&
+echo "AWS_SECRET_ACCESS_KEY={$AWS_SECRET_ACCESS_KEY}" >> ./.env &&
+echo "AWS_BUCKET={$AWS_BUCKET}" >> ./.env &&
+echo "AWS_CLOUDFRONT_INSTANCES_HOST={$AWS_CLOUDFRONT_INSTANCES_HOST}" >> ./.env &&
+echo "AWS_REGION={$AWS_REGION}" >> ./.env'
 HERESHELL;
         }
 
