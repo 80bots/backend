@@ -991,7 +991,7 @@ HERESHELL;
         $AWS_ACCESS_KEY_ID              = config('aws.credentials.key');
         $AWS_SECRET_ACCESS_KEY          = config('aws.credentials.secret');
         $AWS_BUCKET                     = config('aws.bucket');
-        $AWS_CLOUDFRONT_INSTANCES_HOST  = config('aws.instance_cloudfront');
+        $AWS_CLOUDFRONT_INSTANCES_HOST  = str_ireplace('https://', '', config('aws.instance_cloudfront'));
         $AWS_REGION                     = config('aws.region');
         if($isLocalEnv && $API_HOST && $SOCKET_HOST) {
             $localAdjustment =
