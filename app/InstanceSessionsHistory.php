@@ -18,7 +18,6 @@ class InstanceSessionsHistory extends BaseModel
         'scheduling_instances_id',
         'user_id',
         'schedule_type',
-        'selected_time',
         'cron_data',
         'current_time_zone',
         'status',

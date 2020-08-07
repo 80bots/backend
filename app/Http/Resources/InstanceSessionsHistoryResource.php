@@ -21,8 +21,7 @@ class InstanceSessionsHistoryResource extends JsonResource
             'user'         => $this->user->email ?? '',
             'status'       => $this->status ?? '',
             'type'         => $this->schedule_type ?? '',
-            'time'         => $this->selected_time ?? '',
-            'cron'         => $this->cron_data ?? '',
+            'date'         => $this->cron_data ?? '',
             'time_zone'    => $this->current_time_zone ?? '',
         ];
     }

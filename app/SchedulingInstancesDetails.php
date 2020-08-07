@@ -4,6 +4,9 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @method static updateOrCreate(array $array)
+ */
 class SchedulingInstancesDetails extends BaseModel
 {
     const STATUS_RUNNING    = 'running';
@@ -13,10 +16,9 @@ class SchedulingInstancesDetails extends BaseModel
 
     protected $fillable = [
         'scheduling_id',
-        'platform_time',
-        'schedule_time',
+        'day',
+        'time',
         'time_zone',
-        'cron_data',
         'status',
     ];
 

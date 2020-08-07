@@ -17,10 +17,9 @@ class CreateSchedulingInstancesDetailsTable extends Migration
         Schema::create('scheduling_instances_details', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('scheduling_id');
-            $table->string('platform_time');
-            $table->string('schedule_time');
+            $table->string('day');
+            $table->string('time');
             $table->string('time_zone');
-            $table->string('cron_data');
 
             $table->enum('status', [
                 SchedulingInstancesDetails::STATUS_RUNNING,

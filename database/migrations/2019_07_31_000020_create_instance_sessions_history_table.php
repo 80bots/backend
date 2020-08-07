@@ -24,9 +24,8 @@ class CreateInstanceSessionsHistoryTable extends Migration
                 InstanceSessionsHistory::STATUS_STOPPED
             ]);
 
-            $table->string('selected_time');
-            $table->text('cron_data')->nullable();
-            $table->text('current_time_zone')->nullable();
+            $table->string('cron_data');
+            $table->string('current_time_zone');
 
             $table->enum('status', [
                 InstanceSessionsHistory::STATUS_SUCCEED,

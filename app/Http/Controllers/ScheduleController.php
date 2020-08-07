@@ -301,10 +301,9 @@ class ScheduleController extends AppController
 
             SchedulingInstancesDetails::updateOrCreate([
                 'scheduling_id' => $instance->id ?? null,
-                'platform_time' => $detail['platform_time'],
-                'schedule_time' => $detail['schedule_time'],
+                'day'           => $detail['day'],
+                'time'          => $detail['time'],
                 'time_zone'     => $timezone,
-                'cron_data'     => "{$timezone}",
                 'status'        => $status,
             ]);
         }

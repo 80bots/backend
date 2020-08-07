@@ -15,6 +15,7 @@ use App\Services\Aws;
 use App\User;
 use Aws\Result;
 use Carbon\Carbon;
+use Carbon\CarbonTimeZone;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -36,7 +37,8 @@ class InstanceHelper
     public static function isScheduleInstance(SchedulingInstancesDetails $detail, int $currentTime): bool
     {
         try {
-            $ct = Carbon::createFromFormat('Y-m-d H:i', "{$detail->schedule_time}");
+            $ct = Carbon::createFromFormat('D h:i A', "{$detail->day} {$detail->time}", $detail->time_zone);
+
             Log::info(print_r($currentTime, true));
             Log::info(print_r($ct->getTimestamp(), true));
 
@@ -71,13 +73,14 @@ class InstanceHelper
 
                         if (!empty($scheduler->instance->aws_instance_id)) {
 
+                            $ct = Carbon::createFromFormat('D h:i A', "{$detail->day} {$detail->time}", $detail->time_zone);
+
                             array_push($insertHistory, [
                                 'scheduling_instances_id' => $scheduler->id,
                                 'user_id' => $scheduler->user_id,
                                 'schedule_type' => $detail->status,
-                                'cron_data' => $detail->schedule_time,
+                                'cron_data' => $ct,
                                 'current_time_zone' => $detail->time_zone,
-                                'selected_time' => $detail->platform_time,
                             ]);
 
                             array_push($instancesIds, [
@@ -112,11 +115,9 @@ class InstanceHelper
         return $details->map(function ($object) {
             return [
                 'id' => $object->id ?? null,
-                'platform_time' => $object->platform_time ?? '',
-                'schedule_time' => $object->schedule_time ?? '',
+                'day' => $object->day ?? '',
+                'time' => $object->time ?? '',
                 'timezone' => $object->time_zone ?? '',
-                'cron_data' => $object->cron_data ?? '',
-                'type' => $object->status ?? '',
                 'status' => $object->status ?? '',
                 'created_at' => $object->created_at->format('Y-m-d H:m:i') ?? '',
             ];
