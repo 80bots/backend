@@ -21,7 +21,7 @@ class CreateBotsTable extends Migration
             $table->text('description')->nullable();
             $table->json('parameters')->nullable();
             $table->text('path')->nullable();
-            $table->text('aws_startup_script')->nullable();
+            $table->string('s3_folder_name')->nullable();
             $table->text('aws_custom_script')->nullable();
             $table->json('aws_custom_package_json')->nullable();
 

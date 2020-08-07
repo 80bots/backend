@@ -50,7 +50,7 @@ class BotResource extends JsonResource
             'aws_ami_name'              => $this->aws_ami_name ?? '',
             'aws_instance_type'         => $this->aws_instance_type ?? '',
             'aws_storage_gb'            => $this->aws_storage_gb ?? '',
-            'aws_startup_script'        => $this->aws_startup_script ?? '',
+            's3_folder_name'            => $this->s3_folder_name ?? '',
             'aws_custom_script'         => $this->aws_custom_script ?? '',
             'aws_custom_package_json'   => $this->aws_custom_package_json ?? '',
             'status'                    => $this->status ?? '',

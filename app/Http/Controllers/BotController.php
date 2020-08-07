@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Bot;
 use App\BotInstance;
+use App\Helpers\GeneratorID;
 use App\Http\Resources\BotCollection;
 use App\Http\Resources\BotResource;
 use App\Http\Resources\PlatformCollection;
@@ -102,11 +103,12 @@ class BotController extends AppController
     public function store(Request $request)
     {
         try{
-
             $content = $request['aws_custom_script'];
             $path = $request['path'];
             $name = $request['name'];
             $platform = $request['platform'];
+            $random = GeneratorID::generate();
+            $folderName = "{$random}_custom_bot";
 
             $parameters = $this->extractParamsFromScript($content);
 
@@ -119,19 +121,15 @@ class BotController extends AppController
             }
 
             $bot = Bot::create([
-                'name'                      => $name,
                 'platform_id'               => $platform,
+                'name'                      => $name,
                 'description'               => $request->input('description'),
-                'aws_ami_image_id'          => $request->input('aws_ami_image_id'),
-                'aws_ami_name'              => $request->input('aws_ami_name'),
-                'aws_instance_type'         => $request->input('aws_instance_type'),
-                'aws_startup_script'        => $request->input('aws_startup_script'),
+                'parameters'                => $parameters,
+                'path'                      => $path,
                 'aws_custom_script'         => $request->input('aws_custom_script'),
                 'aws_custom_package_json'   => $request->input('aws_custom_package_json'),
-                'aws_storage_gb'            => $request->input('aws_storage_gb'),
                 'type'                      => $request->input('type'),
-                'parameters'                => $parameters,
-                'path'                      => $path
+                's3_folder_name'            => $folderName,
             ]);
 
             if (empty($bot)) {
@@ -227,9 +225,9 @@ class BotController extends AppController
                 $updateData = $request->validate([
                     'update.status'                     => "in:{$active},{$inactive}",
                     'update.name'                       => 'string',
+                    'update.description'                => 'string|nullable',
                     'update.aws_custom_script'          => 'string|nullable',
                     'update.aws_custom_package_json'    => 'json|nullable',
-                    'update.description'                => 'string|nullable',
                     'update.platform'                   => 'string|nullable',
                     'update.tags'                       => 'array',
                     'update.type'                       => 'in:private,public',
@@ -241,8 +239,8 @@ class BotController extends AppController
                 $name = $request['update.name'];
 
                 if(! empty($request['update.aws_custom_script'])) {
-                    $updateData['path'] = Str::slug($name, '_') . '.custom.js';
                     $updateData['parameters'] =  $parameters = $this->extractParamsFromScript($updateData['aws_custom_script']);
+                    $updateData['path'] = Str::slug($name, '_') . '.custom.js';
                 }
 
                 if(! empty($request['update.platform'])){
