@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property mixed path
  * @property mixed aws_custom_package_json
  * @property mixed s3_folder_name
+ * @property int|mixed|null platform_id
  */
 class Bot extends BaseModel
 {
@@ -52,8 +53,6 @@ class Bot extends BaseModel
         'description',
         'parameters',
         'path',
-        'aws_custom_script',
-        'aws_custom_package_json',
         's3_folder_name',
         'status',
         'type'

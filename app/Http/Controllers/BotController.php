@@ -3,26 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Bot;
-use App\BotInstance;
 use App\Helpers\GeneratorID;
+use App\Helpers\S3BucketHelper;
+use App\Http\Requests\BotCreateRequest;
+use App\Http\Requests\BotUpdateRequest;
 use App\Http\Resources\BotCollection;
 use App\Http\Resources\BotResource;
-use App\Http\Resources\PlatformCollection;
 use App\Http\Resources\TagCollection;
 use App\Jobs\SyncLocalBots;
-use App\Platform;
-use App\Services\BotParser;
 use App\Tag;
 use App\User;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\View\View;
 use Throwable;
 
 class BotController extends AppController
@@ -36,7 +31,6 @@ class BotController extends AppController
     public function index(Request $request)
     {
         try {
-
             $limit      = $request->query('limit') ?? self::PAGINATE;
             $platform   = $request->input('platform');
             $search     = $request->input('search');
@@ -76,68 +70,59 @@ class BotController extends AppController
     }
 
     /**
-     * Show the form for creating a new resource.
-     * @return JsonResponse
-     */
-    public function create()
-    {
-        try{
-
-            $platforms = (new PlatformCollection(Platform::get()))->response()->getData();
-
-            return $this->success([
-                'platforms' => $platforms->data ?? []
-            ]);
-
-        } catch (Throwable $throwable){
-            return $this->error(__('user.server_error'), $throwable->getMessage());
-        }
-    }
-
-    /**
      * Store a newly created resource in storage.
      *
-     * @param Request $request
+     * @param BotCreateRequest $request
      * @return JsonResponse
      */
-    public function store(Request $request)
+    public function store(BotCreateRequest $request)
     {
         try{
-            $content = $request['aws_custom_script'];
-            $path = $request['path'];
-            $name = $request['name'];
-            $platform = $request['platform'];
+            $data = $request->validated();
+
+            $name                   = $data['name'];
+            $path                   = $data['path'] ?? null;
+            $platform               = $data['platform'] ?? null;
+            $custom_script          = $data['aws_custom_script'];
+            $custom_package_json    = $data['aws_custom_package_json'];
+            $tags                   = $data['tags'];
+            $users                  = $data['users'];
+            $parameters             = null;
+
             $random = GeneratorID::generate();
-            $folderName = "{$random}_custom_bot";
+            $folderName = "custom-bot/{$random}_custom_bot";
 
-            $parameters = $this->extractParamsFromScript($content);
+            if(!is_null($custom_script)){
+                $parameters = S3BucketHelper::extractParamsFromScript($custom_script);
+            }
 
-            if(!$path) {
+            if(is_null($path)) {
                 $path = Str::slug($name, '_') . '.custom.js';
             }
 
-            if($platform){
-                $platform = $this->getPlatformId($request->input('platform'));
-            }
+            S3BucketHelper::putFilesS3(
+                $folderName,
+                $path,
+                $custom_script,
+                $custom_package_json
+            );
 
             $bot = Bot::create([
-                'platform_id'               => $platform,
-                'name'                      => $name,
-                'description'               => $request->input('description'),
-                'parameters'                => $parameters,
-                'path'                      => $path,
-                'aws_custom_script'         => $request->input('aws_custom_script'),
-                'aws_custom_package_json'   => $request->input('aws_custom_package_json'),
-                'type'                      => $request->input('type'),
-                's3_folder_name'            => $folderName,
+                'platform_id'       => $platform,
+                'name'              => $name,
+                'description'       => $data['description'],
+                'parameters'        => $parameters,
+                'path'              => $path,
+                'type'              => $data['type'],
+                's3_folder_name'    => $folderName,
             ]);
 
             if (empty($bot)) {
                 return $this->error(__('user.server_error'), __('user.bots.error_create'));
             }
 
-            $this->addTagsToBot($bot, $request->input('tags'));
-            $this->addUsersToBot($bot, $request->input('users'));
+            $this->addTagsToBot($bot, $tags);
+            $this->addUsersToBot($bot, $users);
 
             return $this->success([
                 'id' => $bot->id ?? null
@@ -149,113 +134,53 @@ class BotController extends AppController
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param Request $request
-     * @param $id
-     * @return BotResource|JsonResponse
-     */
-    public function show(Request $request, $id)
-    {
-        try{
-            $bot = Bot::find($id);
-
-            if (empty($bot)) {
-                return $this->notFound(__('user.not_found'), __('user.bots.not_found'));
-            }
-
-            return new BotResource($bot);
-
-        } catch (Throwable $throwable){
-            return $this->error(__('user.server_error'), $throwable->getMessage());
-        }
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     * @param $id
-     * @return JsonResponse
-     */
-    public function edit($id)
-    {
-        try{
-
-            $bot = Bot::find($id);
-
-            if (empty($bot)) {
-                return $this->notFound(__('user.not_found'), __('user.bots.not_found'));
-            }
-
-            $platforms  = (new PlatformCollection(Platform::get()))->response()->getData();
-            $resource   = (new BotResource($bot))->response()->getData();
-
-            return $this->success([
-                'bot'       => $resource->data ?? null,
-                'tags'      => implode(', ', $bot->tags()->pluck('name')->toArray()),
-                'users'     => implode(', ', $bot->users()->pluck('email')->toArray()),
-                'platforms' => $platforms->data ?? [],
-            ]);
-
-        } catch (Throwable $throwable){
-            return $this->error(__('user.server_error'), $throwable->getMessage());
-        }
-    }
-
-    /**
      * Update the specified resource in storage.
      *
-     * @param Request $request
+     * @param BotUpdateRequest $request
      * @param $id
      * @return JsonResponse
      */
-    public function update(Request $request, $id)
+    public function update(BotUpdateRequest $request, $id)
     {
         try{
 
             $bot = Bot::find($id);
+            $data = $request->validated();
+
+            $updateData             = $data['update'];
+            $custom_script          = $updateData['aws_custom_script'];
+            $custom_package_json    = $updateData['aws_custom_package_json'];
+            $folderName             = $bot->s3_folder_name;
+            $name                   = $updateData['name'];
+            $path                   = $updateData['path'] ?? null;
 
             if (empty($bot)) {
                 return $this->notFound(__('user.not_found'), __('user.bots.not_found'));
             }
 
-            $active     = Bot::STATUS_ACTIVE;
-            $inactive   = Bot::STATUS_INACTIVE;
-
-            if (! empty($request->input('update'))) {
-                $updateData = $request->validate([
-                    'update.status'                     => "in:{$active},{$inactive}",
-                    'update.name'                       => 'string',
-                    'update.description'                => 'string|nullable',
-                    'update.aws_custom_script'          => 'string|nullable',
-                    'update.aws_custom_package_json'    => 'json|nullable',
-                    'update.platform'                   => 'string|nullable',
-                    'update.tags'                       => 'array',
-                    'update.type'                       => 'in:private,public',
-                    'update.users'                      => 'array',
-                ]);
-
-                $updateData = $updateData['update'];
-
-                $name = $request['update.name'];
-
-                if(! empty($request['update.aws_custom_script'])) {
-                    $updateData['parameters'] =  $parameters = $this->extractParamsFromScript($updateData['aws_custom_script']);
-                    $updateData['path'] = Str::slug($name, '_') . '.custom.js';
-                }
-
-                if(! empty($request['update.platform'])){
-                    $updateData['platform_id'] = $this->getPlatformId($updateData['platform']);
-                }
-
-                $bot->fill($updateData);
-
-                if ($bot->save()) {
-                    if(!empty($updateData['tags'])) $this->addTagsToBot($bot, $updateData['tags']);
-                    if(!empty($updateData['users'])) $this->addUsersToBot($bot, $updateData['users']);
-                    return $this->success((new BotResource($bot))->toArray($request));
-                }
+            if(! empty($updateData['aws_custom_script'])) {
+                $updateData['parameters'] = S3BucketHelper::extractParamsFromScript($custom_script);
+                $updateData['path'] = $path = Str::slug($name, '_') . '.custom.js';
             }
 
+            if(! empty($updateData['platform'])){
+                $updateData['platform_id'] = $this->getPlatformId($updateData['platform']);
+            }
+
+            S3BucketHelper::updateFilesS3(
+                $folderName,
+                $path,
+                $custom_script,
+                $custom_package_json
+            );
+
+            $bot->fill($updateData);
+
+            if ($bot->save()) {
+                if(!empty($updateData['tags'])) $this->addTagsToBot($bot, $updateData['tags']);
+                if(!empty($updateData['users'])) $this->addUsersToBot($bot, $updateData['users']);
+                return $this->success((new BotResource($bot))->toArray($request));
+            }
         } catch (Throwable $throwable){
             return $this->error(__('user.server_error'), $throwable->getMessage());
         }
@@ -278,6 +203,9 @@ class BotController extends AppController
             }
 
             if ($bot->delete()) {
+                S3BucketHelper::deleteFilesS3(
+                    $bot->s3_folder_name
+                );
                 return $this->success(null, __('user.bots.success_delete'));
             }
 
@@ -286,40 +214,6 @@ class BotController extends AppController
         } catch (Throwable $throwable){
             return $this->error(__('user.server_error'), $throwable->getMessage());
         }
-    }
-
-    /**
-     * @param null $platformId
-     * @return Application|Factory|View
-     */
-    public function list($platformId = null)
-    {
-        if (! $platformId) {
-            $this->limit = 5;
-        }
-
-        $platforms = new Platform;
-
-        $platforms = $platforms->hasBots($this->limit, $platformId)->paginate(5);
-
-        return view('user.bots.list', compact('platforms'));
-    }
-
-    /**
-     * @return Application|Factory|View
-     */
-    public function mineBots()
-    {
-        $userId = Auth::id();
-
-        $userInstances = BotInstance::findByUserId($userId)->get();
-        $bots = Bot::all();
-
-        if (! $userInstances->count()) {
-            session()->flash('error', 'Instance Not Found');
-        }
-
-        return view('user.instance.my-bots', compact('userInstances', 'bots'));
     }
 
     /**
@@ -417,35 +311,4 @@ class BotController extends AppController
         }
     }
 
-    /**
-     * @param string|null $name
-     * @return int|null
-     */
-    private function getPlatformId(?string $name): ?int
-    {
-        $platform = Platform::findByName($name)->first();
-
-        if (empty($platform)) {
-            $platform = Platform::create([
-                'name' => $name
-            ]);
-        }
-
-        return $platform->id ?? null;
-    }
-
-    /**
-     * @param string $script
-     * @return false|string|null
-     */
-    private function extractParamsFromScript (string $script) {
-        $result = BotParser::getBotInfo($script);
-        $i = 0;
-        foreach($result['params'] as $key => $val) {
-            $val->order = $i;
-            $result['params']->$key = $val;
-            $i++;
-        }
-        return $result && $result['params'] ? json_encode($result['params']) : null;
-    }
 }

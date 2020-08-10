@@ -3,14 +3,9 @@
 namespace App\Observers;
 
 use App\Bot;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\Translation\Translator;
-use Illuminate\Support\Facades\Storage;
-use Throwable;
+use App\Platform;
+use Illuminate\Support\Facades\Log;
 
-/**
- * @method error(array|Application|Translator|string|null $__, string $getMessage)
- */
 class BotObserver
 {
     /**
@@ -21,13 +16,10 @@ class BotObserver
      */
     public function creating(Bot $bot)
     {
-        try {
-            if($bot->s3_folder_name !== null) {
-                Storage::disk('s3')->put('custom-bot/' . $bot->s3_folder_name .'/' . $bot->path, $bot->aws_custom_script);
-                Storage::disk('s3')->put('custom-bot/' . $bot->s3_folder_name . '/package.json', $bot->aws_custom_package_json);
-            }
-        } catch (Throwable $throwable) {
-            return $this->error(__('custom_bot.server_error'), $throwable->getMessage());
+        Log::info(print_r($bot, true));
+
+        if($bot->platform_id){
+            $bot->platform_id = $this->getPlatformId($bot->platform_id);
         }
     }
 
@@ -39,15 +31,7 @@ class BotObserver
      */
     public function updating(Bot $bot)
     {
-        try {
-            if($bot->s3_folder_name !== null) {
-                Storage::disk('s3')->deleteDirectory('custom-bot/' . $bot->s3_folder_name);
-                Storage::disk('s3')->put('custom-bot/' . $bot->s3_folder_name .'/' . $bot->path, $bot->aws_custom_script);
-                Storage::disk('s3')->put('custom-bot/' . $bot->s3_folder_name . '/package.json', $bot->aws_custom_package_json);
-            }
-        } catch (Throwable $throwable) {
-            return $this->error(__('custom_bot.server_error'), $throwable->getMessage());
-        }
+        //
     }
 
     /**
@@ -58,10 +42,23 @@ class BotObserver
      */
     public function deleting(Bot $bot)
     {
-        try {
-            Storage::disk('s3')->deleteDirectory('custom-bot/' . $bot->s3_folder_name);
-        } catch (Throwable $throwable) {
-            return $this->error(__('custom_bot.server_error'), $throwable->getMessage());
+        //
+    }
+
+    /**
+     * @param string|null $name
+     * @return int|null
+     */
+    private function getPlatformId(?string $name): ?int
+    {
+        $platform = Platform::findByName($name)->first();
+
+        if (empty($platform)) {
+            $platform = Platform::create([
+                'name' => $name
+            ]);
         }
+
+        return $platform->id ?? null;
     }
 }

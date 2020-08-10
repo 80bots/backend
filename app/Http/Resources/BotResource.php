@@ -2,8 +2,10 @@
 
 namespace App\Http\Resources;
 
+use App\Helpers\S3BucketHelper;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 
 class BotResource extends JsonResource
 {
@@ -40,19 +42,19 @@ class BotResource extends JsonResource
             });
         }
 
+        $scripts = S3BucketHelper::getFilesS3(
+            $this->s3_folder_name
+        );
+
         return [
             'id'                        => $this->id ?? '',
             'name'                      => $this->name ?? '',
             'platform'                  => $this->platform->name ?? '',
             'description'               => $this->description ?? '',
             'parameters'                => $formattedParameters ?? [],
-            'aws_ami_image_id'          => $this->aws_ami_image_id ?? '',
-            'aws_ami_name'              => $this->aws_ami_name ?? '',
-            'aws_instance_type'         => $this->aws_instance_type ?? '',
-            'aws_storage_gb'            => $this->aws_storage_gb ?? '',
             's3_folder_name'            => $this->s3_folder_name ?? '',
-            'aws_custom_script'         => $this->aws_custom_script ?? '',
-            'aws_custom_package_json'   => $this->aws_custom_package_json ?? '',
+            'aws_custom_script'         => $scripts['custom_script'] ?? '',
+            'aws_custom_package_json'   => $scripts['custom_package_json'] ?? '',
             'status'                    => $this->status ?? '',
             'type'                      => $this->type ?? '',
             'tags'                      => $tags
