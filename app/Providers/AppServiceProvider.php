@@ -2,8 +2,6 @@
 
 namespace App\Providers;
 
-use App\Bot;
-use App\Observers\BotObserver;
 use Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
@@ -30,6 +28,5 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         Schema::defaultStringLength(191);
-        Bot::observe(BotObserver::class);
     }
 }

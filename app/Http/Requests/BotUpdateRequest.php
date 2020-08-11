@@ -28,15 +28,27 @@ class BotUpdateRequest extends FormRequest
         $inactive   = Bot::STATUS_INACTIVE;
 
         return [
-            'update.status'                     => "in:{$active},{$inactive}",
             'update.name'                       => 'string',
             'update.description'                => 'string|nullable',
+            'update.status'                     => "in:{$active},{$inactive}",
             'update.platform'                   => 'string|nullable',
             'update.tags'                       => 'array',
             'update.type'                       => 'in:private,public',
             'update.users'                      => 'array',
             'update.aws_custom_script'          => 'nullable|string',
             'update.aws_custom_package_json'    => 'nullable|json'
+        ];
+    }
+
+    /**
+     * Custom message for validation
+     *
+     * @return array
+     */
+    public function messages()
+    {
+        return [
+            'update.aws_custom_package_json.unique' => 'The package.json must be a valid JSON string.',
         ];
     }
 }

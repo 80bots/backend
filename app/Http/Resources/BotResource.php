@@ -49,14 +49,13 @@ class BotResource extends JsonResource
         return [
             'id'                        => $this->id ?? '',
             'name'                      => $this->name ?? '',
-            'platform'                  => $this->platform->name ?? '',
             'description'               => $this->description ?? '',
             'parameters'                => $formattedParameters ?? [],
-            's3_folder_name'            => $this->s3_folder_name ?? '',
-            'aws_custom_script'         => $scripts['custom_script'] ?? '',
-            'aws_custom_package_json'   => $scripts['custom_package_json'] ?? '',
+            'platform'                  => $this->platform->name ?? '',
             'status'                    => $this->status ?? '',
             'type'                      => $this->type ?? '',
+            'aws_custom_script'         => $scripts['custom_script'] ?? '',
+            'aws_custom_package_json'   => $scripts['custom_package_json'] ?? '',
             'tags'                      => $tags
         ];
     }
