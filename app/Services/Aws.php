@@ -76,12 +76,11 @@ class Aws
     public function s3Connection(string $region = '', array $credentials = null, string $bucket = ''): void
     {
         $this->s3 = new S3Client([
-            'region' => empty($region) ? config('aws.region', 'us-east-2') : $region,
-            'version' => config('aws.version', 'latest'),
-            'credentials' => empty($credentials) ? config('aws.credentials') : $credentials
+            'region'        => empty($region) ? config('aws.region', 'us-east-2') : $region,
+            'version'       => config('aws.version', 'latest'),
+            'credentials'   => empty($credentials) ? config('aws.credentials') : $credentials
         ]);
-
-        $this->s3Bucket = empty($bucket) ? config('aws.bucket') : $bucket;
+        $this->s3Bucket     = empty($bucket) ? config('aws.bucket') : $bucket;
     }
 
     /**

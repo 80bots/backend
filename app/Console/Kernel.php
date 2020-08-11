@@ -13,6 +13,7 @@ use App\Console\Commands\InstanceSyncScheduling;
 use App\Console\Commands\RefreshDatabase;
 use App\Console\Commands\SyncDataFolders;
 use App\Console\Commands\SyncLocalBots;
+use App\Console\Commands\SyncS3Bots;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -32,6 +33,7 @@ class Kernel extends ConsoleKernel
         RefreshDatabase::class,
         AwsSyncAmis::class,
         SyncLocalBots::class,
+        SyncS3Bots::class,
         AddUser::class,
         SyncDataFolders::class,
         EchoServerInit::class,
@@ -52,6 +54,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('instance:clean')->hourly();
         $schedule->command('aws:sync-amis')->everyThirtyMinutes();
         $schedule->command('bots:sync-local')->daily();
+        $schedule->command('bots:sync-s3')->daily();
     }
 
     /**

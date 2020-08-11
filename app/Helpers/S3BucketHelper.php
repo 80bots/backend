@@ -14,19 +14,19 @@ class S3BucketHelper
     /**
      * Store a custom-bot in storage S3.
      *
-     * @param $folder_name
-     * @param $path
+     * @param $bot
      * @param $custom_script
      * @param $custom_package_json
      * @return void
      */
-    public static function putFilesS3($folder_name, $path, $custom_script, $custom_package_json )
+    public static function putFilesS3($bot, $custom_script, $custom_package_json)
     {
         try {
-            if($folder_name !== null) {
+            if($bot->s3_folder_name !== null) {
                 $disk = Storage::disk('s3');
-                $disk->put($folder_name . '/' . $path, $custom_script);
-                $disk->put($folder_name . '/package.json', $custom_package_json);
+                $disk->put($bot->s3_folder_name . '/' . $bot->path, $custom_script);
+                $disk->put($bot->s3_folder_name . '/package.json', $custom_package_json);
+                $disk->put($bot->s3_folder_name . '/_data.json', $bot);
             }
         } catch (Throwable $throwable) {
             Log::error("Throwable: {$throwable->getMessage()}");
@@ -36,20 +36,20 @@ class S3BucketHelper
     /**
      * Store a custom-bot in storage S3.
      *
-     * @param $folder_name
-     * @param $path
+     * @param $bot
      * @param $custom_script
      * @param $custom_package_json
      * @return void
      */
-    public static function updateFilesS3($folder_name, $path, $custom_script, $custom_package_json )
+    public static function updateFilesS3($bot, $custom_script, $custom_package_json)
     {
         try {
-            if($folder_name !== null) {
+            if($bot->s3_folder_name !== null) {
                 $disk = Storage::disk('s3');
-                $disk->deleteDirectory($folder_name);
-                $disk->put($folder_name . '/' . $path, $custom_script);
-                $disk->put($folder_name . '/package.json', $custom_package_json);
+                $disk->deleteDirectory($bot->s3_folder_name);
+                $disk->put($bot->s3_folder_name . '/' . $bot->path, $custom_script);
+                $disk->put($bot->s3_folder_name . '/package.json', $custom_package_json);
+                $disk->put($bot->s3_folder_name . '/_data.json', $bot);
             }
         } catch (Throwable $throwable) {
             Log::error("Throwable: {$throwable->getMessage()}");
@@ -87,13 +87,12 @@ class S3BucketHelper
             $array = [];
             $files = $disk->files($folder_name);
             foreach ($files as $file) {
-                if(Str::contains($file,'/package.json')) {
+                if (Str::contains($file,'/package.json')) {
                     $array = Arr::add($array, 'custom_package_json', $disk->get($file));
-                } else {
+                } elseif (Str::contains($file,'.custom.js')) {
                     $array = Arr::add($array, 'custom_script', $disk->get($file));
                 }
             }
-            Log::info(print_r($array, true));
             return $array;
         } catch (Throwable $throwable) {
             Log::error("Throwable: {$throwable->getMessage()}");

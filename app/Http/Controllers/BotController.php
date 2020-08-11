@@ -17,6 +17,8 @@ use App\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Throwable;
@@ -87,9 +89,9 @@ class BotController extends AppController
             $platform               = $data['platform'] ?? null;
 
             $random                 = GeneratorID::generate();
-            $folderName             = "custom-bot/{$random}_{$name}";
+            $folderName             = "custom-bot/{$random}_bot";
 
-            if(!empty($custom_script)){
+            if(!empty($custom_script)) {
                 $parameters = S3BucketHelper::extractParamsFromScript($custom_script);
             }
 
@@ -97,7 +99,7 @@ class BotController extends AppController
                 $path = Str::slug($name, '_') . '.custom.js';
             }
 
-            if(!empty($platform)){
+            if(!empty($platform)) {
                 $platform = $this->getPlatformId($request->input('platform'));
             }
 
@@ -116,8 +118,7 @@ class BotController extends AppController
             }
 
             S3BucketHelper::putFilesS3(
-                $folderName,
-                $path,
+                $bot,
                 $custom_script,
                 $data['aws_custom_package_json']
             );
@@ -187,8 +188,7 @@ class BotController extends AppController
             if ($bot->save()) {
 
                 S3BucketHelper::updateFilesS3(
-                    $folderName,
-                    $path,
+                    $bot,
                     $custom_script,
                     $updateData['aws_custom_package_json']
                 );
@@ -271,11 +271,10 @@ class BotController extends AppController
 
             $resource = Tag::where('status', '=', 'active');
 
-            if (! empty($search)) {
+            if (!empty($search)) {
                 $resource->where('name', 'like', "%{$search}%");
             }
 
-            //
             if (!empty($sort)) {
                 $resource->orderBy($sort, $order);
             }
@@ -304,6 +303,7 @@ class BotController extends AppController
         try {
             dispatch(new SyncLocalBots($request->user()));
             return $this->success([], __('user.instances.success_sync'));
+
         } catch (Throwable $throwable) {
             return $this->error(__('user.server_error'), $throwable->getMessage());
         }
