@@ -21,7 +21,7 @@ class CreateBotsTable extends Migration
             $table->text('description')->nullable();
             $table->json('parameters')->nullable();
             $table->text('path')->nullable();
-            $table->string('s3_folder_name')->nullable();
+            $table->string('s3_path')->nullable();
 
             $table->enum('status', [
                 Bot::STATUS_ACTIVE,

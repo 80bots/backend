@@ -5,7 +5,6 @@ namespace App\Http\Resources;
 use App\Helpers\S3BucketHelper;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Storage;
 
 class BotResource extends JsonResource
 {
@@ -43,7 +42,7 @@ class BotResource extends JsonResource
         }
 
         $scripts = S3BucketHelper::getFilesS3(
-            $this->s3_folder_name
+            $this->s3_path
         );
 
         return [

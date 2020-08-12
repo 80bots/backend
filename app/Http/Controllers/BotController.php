@@ -18,10 +18,12 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 use Throwable;
+use ZipArchive;
 
 class BotController extends AppController
 {
@@ -89,7 +91,7 @@ class BotController extends AppController
             $platform               = $data['platform'] ?? null;
 
             $random                 = GeneratorID::generate();
-            $folderName             = "custom-bot/{$random}_bot";
+            $folderName             = "scripts/{$random}_bot";
 
             if(!empty($custom_script)) {
                 $parameters = S3BucketHelper::extractParamsFromScript($custom_script);
@@ -109,7 +111,7 @@ class BotController extends AppController
                 'description'       => $data['description'],
                 'parameters'        => $parameters,
                 'path'              => $path,
-                's3_folder_name'    => $folderName,
+                's3_path'           => $folderName,
                 'type'              => $data['type'],
             ]);
 
@@ -160,7 +162,7 @@ class BotController extends AppController
             $platform               = $updateData['platform'] ?? null;
             $tags                   = $updateData['tags'];
             $users                  = $updateData['users'];
-            $folderName             = $bot->s3_folder_name;
+            $folderName             = $bot->s3_path;
 
             if(!empty($custom_script)) {
                 $parameters = S3BucketHelper::extractParamsFromScript($custom_script);
@@ -180,7 +182,7 @@ class BotController extends AppController
                 'description'       => $updateData['description'],
                 'parameters'        => $parameters,
                 'path'              => $path,
-                's3_folder_name'    => $folderName,
+                's3_path'           => $folderName,
                 'status'            => $updateData['status'],
                 'type'              => $updateData['type'],
             ]);
@@ -245,7 +247,7 @@ class BotController extends AppController
 
             if ($bot->delete()) {
                 S3BucketHelper::deleteFilesS3(
-                    $bot->s3_folder_name
+                    $bot->s3_path
                 );
                 return $this->success(null, __('user.bots.success_delete'));
             }

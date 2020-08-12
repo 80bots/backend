@@ -3,11 +3,8 @@
 namespace App\Console\Commands;
 
 use App\Bot;
-use App\Services\BotParser;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -54,9 +51,28 @@ class SyncS3Bots extends Command
     {
         try {
             $disk = Storage::disk('s3');
-            $array = [];
-            $files = $disk->directories('custom-bot/');
-            Log::info(print_r($files, true));
+            $directories = $disk->directories('custom-bot/');
+            foreach ($directories as $directory) {
+                $bot = Bot::where('s3_path', '=', $directory)->first();
+                if(!$bot) {
+                    $files = $disk->files($directory);
+                    foreach ($files as $file) {
+                        if (Str::contains($file,'/_metadata.json')) {
+                            $data = json_decode($disk->get($file));
+                            Bot::updateOrCreate([
+                               'platform_id'        => $data->platform_id,
+                               'name'               => $data->name,
+                               'description'        => $data->description,
+                               'parameters'         => $data->parameters,
+                               'path'               => $data->path,
+                               's3_path'            => $data->s3_path,
+                               'type'               => $data->type,
+                            ]);
+                            Log::info(print_r($data, true));
+                        }
+                    }
+                }
+            }
         } catch (Throwable $throwable) {
             Log::error($throwable->getMessage());
         }

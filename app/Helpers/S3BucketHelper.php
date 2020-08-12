@@ -7,7 +7,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Throwable;
+use Throwable;;
 
 class S3BucketHelper
 {
@@ -22,11 +22,17 @@ class S3BucketHelper
     public static function putFilesS3($bot, $custom_script, $custom_package_json)
     {
         try {
-            if($bot->s3_folder_name !== null) {
-                $disk = Storage::disk('s3');
-                $disk->put($bot->s3_folder_name . '/' . $bot->path, $custom_script);
-                $disk->put($bot->s3_folder_name . '/package.json', $custom_package_json);
-                $disk->put($bot->s3_folder_name . '/_data.json', $bot);
+            if($bot->s3_path !== null) {
+                Storage::put($bot->s3_path . '/src/' . $bot->path, $custom_script);
+                Storage::put($bot->s3_path . '/src/package.json', $custom_package_json);
+                Storage::put($bot->s3_path . '/.env', S3BucketHelper::generateEnvFile());
+                Storage::put($bot->s3_path . '/startup.sh', S3BucketHelper::generateShellFile());
+                Storage::put($bot->s3_path . '/_metadata.json', $bot);
+
+//                $disk = Storage::disk('s3');
+//                $disk->put($bot->s3_path . '/' . $bot->path, $custom_script);
+//                $disk->put($bot->s3_path . '/package.json', $custom_package_json);
+//                $disk->put($bot->s3_path . '/_metadata.json', $bot);
             }
         } catch (Throwable $throwable) {
             Log::error("Throwable: {$throwable->getMessage()}");
@@ -44,12 +50,12 @@ class S3BucketHelper
     public static function updateFilesS3($bot, $custom_script, $custom_package_json)
     {
         try {
-            if($bot->s3_folder_name !== null) {
+            if($bot->s3_path !== null) {
                 $disk = Storage::disk('s3');
-                $disk->deleteDirectory($bot->s3_folder_name);
-                $disk->put($bot->s3_folder_name . '/' . $bot->path, $custom_script);
-                $disk->put($bot->s3_folder_name . '/package.json', $custom_package_json);
-                $disk->put($bot->s3_folder_name . '/_data.json', $bot);
+                $disk->deleteDirectory($bot->s3_path);
+                $disk->put($bot->s3_path . '/' . $bot->path, $custom_script);
+                $disk->put($bot->s3_path . '/package.json', $custom_package_json);
+                $disk->put($bot->s3_path . '/_metadata.json', $bot);
             }
         } catch (Throwable $throwable) {
             Log::error("Throwable: {$throwable->getMessage()}");
@@ -105,13 +111,54 @@ class S3BucketHelper
      */
     public static function extractParamsFromScript(string $script)
     {
-        $result = BotParser::getBotInfo($script);
-        $i = 0;
-        foreach($result['params'] as $key => $val) {
-            $val->order = $i;
-            $result['params']->$key = $val;
-            $i++;
+        try {
+            $result = BotParser::getBotInfo($script);
+            $i = 0;
+            foreach($result['params'] as $key => $val) {
+                $val->order = $i;
+                $result['params']->$key = $val;
+                $i++;
+            }
+            return $result && $result['params'] ? json_encode($result['params']) : null;
+        } catch (Throwable $throwable) {
+            Log::error("Throwable: {$throwable->getMessage()}");
         }
-        return $result && $result['params'] ? json_encode($result['params']) : null;
+    }
+
+    /**
+     * @return string
+     */
+    public static function generateEnvFile()
+    {
+        try {
+            $API_HOST                       = config('bot_instance.api_url');
+            $SOCKET_HOST                    = config('bot_instance.socket_url');
+            $AWS_ACCESS_KEY_ID              = config('aws.credentials.key');
+            $AWS_SECRET_ACCESS_KEY          = config('aws.credentials.secret');
+            $AWS_BUCKET                     = config('aws.bucket');
+            $AWS_CLOUDFRONT_INSTANCES_HOST  = str_ireplace('https://', '', config('aws.instance_cloudfront'));
+            $AWS_REGION                     = config('aws.region');
+            return "SOCKET_SERVER_HOST={$SOCKET_HOST}
+API_URL={$API_HOST}
+AWS_ACCESS_KEY_ID={$AWS_ACCESS_KEY_ID}
+AWS_SECRET_ACCESS_KEY={$AWS_SECRET_ACCESS_KEY}
+AWS_BUCKET={$AWS_BUCKET}
+AWS_CLOUDFRONT_INSTANCES_HOST={$AWS_CLOUDFRONT_INSTANCES_HOST}
+AWS_REGION={$AWS_REGION}";
+        } catch (Throwable $throwable) {
+            Log::error("Throwable: {$throwable->getMessage()}");
+        }
+    }
+
+    /**
+     * @return string
+     */
+    public static function generateShellFile()
+    {
+        try {
+            return "#!bin/bash";
+        } catch (Throwable $throwable) {
+            Log::error("Throwable: {$throwable->getMessage()}");
+        }
     }
 }
