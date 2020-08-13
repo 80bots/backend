@@ -17,13 +17,10 @@ use App\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
 use Throwable;
-use ZipArchive;
 
 class BotController extends AppController
 {
@@ -91,7 +88,7 @@ class BotController extends AppController
             $platform               = $data['platform'] ?? null;
 
             $random                 = GeneratorID::generate();
-            $folderName             = "scripts/{$random}_bot";
+            $folderName             = "scripts/{$random}";
 
             if(!empty($custom_script)) {
                 $parameters = S3BucketHelper::extractParamsFromScript($custom_script);
@@ -119,10 +116,11 @@ class BotController extends AppController
                 return $this->error(__('user.server_error'), __('user.bots.error_create'));
             }
 
-            S3BucketHelper::putFilesS3(
+            S3BucketHelper::updateOrCreateFilesS3(
                 $bot,
+                Storage::disk('s3'),
                 $custom_script,
-                $data['aws_custom_package_json']
+                $data['aws_custom_package_json'],
             );
 
             $this->addTagsToBot($bot, $data['tags']);
@@ -189,8 +187,9 @@ class BotController extends AppController
 
             if ($bot->save()) {
 
-                S3BucketHelper::updateFilesS3(
+                S3BucketHelper::updateOrCreateFilesS3(
                     $bot,
+                    Storage::disk('s3'),
                     $custom_script,
                     $updateData['aws_custom_package_json']
                 );
@@ -305,7 +304,6 @@ class BotController extends AppController
         try {
             dispatch(new SyncLocalBots($request->user()));
             return $this->success([], __('user.instances.success_sync'));
-
         } catch (Throwable $throwable) {
             return $this->error(__('user.server_error'), $throwable->getMessage());
         }

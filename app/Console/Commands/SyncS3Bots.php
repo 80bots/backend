@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Bot;
+use App\Helpers\ZipHelper;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -50,27 +51,31 @@ class SyncS3Bots extends Command
     public function handle()
     {
         try {
-            $disk = Storage::disk('s3');
-            $directories = $disk->directories('custom-bot/');
-            foreach ($directories as $directory) {
-                $bot = Bot::where('s3_path', '=', $directory)->first();
+            $s3Files = Storage::disk('s3')->files('scripts/');
+            foreach ($s3Files as $s3File) {
+                $s3Path = str_ireplace('.zip', '', $s3File);
+                $bot = Bot::where('s3_path', '=', $s3Path)->first();
                 if(!$bot) {
-                    $files = $disk->files($directory);
-                    foreach ($files as $file) {
-                        if (Str::contains($file,'/_metadata.json')) {
-                            $data = json_decode($disk->get($file));
-                            Bot::updateOrCreate([
-                               'platform_id'        => $data->platform_id,
-                               'name'               => $data->name,
-                               'description'        => $data->description,
-                               'parameters'         => $data->parameters,
-                               'path'               => $data->path,
-                               's3_path'            => $data->s3_path,
-                               'type'               => $data->type,
-                            ]);
-                            Log::info(print_r($data, true));
+                    $unZip = ZipHelper::unZip($s3Path);
+                    if($unZip) {
+                        $localFiles = Storage::files($s3Path);
+                        foreach ($localFiles as $localFile) {
+                            if (Str::contains($localFile,'/_metadata.json')) {
+                                $data = json_decode(Storage::get($localFile));
+                                Bot::updateOrCreate([
+                                    'platform_id'        => $data->platform_id,
+                                    'name'               => $data->name,
+                                    'description'        => $data->description,
+                                    'parameters'         => $data->parameters,
+                                    'path'               => $data->path,
+                                    's3_path'            => $data->s3_path,
+                                    'type'               => $data->type,
+                                ]);
+                            }
                         }
+                        Storage::deleteDirectory($s3Path);
                     }
+                    Log::info(print_r($s3File, true));
                 }
             }
         } catch (Throwable $throwable) {

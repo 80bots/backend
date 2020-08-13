@@ -28,7 +28,8 @@
         "nubs/random-name-generator": "^2.1",
         "php-http/guzzle6-adapter": "1.1.1",
         "predis/predis": "^1.1",
-        "sentry/sentry-laravel": "^1.7"
+        "sentry/sentry-laravel": "^1.7",
+        "ext-zip": "*"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^2.7",
