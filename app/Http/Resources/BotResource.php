@@ -41,9 +41,9 @@ class BotResource extends JsonResource
             });
         }
 
-        $scripts = S3BucketHelper::getFilesS3(
-            $this->s3_path
-        );
+        if(! empty($this->s3_path)) {
+            $scripts = S3BucketHelper::getFilesS3($this->s3_path);
+        }
 
         return [
             'id'                        => $this->id ?? '',
