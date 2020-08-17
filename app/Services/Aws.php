@@ -540,10 +540,9 @@ class Aws
 
         $path = $bot->path;
         $params = json_encode($formattedParams);
-        $script = $bot->aws_custom_script ?? '';
-        $package = $bot->aws_custom_package_json ?? '{}';
+        $s3_path = $bot->s3_path ?? '';
 
-        $userData = base64_encode("#!/bin/bash\n{$this->startupScript($path, $params, $script, $package)}");
+        $userData = base64_encode("#!/bin/bash\n{$this->startupScript($path, $params, $s3_path)}");
 
         if (empty($this->ec2)) {
             $this->ec2Connection($region);
@@ -592,8 +591,7 @@ class Aws
             $this->ec2Connection($instance->aws_region);
         }
 
-        $script = $instance->aws_custom_script ?? '';
-        $package = $instance->aws_custom_package_json ?? '{}';
+        $s3_path = $instance->s3_path ?? '';
         $instance_params = json_decode(''.$instance->params, true);
 
         $params = array_merge([
@@ -601,7 +599,7 @@ class Aws
             'instanceId' => $instance->instance_id ?? '',
         ], $instance_params);
 
-        $userData = $this->createUserData($instance->bot_path, $params, $script, $package);
+        $userData = $this->createUserData($instance->bot_path, $params, $s3_path);
 
         $tags = [
             [
@@ -911,80 +909,34 @@ class Aws
     /**
      * @param string $path
      * @param string $params
-     * @param string $script
-     * @param $package
+     * @param string $s3_path
      * @return string
      */
-    protected function startupScript($path, string $params = '{}', $script = '', $package = '{}'): string
+    protected function startupScript($path, string $params = '{}', $s3_path = ''): string
     {
-        $isCustom = !empty($script) && !empty($package);
-        $user                   = 'kabas';
-        $scriptDir              = $isCustom ? 'custom' : 'puppeteer';
-        $streamerDir            = 'data-streamer';
-        $streamerCommand        = "git pull && yarn && yarn build && pm2 start --name \"data-streamer\" yarn -- start";
-        $scriptCommand          = "yarn && DISPLAY=:1 node {$path} > /dev/null";
-
-        $environment = <<<HERESHELL
-USER_NAME="{$user}"
-HOME="/home/\$USER_NAME"
-SCRIPT_DIR="\$HOME/$scriptDir"
-STREAMER_DIR="\$HOME/$streamerDir"
-HERESHELL;
-
-        $commonBeforeRun = <<<HERESHELL
-{$environment}
-cd \$SCRIPT_DIR && git pull
-cat > \$SCRIPT_DIR/params/params.json <<EOF
-{$params}
-EOF
-chown -R \$USER_NAME:\$USER_NAME \$SCRIPT_DIR/params/params.json
-HERESHELL;
-
-        $customBeforeRun = <<<HERESHELL
-{$environment}
-
-# - Init work dir -
-mkdir -p \$SCRIPT_DIR
-mkdir -p \$SCRIPT_DIR/params
-
-# Auto generate {path}.js file - custom script
-cat > \$SCRIPT_DIR/{$path} << 'EOF'
-let params = {}
-try {
-  params = require('./params/params.json');
-} catch (e) {
-  params = {}
-  console.log('Params is not defined');
-  console.log(e)
-}
-{$script}
-EOF
-
-# Auto generate package.json file
-cat > \$SCRIPT_DIR/package.json << 'EOF'
-{$package}
-EOF
-
-# Auto generate params/params.json file
-cat > \$SCRIPT_DIR/params/params.json << 'EOF'
-{$params}
-EOF
-
-# - Fix the streamer ENV in order to handle data in the same way as it did in the puppeteer -
-echo "OUTPUT_FOLDER=/home/{$user}/{$scriptDir}/output" >> ./\$STREAMER_DIR/.env
-echo "LOG_PATH=/home/{$user}/{$scriptDir}/logs" >> ./\$STREAMER_DIR/.env
-
-chown -R \$USER_NAME:\$USER_NAME \$SCRIPT_DIR
-HERESHELL;
-
-        $beforeRun = $isCustom ? $customBeforeRun : $commonBeforeRun;
-        $globalSettings = AwsSetting::isDefault()->first();
-        $globalSettingsScript = $globalSettings ? $globalSettings->script : '';
-
-        // This script overwrites the API and SOCKETS endpoint in order
-        // to fix them if the project is locally deployed
+        // Checking if the script is custom.
+        $isCustom                       = !empty($s3_path);
+        // Directories for a new instance to run the script.
+        $user                           = "kabas";
+        $workName                       = $isCustom ? "src" : "puppeteer";
+        $homeDir                        = "/home/{$user}";
+        $streamerDir                    = "{$homeDir}/data-streamer";
+        $workDir                        = "{$homeDir}/{$workName}";
+        Log::info('work directory' . $workDir);
+        // Commands to run streamer and script.
+        $streamerCommand                = "git pull && yarn && yarn build && pm2 start --name \"data-streamer\" yarn -- start";
+        $scriptCommand                  = "yarn && DISPLAY=:1 node {$path} > /dev/null";
+        // A piece of script for the correct work of a custom script.
+        $paramsScript                   = "let params = {};try{params=require('./params/params.json');}catch(e){params={};console.log('Params is not defined');console.log(e);};";
+        // Zip file name.
+        $zipName                        = str_ireplace('scripts/', '', $s3_path);
+        // Global instance settings.
+        $globalSettings                 = AwsSetting::isDefault()->first();
+        $globalSettingsScript           = $globalSettings ? $globalSettings->script : '';
         $localAdjustment                = '';
+        // Check project is locally deployed.
         $isLocalEnv                     = config('app.env') === 'local';
+        // AWS variables.
         $API_HOST                       = config('bot_instance.api_url');
         $SOCKET_HOST                    = config('bot_instance.socket_url');
         $AWS_ACCESS_KEY_ID              = config('aws.credentials.key');
@@ -992,10 +944,49 @@ HERESHELL;
         $AWS_BUCKET                     = config('aws.bucket');
         $AWS_CLOUDFRONT_INSTANCES_HOST  = str_ireplace('https://', '', config('aws.instance_cloudfront'));
         $AWS_REGION                     = config('aws.region');
+        //
+        $commonBeforeRun = <<<HERESHELL
+cd {$workDir} && git pull
+cat > {$workDir}/params/params.json <<EOF
+{$params}
+EOF
+chown -R {$user}:{$user} {$workDir}/params/params.json
+HERESHELL;
+        //
+        $customBeforeRun = <<<HERESHELL
+# - Add AWS configure. -
+cd {$homeDir}
+aws configure set aws_access_key_id {$AWS_ACCESS_KEY_ID}
+aws configure set aws_secret_access_key {$AWS_SECRET_ACCESS_KEY}
+aws configure set default.region {$AWS_REGION}
+aws configure set output json
+# - Download script from s3. -
+aws s3 cp s3://{$AWS_BUCKET}/{$s3_path}.zip {$zipName}.zip
+# - Unzip file. -
+unzip {$zipName}.zip
+chmod +x {$workDir} && chown {$user}:{$user} {$workDir}
+# - Add parameters for custom script. -
+sed -i "1i {$paramsScript}" {$workDir}/{$path}
+# - Create params directory. -
+mkdir -p {$workDir}/params
+# - Auto generate params/params.json file -
+cat > {$workDir}/params/params.json << 'EOF'
+{$params}
+EOF
+# - Fix the streamer ENV in order to handle data in the same way as it did in the puppeteer. -
+su - {$user} -c 'cd {$streamerDir} &&
+echo "OUTPUT_FOLDER={$workDir}/output" >> ./.env &&
+echo "LOG_PATH={$workDir}/logs" >> ./.env'
+# - Changing permissions for the custom script folder. -
+chown -R {$user}:{$user} {$workDir}
+HERESHELL;
+        //
+        $beforeRun = $isCustom ? $customBeforeRun : $commonBeforeRun;
+        // This script overwrites the API and SOCKETS endpoint in order to fix them if the project is locally deployed
         if($isLocalEnv && $API_HOST && $SOCKET_HOST) {
             $localAdjustment =
 <<<HERESHELL
-su - {$user} -c 'cd ~/{$streamerDir} &&
+su - {$user} -c 'cd {$streamerDir} &&
 echo "SOCKET_SERVER_HOST={$SOCKET_HOST}" >> ./.env &&
 echo "API_URL={$API_HOST}" >> ./.env &&
 echo "AWS_ACCESS_KEY_ID={$AWS_ACCESS_KEY_ID}" >> ./.env &&
@@ -1008,35 +999,28 @@ HERESHELL;
 
         return <<<HERESHELL
 echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
-
-# - Init environment -
-{$environment}
-
-su - \$USER_NAME -c 'cd /home/{$user}/{$streamerDir} && cp .env.example .env'
+su - {$user} -c 'cd {$streamerDir} && cp .env.example .env'
 {$globalSettingsScript}
-
 {$localAdjustment}
-
-su - \$USER_NAME -c 'rm -rf ~/.screenshots/*'
-
-# Generate app startup script file in the home directory
-cat > \$HOME/startup.sh <<EOF
+su - {$user} -c 'rm -rf ~/.screenshots/*'
+#  - Generate app startup script file in the home directory. -
+cat > {$homeDir}/startup.sh << 'EOF'
 #!/bin/bash
-cd \$STREAMER_DIR && {$streamerCommand}
-cd \$SCRIPT_DIR && {$scriptCommand}
+cd {$streamerDir} && {$streamerCommand}
+cd {$workDir} && {$scriptCommand}
 EOF
-chmod +x \$HOME/startup.sh && chown \$USER_NAME:\$USER_NAME \$HOME/startup.sh
-
-# Generate instance startup script file in the /etc/rc.local
-cat > /etc/rc.local <<EOF
+chmod +x {$homeDir}/startup.sh && chown {$user}:{$user} {$homeDir}/startup.sh
+# - Generate instance startup script file in the /etc/rc.local. -
+cat > /etc/rc.local << 'EOF'
 #!/bin/bash
-su - \$USER_NAME -c '\$HOME/startup.sh'
+su - {$user} -c '{$homeDir}/startup.sh'
 exit 0
 EOF
 chmod +x /etc/rc.local
-
+# -  -
 {$beforeRun}
-su - \$USER_NAME -c '\$HOME/startup.sh'
+# - Run startup script. -
+su - {$user} -c '{$homeDir}/startup.sh'
 HERESHELL;
     }
 
@@ -1360,11 +1344,10 @@ HERESHELL;
     /**
      * @param string $path
      * @param array $params
-     * @param $script
-     * @param $package
+     * @param string $s3_path
      * @return string
      */
-    private function createUserData(string $path, array $params, $script, $package): string
+    private function createUserData(string $path, array $params, $s3_path): string
     {
         if (!empty($params)) {
 
@@ -1376,7 +1359,7 @@ HERESHELL;
                 ];
             }
 
-            return base64_encode("#!/bin/bash\n{$this->startupScript($path ?? '', json_encode($formattedParams), $script, $package)}");
+            return base64_encode("#!/bin/bash\n{$this->startupScript($path ?? '', json_encode($formattedParams), $s3_path)}");
         }
         return '';
     }

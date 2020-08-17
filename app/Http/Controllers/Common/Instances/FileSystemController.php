@@ -3,11 +3,8 @@
 namespace App\Http\Controllers\Common\Instances;
 
 use App\BotInstance;
-use App\Helpers\InstanceHelper;
 use App\Http\Resources\S3ObjectCollection;
 use App\Jobs\StoreS3Objects;
-use App\S3Object;
-use App\Services\Aws;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -44,6 +41,7 @@ class FileSystemController extends InstanceController
         $limit = $request->query('limit') ?? self::PAGINATE;
         $parent = $request->query('parent') ?? null;
         $parentFolder = $instance->s3Objects()->where('path', '=', "{$parent}")->first();
+
         if(!$parentFolder) {
             return $this->success([
                 'data'  => $objects->data ?? [],
@@ -57,6 +55,7 @@ class FileSystemController extends InstanceController
         $resource = $resource->latest();
 
         $objects = (new S3ObjectCollection($resource->paginate($limit)))->response()->getData();
+
         $meta = $objects->meta ?? null;
 
         $response = [

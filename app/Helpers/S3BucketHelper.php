@@ -25,21 +25,22 @@ class S3BucketHelper
         try {
             if($bot->s3_path !== null) {
                 if ($disk->exists($bot->s3_path . '.zip')) {
-                    $disk->delete($bot->s3_path . '.zip');
+                    $isDelete = $disk->delete($bot->s3_path . '.zip');
+                    if($isDelete) Log::info('Update or Create files s3: Zip file delete from s3!');
                 }
 
                 Storage::put($bot->s3_path . '/src/' . $bot->path, $custom_script);
                 Storage::put($bot->s3_path . '/src/package.json', $custom_package_json);
-                Storage::put($bot->s3_path . '/.env', S3BucketHelper::generateEnvFile());
-                Storage::put($bot->s3_path . '/startup.sh', S3BucketHelper::generateShellFile());
                 Storage::put($bot->s3_path . '/_metadata.json', $bot);
                 Storage::put($bot->s3_path . '.zip', '');
 
                 if (Storage::exists($bot->s3_path . '.zip')) {
+                    Log::info('Update or Create files s3: Folder scripts in local created ' . $bot->s3_path . '.zip');
+                    // Create zip file with folder in local storage
                     $file_content = ZipHelper::createZip($bot->s3_path);
+                    // Create new zip file for storage s3
                     $disk->put($bot->s3_path . '.zip', $file_content);
                 }
-
                 Storage::deleteDirectory('scripts');
             }
         } catch (Throwable $throwable) {
@@ -85,7 +86,7 @@ class S3BucketHelper
                         $array = Arr::add($array, 'custom_script', Storage::get($file));
                     }
                 }
-                Storage::deleteDirectory($folder_name);
+                Storage::deleteDirectory('scripts');
                 Log::info(print_r($array, true));
                 return $array;
             }
@@ -109,43 +110,6 @@ class S3BucketHelper
                 $i++;
             }
             return $result && $result['params'] ? json_encode($result['params']) : null;
-        } catch (Throwable $throwable) {
-            Log::error("Throwable: {$throwable->getMessage()}");
-        }
-    }
-
-    /**
-     * @return string
-     */
-    public static function generateEnvFile()
-    {
-        try {
-            $API_HOST                       = config('bot_instance.api_url');
-            $SOCKET_HOST                    = config('bot_instance.socket_url');
-            $AWS_ACCESS_KEY_ID              = config('aws.credentials.key');
-            $AWS_SECRET_ACCESS_KEY          = config('aws.credentials.secret');
-            $AWS_BUCKET                     = config('aws.bucket');
-            $AWS_CLOUDFRONT_INSTANCES_HOST  = str_ireplace('https://', '', config('aws.instance_cloudfront'));
-            $AWS_REGION                     = config('aws.region');
-            return "SOCKET_SERVER_HOST={$SOCKET_HOST}
-API_URL={$API_HOST}
-AWS_ACCESS_KEY_ID={$AWS_ACCESS_KEY_ID}
-AWS_SECRET_ACCESS_KEY={$AWS_SECRET_ACCESS_KEY}
-AWS_BUCKET={$AWS_BUCKET}
-AWS_CLOUDFRONT_INSTANCES_HOST={$AWS_CLOUDFRONT_INSTANCES_HOST}
-AWS_REGION={$AWS_REGION}";
-        } catch (Throwable $throwable) {
-            Log::error("Throwable: {$throwable->getMessage()}");
-        }
-    }
-
-    /**
-     * @return string
-     */
-    public static function generateShellFile()
-    {
-        try {
-            return "#!bin/bash";
         } catch (Throwable $throwable) {
             Log::error("Throwable: {$throwable->getMessage()}");
         }

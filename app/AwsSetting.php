@@ -2,6 +2,9 @@
 
 namespace App;
 
+/**
+ * @method static isDefault()
+ */
 class AwsSetting extends BaseModel
 {
     protected $table = "aws_settings";

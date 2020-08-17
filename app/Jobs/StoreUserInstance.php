@@ -235,8 +235,7 @@ class StoreUserInstance implements ShouldQueue
                 'bot_name'                  => $this->bot->name,
                 'params'                    => $parameters,
                 'aws_region'                => $this->instance->region->code,
-                'aws_custom_script'         => $this->bot->aws_custom_script,
-                'aws_custom_package_json'   => $this->bot->aws_custom_package_json,
+                's3_path'                   => $this->bot->s3_path,
             ], $details);
 
             Log::debug(print_r($data, true));

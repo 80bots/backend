@@ -56,14 +56,13 @@ class ZipHelper
     public static function unZip(string $s3_path)
     {
         try {
-            $disk = Storage::disk('s3');
-            $files = $disk->get($s3_path . '.zip');
+            $disk   = Storage::disk('s3');
+            $files  = $disk->get($s3_path . '.zip');
+
             Storage::put($s3_path . '.zip', $files);
-
-            $zip_file = storage_path('app/' . $s3_path . '.zip');
-
-            $zip = new ZipArchive;
-            $res = $zip->open($zip_file);
+            $zip_file   = storage_path('app/' . $s3_path . '.zip');
+            $zip        = new ZipArchive;
+            $res        = $zip->open($zip_file);
             if ($res === TRUE) {
                 $path = storage_path('app/' . $s3_path);
                 $zip->extractTo($path);

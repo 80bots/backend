@@ -73,9 +73,9 @@ class SyncS3Bots extends Command
                                 ]);
                             }
                         }
+                        Log::info(print_r($localFiles, true));
                         Storage::deleteDirectory($s3Path);
                     }
-                    Log::info(print_r($s3File, true));
                 }
             }
         } catch (Throwable $throwable) {
