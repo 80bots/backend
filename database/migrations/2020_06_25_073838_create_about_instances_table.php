@@ -25,8 +25,7 @@ class CreateAboutInstancesTable extends Migration
             $table->unsignedSmallInteger('aws_storage_gb')->nullable();
             $table->string('aws_image_id')->nullable();
             $table->json('params');
-            $table->text('aws_custom_script')->nullable();
-            $table->json('aws_custom_package_json')->nullable();
+            $table->string('s3_path')->nullable();
 
             $table->timestamps();
             $table->softDeletes();

@@ -19,8 +19,7 @@ class AboutInstance extends BaseModel
         'aws_storage_gb',
         'aws_image_id',
         'params',
-        'aws_custom_script',
-        'aws_custom_package_json'
+        's3_path',
     ];
 
     /**
