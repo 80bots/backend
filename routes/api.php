@@ -46,6 +46,7 @@ Route::group([
         Route::get('/', 'BotController@index')->name('running');
         Route::get('/tags', 'BotController@getTags')->name('tags');
         Route::get('/sync', 'BotController@syncBots')->name('sync');
+        Route::put('/status/{status}', 'BotController@updateStatus')->name('status');
 
         Route::group([
             'prefix' => 'instances',

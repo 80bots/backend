@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @method static updateOrCreate(array $array)
+ * @method static whereIn(string $string, $input)
+ * @method static where(string $string, string $string1, $param)
  */
 class SchedulingInstancesDetails extends BaseModel
 {

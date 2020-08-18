@@ -141,7 +141,6 @@ return [
     */
 
     'providers' => [
-
         /*
          * Laravel Framework Service Providers...
          */
@@ -168,7 +167,6 @@ return [
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
         Aws\Laravel\AwsServiceProvider::class,
-
         /*
          * Package Service Providers...
          */
@@ -183,7 +181,6 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\HorizonServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
-
     ],
 
     /*

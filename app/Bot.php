@@ -6,6 +6,14 @@ use App\Helpers\QueryHelper;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
+/**
+ * @property mixed name
+ * @property mixed aws_custom_script
+ * @property mixed path
+ * @property mixed aws_custom_package_json
+ * @property mixed s3_path
+ * @property int|mixed|null platform_id
+ */
 class Bot extends BaseModel
 {
     const STATUS_ACTIVE     = 'active';
@@ -45,9 +53,7 @@ class Bot extends BaseModel
         'description',
         'parameters',
         'path',
-        'aws_startup_script',
-        'aws_custom_script',
-        'aws_custom_package_json',
+        's3_path',
         'status',
         'type'
     ];

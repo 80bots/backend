@@ -15,7 +15,6 @@ use App\Services\Aws;
 use App\User;
 use Aws\Result;
 use Carbon\Carbon;
-use Carbon\CarbonTimeZone;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -38,10 +37,6 @@ class InstanceHelper
     {
         try {
             $ct = Carbon::createFromFormat('D h:i A', "{$detail->day} {$detail->time}", $detail->time_zone);
-
-            Log::info(print_r($currentTime, true));
-            Log::info(print_r($ct->getTimestamp(), true));
-
             return $currentTime === $ct->getTimestamp();
         } catch (Throwable $throwable) {
             Log::error("Throwable isScheduleInstance: {$throwable->getMessage()}");
@@ -346,6 +341,11 @@ class InstanceHelper
         return $state === 'terminated';
     }
 
+    /**
+     * @param $instanceId
+     * @param string $path
+     * @return S3Object
+     */
     public static function getObjectByPath($instanceId, string $path): S3Object
     {
         $path = trim($path, '/');
@@ -383,6 +383,11 @@ class InstanceHelper
         return $object;
     }
 
+    /**
+     * @param string|null $extension
+     * @param string $path
+     * @return string
+     */
     private static function getTypeS3ObjectByExtension(?string $extension, string $path): string
     {
         switch ($extension) {

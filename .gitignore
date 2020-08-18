@@ -14,6 +14,7 @@ public/vendor/*
 storage/framework/sessions/*
 storage/framework/views/*
 storage/logs/*
+storage/app/scripts/*
 storage/framework/cache/*
 /node_modules
 
