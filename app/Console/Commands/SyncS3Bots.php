@@ -62,6 +62,7 @@ class SyncS3Bots extends Command
                         foreach ($localFiles as $localFile) {
                             if (Str::contains($localFile,'/_metadata.json')) {
                                 $data = json_decode(Storage::get($localFile));
+                                Log::info(print_r($data, true));
                                 Bot::updateOrCreate([
                                     'platform_id'        => $data->platform_id,
                                     'name'               => $data->name,
@@ -74,7 +75,7 @@ class SyncS3Bots extends Command
                             }
                         }
                         Log::info(print_r($localFiles, true));
-                        Storage::deleteDirectory($s3Path);
+                        Storage::deleteDirectory('scripts');
                     }
                 }
             }
