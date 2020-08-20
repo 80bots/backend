@@ -19,7 +19,7 @@
   1. AwsSyncAmis ( aws:sync-amis ) is launched every 30 min 
   (Synchronizes AMI's list, which are available in each region for selecting in the region settings);
 
-  2. CalculateInstancesUpTime ( instance:calculate-up-time ) is launched every 10 min 
+  2. CalculateInstancesUpTime ( instance:calculate-up-time ) is launched every 1 min 
   (Calculates the Uptime time of all launched instances);
 
   3. CleanUpUnused ( instance:clean ) - is launched hourly 
@@ -29,18 +29,20 @@
   (Runs and Stops users' instances, which are specified for a scheduled launch or stop considering the time and time zone chosen by the user);
 
   5. InstanceSyncScheduling ( instance:sync ) is launched every 5 min: 
-  - Synchronizes all instances in all regions; 
-  - If the user's email is specified in the tags and such instance is missing in DB - we create it;
-  - Remove all the instances with no data (if the issue occurred and the instance wasn't created on AWS);
-  - Apply Terminated status - if such instance exists in our DB, but was removed on AWS; 
+    - Synchronizes all instances in all regions; 
+    - If the user's email is specified in the tags and such instance is missing in DB - we create it;
+    - Remove all the instances with no data (if the issue occurred and the instance wasn't created on AWS);
+    - Apply Terminated status - if such instance exists in our DB, but was removed on AWS; 
 
   6. SyncDataFolders ( sync:folders ) is launched per minute 
   (Synchronizes the structure of folders, screenshots, logs and JSON files stored on AWS S3 with our DB);
 
   7. SyncLocalBots ( bots:sync-local ) is launched once a day 
-  (Synchronizes bots list and their parameters using puppeteer GIT repo, which is set up on the project); 
-
-####The functionality performed in the background ( JOBS ):
+  (Synchronizes bots list and their parameters using puppeteer GIT repo, which is set up on the project);
+  
+  8. SyncS3Bots ( bots:sync-s3 )  is launched once a day 
+  (Synchronizes bots list and ); Syncs a list of custom scripts and their parameters via s3 bucket, that is configured for this project
+#### The functionality performed in the background ( JOBS ):
 
   1. InstanceChangeStatus - changes an instance status ( 'terminated', 'running', 'stopped' );
   
