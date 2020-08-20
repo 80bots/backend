@@ -29,27 +29,27 @@ class Aws
     /**
      * @var Ec2Client
      */
-    protected $ec2;
+    protected Ec2Client $ec2;
 
     /**
      * @var S3Client
      */
-    protected $s3;
+    protected S3Client $s3;
 
     /**
      * @var IamClient
      */
-    protected $iam;
+    protected IamClient $iam;
 
     /**
      * @var string
      */
-    protected $s3Bucket;
+    protected string $s3Bucket;
 
     /**
      * @var array
      */
-    protected $ignore;
+    protected array $ignore;
 
     /**
      * @param string $region
@@ -914,16 +914,16 @@ class Aws
      */
     protected function startupScript($path, string $params = '{}', $s3_path = ''): string
     {
-        // Checking if the script is custom.
+        // Checks whether the script is custom.
         $isCustom                       = !empty($s3_path);
-        // Directories for a new instance to run the script.
+        // User name for instance.
         $user                           = "kabas";
+        // Pass to streamer and custom-script/puppeteer
         $workName                       = $isCustom ? "src" : "puppeteer";
         $homeDir                        = "/home/{$user}";
         $streamerDir                    = "{$homeDir}/data-streamer";
         $workDir                        = "{$homeDir}/{$workName}";
-        Log::info('work directory' . $workDir);
-        // Commands to run streamer and script.
+        // Commands to streamer and custom-script/puppeteer
         $streamerCommand                = "git pull && yarn && yarn build && pm2 start --name \"data-streamer\" yarn -- start";
         $scriptCommand                  = "yarn && DISPLAY=:1 node {$path} > /dev/null";
         // A piece of script for the correct work of a custom script.
@@ -936,15 +936,16 @@ class Aws
         $localAdjustment                = '';
         // Check project is locally deployed.
         $isLocalEnv                     = config('app.env') === 'local';
-        // AWS variables.
+        // Variables (needed for the streamer to work correctly).
         $API_HOST                       = config('bot_instance.api_url');
         $SOCKET_HOST                    = config('bot_instance.socket_url');
+        // AWS variables (needed for the streamer to work correctly and streamer correct work and installing aws configure for an instance.).
         $AWS_ACCESS_KEY_ID              = config('aws.credentials.key');
         $AWS_SECRET_ACCESS_KEY          = config('aws.credentials.secret');
         $AWS_BUCKET                     = config('aws.bucket');
         $AWS_CLOUDFRONT_INSTANCES_HOST  = str_ireplace('https://', '', config('aws.instance_cloudfront'));
         $AWS_REGION                     = config('aws.region');
-        //
+        // Script for puppeteer
         $commonBeforeRun = <<<HERESHELL
 cd {$workDir} && git pull
 cat > {$workDir}/params/params.json <<EOF
@@ -952,7 +953,7 @@ cat > {$workDir}/params/params.json <<EOF
 EOF
 chown -R {$user}:{$user} {$workDir}/params/params.json
 HERESHELL;
-        //
+        // Script for custom scripts
         $customBeforeRun = <<<HERESHELL
 # - Add AWS configure. -
 cd {$homeDir}
@@ -980,7 +981,7 @@ echo "LOG_PATH={$workDir}/logs" >> ./.env'
 # - Changing permissions for the custom script folder. -
 chown -R {$user}:{$user} {$workDir}
 HERESHELL;
-        //
+        // Running scripts depending on whether the script is custom.
         $beforeRun = $isCustom ? $customBeforeRun : $commonBeforeRun;
         // This script overwrites the API and SOCKETS endpoint in order to fix them if the project is locally deployed
         if($isLocalEnv && $API_HOST && $SOCKET_HOST) {
@@ -1017,7 +1018,6 @@ su - {$user} -c '{$homeDir}/startup.sh'
 exit 0
 EOF
 chmod +x /etc/rc.local
-# -  -
 {$beforeRun}
 # - Run startup script. -
 su - {$user} -c '{$homeDir}/startup.sh'
@@ -1104,7 +1104,6 @@ HERESHELL;
             return $this->ec2->describeImages([
                 'Filters' => [
                     ['Name' => 'owner-id', 'Values' => [$owner]],
-                    //['Name' => 'image-id', 'Values' => ['ami-0de51bde84cbc7049']]
                 ]
             ]);
         } catch (Throwable $throwable) {
