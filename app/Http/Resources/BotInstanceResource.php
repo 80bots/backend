@@ -22,21 +22,22 @@ class BotInstanceResource extends JsonResource
         $uptime     = ($this->total_up_time ?? 0) + ($this->cron_up_time ?? 0);
 
         $data = [
-            'id'                => $this->id ?? '',
-            'region'            => $region->name ?? '',
-            'instance_id'       => $this->aws_instance_id ?? '',
-            'launched_by'       => $this->tag_user_email ?? '',
-            'name'              => $this->tag_name ?? '',
-            'bot_name'          => $this->bot->name ?? '',
-            'parameters'        => $this->bot->parameters ?? '',
-            'launched_at'       => $details->start_time ?? '',
-            'uptime'            => $uptime,
-            'total_up_time'     => $this->total_up_time ?? 0,
-            'cron_up_time'      => $this->cron_up_time ?? 0,
-            'status'            => $this->aws_status ?? BotInstance::STATUS_TERMINATED,
-            'ip'                => $this->aws_public_ip ?? '',
-            'is_in_queue'       => $this->is_in_queue ?? 0,
-            'storage_channel'   => "instances.{$this->aws_instance_id}.storage"
+            'id'                    => $this->id ?? '',
+            'region'                => $region->name ?? '',
+            'instance_id'           => $this->aws_instance_id ?? '',
+            'launched_by'           => $this->tag_user_email ?? '',
+            'name'                  => $this->tag_name ?? '',
+            'bot_name'              => $this->bot->name ?? '',
+            'parameters'            => $this->bot->parameters ?? '',
+            'launched_at'           => $details->start_time ?? '',
+            'uptime'                => $uptime,
+            'total_up_time'         => $this->total_up_time ?? 0,
+            'cron_up_time'          => $this->cron_up_time ?? 0,
+            'status'                => $this->aws_status ?? BotInstance::STATUS_TERMINATED,
+            'ip'                    => $this->aws_public_ip ?? '',
+            'is_in_queue'           => $this->is_in_queue ?? 0,
+            'storage_channel'       => "instances.{$this->aws_instance_id}.storage",
+            'notification_channel'  => "instances.{$this->aws_instance_id}.notification",
         ];
 
         if (Auth::check()) {
