@@ -924,10 +924,11 @@ class Aws
         $streamerDir                    = "{$homeDir}/data-streamer";
         $workDir                        = "{$homeDir}/{$workName}";
         // Commands to streamer and custom-script/puppeteer
-        $streamerCommand                = "git pull && yarn && yarn build && pm2 start --name \"data-streamer\" yarn -- start";
-        $scriptCommand                  = "yarn && DISPLAY=:1 node {$path} > /dev/null";
+        $streamerCommand                = "git pull && yarn && yarn build && yarn test";
+        $scriptCommand                  = "yarn";
         // A piece of script for the correct work of a custom script.
-        $paramsScript                   = "let params = {};try{params=require('./params/params.json');}catch(e){params={};console.log('Params is not defined');console.log(e);};";
+        $paramsScript                   = "const notify=require('./utils/notify.js');let params={};try{params=require('./params/params.json');}catch(e){params={};console.log('Params is not defined');console.log(e);};";
+        $notifyScript                   = "const {parentPort}=require('worker_threads');function notify(status){if(typeof(status)===typeof(String())){parentPort.postMessage(status);}else{throw new Error('status type must be string');}} module.exports=notify;";
         // Zip file name.
         $zipName                        = str_ireplace('scripts/', '', $s3_path);
         // Global instance settings.
@@ -970,14 +971,15 @@ chmod +x {$workDir} && chown {$user}:{$user} {$workDir}
 sed -i "1i {$paramsScript}" {$workDir}/{$path}
 # - Create params directory. -
 mkdir -p {$workDir}/params
-# - Auto generate params/params.json file -
+mkdir -p {$workDir}/utils
+# - Auto generate params/params.json file. -
 cat > {$workDir}/params/params.json << 'EOF'
 {$params}
 EOF
-# - Fix the streamer ENV in order to handle data in the same way as it did in the puppeteer. -
-su - {$user} -c 'cd {$streamerDir} &&
-echo "OUTPUT_FOLDER={$workDir}/output" >> ./.env &&
-echo "LOG_PATH={$workDir}/logs" >> ./.env'
+# - Auto generate utils/notify.js file. -
+cat > {$workDir}/utils/notify.js << 'EOF'
+{$notifyScript}
+EOF
 # - Changing permissions for the custom script folder. -
 chown -R {$user}:{$user} {$workDir}
 HERESHELL;
@@ -994,7 +996,8 @@ echo "AWS_ACCESS_KEY_ID={$AWS_ACCESS_KEY_ID}" >> ./.env &&
 echo "AWS_SECRET_ACCESS_KEY={$AWS_SECRET_ACCESS_KEY}" >> ./.env &&
 echo "AWS_BUCKET={$AWS_BUCKET}" >> ./.env &&
 echo "AWS_CLOUDFRONT_INSTANCES_HOST={$AWS_CLOUDFRONT_INSTANCES_HOST}" >> ./.env &&
-echo "AWS_REGION={$AWS_REGION}" >> ./.env'
+echo "AWS_REGION={$AWS_REGION}" >> ./.env &&
+echo "SCRIPT_DIR={$workDir}/{$path}" >> ./.env'
 HERESHELL;
         }
 
@@ -1007,8 +1010,8 @@ su - {$user} -c 'rm -rf ~/.screenshots/*'
 #  - Generate app startup script file in the home directory. -
 cat > {$homeDir}/startup.sh << 'EOF'
 #!/bin/bash
-cd {$streamerDir} && {$streamerCommand}
 cd {$workDir} && {$scriptCommand}
+cd {$streamerDir} && {$streamerCommand}
 EOF
 chmod +x {$homeDir}/startup.sh && chown {$user}:{$user} {$homeDir}/startup.sh
 # - Generate instance startup script file in the /etc/rc.local. -
