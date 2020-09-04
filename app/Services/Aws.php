@@ -924,11 +924,11 @@ class Aws
         $streamerDir                    = "{$homeDir}/data-streamer";
         $workDir                        = "{$homeDir}/{$workName}";
         // Commands to streamer and custom-script/puppeteer
-        $streamerCommand                = "git pull && yarn && yarn build && yarn test";
-        $scriptCommand                  = "yarn";
+        $streamerCommand                = $isCustom ? "git pull && yarn && yarn build && yarn worker-custom-script" : "git pull && yarn && yarn build && yarn worker-puppeteer";
+        $scriptCommand                  = $isCustom ? "yarn" : "git pull && yarn";
         // A piece of script for the correct work of a custom script.
         $paramsScript                   = "const notify=require('./utils/notify.js');let params={};try{params=require('./params/params.json');}catch(e){params={};console.log('Params is not defined');console.log(e);};";
-        $notifyScript                   = "const {parentPort}=require('worker_threads');function notify(status){if(typeof(status)===typeof(String())){parentPort.postMessage(status);}else{throw new Error('status type must be string');}} module.exports=notify;";
+        $notifyScript                   = "const {parentPort}=require('worker_threads');function notify(status){try{if(typeof(status)===typeof(String())){parentPort.postMessage(status);}else{throw new Error('status type must be string');}}catch(err){console.log(err);}}module.exports=notify;";
         // Zip file name.
         $zipName                        = str_ireplace('scripts/', '', $s3_path);
         // Global instance settings.
@@ -949,10 +949,13 @@ class Aws
         // Script for puppeteer
         $commonBeforeRun = <<<HERESHELL
 cd {$workDir} && git pull
-cat > {$workDir}/params/params.json <<EOF
+cat > {$workDir}/params/params.json <<'EOF'
 {$params}
 EOF
 chown -R {$user}:{$user} {$workDir}/params/params.json
+# -Add path for params dir. -
+su - {$user} -c 'cd {$streamerDir} &&
+echo "PUPPETEER_PARAMS={$workDir}/params/params.json" >> ./.env'
 HERESHELL;
         // Script for custom scripts
         $customBeforeRun = <<<HERESHELL
