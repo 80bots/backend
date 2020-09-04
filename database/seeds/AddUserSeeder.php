@@ -20,12 +20,7 @@ class AddUserSeeder extends Seeder
 
 
         $users = [
-          ['name' => 'Francis', 'email' => 'francis@inforca.com', 'passwords' => 'q<jS\9EwtT9h(U`m'],
-          ['name' => 'Mishra', 'email' => 'akkimysite@gmail.com', 'passwords' => 'z8Gjhp4!v@#3Wxm'],
-          ['name' => 'Kumar', 'email' => 'kumargaf@gmail.com', 'passwords' => '?9d8%?Pm(g3~2qS)'],
-          ['name' => 'Mike', 'email' => 'mike.mitrofanov.dev@gmail.com', 'passwords' => 'B8J]+Ridb#YP=F'],
-          ['name' => 'Sergey', 'email' => 's.sergeykoval@gmail.com', 'passwords' => 't#cW=$@%^>9XS&j<'],
-          ['name' => 'Uxd', 'email' => 'uxd.jun@gmail.com', 'passwords' => '{7>bVswE+53}hGXt'],
+          ['name' => '80Bots', 'email' => 'user@80bots.com', 'passwords' => 'q<jS\9EwtT9h(U`m'],
         ];
 
         foreach ($users as $user) {
@@ -37,15 +32,6 @@ class AddUserSeeder extends Seeder
                 'region_id'     => $region,
                 'name'          => "$name",
                 'email'         => "$emailParts[0]@$emailParts[1]",
-                'password'      => bcrypt($user['passwords']),
-                'status'        => 'active',
-            ]);
-
-            DB::table('users')->insert([
-                'timezone_id'   => $timezone,
-                'region_id'     => $region,
-                'name'          => "$name",
-                'email'         => "$emailParts[0]+admin@$emailParts[1]",
                 'password'      => bcrypt($user['passwords']),
                 'status'        => 'active',
             ]);
