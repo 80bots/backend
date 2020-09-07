@@ -14,11 +14,11 @@ class DatabaseSeeder extends Seeder
          $this->call([
              AwsRegionsTableSeeder::class,
              TimezonesTableSeeder::class,
-             AddUserSeeder::class,
              AddPlatformsSeeder::class,
              BotsTableSeeder::class,
              AwsAmisTableSeeder::class,
-             AwsSettingsTableSeeder::class
+             AwsSettingsTableSeeder::class,
+             AddUserSeeder::class,
          ]);
     }
 }

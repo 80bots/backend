@@ -1,9 +1,7 @@
 <?php
 
-use App\Bot;
-use App\Platform;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Artisan;
 
 class BotsTableSeeder extends Seeder
 {

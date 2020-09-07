@@ -1,6 +1,9 @@
 <?php
 
+/** @var Factory $factory */
+
 use App\User;
+use Illuminate\Database\Eloquent\Factory;
 use Illuminate\Support\Str;
 use Faker\Generator as Faker;
 
@@ -15,7 +18,6 @@ use Faker\Generator as Faker;
 |
 */
 
-/** @var TYPE_NAME $factory */
 $factory->define(User::class, function (Faker $faker) {
     return [
         'name' => $faker->name,

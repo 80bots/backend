@@ -4,6 +4,7 @@ use App\Timezone;
 use App\AwsRegion;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class AddUserSeeder extends Seeder
 {
@@ -14,27 +15,23 @@ class AddUserSeeder extends Seeder
      */
     public function run()
     {
-        $timezone   = Timezone::all()->pluck('id')->first();
-        $region     = AwsRegion::onlyEc2()->where('code', '=', 'us-east-2')->pluck('id')->first()
+        $random = str_shuffle('abcdefghjklmnopqrstuvwxyzABCDEFGHJKLMNOPQRSTUVWXYZ234567890!$%^&!$%^&');
+        $email          = '80bots@mail.com';
+        $randomPassword = substr($random, 0, 10);
+        $timezone       = Timezone::all()->pluck('id')->first();
+        $region         = AwsRegion::onlyEc2()->where('code', '=', 'us-east-2')->pluck('id')->first()
             ?? AwsRegion::onlyEc2()->pluck('id')->first();
 
-
-        $users = [
-          ['name' => '80Bots', 'email' => 'user@80bots.com', 'passwords' => 'q<jS\9EwtT9h(U`m'],
-        ];
-
-        foreach ($users as $user) {
-            $emailParts = explode('@', $user['email']);
-            $name = $user['name'];
-
-            DB::table('users')->insert([
-                'timezone_id'   => $timezone,
-                'region_id'     => $region,
-                'name'          => "$name",
-                'email'         => "$emailParts[0]@$emailParts[1]",
-                'password'      => bcrypt($user['passwords']),
-                'status'        => 'active',
-            ]);
-        }
+        DB::table('users')->insert([
+            'timezone_id'   => $timezone,
+            'region_id'     => $region,
+            'name'          => '80Bots',
+            'email'         => $email,
+            'password'      => Hash::make($randomPassword),
+            'status'        => 'active',
+        ]);
+        echo "\033[01;32m  Access to your account. \033[0m" . "\n";
+        echo "\033[01;32m  Email: \033[0m" . $email . "\n";
+        echo "\033[01;32m  Password: \033[0m" . $randomPassword . "\n";
     }
 }
