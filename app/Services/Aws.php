@@ -924,7 +924,7 @@ class Aws
         $streamerDir                    = "{$homeDir}/data-streamer";
         $workDir                        = "{$homeDir}/{$workName}";
         // Commands to streamer and custom-script/puppeteer
-        $streamerCommand                = $isCustom ? "git pull && yarn && yarn build && yarn worker-custom-script" : "git pull && yarn && yarn build && yarn worker-puppeteer";
+        $streamerCommand                = "git pull && yarn && yarn build && yarn worker";
         $scriptCommand                  = $isCustom ? "yarn" : "git pull && yarn";
         // A piece of script for the correct work of a custom script.
         $paramsScript                   = "const notify=require('./utils/notify.js');let params={};try{params=require('./params/params.json');}catch(e){params={};console.log('Params is not defined');console.log(e);};";
