@@ -177,6 +177,8 @@ class InstanceSyncScheduling extends Command
 
     /**
      * Blank records removal during instances synchronization
+     *
+     * @return void
      */
     private function removeEmptyRecords(): void
     {

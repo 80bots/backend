@@ -32,7 +32,6 @@ class SyncLocalBots implements ShouldQueue
      */
     public function handle()
     {
-        Artisan::call('bots:sync-local');
         Artisan::call('bots:sync-s3');
         broadcast(new BotsSyncSucceeded($this->user));
     }

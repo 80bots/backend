@@ -12,6 +12,6 @@ class BotsTableSeeder extends Seeder
      */
     public function run()
     {
-        Artisan::call('bots:sync-local');
+        Artisan::call('bots:sync-s3');
     }
 }

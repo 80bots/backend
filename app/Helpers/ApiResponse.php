@@ -2,7 +2,6 @@
 
 namespace App\Helpers;
 
-// standard api response
 class ApiResponse
 {
     private $data;
@@ -30,7 +29,6 @@ class ApiResponse
                 $response[$key] = $data;
             }
         }
-
         return $response;
     }
 

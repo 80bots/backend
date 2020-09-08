@@ -16,7 +16,6 @@ class CreateBotsTable extends Migration
     {
         Schema::create('bots', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedInteger('platform_id')->nullable();
             $table->string('name');
             $table->text('description')->nullable();
             $table->json('parameters')->nullable();
@@ -34,12 +33,6 @@ class CreateBotsTable extends Migration
             ])->default(Bot::TYPE_PUBLIC);
 
             $table->timestamps();
-
-            $table->foreign('platform_id')
-                ->references('id')
-                ->on('platforms')
-                ->onUpdate('cascade')
-                ->onDelete('cascade');
         });
     }
 
@@ -50,10 +43,6 @@ class CreateBotsTable extends Migration
      */
     public function down()
     {
-        Schema::table('bots', function (Blueprint $table) {
-            $table->dropForeign(['platform_id']);
-        });
-
         Schema::dropIfExists('bots');
     }
 }

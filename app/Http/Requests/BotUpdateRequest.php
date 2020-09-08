@@ -31,7 +31,6 @@ class BotUpdateRequest extends FormRequest
             'update.name'                       => 'string',
             'update.description'                => 'string|nullable',
             'update.status'                     => "in:{$active},{$inactive}",
-            'update.platform'                   => 'string|nullable',
             'update.tags'                       => 'array',
             'update.type'                       => 'in:private,public',
             'update.users'                      => 'array',
