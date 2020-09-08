@@ -16,7 +16,7 @@ class AddUserSeeder extends Seeder
     public function run()
     {
         $random = str_shuffle('abcdefghjklmnopqrstuvwxyzABCDEFGHJKLMNOPQRSTUVWXYZ234567890!$%^&!$%^&');
-        $email          = '80bots@mail.com';
+        $email          = 'hello@80bots.com';
         $randomPassword = substr($random, 0, 10);
         $timezone       = Timezone::all()->pluck('id')->first();
         $region         = AwsRegion::onlyEc2()->where('code', '=', 'us-east-2')->pluck('id')->first()
