@@ -25,7 +25,7 @@ class AddUserSeeder extends Seeder
         DB::table('users')->insert([
             'timezone_id'   => $timezone,
             'region_id'     => $region,
-            'name'          => '80Bots',
+            'name'          => '80bots',
             'email'         => $email,
             'password'      => Hash::make($randomPassword),
             'status'        => 'active',
