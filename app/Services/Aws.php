@@ -933,8 +933,6 @@ class Aws
         $globalSettings                 = AwsSetting::isDefault()->first();
         $globalSettingsScript           = $globalSettings ? $globalSettings->script : '';
         $localAdjustment                = '';
-        // Check project is locally deployed.
-        $isLocalEnv                     = config('app.env') === 'local';
         // Variables (needed for the streamer to work correctly).
         $API_HOST                       = config('bot_instance.api_url');
         $SOCKET_HOST                    = config('bot_instance.socket_url');
@@ -973,9 +971,8 @@ EOF
 # - Changing permissions for the custom script folder. -
 chown -R {$user}:{$user} {$workDir}
 HERESHELL;
-        // This script overwrites the API and SOCKETS endpoint in order to fix them if the project is locally deployed
-        if($isLocalEnv && $API_HOST && $SOCKET_HOST) {
-            $localAdjustment =
+        // This script overwrites
+        $localAdjustment =
 <<<HERESHELL
 su - {$user} -c 'cd {$streamerDir} &&
 echo "SOCKET_SERVER_HOST={$SOCKET_HOST}" >> ./.env &&
@@ -987,7 +984,6 @@ echo "AWS_CLOUDFRONT_INSTANCES_HOST={$AWS_CLOUDFRONT_INSTANCES_HOST}" >> ./.env 
 echo "AWS_REGION={$AWS_REGION}" >> ./.env &&
 echo "SCRIPT_DIR={$workDir}/{$path}" >> ./.env'
 HERESHELL;
-        }
 
         return <<<HERESHELL
 echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
