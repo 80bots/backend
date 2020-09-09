@@ -914,18 +914,16 @@ class Aws
      */
     protected function startupScript($path, string $params = '{}', $s3_path = ''): string
     {
-        // Checks whether the script is custom.
-        $isCustom                       = !empty($s3_path);
         // User name for instance.
         $user                           = "kabas";
-        // Pass to streamer and custom-script/puppeteer
-        $workName                       = $isCustom ? "src" : "puppeteer";
+        // Pass to streamer and custom-script
+        $workName                       = "src";
         $homeDir                        = "/home/{$user}";
         $streamerDir                    = "{$homeDir}/data-streamer";
         $workDir                        = "{$homeDir}/{$workName}";
-        // Commands to streamer and custom-script/puppeteer
+        // Commands to streamer and custom-script
         $streamerCommand                = "git pull && yarn && yarn build && yarn worker";
-        $scriptCommand                  = $isCustom ? "yarn" : "git pull && yarn";
+        $scriptCommand                  = "yarn";
         // A piece of script for the correct work of a custom script.
         $paramsScript                   = "const notify=require('./utils/notify.js');let params={};try{params=require('./params/params.json');}catch(e){params={};console.log('Params is not defined');console.log(e);};";
         $notifyScript                   = "const {parentPort}=require('worker_threads');function notify(status){try{if(typeof(status)===typeof(String())){parentPort.postMessage(status);}else{throw new Error('status type must be string');}}catch(err){console.log(err);}}module.exports=notify;";
@@ -946,17 +944,6 @@ class Aws
         $AWS_BUCKET                     = config('aws.bucket');
         $AWS_CLOUDFRONT_INSTANCES_HOST  = str_ireplace('https://', '', config('aws.instance_cloudfront'));
         $AWS_REGION                     = config('aws.region');
-        // Script for puppeteer
-        $commonBeforeRun = <<<HERESHELL
-cd {$workDir} && git pull
-cat > {$workDir}/params/params.json <<'EOF'
-{$params}
-EOF
-chown -R {$user}:{$user} {$workDir}/params/params.json
-# -Add path for params dir. -
-su - {$user} -c 'cd {$streamerDir} &&
-echo "PUPPETEER_PARAMS={$workDir}/params/params.json" >> ./.env'
-HERESHELL;
         // Script for custom scripts
         $customBeforeRun = <<<HERESHELL
 # - Add AWS configure. -
@@ -986,8 +973,6 @@ EOF
 # - Changing permissions for the custom script folder. -
 chown -R {$user}:{$user} {$workDir}
 HERESHELL;
-        // Running scripts depending on whether the script is custom.
-        $beforeRun = $isCustom ? $customBeforeRun : $commonBeforeRun;
         // This script overwrites the API and SOCKETS endpoint in order to fix them if the project is locally deployed
         if($isLocalEnv && $API_HOST && $SOCKET_HOST) {
             $localAdjustment =
@@ -1024,7 +1009,7 @@ su - {$user} -c '{$homeDir}/startup.sh'
 exit 0
 EOF
 chmod +x /etc/rc.local
-{$beforeRun}
+{$customBeforeRun}
 # - Run startup script. -
 su - {$user} -c '{$homeDir}/startup.sh'
 HERESHELL;

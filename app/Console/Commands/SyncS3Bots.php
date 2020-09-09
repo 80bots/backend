@@ -64,7 +64,6 @@ class SyncS3Bots extends Command
                                 $data = json_decode(Storage::get($localFile));
                                 Log::info(print_r($data, true));
                                 Bot::updateOrCreate([
-                                    'platform_id'        => $data->platform_id,
                                     'name'               => $data->name,
                                     'description'        => $data->description,
                                     'parameters'         => $data->parameters,

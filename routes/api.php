@@ -33,10 +33,6 @@ Route::group([
         Route::delete('/details/delete', 'ScheduleController@deleteSchedulerDetails')->name('details.delete');
     });
 
-    Route::group(['prefix' => 'platform', 'as' => 'platform.'], function () {
-        Route::get('/types', 'PlatformController@getInstanceTypes');
-    });
-
     Route::group(['prefix' => 'aws', 'as' => 'aws.'], function () {
         Route::get('/', 'AwsSettingController@index')->name('aws');
         Route::put('/{setting}', 'AwsSettingController@update')->name('update.settings');
@@ -79,7 +75,6 @@ Route::group([
         'user'      => 'UserController',
         'schedule'  => 'ScheduleController',
         'session'   => 'InstanceSessionController',
-        'platform'  => 'PlatformController',
         'bots'      => 'BotController',
     ]);
 });

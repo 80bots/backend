@@ -11,10 +11,8 @@ use App\Http\Resources\BotCollection;
 use App\Http\Resources\BotResource;
 use App\Http\Resources\TagCollection;
 use App\Jobs\SyncLocalBots;
-use App\Platform;
 use App\Tag;
 use App\User;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
@@ -34,18 +32,11 @@ class BotController extends AppController
     {
         try {
             $limit      = $request->query('limit') ?? self::PAGINATE;
-            $platform   = $request->input('platform');
             $search     = $request->input('search');
             $sort       = $request->input('sort');
             $order      = $request->input('order') ?? 'asc';
 
             $resource = Bot::query();
-
-            if (! empty($platform)) {
-                $resource->whereHas('platform', function (Builder $query) use ($platform) {
-                    $query->where('name', '=', $platform);
-                });
-            }
 
             if (! empty($search)) {
                 $resource->where('name', 'like', "%{$search}%")
@@ -85,7 +76,6 @@ class BotController extends AppController
             $path                   = $data['path'] ?? null;
             $custom_script          = $data['aws_custom_script'];
             $parameters             = $data['parameters'] ?? null;
-            $platform               = $data['platform'] ?? null;
 
             $random                 = GeneratorID::generate();
             $folderName             = "scripts/{$random}";
@@ -98,12 +88,7 @@ class BotController extends AppController
                 $path = Str::slug($name, '_') . '.custom.js';
             }
 
-            if(!empty($platform)) {
-                $platform = $this->getPlatformId($request->input('platform'));
-            }
-
             $bot = Bot::create([
-                'platform_id'       => $platform,
                 'name'              => $name,
                 'description'       => $data['description'],
                 'parameters'        => $parameters,
@@ -157,7 +142,6 @@ class BotController extends AppController
             $name                   = $updateData['name'];
             $path                   = $updateData['path'] ?? null;
             $parameters             = $updateData['parameters'] ?? null;
-            $platform               = $updateData['platform'] ?? null;
             $tags                   = $updateData['tags'];
             $users                  = $updateData['users'];
             $folderName             = $bot->s3_path;
@@ -170,12 +154,7 @@ class BotController extends AppController
                 $path = Str::slug($name, '_') . '.custom.js';
             }
 
-            if(!empty($platform)) {
-                $platform = $this->getPlatformId($platform);
-            }
-
             $bot->fill([
-                'platform_id'       => $platform,
                 'name'              => $name,
                 'description'       => $updateData['description'],
                 'parameters'        => $parameters,
@@ -349,22 +328,5 @@ class BotController extends AppController
             $users  = User::whereIn('id', $input)->pluck('id')->toArray();
             $bot->users()->sync($users);
         }
-    }
-
-    /**
-     * @param string|null $name
-     * @return int|null
-     */
-    private function getPlatformId(?string $name): ?int
-    {
-        $platform = Platform::findByName($name)->first();
-
-        if (empty($platform)) {
-            $platform = Platform::create([
-                'name' => $name
-            ]);
-        }
-
-        return $platform->id ?? null;
     }
 }

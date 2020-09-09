@@ -3,7 +3,6 @@
 namespace App;
 
 use App\Helpers\QueryHelper;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
@@ -12,7 +11,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property mixed path
  * @property mixed aws_custom_package_json
  * @property mixed s3_path
- * @property int|mixed|null platform_id
  */
 class Bot extends BaseModel
 {
@@ -23,10 +21,6 @@ class Bot extends BaseModel
     const TYPE_PRIVATE      = 'private';
 
     const ORDER_FIELDS      = [
-        'platform' => [
-            'entity'    => QueryHelper::ENTITY_PLATFORM,
-            'field'     => 'name'
-        ],
         'name' => [
             'entity'    => QueryHelper::ENTITY_BOT,
             'field'     => 'name'
@@ -48,7 +42,6 @@ class Bot extends BaseModel
     protected $table = "bots";
 
     protected $fillable = [
-        'platform_id',
         'name',
         'description',
         'parameters',
@@ -57,14 +50,6 @@ class Bot extends BaseModel
         'status',
         'type'
     ];
-
-    /**
-     * @return BelongsTo
-     */
-    public function platform()
-    {
-        return $this->belongsTo(Platform::class, 'platform_id');
-    }
 
     /**
      * @return BelongsToMany

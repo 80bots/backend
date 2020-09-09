@@ -50,7 +50,6 @@ class BotResource extends JsonResource
             'name'                      => $this->name ?? '',
             'description'               => $this->description ?? '',
             'parameters'                => $formattedParameters ?? [],
-            'platform'                  => $this->platform->name ?? '',
             'status'                    => $this->status ?? '',
             'type'                      => $this->type ?? '',
             'aws_custom_script'         => $scripts['custom_script'] ?? '',

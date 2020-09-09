@@ -14,7 +14,6 @@ class DatabaseSeeder extends Seeder
          $this->call([
              AwsRegionsTableSeeder::class,
              TimezonesTableSeeder::class,
-             AddPlatformsSeeder::class,
              BotsTableSeeder::class,
              AwsAmisTableSeeder::class,
              AwsSettingsTableSeeder::class,

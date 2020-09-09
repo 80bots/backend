@@ -13,7 +13,6 @@ class QueryHelper
     const ENTITY_BOT_INSTANCES_DETAILS  = 'ENTITY_BOT_INSTANCES_DETAILS';
     const ENTITY_AWS_REGION             = 'ENTITY_AWS_REGION';
     const ENTITY_BOT                    = 'ENTITY_BOT';
-    const ENTITY_PLATFORM               = 'ENTITY_PLATFORM';
     const ENTITY_SCHEDULING             = 'ENTITY_SCHEDULING';
 
     /**
@@ -48,7 +47,6 @@ class QueryHelper
             case self::ENTITY_BOT_INSTANCES_DETAILS:
                 break;
         }
-
         return $query;
     }
 
@@ -61,18 +59,10 @@ class QueryHelper
     public static function orderBot(Builder $query, array $sort, string $order): Builder
     {
         switch ($sort['entity']) {
-            case self::ENTITY_PLATFORM:
-                $query->leftJoin('platforms', function ($join) {
-                    $join->on('bots.platform_id', '=', 'platforms.id');
-                })
-                ->orderBy("platforms.{$sort['field']}", $order)
-                ->select('bots.*');
-                break;
             case self::ENTITY_BOT:
                 $query->orderBy("{$sort['field']}", $order);
                 break;
         }
-
         return $query;
     }
 
@@ -103,7 +93,6 @@ class QueryHelper
                     ->select('scheduling_instances.*');
                 break;
         }
-
         return $query;
     }
 
@@ -120,7 +109,6 @@ class QueryHelper
                 $query->orderBy("{$sort['field']}", $order);
                 break;
         }
-
         return $query;
     }
 }

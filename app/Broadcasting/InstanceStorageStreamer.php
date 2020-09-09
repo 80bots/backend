@@ -12,7 +12,9 @@ class InstanceStorageStreamer
      * @return void
      */
     public function __construct()
-    {}
+    {
+    //
+    }
 
     /**
      * Authenticate the user's access to the channel.
