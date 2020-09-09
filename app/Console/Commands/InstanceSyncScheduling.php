@@ -50,9 +50,7 @@ class InstanceSyncScheduling extends Command
             Log::info('Sync started at ' . date('Y-m-d h:i:s'));
 
             $this->removeEmptyRecords();
-
             $this->clearTerminatedInstances();
-
             $regions = AwsRegion::all();
 
             if (! empty($regions)) {

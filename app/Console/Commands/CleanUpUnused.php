@@ -66,6 +66,6 @@ class CleanUpUnused extends Command
                         Log::error($throwable->getMessage());
                     }
                 }
-        });
+            });
     }
 }

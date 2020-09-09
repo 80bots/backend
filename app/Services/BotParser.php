@@ -7,7 +7,6 @@ class BotParser
     /** ABOUT
     {
         "name": "linkedin-track-companies",
-        "platform": "Linkedin",
         "description": "maintians a record of no. of employees and jobs posted by companies provided.",
         "icon": "fa-meh-rolling-eyes"
     }
