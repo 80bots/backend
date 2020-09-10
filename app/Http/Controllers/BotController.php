@@ -15,6 +15,7 @@ use App\Tag;
 use App\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -177,6 +178,27 @@ class BotController extends AppController
                 if(!empty($users)) $this->addUsersToBot($bot, $users);
                 return $this->success((new BotResource($bot))->toArray($request));
             }
+        } catch (Throwable $throwable){
+            return $this->error(__('user.server_error'), $throwable->getMessage());
+        }
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param Request $request
+     * @param $id
+     * @return JsonResponse
+     */
+    public function show(Request $request, $id)
+    {
+        try{
+            $bot = Bot::findOrFail($id);
+            if(!$bot) {
+                $this->error('Not found', __('bots.not_found'));
+            }
+
+            return $this->success((new BotResource($bot))->toArray($request));
         } catch (Throwable $throwable){
             return $this->error(__('user.server_error'), $throwable->getMessage());
         }
