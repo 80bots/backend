@@ -36,11 +36,8 @@
 
   6. SyncDataFolders ( sync:folders ) is launched per minute 
   (Synchronizes the structure of folders, screenshots, logs and JSON files stored on AWS S3 with our DB);
-
-  7. SyncLocalBots ( bots:sync-local ) is launched once a day 
-  (Synchronizes bots list and their parameters using puppeteer GIT repo, which is set up on the project);
   
-  8. SyncS3Bots ( bots:sync-s3 )  is launched once a day 
+  7. SyncS3Bots ( bots:sync-s3 )  is launched once a day 
   (Synchronizes bots list and ); Syncs a list of custom scripts and their parameters via s3 bucket, that is configured for this project
 #### The functionality performed in the background ( JOBS ):
 

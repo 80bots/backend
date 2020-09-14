@@ -36,7 +36,9 @@ class InstanceHelper
     public static function isScheduleInstance(SchedulingInstancesDetails $detail, int $currentTime): bool
     {
         try {
-            $ct = Carbon::createFromFormat('D h:i A', "{$detail->day} {$detail->time}", $detail->time_zone);
+            $ct = $detail->day === "Everyday" ?
+                Carbon::createFromFormat('h:i A', "{$detail->time}", $detail->time_zone) :
+                Carbon::createFromFormat('D h:i A', "{$detail->day} {$detail->time}", $detail->time_zone);
             return $currentTime === $ct->getTimestamp();
         } catch (Throwable $throwable) {
             Log::error("Throwable isScheduleInstance: {$throwable->getMessage()}");
@@ -68,7 +70,9 @@ class InstanceHelper
 
                         if (!empty($scheduler->instance->aws_instance_id)) {
 
-                            $ct = Carbon::createFromFormat('D h:i A', "{$detail->day} {$detail->time}", $detail->time_zone);
+                            $ct = $detail->day === "Everyday" ?
+                                Carbon::createFromFormat('h:i A', "{$detail->time}", $detail->time_zone) :
+                                Carbon::createFromFormat('D h:i A', "{$detail->day} {$detail->time}", $detail->time_zone);
 
                             array_push($insertHistory, [
                                 'scheduling_instances_id' => $scheduler->id,

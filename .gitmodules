@@ -1,3 +1,0 @@
-[submodule "resources/puppeteer"]
-	path = resources/puppeteer
-	url = https://github.com/80bots/puppeteer
