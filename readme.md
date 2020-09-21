@@ -1,4 +1,4 @@
-![80bots backend](public/80bots-logo.svg)
+![80bots backend](public/80bots_logo.svg)
 
 # 80bots backend
 
