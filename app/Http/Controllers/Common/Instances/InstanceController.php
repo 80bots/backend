@@ -58,6 +58,10 @@ class InstanceController extends AppController
             });
 
             $bots = (new BotInstanceCollection($resource->paginate($limit)))->response()->getData();
+
+            foreach ($bots->data as $bot) {
+                $bot->difference = S3Object::calculateStatistic($bot->id);
+            }
             $meta = $bots->meta ?? null;
 
             $response = [

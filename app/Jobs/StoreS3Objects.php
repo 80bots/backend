@@ -10,6 +10,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class StoreS3Objects implements ShouldQueue
 {
@@ -29,18 +30,22 @@ class StoreS3Objects implements ShouldQueue
      */
     protected $key;
 
+    protected float $difference;
+
     /**
      * Create a new job instance.
      *
      * @param User $user
      * @param string $instance_id
      * @param string $key
+     * @param float $difference
      */
-    public function __construct(User $user, string $instance_id, string $key)
+    public function __construct(User $user, string $instance_id, string $key,  float $difference = 0.00)
     {
         $this->user         = $user;
         $this->instance_id  = $instance_id;
         $this->key          = $key;
+        $this->difference   = $difference;
     }
 
     /**
@@ -57,6 +62,6 @@ class StoreS3Objects implements ShouldQueue
 
         if (! $instance) return;
 
-        InstanceHelper::getObjectByPath($instance->id, $this->key);
+        InstanceHelper::getObjectByPath($instance->id, $this->key, $this->difference);
     }
 }

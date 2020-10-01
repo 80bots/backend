@@ -348,9 +348,10 @@ class InstanceHelper
     /**
      * @param $instanceId
      * @param string $path
+     * @param float $difference
      * @return S3Object
      */
-    public static function getObjectByPath($instanceId, string $path): S3Object
+    public static function getObjectByPath($instanceId, string $path,  float $difference = 0.00): S3Object
     {
         $path = trim($path, '/');
         $pathInfo = pathinfo($path);
@@ -365,7 +366,8 @@ class InstanceHelper
                 'path' => $path,
                 'name' => $filename,
                 'entity' => $entity,
-                'type' => $type
+                'type' => $type,
+                'difference' => $difference
             ]);
         } else {
             $object = S3Object::wherePath($path)
@@ -380,7 +382,8 @@ class InstanceHelper
                     'path' => $path,
                     'name' => $filename,
                     'entity' => $entity,
-                    'type' => $type
+                    'type' => $type,
+                    'difference' => $difference
                 ]);
             }
         }

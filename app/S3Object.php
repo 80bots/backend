@@ -5,6 +5,9 @@ namespace App;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class S3Object extends BaseModel
@@ -29,6 +32,7 @@ class S3Object extends BaseModel
         'expires',
         'entity',
         'type',
+        'difference'
     ];
 
     /**
@@ -135,5 +139,24 @@ class S3Object extends BaseModel
         return $query->where('instance_id', '=', $instanceId)
             ->where('expires', '<=', $expires)
             ->delete();
+    }
+
+    /**
+     *
+     */
+    public static function calculateStatistic(int $id = 0) {
+        $statistic = Cache::remember($id . '_instance_activity', 480, function () use ($id) {
+            return S3Object::where('instance_id', $id)
+                ->pluck('difference')
+                ->chunk(24)
+                ->map(function ($chunk) {
+                    return $chunk->avg();
+                });
+        });
+
+        if( !$statistic ) {
+            Cache::forget($id . '_instance_activity' );
+        }
+        return $statistic;
     }
 }

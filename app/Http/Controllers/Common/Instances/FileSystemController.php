@@ -8,6 +8,7 @@ use App\Jobs\StoreS3Objects;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class FileSystemController extends InstanceController
 {
@@ -20,7 +21,8 @@ class FileSystemController extends InstanceController
     {
         $user = Auth::user();
         $key = $request->input('key');
-        dispatch(new StoreS3Objects( $user, $instance_id, $key ));
+        $diff = $request->input('difference') ?? 0.00;
+        dispatch(new StoreS3Objects( $user, $instance_id, $key, $diff ));
         return response()->json([], 201);
     }
 
@@ -86,4 +88,6 @@ class FileSystemController extends InstanceController
         $resource->where('path', 'not like');
         return $resource;
     }
+
+
 }
