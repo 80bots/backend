@@ -58,6 +58,7 @@ Route::group([
     Route::group(['prefix' => 'instances', 'as' => 'instances.', 'namespace' => 'Common\Instances'], function () {
         Route::get('/', 'InstanceController@index')->name('running');
         Route::get('/regions', 'InstanceController@regions')->name('regions');
+        Route::post('/update', 'InstanceController@updateLastNotification');
         Route::post('/launch', 'ManageController@launchInstances')->name('launch');
         Route::post('/restore', 'ManageController@restoreInstance')->name('restore');
         Route::post('/copy', 'ManageController@copy')->name('copy');

@@ -69,7 +69,8 @@ class BotInstance extends BaseModel
         'is_in_queue',
         'aws_status',
         'status',
-        'start_time'
+        'start_time',
+        'last_notification',
     ];
 
     /**

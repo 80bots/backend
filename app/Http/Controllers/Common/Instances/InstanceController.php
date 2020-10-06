@@ -60,6 +60,7 @@ class InstanceController extends AppController
             $bots = (new BotInstanceCollection($resource->paginate($limit)))->response()->getData();
 
             foreach ($bots->data as $bot) {
+                $bot->last_notification = BotInstance::where('id', $bot->id)->pluck('last_notification')[0];
                 $bot->difference = S3Object::calculateStatistic($bot->id);
             }
             $meta = $bots->meta ?? null;
@@ -255,5 +256,22 @@ class InstanceController extends AppController
         }
 
         return $query->first();
+    }
+
+    /**
+     * @param Request $request
+     * @param $id
+     * @return JsonResponse|\Illuminate\Http\Response
+     */
+    public function updateLastNotification(Request $request) {
+        try {
+            $aws_instance_id = htmlspecialchars($request->input('aws_instance_id') ?? '');
+            $notification = htmlspecialchars($request->input('notification') ?? '');
+            BotInstance::where('aws_instance_id', $aws_instance_id)->update(['last_notification' => $notification]);
+        } catch (Throwable $throwable) {
+            Log::error($throwable->getMessage());
+            return $this->error(__('keywords.server_error'), $throwable->getMessage());
+        }
+        return response('The instance last notification has been updated.', 200);
     }
 }

@@ -147,6 +147,7 @@ class S3Object extends BaseModel
     public static function calculateStatistic(int $id = 0) {
         $statistic = Cache::remember($id . '_instance_activity', 480, function () use ($id) {
             return S3Object::where('instance_id', $id)
+                ->where('created_at', '>=', Carbon::now()->subDay())
                 ->pluck('difference')
                 ->chunk(24)
                 ->map(function ($chunk) {
