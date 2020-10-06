@@ -148,8 +148,9 @@ class S3Object extends BaseModel
         $statistic = Cache::remember($id . '_instance_activity', 480, function () use ($id) {
             return S3Object::where('instance_id', $id)
                 ->where('created_at', '>=', Carbon::now()->subDay())
+                ->where('type', 'screenshots')
                 ->pluck('difference')
-                ->chunk(24)
+                ->chunk(48)
                 ->map(function ($chunk) {
                     return $chunk->avg();
                 });
