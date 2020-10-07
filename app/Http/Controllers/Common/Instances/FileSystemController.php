@@ -42,6 +42,9 @@ class FileSystemController extends InstanceController
 
         $limit = $request->query('limit') ?? self::PAGINATE;
         $parent = $request->query('parent') ?? null;
+        $isFiltered = $request->query('isFiltered') == 'false' || empty($request->query('isFiltered'))
+                      ? 0
+                      : 1;
         $parentFolder = $instance->s3Objects()->where('path', '=', "{$parent}")->first();
 
         if(!$parentFolder) {
@@ -56,7 +59,15 @@ class FileSystemController extends InstanceController
 
         $resource = $resource->latest();
 
-        $objects = (new S3ObjectCollection($resource->paginate($limit)))->response()->getData();
+        if ($isFiltered == true) {
+            $objects = (new S3ObjectCollection($resource->where([
+                                                            ['name', 'not like', '%blank%'],
+                                                            ['name', 'not like', '%black%']
+                                                        ])
+                                                        ->paginate($limit)))->response()->getData();
+        } else {
+            $objects = (new S3ObjectCollection($resource->paginate($limit)))->response()->getData();
+        }
 
         $meta = $objects->meta ?? null;
 
