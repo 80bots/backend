@@ -61,7 +61,7 @@ class InstanceController extends AppController
 
             foreach ($bots->data as $bot) {
                 $bot->last_notification = BotInstance::where('id', $bot->id)->pluck('last_notification')[0];
-                $bot->difference = S3Object::calculateStatistic($bot->id);
+                $bot->difference = S3Object::calculateStatistic($bot->id, $bot->status);
             }
             $meta = $bots->meta ?? null;
 

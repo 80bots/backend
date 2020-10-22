@@ -144,16 +144,27 @@ class S3Object extends BaseModel
     /**
      *
      */
-    public static function calculateStatistic(int $id = 0) {
-        $statistic = Cache::remember($id . '_instance_activity', 480, function () use ($id) {
-            return S3Object::where('instance_id', $id)
-                ->where('created_at', '>=', Carbon::now()->subDay())
-                ->where('type', 'screenshots')
-                ->pluck('difference')
-                ->chunk(48)
-                ->map(function ($chunk) {
-                    return $chunk->avg();
-                });
+    public static function calculateStatistic(int $id = 0, string $status = '') {
+        $statistic = Cache::remember($id . '_instance_activity', 480, function () use ($id, $status) {
+            if( $status === 'active' ) {
+                return S3Object::where('instance_id', $id)
+                    ->where('created_at', '>=', Carbon::now()->subDay())
+                    ->where('type', 'screenshots')
+                    ->pluck('difference')
+                    ->chunk(48)
+                    ->map(function ($chunk) {
+                        return $chunk->avg();
+                    });
+            } else {
+                return S3Object::where('instance_id', $id)
+                    ->where('type', 'screenshots')
+                    ->pluck('difference')
+                    ->chunk(48)
+                    ->map(function ($chunk) {
+                        return $chunk->avg();
+                    });
+            }
+
         });
 
         if( !$statistic ) {
