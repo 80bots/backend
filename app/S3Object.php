@@ -157,6 +157,7 @@ class S3Object extends BaseModel
                     });
             } else {
                 return S3Object::where('instance_id', $id)
+                    ->limit(17280)
                     ->where('type', 'screenshots')
                     ->pluck('difference')
                     ->chunk(48)
