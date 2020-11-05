@@ -28,9 +28,11 @@ class ManageController extends InstanceController {
     protected function launchInstances(Request $request)
     {
         try {
-
+            Log::debug("Launch Instance Start");
             $botId = $request->input('bot_id');
             $params = collect($request->input('params'));
+
+            Log::debug("Params : ".$params);
 
             if ($params->isEmpty()) {
                 return $this->error(__('keywords.error'), __('keywords.instance.parameters_incorrect'));
@@ -62,14 +64,17 @@ class ManageController extends InstanceController {
 
             $awsSetting = AwsSetting::isDefault()->first();
 
+            Log::debug("Aws Setting");
+
             $imageId = $region->default_image_id ?? $awsSetting->image_id;
+
+            Log::debug("Image Id");
 
             if ($this->issetAmiInRegion($region, $imageId)) {
 
                 Log::debug("issetAmiInRegion ISSET");
-
+                Log::debug("params ".$params);
                 foreach ($params as $param) {
-
                     $instance = BotInstance::create([
                         'user_id'           => Auth::id(),
                         'tag_user_email'    => Auth::user()->email ?? '',
