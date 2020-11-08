@@ -6,7 +6,7 @@ use App\AwsSetting;
 use App\Bot;
 use App\BotInstance;
 use App\Helpers\InstanceHelper;
-use App\Jobs\InstanceChangeStatus;
+use App\Jobs\InstanceStatusChange;
 use App\Jobs\RestoreUserInstance;
 use App\Jobs\StoreUserInstance;
 use App\Services\Aws;
@@ -189,7 +189,7 @@ class ManageController extends InstanceController {
 
         $instance->setAwsStatusPending();
 
-        dispatch(new InstanceChangeStatus($instance, $user, $instance->region, $status));
+        dispatch(new InstanceStatusChange($instance, $user, $instance->region, $status));
 
         return true;
     }

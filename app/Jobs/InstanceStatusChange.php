@@ -20,7 +20,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
-class InstanceChangeStatus implements ShouldQueue
+class InstanceStatusChange implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -80,7 +80,7 @@ class InstanceChangeStatus implements ShouldQueue
      */
     public function handle()
     {
-        Log::info('Starting InstanceChangeStatus for ' . $this->instance->id ?? '');
+        Log::info('Starting InstanceStatusChange for ' . $this->instance->id ?? '');
 
         $aws = new Aws;
         $aws->ec2Connection($this->region->code);
@@ -97,7 +97,7 @@ class InstanceChangeStatus implements ShouldQueue
                 break;
         }
 
-        Log::info('Completed InstanceChangeStatus for ' . $this->instance->id ?? '');
+        Log::info('Completed InstanceStatusChange for ' . $this->instance->id ?? '');
     }
 
     /**
@@ -165,7 +165,7 @@ class InstanceChangeStatus implements ShouldQueue
             }
 
         } else {
-            dispatch(new InstanceChangeStatus(
+            dispatch(new InstanceStatusChange(
                 $this->instance,
                 $this->user,
                 $this->region,
@@ -199,7 +199,7 @@ class InstanceChangeStatus implements ShouldQueue
             }
 
         } else {
-            dispatch(new InstanceChangeStatus(
+            dispatch(new InstanceStatusChange(
                     $this->instance,
                     $this->user,
                     $this->region,

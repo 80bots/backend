@@ -8,7 +8,7 @@ use App\BotInstance;
 use App\BotInstancesDetails;
 use App\DeleteSecurityGroup;
 use App\InstanceSessionsHistory;
-use App\Jobs\InstanceChangeStatus;
+use App\Jobs\InstanceStatusChange;
 use App\S3Object;
 use App\SchedulingInstancesDetails;
 use App\Services\Aws;
@@ -534,7 +534,7 @@ class InstanceHelper
 
         $instance->setAwsStatusPending();
 
-        dispatch(new InstanceChangeStatus($instance, $user, $instance->region, $status));
+        dispatch(new InstanceStatusChange($instance, $user, $instance->region, $status));
 
         return true;
     }
