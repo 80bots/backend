@@ -45,8 +45,9 @@ class FileSystemController extends InstanceController
         $isFiltered = $request->query('isFiltered') == 'false' || empty($request->query('isFiltered'))
                       ? 0
                       : 1;
-        $parentFolder = $instance->s3Objects()->where('path', '=', "{$parent}")->first();
-
+	
+        $parentFolder = $instance->s3Objects()->where('path', '=', "{$parent}")->orderBy('id', 'DESC')->first();
+	    Log::debug("parent Folder............... ".$parentFolder);
         if(!$parentFolder) {
             return $this->success([
                 'data'  => $objects->data ?? [],

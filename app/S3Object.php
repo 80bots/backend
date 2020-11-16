@@ -146,26 +146,15 @@ class S3Object extends BaseModel
      */
     public static function calculateStatistic(int $id = 0, string $status = '') {
         $statistic = Cache::remember($id . '_instance_activity', 480, function () use ($id, $status) {
-            if( $status === 'active' ) {
                 return S3Object::where('instance_id', $id)
                     ->where('created_at', '>=', Carbon::now()->subDay())
                     ->where('type', 'screenshots')
-                    ->pluck('difference')
-                    ->chunk(48)
-                    ->map(function ($chunk) {
-                        return $chunk->avg();
-                    });
-            } else {
-                return S3Object::where('instance_id', $id)
-                    ->limit(17280)
-                    ->where('type', 'screenshots')
-                    ->pluck('difference')
-                    ->chunk(48)
-                    ->map(function ($chunk) {
-                        return $chunk->avg();
-                    });
-            }
-
+                   // ->pluck('difference')
+                    ->select('difference', 'created_at')->get();
+                   // ->chunk(4)
+                   // ->map(function ($chunk) {
+                       // return $chunk->avg();
+                   // });
         });
 
         if( !$statistic ) {
@@ -173,4 +162,43 @@ class S3Object extends BaseModel
         }
         return $statistic;
     }
+
+    // public static function calculateStatistic(int $id = 0, string $status = '') {
+    //     $statistic = Cache::remember($id . '_instance_activity', 480, function () use ($id, $status) {
+    //         return S3Object::where('instance_id', $id)
+    //                 ->where('created_at', '>=', Carbon::now()->subDay())
+    //                 ->where('type', 'screenshots')
+    //                 ->pluck('difference')
+    //                 ->chunk(4)
+    //                 ->map(function ($chunk) {
+    //                     return $chunk->avg();
+    //                 });
+            
+    //         // if( $status === 'active' ) {
+    //         //     return S3Object::where('instance_id', $id)
+    //         //         ->where('created_at', '>=', Carbon::now()->subDay())
+    //         //         ->where('type', 'screenshots')
+    //         //         ->pluck('difference')
+    //         //         ->chunk(4)
+    //         //         ->map(function ($chunk) {
+    //         //             return $chunk->avg();
+    //         //         });
+    //         // } else {
+    //         //     return S3Object::where('instance_id', $id)
+    //         //         ->limit(17280)
+    //         //         ->where('type', 'screenshots')
+    //         //         ->pluck('difference')
+    //         //         ->chunk(4)
+    //         //         ->map(function ($chunk) {
+    //         //             return $chunk->avg();
+    //         //         });
+    //         // }
+
+    //     });
+
+    //     if( !$statistic ) {
+    //         Cache::forget($id . '_instance_activity' );
+    //     }
+    //     return $statistic;
+    // }
 }
