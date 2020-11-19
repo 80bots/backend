@@ -125,6 +125,7 @@ class InstanceController extends AppController
      */
     public function update(Request $request, $id)
     {
+        Log::debug("+++++++++++++update instance++++++++++++");
         try {
 
             $instance = $this->getInstanceWithCheckUser($id);
@@ -136,11 +137,14 @@ class InstanceController extends AppController
             $running = BotInstance::STATUS_RUNNING;
             $stopped = BotInstance::STATUS_STOPPED;
             $terminated = BotInstance::STATUS_TERMINATED;
-
+            $restart = BotInstance::STATUS_RESTART;
+            Log::debug("updateData ". json_encode($request->input('update')));
             if (!empty($request->input('update'))) {
                 $updateData = $request->validate([
-                    'update.status' => "in:{$running},{$stopped},{$terminated}"
+                    'update.status' => "in:{$running},{$stopped},{$terminated},{$restart}"
                 ]);
+
+                Log::debug('updateData after filter : '.json_encode($updateData));
 
                 foreach ($updateData['update'] as $key => $value) {
                     switch ($key) {
