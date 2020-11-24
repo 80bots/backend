@@ -48,6 +48,48 @@ class S3BucketHelper
         }
     }
 
+
+
+    /**
+     * Creates or updates files by script in S3 storage.
+     *
+     * @param object $botInstance
+     * @param object $disk
+     * @param string|null $custom_script
+     * @param string|null $custom_package_json
+     * @return void
+     */
+    public static function updateOrCreateFilesS3BotInstance(object $botInstance, object $disk, $custom_script, $custom_package_json)
+    {
+        try {
+            if($botInstance->s3_path !== null) {
+                if ($disk->exists($botInstance->s3_path . '.zip')) {
+                    $isDelete = $disk->delete($botInstance->s3_path . '.zip');
+                    if($isDelete) Log::info('Update or Create files s3: Zip file delete from s3!');
+                }
+
+                Storage::put($botInstance->s3_path . '/src/' . $botInstance->path, $custom_script);
+                Storage::put($botInstance->s3_path . '/src/package.json', $custom_package_json);
+                Storage::put($botInstance->s3_path . '/_metadata.json', $botInstance);
+                Storage::put($botInstance->s3_path . '.zip', '');
+
+                if (Storage::exists($botInstance->s3_path . '.zip')) {
+                    Log::info('Update or Create files s3: Folder scripts in local created ' . $botInstance->s3_path . '.zip');
+                    // Create zip file with folder in local storage
+                    $file_content = ZipHelper::createZip($botInstance->s3_path);
+                    // Create new zip file for storage s3
+                    $disk->put($botInstance->s3_path . '.zip', $file_content);
+                }
+                Storage::deleteDirectory('scripts');
+            }
+        } catch (Throwable $throwable) {
+            Log::error("Throwable: {$throwable->getMessage()}");
+        }
+    }
+
+
+
+
     /**
      * Delete script files in S3 storage.
      *

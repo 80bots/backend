@@ -11,11 +11,20 @@ use App\Http\Resources\RegionCollection;
 use App\Http\Resources\RegionResource;
 use App\Jobs\SyncBotInstances;
 use App\Services\Aws;
+use App\Bot;
+use App\Http\Resources\BotResource;
+use App\Http\Resources\BotInstaResource;
+use Illuminate\Support\Facades\Log;
 use App\BotInstance;
 use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use App\Http\Requests\BotInstanceUpdateRequest;
+use App\Helpers\S3BucketHelper;
+use Illuminate\Support\Str;
+use App\Helpers\GeneratorID;
+use Illuminate\Support\Facades\Storage;
 use Throwable;
 
 class BotInstanceController extends InstanceController
@@ -193,5 +202,119 @@ class BotInstanceController extends InstanceController
         }
 
         return $this->error(__('user.error'), __('user.parameters_incorrect'));
+    }
+
+    public function show(Request $request, $id)
+    {
+        Log::debug("get botinstancde id {$id}");
+        try{
+
+            $botInstance = BotInstance::findOrFail($id);
+            if(!$botInstance) {
+                Log::debug("Invalid botinstance id : {$id}");
+                $this->error('Not found', __('botinstance.not_found'));
+            }
+            
+
+           // Log::debug("botInstance    {$botInstance}");
+            if(!$botInstance->path || !$botInstance->s3_path){
+               // Log::debug("path is null find script from bot table  {$botInstance->bot_id} ");
+                $bot = Bot::findOrFail($botInstance->bot_id);
+                ///Log::debug("bot {$bot}");
+                if(!$bot) {
+                    $this->error('Not found', __('bots.not_found'));
+                }
+                $parameters = $bot->parameters;
+                $path = $bot->path;
+                $s3_path  = $bot->s3_path;
+                $botInstance->parameters = $parameters;
+                $botInstance->path = $path;
+                $botInstance->s3_path = $s3_path;
+
+                Log::debug("botInstance {$botInstance}");
+                //return $this->success((new BotResource($bot))->toArray($request));
+                return $this->success((new BotInstaResource($botInstance))->toArray($request));
+            }else {
+                Log::debug("botInstance {$botInstance}");
+                Log::debug("path is not null fetch bot data from botinstance table");
+                return $this->success((new BotInstaResource($botInstance))->toArray($request));
+            }
+
+            
+        } catch (Throwable $throwable){
+            return $this->error(__('user.server_error'), $throwable->getMessage());
+        }
+    }
+
+     /**
+     * Update the specified resource in storage.
+     *
+     * @param BotInstanceUpdateRequest $request
+     * @param $id
+     * @return JsonResponse
+     */
+    public function updateInstance(BotInstanceUpdateRequest $request, $id)
+    {
+        //Log::debug("update botinstance {$id}");
+        try{
+            $botInstance        = BotInstance::find($id);
+
+            if (empty($botInstance)) {
+                return $this->notFound(__('user.not_found'), __('user.bots.not_found'));
+            }
+           // Log::debug("botId  {$botInstance->bot_id}");
+            $bot = Bot::find($botInstance->bot_id);
+            $data                   = $request->validated();
+            //Log::debug("validated data ". json_encode($data));
+            $updateData             = $data['update'];
+           // Log::debug("updateData ". json_encode($updateData));
+            $custom_script          = $updateData['aws_custom_script'];
+            $path                   = $updateData['path'] ?? null;
+            $parameters             = $updateData['parameters'] ?? null;
+            
+            $folderName             = $botInstance->s3_path;
+            if(empty($folderName)){
+                $random                 = GeneratorID::generate();
+                $folderName             = "scripts/{$random}";
+            }
+            $name                   = $bot->name;
+            if(!empty($custom_script)) {
+                //Log::debug("folderName {$folderName}");
+                $parameters = S3BucketHelper::extractParamsFromScript($custom_script);
+                //Log::debug("parameters2 {$parameters}");
+            }
+            
+            //Log::debug("name {$name}  path {$path}");
+            if(empty($path)) {
+                Log::debug("path is null");
+                $path = Str::slug($name, '_') . '.custom.js';
+                Log::debug("path  {$path} ");
+            }
+            
+            $botInstance->parameters = $parameters;
+            $botInstance->path = $path;
+            $botInstance->s3_path = $folderName;
+            //Log::debug(" botInstance {$botInstance} ");
+           
+            if ($botInstance->save()) {
+              
+                S3BucketHelper::updateOrCreateFilesS3BotInstance(
+                    $botInstance,
+                    Storage::disk('s3'),
+                    $custom_script,
+                    $updateData['aws_custom_package_json']
+                );
+                //Log::debug("Script updated");
+                return $this->success((new BotInstaResource($botInstance))->toArray($request));
+            }else{
+                Log::debug("bot instance not saved");
+
+            }
+
+
+        } catch (Throwable $throwable){
+            Log::debug("Error while updating botinstance {$throwable->getMessage()}");
+            return $this->error(__('user.server_error'), $throwable->getMessage());
+        }
     }
 }
