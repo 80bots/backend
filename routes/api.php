@@ -59,6 +59,7 @@ Route::group([
     Route::group(['prefix' => 'botinstances', 'as' => 'botinstances.'], function () {
         Route::get('/{id}', 'BotInstanceController@show')->name('get');
         Route::put('/{id}', 'BotInstanceController@updateInstance');
+        Route::post('/restart', 'BotInstanceController@restart');
     });
 
     Route::group(['prefix' => 'instances', 'as' => 'instances.', 'namespace' => 'Common\Instances'], function () {

@@ -12,6 +12,8 @@ use App\Http\Resources\RegionResource;
 use App\Jobs\SyncBotInstances;
 use App\Services\Aws;
 use App\Bot;
+use App\User;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\BotResource;
 use App\Http\Resources\BotInstaResource;
 use Illuminate\Support\Facades\Log;
@@ -24,6 +26,7 @@ use App\Http\Requests\BotInstanceUpdateRequest;
 use App\Helpers\S3BucketHelper;
 use Illuminate\Support\Str;
 use App\Helpers\GeneratorID;
+use App\Jobs\RestartInstance;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
 
@@ -314,6 +317,45 @@ class BotInstanceController extends InstanceController
 
         } catch (Throwable $throwable){
             Log::debug("Error while updating botinstance {$throwable->getMessage()}");
+            return $this->error(__('user.server_error'), $throwable->getMessage());
+        }
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param $id 
+     * @param $params
+     * @return JsonResponse
+     */
+    public function restart(Request $request)
+    {
+        Log::debug("Restart Bot Instance Start!". json_encode($request->input('params')));
+        $botInstanceId = null;
+        try{
+            $instanceId = $request->input('id');
+            Log::debug("botInstanceId {$instanceId}");
+            $botInstance = BotInstance::find($instanceId);
+            if(!$botInstance){
+                return $this->error(__('keywords.not_found'), __('keywords.botinstance.not_found'));
+            }
+            $params = collect($request->input('params'));
+            Log::debug("params+++++ " . print_r($params));
+            if ($params->isEmpty()) {
+                return $this->error(__('keywords.error'), __('keywords.instance.parameters_incorrect'));
+            }
+            $user = User::find(Auth::id()); // Get "App\User" object
+            foreach ($params as $param) {
+                Log::debug("param &&&&&&&&&&&&&&&&&& ". json_encode($param));
+                dispatch(new RestartInstance( $botInstance, $user, $param, $request->ip()));
+            }
+            return $this->success([
+                'instance_id' => $botInstanceId ?? null
+            ], __('keywords.instance.restart_success'));
+
+
+        } catch (Throwable $throwable){
+            Log::debug("Error while restarting bot instance {$throwable->getMessage()}");
             return $this->error(__('user.server_error'), $throwable->getMessage());
         }
     }
