@@ -19,7 +19,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
-class RestartInstance implements ShouldQueue
+class UpdateScriptRestartBot implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -71,7 +71,7 @@ class RestartInstance implements ShouldQueue
      */
     public function handle()
     {
-        Log::info('Restart instance for ' . $this->instance->id ?? '');
+        Log::info('Update  Script and restart bot for ' . $this->instance->id ?? '');
 
         try {
             ini_set('memory_limit', '-1');
@@ -80,12 +80,12 @@ class RestartInstance implements ShouldQueue
             Log::debug("instance {$this->instance}");
 
             $aws = new Aws;
-            // Instance Create
-            // $newInstanceResponse = $aws->restartInstance(
-            //     $this->instance,
-            //     $this->user,
-            //     $this->params
-            // );
+            //Instance Restart
+            $newInstanceResponse = $aws->updateScriptRestartBot(
+                $this->instance,
+                $this->user,
+                $this->params
+            );
 
         } catch (GuzzleException $exception) {
 

@@ -26,7 +26,7 @@ use App\Http\Requests\BotInstanceUpdateRequest;
 use App\Helpers\S3BucketHelper;
 use Illuminate\Support\Str;
 use App\Helpers\GeneratorID;
-use App\Jobs\RestartInstance;
+use App\Jobs\UpdateScriptRestartBot;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
 
@@ -347,7 +347,7 @@ class BotInstanceController extends InstanceController
             $user = User::find(Auth::id()); // Get "App\User" object
             foreach ($params as $param) {
                 Log::debug("param &&&&&&&&&&&&&&&&&& ". json_encode($param));
-                dispatch(new RestartInstance( $botInstance, $user, $param, $request->ip()));
+                dispatch(new UpdateScriptRestartBot( $botInstance, $user, $param, $request->ip()));
             }
             return $this->success([
                 'instance_id' => $botInstanceId ?? null
