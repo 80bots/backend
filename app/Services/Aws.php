@@ -622,7 +622,7 @@ class Aws
         //Log::debug("Params  {$params}");
         $s3_path = $instance->s3_path ?? '';
 
-        $downloasScriptContent = $this->writeDownloadScript($path, $params, $s3_path);
+        $downloadScript = $this->getDownloadScript($path, $params, $s3_path);
         Log::debug("SFTP START!");
 
 
@@ -649,7 +649,7 @@ class Aws
             Log::debug("SSH login success!");
         }
         
-        
+        $ssh->setTimeout(1800);
         $ssh->exec('rm -rf /home/ubuntu/download.sh', function ($str) {
             Log::debug($str);
         });
@@ -666,29 +666,18 @@ class Aws
             Log::debug("sftp login failed");
             return null;
         }else{
-            Log::debug("Login success");
+            Log::debug("sftp login success");
         }
-        $sftp->put('/home/ubuntu/download.sh', $downloasScriptContent);
+        $sftp->put('/home/ubuntu/download.sh', $downloadScript);
         Log::debug("download file uploaded successfully");
-        //$sftp->put('/etc/rc.local', $rcLocal);
-
-       // Log::debug("rclocal file uploaded successfully");
-        $ssh->enablePTY();
-        Log::debug("PTY enabled");
-        $ssh->exec('sudo sh  /home/ubuntu/download.sh', function ($str) {
+        
+        $ssh->exec('sudo mv /home/ubuntu/download.sh /home/kabas/download.sh', function ($str) {
             Log::debug($str);
         });
-        $ssh->disablePTY();
-        Log::debug("PTY DESABLED");
-        sleep(5);
-        $ssh->enablePTY();
-        Log::debug("PTY enabled");
-        $ssh->exec('sudo -i; su kabas ;  sh /home/kabas/startup.sh ', function ($str) {
+    
+        $ssh->exec('sudo sh /home/kabas/download.sh ', function ($str) {
             Log::debug($str);
         });
-        $ssh->disablePTY();
-        Log::debug("PTY DESABLED");
-        Log::debug(" updateScript ");
         return null;
     }
 
@@ -699,7 +688,7 @@ class Aws
      * @param string $s3_path
      * @return string
      */
-    protected function writeDownloadScript($path, string $params = '{}', $s3_path = '')
+    protected function getDownloadScript($path, string $params = '{}', $s3_path = '')
     {
         // User name for instance.
         $user                           = "kabas";
@@ -730,45 +719,45 @@ class Aws
         $AWS_CLOUDFRONT_INSTANCES_HOST  = str_ireplace('https://', '', config('aws.instance_cloudfront'));
         $AWS_REGION                     = config('aws.region');
         // Script for custom scripts
-        $customBeforeRun = <<<HERESHELL
-        # - Add AWS configure. -
-        sudo -i
-        su kabas
-        sudo pkill -f node;
-        sudo pkill -f chromium;
-        cd /home/kabas/storage/screenshots
-        rm -rf *
-        cd /home/kabas/storage/logs
-        rm -rf *
-        rm -rf /home/kabas/_metadata.json
-        rm -rf /home/kabas/src
-        cd {$homeDir}
-        aws configure set aws_access_key_id {$AWS_ACCESS_KEY_ID}
-        aws configure set aws_secret_access_key {$AWS_SECRET_ACCESS_KEY}
-        aws configure set default.region {$AWS_REGION}
-        aws configure set output json
+        $downloadScript = <<<HERESHELL
+        # download script
+        set -x
+        su - {$user} -c 'ls -l'
+        su - {$user} -c 'pkill -f node'
+        su - {$user} -c 'pkill -f chromium'
+        su - {$user} -c 'cd /home/{$user}/storage/screenshots; rm -rf *'
+        su - {$user} -c 'cd /home/{$user}/storage/logs; rm -rf *'
+        su - {$user} -c  'rm -rf /home/{$user}/_metadata.json'
+        su - {$user} -c 'rm -rf  /home/{$user}/src'
+        su - {$user} -c 'cd /home/{$user}'
+        su - {$user} -c 'aws configure set aws_access_key_id {$AWS_ACCESS_KEY_ID}'
+        su - {$user} -c 'aws configure set aws_secret_access_key {$AWS_SECRET_ACCESS_KEY}'
+        su - {$user} -c 'aws configure set default.region {$AWS_REGION}'
+        su - {$user} -c 'aws configure set output json'
         # - Download script from s3. -
-        aws s3 cp s3://{$AWS_BUCKET}/{$s3_path}.zip {$zipName}.zip
+        su - {$user} -c 'aws s3 cp s3://{$AWS_BUCKET}/{$s3_path}.zip {$zipName}.zip'
         # - Unzip file. -
-        unzip {$zipName}.zip
-        chmod +x {$workDir} && chown {$user}:{$user} {$workDir}
+        su - {$user} -c 'unzip {$zipName}.zip'
+        su - {$user} -c 'chmod +x /home/{$user}/src && chown {$user}:{$user} /home/{$user}/src'
         # - Add parameters for custom script. -
-        sed -i "1i {$paramsScript}" {$workDir}/{$path}
+        sed -i "1i {$paramsScript}"   /home/{$user}/src/nike_buy_bot.custom.js
         # - Create params directory. -
-        mkdir -p {$workDir}/params
-        mkdir -p {$workDir}/utils
-        # - Auto generate params/params.json file. -
-        cat > {$workDir}/params/params.json << 'EOF'
+        su - {$user} -c 'mkdir -p /home/{$user}/src/params'
+        su - {$user} -c 'mkdir -p /home/{$user}/src/utils'
+
+        su - {$user} -c 'cat > /home/{$user}/src/params/params.json << 'EOF'
         {$params}
-        EOF
+        EOF'
         # - Auto generate utils/notify.js file. -
-        cat > {$workDir}/utils/notify.js << 'EOF'
-        {$notifyScript}
-        EOF
+        su - {$user} -c "cat > /home/{$user}/src/utils/notify.js << 'EOF'
+        {$notifyScript} 
+        EOF"
         # - Changing permissions for the custom script folder. -
-        chown -R {$user}:{$user} {$workDir}
+        su - {$user} -c 'chown -R {$user}:{$user} /home/{$user}/src'
+        sleep 4
+        su - kabas -c 'cd /home/{$user}/src ; yarn ; cd /home/{$user}/data-streamer ; nohup yarn worker &'
         HERESHELL;
-        return $customBeforeRun;
+        return $downloadScript;
     }
 
     /**

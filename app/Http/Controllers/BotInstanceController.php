@@ -346,7 +346,7 @@ class BotInstanceController extends InstanceController
             }
             $user = User::find(Auth::id()); // Get "App\User" object
             foreach ($params as $param) {
-                Log::debug("param &&&&&&&&&&&&&&&&&& ". json_encode($param));
+                Log::debug("param ". json_encode($param));
                 dispatch(new UpdateScriptRestartBot( $botInstance, $user, $param, $request->ip()));
             }
             return $this->success([

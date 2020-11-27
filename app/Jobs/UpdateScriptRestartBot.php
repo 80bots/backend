@@ -87,20 +87,7 @@ class UpdateScriptRestartBot implements ShouldQueue
                 $this->params
             );
 
-        } catch (GuzzleException $exception) {
-
-            $pos = strpos($exception->getMessage(), '<?xml version="1.0" encoding="UTF-8"?>');
-
-            if ($pos === false) {
-                Log::error("Error on catch Throwable : {$exception->getMessage()}");
-            } else {
-                $message = preg_replace('/^(.*)<\?xml version="1\.0" encoding="UTF-8"\?>/s', '', $exception->getMessage());
-                Log::error("Error on catch GuzzleException : {$message}");
-            }
-
-            $this->removeInstance();
-
-        } catch (Throwable $throwable) {
+        }catch (Throwable $throwable) {
 
             $pos = strpos($throwable->getMessage(), '<?xml version="1.0" encoding="UTF-8"?>');
 
@@ -110,56 +97,6 @@ class UpdateScriptRestartBot implements ShouldQueue
                 $message = preg_replace('/^(.*)<\?xml version="1\.0" encoding="UTF-8"\?>/s', '', $throwable->getMessage());
                 Log::error("Error on catch Throwable : {$message}");
             }
-
-            $this->removeInstance();
-        }
-
-        broadcast(new InstanceLaunched($this->instance, $this->user));
-    }
-
-    /**
-     * @return void
-     */
-    private function removeInstance()
-    {
-        Log::debug("removeInstance");
-        Log::debug(print_r($this->instance, true));
-
-        if (! empty($this->instance)) {
-            $this->instance->setAwsStatusTerminated();
-        }
-    }
-
-    /**
-     * @return void
-     */
-    private function addInstanceInfo()
-    {
-        try {
-
-            Log::debug("Start addInstanceInfo");
-
-            $details = $this->instanceDetail->only('aws_instance_type', 'aws_storage_gb', 'aws_image_id');
-            $parameters = json_encode($this->params);
-            $data = array_merge([
-                'instance_id'               => $this->instance->id,
-                'tag_name'                  => $this->instance->tag_name,
-                'tag_user_email'            => $this->instance->tag_user_email,
-                'bot_path'                  => $this->bot->path,
-                'bot_name'                  => $this->bot->name,
-                'params'                    => $parameters,
-                'aws_region'                => $this->instance->region->code,
-                's3_path'                   => $this->bot->s3_path,
-            ], $details);
-
-            Log::debug(print_r($data, true));
-
-            AboutInstance::create($data);
-
-            Log::debug("Completed addInstanceInfo");
-
-        } catch (Throwable $throwable) {
-            Log::error($throwable->getMessage());
         }
     }
 }
