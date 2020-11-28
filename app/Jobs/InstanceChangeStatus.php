@@ -19,6 +19,9 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use phpseclib\Crypt\RSA;
+use phpseclib\Net\SSH2;
+use Illuminate\Support\Facades\Storage;
 
 class InstanceChangeStatus implements ShouldQueue
 {
@@ -80,7 +83,7 @@ class InstanceChangeStatus implements ShouldQueue
      */
     public function handle()
     {
-        Log::info('Starting InstanceChangeStatus for ' . $this->instance->id ?? '');
+        Log::debug("Starting InstanceChangeStatus for  {$this->instance->id}  status  {$this->status}");
 
         $aws = new Aws;
         $aws->ec2Connection($this->region->code);
@@ -92,6 +95,9 @@ class InstanceChangeStatus implements ShouldQueue
             case BotInstance::STATUS_STOPPED:
                 $this->setStatusStopped($aws);
                 break;
+            case BotInstance:: STATUS_RESTART;
+                $this->restartBot($aws);
+                break;
             default:
                 $this->setStatusTerminated($aws);
                 break;
@@ -99,6 +105,9 @@ class InstanceChangeStatus implements ShouldQueue
 
         Log::info('Completed InstanceChangeStatus for ' . $this->instance->id ?? '');
     }
+    
+
+
 
     /**
      * @param Aws $aws
@@ -118,6 +127,60 @@ class InstanceChangeStatus implements ShouldQueue
 
         return null;
     }
+
+
+    /**
+     * @param Aws $aws
+     * @return void
+     */
+    
+    private function restartBot(Aws $aws){
+        Log::debug("restart  {$this->instance->id}");
+        $current = $this->getCurrentInstanceStatus($aws);
+        Log::debug("current status   {$current}");
+        if ($current === BotInstance::STATUS_RUNNING) {
+           // Log::debug("botinstance ip : {$this->instance->aws_public_ip} ");
+            $instanceDetail =  $this->instance->details()->latest()->first();
+            //Log::debug("instanceDetail {$instanceDetail} ");
+            $result = $aws->getKeyPairObject($instanceDetail->aws_pem_file_path ?? '');
+            if (empty($result)) {
+                return $this->error(__('user.error'), __('user.access_denied'));
+            }
+            $body = $result->get('Body');
+            $dir = sys_get_temp_dir();
+            $tmp = tempnam($dir, "foo");
+            $tmp = $tmp.'.pem';
+            Log::debug("tmp file {$tmp} ");
+            file_put_contents($tmp, $body);
+            $key = new RSA();
+            //$key->loadKey($body);
+            Log::debug("use file");
+            $key->loadKey(file_get_contents($tmp));
+           
+            //echo "key ".$key;
+           
+            $ssh = new SSH2($this->instance->aws_public_ip);
+            if (!$ssh->login('ubuntu', $key)) {
+                Log::debug("ssh login failed to {$this->instance->aws_public_ip}");
+                return null;
+            }
+            $ssh->exec('sudo pkill -f node;  sudo pkill -f chromium;', function ($str) {
+                Log::debug($str);
+            });
+            sleep(5);
+            $ssh->exec('sudo /etc/rc.local start', function ($str) {
+                Log::debug($str);
+            });
+            dispatch(new SyncS3Objects($this->instance));
+            broadcast(new InstanceLaunched($this->instance, $this->user));
+
+        } else {
+            Log::debug("We can only restart stopped or terminated bot!");
+
+        }
+    }
+
+
 
     /**
      * @param Aws $aws

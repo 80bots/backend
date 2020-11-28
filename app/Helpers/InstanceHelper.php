@@ -488,6 +488,7 @@ class InstanceHelper
      */
     public static function changeInstanceStatus($status, $id, $user_id): bool
     {
+        Log::debug('InstanceHeloper::changeInstanceStatus  : '.$status);
         $instance = self::getInstanceWithCheckUser($id);
 
         if (empty($instance)) {
@@ -506,9 +507,10 @@ class InstanceHelper
 
         $user = User::find($user_id);
         $aws = new Aws;
-
-        $instance->clearPublicIp();
-
+        if($status != BotInstance::STATUS_RESTART){
+            $instance->clearPublicIp();
+        }
+        
         try {
 
             $describeInstancesResponse = $aws->describeInstances(
@@ -533,7 +535,7 @@ class InstanceHelper
         }
 
         $instance->setAwsStatusPending();
-
+        Log::debug("dispatch : instanced {$instance} ++++++++++status : {$status} +++++++++user : {$user} ++++++++++++++region {$instance->region}");
         dispatch(new InstanceChangeStatus($instance, $user, $instance->region, $status));
 
         return true;

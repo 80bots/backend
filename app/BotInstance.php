@@ -17,6 +17,7 @@ class BotInstance extends BaseModel
     const STATUS_TERMINATED = 'terminated';
     const STATUS_RUNNING    = 'running';
     const STATUS_STOPPED    = 'stopped';
+    const STATUS_RESTART    = 'restart';
 
     const ORDER_FIELDS      = [
         'region' => [

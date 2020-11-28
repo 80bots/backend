@@ -22,6 +22,9 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use phpseclib\Crypt\RSA;
+use phpseclib\Net\SFTP;
+use phpseclib\Net\SSH2;
 use Throwable;
 
 class Aws
@@ -577,6 +580,184 @@ class Aws
         Log::debug(print_r($instanceLaunchRequest, true));
 
         return $this->ec2->runInstances($instanceLaunchRequest);
+    }
+
+
+    /**
+     * Update Script and restart bot  on running EC2 Instance
+     *
+     * @param BotInstance $instance
+     * @param User $user
+     * @param array|null $params
+     * @return Result|null
+     */
+    public function updateScriptRestartBot( BotInstance $instance, User $user, $params): ?Result
+    {
+        Log::debug("AWS: update script and restart bot");
+
+        $botInstanceDetail = $instance->details()->latest()->first();
+        //Log::debug("Instance Details !");
+        if (empty($botInstanceDetail)) {
+            return null;
+        }
+        $formattedParams = [];
+        if (!empty($params)) {
+            foreach ($params as $key => $param) {
+                $formattedParams[$key] = [
+                    'value' => $param
+                ];
+            }
+
+            $formattedParams['userEmail'] = [
+                'value' => $user->email ?? ''
+            ];
+
+            $formattedParams['instanceId'] = [
+                'value' => $instance->id ?? ''
+            ];
+        }
+       // Log::debug("Formated Params ");
+        $path = $instance->path;
+        $params = json_encode($formattedParams);
+        //Log::debug("Params  {$params}");
+        $s3_path = $instance->s3_path ?? '';
+
+        $downloadScript = $this->getDownloadScript($path, $params, $s3_path);
+        Log::debug("SFTP START!");
+
+
+        $result = $this->getKeyPairObject($botInstanceDetail->aws_pem_file_path ?? '');
+        if (empty($result)) {
+            return $this->error(__('user.error'), __('user.access_denied'));
+        }
+        $body = $result->get('Body');
+        $dir = sys_get_temp_dir();
+        $tmp = tempnam($dir, "foo");
+        $tmp = $tmp.'.pem';
+        Log::debug("tmp file {$tmp} ");
+        file_put_contents($tmp, $body);
+
+        $key = new RSA();
+        Log::debug("use file");
+        $key->loadKey(file_get_contents($tmp));
+        Log::debug("public ip {$instance->aws_public_ip} ");
+        $ssh = new SSH2($instance->aws_public_ip);
+        if (!$ssh->login('ubuntu', $key)) {
+            Log::debug("ssh login failed to {$instance->aws_public_ip}");
+            return null;
+        }else{
+            Log::debug("SSH login success!");
+        }
+        
+        $ssh->setTimeout(1800);
+        $ssh->exec('rm -rf /home/ubuntu/download.sh', function ($str) {
+            Log::debug($str);
+        });
+
+        $rcLocal = <<<HERESHELL
+        #!/bin/bash
+        sudo sh /home/ubuntu/download.sh
+        su - kabas -c '/home/kabas/startup.sh'
+        exit 0
+        HERESHELL;
+
+        $sftp = new SFTP($instance->aws_public_ip);
+        if (!$sftp->login('ubuntu', $key)) {
+            Log::debug("sftp login failed");
+            return null;
+        }else{
+            Log::debug("sftp login success");
+        }
+        $sftp->put('/home/ubuntu/download.sh', $downloadScript);
+        Log::debug("download file uploaded successfully");
+        
+        $ssh->exec('sudo mv /home/ubuntu/download.sh /home/kabas/download.sh', function ($str) {
+            Log::debug($str);
+        });
+    
+        $ssh->exec('sudo sh /home/kabas/download.sh ', function ($str) {
+            Log::debug($str);
+        });
+        return null;
+    }
+
+
+    /**
+     * @param string $path
+     * @param string $params
+     * @param string $s3_path
+     * @return string
+     */
+    protected function getDownloadScript($path, string $params = '{}', $s3_path = '')
+    {
+        // User name for instance.
+        $user                           = "kabas";
+        // Pass to streamer and custom-script
+        $workName                       = "src";
+        $homeDir                        = "/home/{$user}";
+        $streamerDir                    = "{$homeDir}/data-streamer";
+        $workDir                        = "{$homeDir}/{$workName}";
+        // Commands to streamer and custom-script
+        $streamerCommand                = "git pull && yarn && yarn build && yarn worker";
+        $scriptCommand                  = "yarn";
+        // A piece of script for the correct work of a custom script.
+        $paramsScript                   = "const notify=require('./utils/notify.js');let params={};try{params=require('./params/params.json');}catch(e){params={};console.log('Params is not defined');console.log(e);};";
+        $notifyScript                   = "const {parentPort}=require('worker_threads');function notify(status){try{if(typeof(status)===typeof(String())){parentPort.postMessage(status);}else{throw new Error('status type must be string');}}catch(err){console.log(err);}}module.exports=notify;";
+        // Zip file name.
+        $zipName                        = str_ireplace('scripts/', '', $s3_path);
+        // Global instance settings.
+        $globalSettings                 = AwsSetting::isDefault()->first();
+        $globalSettingsScript           = $globalSettings ? $globalSettings->script : '';
+        $localAdjustment                = '';
+        // Variables (needed for the streamer to work correctly).
+        $API_HOST                       = config('bot_instance.api_url');
+        $SOCKET_HOST                    = config('bot_instance.socket_url');
+        // AWS variables (needed for the streamer to work correctly and streamer correct work and installing aws configure for an instance.).
+        $AWS_ACCESS_KEY_ID              = config('aws.credentials.key');
+        $AWS_SECRET_ACCESS_KEY          = config('aws.credentials.secret');
+        $AWS_BUCKET                     = config('aws.bucket');
+        $AWS_CLOUDFRONT_INSTANCES_HOST  = str_ireplace('https://', '', config('aws.instance_cloudfront'));
+        $AWS_REGION                     = config('aws.region');
+        // Script for custom scripts
+        $downloadScript = <<<HERESHELL
+        # download script
+        set -x
+        su - {$user} -c 'ls -l'
+        su - {$user} -c 'pkill -f node'
+        su - {$user} -c 'pkill -f chromium'
+        su - {$user} -c 'cd /home/{$user}/storage/screenshots; rm -rf *'
+        su - {$user} -c 'cd /home/{$user}/storage/logs; rm -rf *'
+        su - {$user} -c  'rm -rf /home/{$user}/_metadata.json'
+        su - {$user} -c 'rm -rf  /home/{$user}/src'
+        su - {$user} -c 'cd /home/{$user}'
+        su - {$user} -c 'aws configure set aws_access_key_id {$AWS_ACCESS_KEY_ID}'
+        su - {$user} -c 'aws configure set aws_secret_access_key {$AWS_SECRET_ACCESS_KEY}'
+        su - {$user} -c 'aws configure set default.region {$AWS_REGION}'
+        su - {$user} -c 'aws configure set output json'
+        # - Download script from s3. -
+        su - {$user} -c 'aws s3 cp s3://{$AWS_BUCKET}/{$s3_path}.zip {$zipName}.zip'
+        # - Unzip file. -
+        su - {$user} -c 'unzip {$zipName}.zip'
+        su - {$user} -c 'chmod +x /home/{$user}/src && chown {$user}:{$user} /home/{$user}/src'
+        # - Add parameters for custom script. -
+        sed -i "1i {$paramsScript}"   /home/{$user}/src/nike_buy_bot.custom.js
+        # - Create params directory. -
+        su - {$user} -c 'mkdir -p /home/{$user}/src/params'
+        su - {$user} -c 'mkdir -p /home/{$user}/src/utils'
+
+        su - {$user} -c 'cat > /home/{$user}/src/params/params.json << 'EOF'
+        {$params}
+        EOF'
+        # - Auto generate utils/notify.js file. -
+        su - {$user} -c "cat > /home/{$user}/src/utils/notify.js << 'EOF'
+        {$notifyScript} 
+        EOF"
+        # - Changing permissions for the custom script folder. -
+        su - {$user} -c 'chown -R {$user}:{$user} /home/{$user}/src'
+        sleep 4
+        su - kabas -c 'cd /home/{$user}/src ; yarn ; cd /home/{$user}/data-streamer ; nohup yarn worker &'
+        HERESHELL;
+        return $downloadScript;
     }
 
     /**
