@@ -265,39 +265,42 @@ class BotInstanceController extends InstanceController
             if (empty($botInstance)) {
                 return $this->notFound(__('user.not_found'), __('user.bots.not_found'));
             }
-           // Log::debug("botId  {$botInstance->bot_id}");
+            Log::debug("botId  {$botInstance->bot_id}");
             $bot = Bot::find($botInstance->bot_id);
             $data                   = $request->validated();
-            //Log::debug("validated data ". json_encode($data));
+            Log::debug("validated data ". json_encode($data));
             $updateData             = $data['update'];
-           // Log::debug("updateData ". json_encode($updateData));
+            Log::debug("updateData ". json_encode($updateData));
             $custom_script          = $updateData['aws_custom_script'];
+            Log::debug("custom_script ". $custom_script);
             $path                   = $updateData['path'] ?? null;
             $parameters             = $updateData['parameters'] ?? null;
             
             $folderName             = $botInstance->s3_path;
+            Log::debug("folderName {$folderName}");
             if(empty($folderName)){
                 $random                 = GeneratorID::generate();
                 $folderName             = "scripts/{$random}";
             }
+            Log::debug("folderName {$folderName}");
             $name                   = $bot->name;
             if(!empty($custom_script)) {
-                //Log::debug("folderName {$folderName}");
+                Log::debug("folderName {$folderName}");
                 $parameters = S3BucketHelper::extractParamsFromScript($custom_script);
-                //Log::debug("parameters2 {$parameters}");
+                Log::debug("parameters2 {$parameters}");
             }
             
-            //Log::debug("name {$name}  path {$path}");
+            Log::debug("name {$name}  path {$path}");
             if(empty($path)) {
                 Log::debug("path is null");
                 $path = Str::slug($name, '_') . '.custom.js';
                 Log::debug("path  {$path} ");
             }
-            
+            Log::debug(" botInstance {$botInstance} ");
             $botInstance->parameters = $parameters;
             $botInstance->path = $path;
             $botInstance->s3_path = $folderName;
-            //Log::debug(" botInstance {$botInstance} ");
+            Log::debug(" botInstance {$botInstance} ");
            
             if ($botInstance->save()) {
               
@@ -307,14 +310,12 @@ class BotInstanceController extends InstanceController
                     $custom_script,
                     $updateData['aws_custom_package_json']
                 );
-                //Log::debug("Script updated");
+                Log::debug("Script updated");
                 return $this->success((new BotInstaResource($botInstance))->toArray($request));
             }else{
                 Log::debug("bot instance not saved");
 
             }
-
-
         } catch (Throwable $throwable){
             Log::debug("Error while updating botinstance {$throwable->getMessage()}");
             return $this->error(__('user.server_error'), $throwable->getMessage());
