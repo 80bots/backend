@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class BotController extends AppController
@@ -130,8 +131,11 @@ class BotController extends AppController
      */
     public function update(BotUpdateRequest $request, $id)
     {
+        Log::debug("+++++++++++++++++update+++++++++++++++  {$id}");
         try{
             $bot                    = Bot::find($id);
+
+            Log::debug("bot {$bot}");
 
             if (empty($bot)) {
                 return $this->notFound(__('user.not_found'), __('user.bots.not_found'));
@@ -173,9 +177,11 @@ class BotController extends AppController
                     $custom_script,
                     $updateData['aws_custom_package_json']
                 );
-
+                Log::debug("script updated to s3");
                 if(!empty($tags)) $this->addTagsToBot($bot, $tags);
+                Log::debug("addTagsToBot");
                 if(!empty($users)) $this->addUsersToBot($bot, $users);
+                Log::debug("addUsersToBot");
                 return $this->success((new BotResource($bot))->toArray($request));
             }
         } catch (Throwable $throwable){

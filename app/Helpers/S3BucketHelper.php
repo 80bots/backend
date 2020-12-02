@@ -24,7 +24,9 @@ class S3BucketHelper
     {
         try {
             if($bot->s3_path !== null) {
+                Log::debug("delete if exists");
                 if ($disk->exists($bot->s3_path . '.zip')) {
+                    Log::debug("zip exists on s3 delete it");
                     $isDelete = $disk->delete($bot->s3_path . '.zip');
                     if($isDelete) Log::info('Update or Create files s3: Zip file delete from s3!');
                 }
@@ -37,9 +39,12 @@ class S3BucketHelper
                 if (Storage::exists($bot->s3_path . '.zip')) {
                     Log::info('Update or Create files s3: Folder scripts in local created ' . $bot->s3_path . '.zip');
                     // Create zip file with folder in local storage
+                    Log::debug("create zip ");
                     $file_content = ZipHelper::createZip($bot->s3_path);
+                    Log::debug("file_content");
                     // Create new zip file for storage s3
                     $disk->put($bot->s3_path . '.zip', $file_content);
+                    Log::debug("zip file updated on s3");
                 }
                 Storage::deleteDirectory('scripts');
             }
