@@ -34,7 +34,9 @@ class ZipHelper
             {
                 if (!$file->isDir()) {
                     $filePath     = $file->getRealPath();
+                    Log::debug("filePath {$filePath}");
                     $relativePath = str_ireplace($path, '', $filePath);
+                    Log::debug("relativePath {$relativePath}");
                     $zip->addFile($filePath, $relativePath);
                 }
             }
