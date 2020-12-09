@@ -228,12 +228,13 @@ class InstanceChangeStatus implements ShouldQueue
             }
 
         } else {
-            dispatch(new InstanceChangeStatus(
-                $this->instance,
-                $this->user,
-                $this->region,
-                $this->status)
-            )->delay(30);
+            // dispatch(new InstanceChangeStatus(
+            //     $this->instance,
+            //     $this->user,
+            //     $this->region,
+            //     $this->status)
+            // )->delay(30);
+            Log::debug(">>>>We can not start a bot which is already running!");
         }
     }
 
@@ -262,12 +263,13 @@ class InstanceChangeStatus implements ShouldQueue
             }
 
         } else {
-            dispatch(new InstanceChangeStatus(
-                    $this->instance,
-                    $this->user,
-                    $this->region,
-                    $this->status)
-            )->delay(30);
+            // dispatch(new InstanceChangeStatus(
+            //         $this->instance,
+            //         $this->user,
+            //         $this->region,
+            //         $this->status)
+            // )->delay(30);
+            Log::debug(">>>>We can not stop a bot which is already stopped!");
         }
     }
 
