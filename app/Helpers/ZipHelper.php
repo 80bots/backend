@@ -27,7 +27,13 @@ class ZipHelper
             $zip->open($zip_file, ZipArchive::CREATE | ZipArchive::OVERWRITE);
 
             $path       = storage_path('app/' . $s3_path);
+
             Log::debug("path {$path}");
+            $path = preg_replace('/releases\/[0-9]+\//', '', $path); 
+
+            Log::debug("path after replace {$path}");
+
+
             $directory  = new RecursiveDirectoryIterator($path);
             $files      = new RecursiveIteratorIterator($directory);
 
