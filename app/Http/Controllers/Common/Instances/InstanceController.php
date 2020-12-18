@@ -61,7 +61,9 @@ class InstanceController extends AppController
 
             foreach ($bots->data as $bot) {
                 $bot->last_notification = BotInstance::where('id', $bot->id)->pluck('last_notification')[0];
-                $bot->difference = S3Object::calculateStatistic($bot->id, $bot->status);
+                $bot->difference = $this->calculateStatistics(S3Object::calculateStatistic($bot->id, $bot->status));
+                //$bot->difference = S3Object::calculateStatistic($bot->id, $bot->status);
+                
             }
             $meta = $bots->meta ?? null;
 
@@ -76,6 +78,48 @@ class InstanceController extends AppController
             return $this->error(__('keywords.server_error'), $throwable->getMessage());
         }
     }
+    /**
+     * @param array
+     * @return array
+     */
+    
+     public function calculateStatistics($data){
+        $length = count($data);
+        if($length >= 2){
+            //Log::debug("caculate statisistics {$length}");
+            $difference = array();
+            $prevTime = null;
+            foreach ($data as $diff) {
+                if($prevTime != null){
+                    $prev = \Carbon\Carbon::parse($prevTime);
+                    //Log::debug("prev**** {$prev}");
+                    $current = \Carbon\Carbon::parse($diff->created_at);
+                   // Log::debug("current*** {$current}");
+                    $diffSeconds = $current->diffInSeconds($prev);
+                    //Log::debug("diffsec**** {$diffSeconds}");
+                    if($diffSeconds > 300){
+                        //Log::debug("diffsec is greater than 300");
+                        $startTime = \Carbon\Carbon::parse($prevTime);
+                        $endTime = \Carbon\Carbon::parse($diff->created_at);
+                        while(startTime < endTime){
+                            array_push($difference, 0);
+                            $startTime = $startTime . 60000;
+                        }
+                    } else {
+                       // Log::debug("diffsec is less than 300");
+                    }
+                    array_push($difference ,$diff->difference);
+                    //Log::debug("difference ".json_encode($difference));
+                }
+                $prevTime = $diff->created_at;
+            }
+            //Log::debug("difference at end ".json_encode($difference));
+            return $difference;
+        } else {
+            //Log::debug("return difference {$length}");
+            return $data;
+        }
+     }
 
     /**
      * @param Request $request

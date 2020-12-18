@@ -142,7 +142,9 @@ class S3Object extends BaseModel
     }
 
     /**
-     *
+     *@param $id
+     *@param $status
+     *@return mixed
      */
     public static function calculateStatistic(int $id = 0, string $status = '') {
         $statistic = Cache::remember($id . '_instance_activity', 480, function () use ($id, $status) {
