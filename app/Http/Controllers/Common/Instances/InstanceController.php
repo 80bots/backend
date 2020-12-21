@@ -19,6 +19,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 use Throwable;
 
 class InstanceController extends AppController
@@ -94,19 +95,19 @@ class InstanceController extends AppController
                     $prev = \Carbon\Carbon::parse($prevTime);
                     //Log::debug("prev**** {$prev}");
                     $current = \Carbon\Carbon::parse($diff->created_at);
-                   // Log::debug("current*** {$current}");
+                    //Log::debug("current*** {$current}");
                     $diffSeconds = $current->diffInSeconds($prev);
-                    //Log::debug("diffsec**** {$diffSeconds}");
-                    if($diffSeconds > 300){
+                    Log::debug("diffsec**** {$diffSeconds}");
+                    if($diffSeconds > 6){
                         //Log::debug("diffsec is greater than 300");
                         $startTime = \Carbon\Carbon::parse($prevTime);
                         $endTime = \Carbon\Carbon::parse($diff->created_at);
-                        while(startTime < endTime){
+                        while($startTime < $endTime){
                             array_push($difference, 0);
-                            $startTime = $startTime . 60000;
+                            $startTime = $startTime->addSeconds(6);
                         }
                     } else {
-                       // Log::debug("diffsec is less than 300");
+                       //Log::debug("diffsec is less than 300");
                     }
                     array_push($difference ,$diff->difference);
                     //Log::debug("difference ".json_encode($difference));
@@ -312,6 +313,7 @@ class InstanceController extends AppController
      * @return JsonResponse|\Illuminate\Http\Response
      */
     public function updateLastNotification(Request $request) {
+        Log::debug("updateLastNotification +++++++++++++++");
         try {
             $aws_instance_id = htmlspecialchars($request->input('aws_instance_id') ?? '');
             $notification = htmlspecialchars($request->input('notification') ?? '');
