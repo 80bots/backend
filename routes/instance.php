@@ -9,5 +9,6 @@ Route::group([
     'namespace' => 'Common\Instances',
     'middleware' => ['auth:api']
 ], function () {
+    Route::post('/{instance_id}/updatenotification', 'InstanceController@updateLastNotificationTunnel');
     Route::post('/{instance_id}/objects', 'FileSystemController@storeS3Object');
 });

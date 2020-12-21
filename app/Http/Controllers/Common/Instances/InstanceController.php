@@ -87,7 +87,7 @@ class InstanceController extends AppController
      public function calculateStatistics($data){
         $length = count($data);
         if($length >= 2){
-            //Log::debug("caculate statisistics {$length}");
+            Log::debug("caculate statisistics {$length}");
             $difference = array();
             $prevTime = null;
             foreach ($data as $diff) {
@@ -313,7 +313,6 @@ class InstanceController extends AppController
      * @return JsonResponse|\Illuminate\Http\Response
      */
     public function updateLastNotification(Request $request) {
-        Log::debug("updateLastNotification +++++++++++++++");
         try {
             $aws_instance_id = htmlspecialchars($request->input('aws_instance_id') ?? '');
             $notification = htmlspecialchars($request->input('notification') ?? '');
@@ -323,5 +322,23 @@ class InstanceController extends AppController
             return $this->error(__('keywords.server_error'), $throwable->getMessage());
         }
         return response('The instance last notification has been updated.', 200);
+    }
+    /**
+     * @param Request $request
+     * @param $id
+     * @return JsonResponse|\Illuminate\Http\Response
+     */
+    public function updateLastNotificationTunnel(Request $request, string $instance_id) {
+        Log::debug("updateLastNotification +++++++++++++++");
+        try {
+            $aws_instance_id = htmlspecialchars($request->input('aws_instance_id') ?? '');
+            $notification = htmlspecialchars($request->input('notification') ?? '');
+            BotInstance::where('aws_instance_id', $aws_instance_id)->update(['last_notification' => $notification]);
+        } catch (Throwable $throwable) {
+            Log::error($throwable->getMessage());
+            return $this->error(__('keywords.server_error'), $throwable->getMessage());
+        }
+        //return response('The instance last notification has been updated.', 200);
+        return response()->json([], 201);
     }
 }
