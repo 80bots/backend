@@ -40,7 +40,7 @@ class InstanceController extends AppController
             $order = $request->input('order') ?? 'asc';
             $list = $request->input('list') ?? 'all';
             $resource = BotInstance::withTrashed();
-            if ( $list === 'my') {
+            if ($list === 'my') {
                 $resource->findByUserId(Auth::id());
             }
             if (!empty($search)) {
@@ -64,7 +64,6 @@ class InstanceController extends AppController
                 $bot->last_notification = BotInstance::where('id', $bot->id)->pluck('last_notification')[0];
                 $bot->difference = $this->calculateStatistics(S3Object::calculateStatistic($bot->id, $bot->status));
                 //$bot->difference = S3Object::calculateStatistic($bot->id, $bot->status);
-                
             }
             $meta = $bots->meta ?? null;
 
@@ -79,37 +78,39 @@ class InstanceController extends AppController
             return $this->error(__('keywords.server_error'), $throwable->getMessage());
         }
     }
+
     /**
      * @param array
      * @return array
      */
-    
-     public function calculateStatistics($data){
+
+    public function calculateStatistics($data)
+    {
         $length = count($data);
-        if($length >= 2){
+        if ($length >= 2) {
             Log::debug("caculate statisistics {$length}");
             $difference = array();
             $prevTime = null;
             foreach ($data as $diff) {
-                if($prevTime != null){
+                if ($prevTime != null) {
                     $prev = \Carbon\Carbon::parse($prevTime);
                     //Log::debug("prev**** {$prev}");
                     $current = \Carbon\Carbon::parse($diff->created_at);
                     //Log::debug("current*** {$current}");
                     $diffSeconds = $current->diffInSeconds($prev);
                     Log::debug("diffsec**** {$diffSeconds}");
-                    if($diffSeconds > 6){
+                    if ($diffSeconds > 6) {
                         //Log::debug("diffsec is greater than 300");
                         $startTime = \Carbon\Carbon::parse($prevTime);
                         $endTime = \Carbon\Carbon::parse($diff->created_at);
-                        while($startTime < $endTime){
+                        while ($startTime < $endTime) {
                             array_push($difference, 0);
                             $startTime = $startTime->addSeconds(6);
                         }
                     } else {
-                       //Log::debug("diffsec is less than 300");
+                        //Log::debug("diffsec is less than 300");
                     }
-                    array_push($difference ,$diff->difference);
+                    array_push($difference, $diff->difference);
                     //Log::debug("difference ".json_encode($difference));
                 }
                 $prevTime = $diff->created_at;
@@ -120,7 +121,7 @@ class InstanceController extends AppController
             //Log::debug("return difference {$length}");
             return $data;
         }
-     }
+    }
 
     /**
      * @param Request $request
@@ -152,7 +153,7 @@ class InstanceController extends AppController
         /** @var User $user */
         $user = Auth::user();
         $resource = BotInstance::withTrashed()->find($id);
-        if(!$resource) {
+        if (!$resource) {
             $this->error('Not found', __('user.bots.not_found'));
         }
 
@@ -183,13 +184,13 @@ class InstanceController extends AppController
             $stopped = BotInstance::STATUS_STOPPED;
             $terminated = BotInstance::STATUS_TERMINATED;
             $restart = BotInstance::STATUS_RESTART;
-            Log::debug("updateData ". json_encode($request->input('update')));
+            Log::debug("updateData " . json_encode($request->input('update')));
             if (!empty($request->input('update'))) {
                 $updateData = $request->validate([
                     'update.status' => "in:{$running},{$stopped},{$terminated},{$restart}"
                 ]);
 
-                Log::debug('updateData after filter : '.json_encode($updateData));
+                Log::debug('updateData after filter : ' . json_encode($updateData));
 
                 foreach ($updateData['update'] as $key => $value) {
                     switch ($key) {
@@ -312,27 +313,32 @@ class InstanceController extends AppController
      * @param $id
      * @return JsonResponse|\Illuminate\Http\Response
      */
-    public function updateLastNotification(Request $request) {
+    public function updateLastNotification(Request $request)
+    {
         try {
             $aws_instance_id = htmlspecialchars($request->input('aws_instance_id') ?? '');
             $notification = htmlspecialchars($request->input('notification') ?? '');
-            BotInstance::where('aws_instance_id', $aws_instance_id)->update(['last_notification' => $notification]);
+            $notification = date('Y-m-d h:i:s') . '(/break/)' . $notification;
+            BotInstane::where('aws_instance_id', $aws_instance_id)->update(['last_notification' => $notification]);
         } catch (Throwable $throwable) {
             Log::error($throwable->getMessage());
             return $this->error(__('keywords.server_error'), $throwable->getMessage());
         }
         return response('The instance last notification has been updated.', 200);
     }
+
     /**
      * @param Request $request
      * @param $id
      * @return JsonResponse|\Illuminate\Http\Response
      */
-    public function updateLastNotificationTunnel(Request $request, string $instance_id) {
+    public function updateLastNotificationTunnel(Request $request, string $instance_id)
+    {
         Log::debug("updateLastNotification +++++++++++++++");
         try {
             $aws_instance_id = htmlspecialchars($request->input('aws_instance_id') ?? '');
             $notification = htmlspecialchars($request->input('notification') ?? '');
+            $notification = date('Y-m-d h:i:s') . '(/break/)' . $notification;
             BotInstance::where('aws_instance_id', $aws_instance_id)->update(['last_notification' => $notification]);
         } catch (Throwable $throwable) {
             Log::error($throwable->getMessage());

@@ -13,44 +13,44 @@ class BotInstance extends BaseModel
 {
     use SoftDeletes;
 
-    const STATUS_PENDING    = 'pending';
+    const STATUS_PENDING = 'pending';
     const STATUS_TERMINATED = 'terminated';
-    const STATUS_RUNNING    = 'running';
-    const STATUS_STOPPED    = 'stopped';
-    const STATUS_RESTART    = 'restart';
+    const STATUS_RUNNING = 'running';
+    const STATUS_STOPPED = 'stopped';
+    const STATUS_RESTART = 'restart';
 
-    const ORDER_FIELDS      = [
+    const ORDER_FIELDS = [
         'region' => [
-            'entity'    => QueryHelper::ENTITY_AWS_REGION,
-            'field'     => 'name'
+            'entity' => QueryHelper::ENTITY_AWS_REGION,
+            'field' => 'name'
         ],
         'launched_by' => [
-            'entity'    => QueryHelper::ENTITY_BOT_INSTANCES,
-            'field'     => 'tag_user_email'
+            'entity' => QueryHelper::ENTITY_BOT_INSTANCES,
+            'field' => 'tag_user_email'
         ],
         'name' => [
-            'entity'    => QueryHelper::ENTITY_BOT_INSTANCES,
-            'field'     => 'tag_name'
+            'entity' => QueryHelper::ENTITY_BOT_INSTANCES,
+            'field' => 'tag_name'
         ],
         'uptime' => [
-            'entity'    => QueryHelper::ENTITY_BOT_INSTANCES_UPTIME,
-            'field'     => 'total_up_time'
+            'entity' => QueryHelper::ENTITY_BOT_INSTANCES_UPTIME,
+            'field' => 'total_up_time'
         ],
         'status' => [
-            'entity'    => QueryHelper::ENTITY_BOT_INSTANCES,
-            'field'     => 'aws_status'
+            'entity' => QueryHelper::ENTITY_BOT_INSTANCES,
+            'field' => 'aws_status'
         ],
         'launched_at' => [
-            'entity'    => QueryHelper::ENTITY_BOT_INSTANCES,
-            'field'     => 'start_time'
+            'entity' => QueryHelper::ENTITY_BOT_INSTANCES,
+            'field' => 'start_time'
         ],
         'ip' => [
-            'entity'    => QueryHelper::ENTITY_BOT_INSTANCES,
-            'field'     => 'aws_public_ip'
+            'entity' => QueryHelper::ENTITY_BOT_INSTANCES,
+            'field' => 'aws_public_ip'
         ],
         'bot_name' => [
-            'entity'    => QueryHelper::ENTITY_BOT,
-            'field'     => 'name'
+            'entity' => QueryHelper::ENTITY_BOT,
+            'field' => 'name'
         ],
     ];
 
@@ -214,7 +214,7 @@ class BotInstance extends BaseModel
      */
     public function about()
     {
-        return $this->hasOne(AboutInstance::class, 'instance_id','id');
+        return $this->hasOne(AboutInstance::class, 'instance_id', 'id');
     }
 
     /**
@@ -238,7 +238,7 @@ class BotInstance extends BaseModel
      */
     public function bot()
     {
-        return $this->belongsTo(Bot::class,'bot_id');
+        return $this->belongsTo(Bot::class, 'bot_id');
     }
 
     /**
