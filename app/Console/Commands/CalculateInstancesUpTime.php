@@ -12,21 +12,21 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
-class CalculateInstancesUpTime extends Command
+class CalculateInstancesUptime extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'instance:calculate-up-time';
+    protected $signature = 'instance:calculate-uptime';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Calculates the uptime of a bot instance';
 
     /**
      * @var Carbon
@@ -80,8 +80,8 @@ class CalculateInstancesUpTime extends Command
                                         $cronUpTime = CommonHelper::diffTimeInMinutes($awsInstance['LaunchTime']->format('Y-m-d H:i:s'), $this->now->toDateTimeString());
 
                                         $instance->update([
-                                            'cron_up_time'  => $cronUpTime,
-                                            'up_time'       => $cronUpTime + $instance->total_up_time ?? 0,
+                                            'cron_up_time' => $cronUpTime,
+                                            'up_time' => $cronUpTime + $instance->total_up_time ?? 0,
                                         ]);
 
                                         Log::debug('instance id ' . $instance->aws_instance_id . ' Cron Up Time is ' . $cronUpTime);
@@ -109,7 +109,7 @@ class CalculateInstancesUpTime extends Command
 
                             unset($aws, $instanceDetail, $describeInstance);
                         }
-                });
+                    });
             }
         });
     }

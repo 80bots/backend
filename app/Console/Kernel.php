@@ -48,8 +48,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('horizon:snapshot')->everyFiveMinutes();
         $schedule->command('instance:sync')->everyFiveMinutes();
         $schedule->command('instance:scheduling')->everyMinute();
-        $schedule->command('instance:calculate-up-time')->everyMinute();
-        $schedule->command('instance:clean')->hourly();
+        $schedule->command('instance:calculate-uptime')->everyMinute();
         $schedule->command('aws:sync-amis')->everyThirtyMinutes();
         $schedule->command('bots:sync-s3')->daily();
     }

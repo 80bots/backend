@@ -44,16 +44,16 @@ class AwsSyncAmis extends Command
      */
     public function handle()
     {
-        $owners     = config('aws.owners', ['030500410996']);
-        $regions    = AwsRegion::get();
+        $owners = config('aws.owners', ['030500410996']);
+        $regions = AwsRegion::get();
 
         if ($regions->isNotEmpty()) {
             foreach ($regions as $region) {
 
-                Log::debug("Sync Ami in {$region->code} region");
+                Log::debug("Sync AMI in {$region->code} region");
 
                 $aws = new Aws;
-                if (! empty($owners) && is_array($owners)) {
+                if (!empty($owners) && is_array($owners)) {
                     foreach ($owners as $owner) {
                         $result = $aws->describeImages($region->code ?? null, $owner);
                         if ($result->hasKey('Images')) {
@@ -99,7 +99,7 @@ class AwsSyncAmis extends Command
                 ];
                 AwsAmi::updateOrInsert(
                     $data,
-                    [ 'image_id' => $image['ImageId'] ?? null ]
+                    ['image_id' => $image['ImageId'] ?? null]
                 );
             }
         }
