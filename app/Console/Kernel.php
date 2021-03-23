@@ -6,7 +6,6 @@ use App\Console\Commands\AddUser;
 use App\Console\Commands\AwsSyncAmis;
 use App\Console\Commands\CacheRefresh;
 use App\Console\Commands\CalculateInstancesUpTime;
-use App\Console\Commands\CleanUpUnused;
 use App\Console\Commands\EchoServerInit;
 use App\Console\Commands\InstanceScheduling;
 use App\Console\Commands\InstanceSyncScheduling;
@@ -60,7 +59,7 @@ class Kernel extends ConsoleKernel
      */
     protected function commands()
     {
-        $this->load(__DIR__.'/Commands');
+        $this->load(__DIR__ . '/Commands');
         require base_path('routes/console.php');
     }
 }
