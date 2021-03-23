@@ -27,7 +27,6 @@ class Kernel extends ConsoleKernel
         InstanceScheduling::class,
         InstanceSyncScheduling::class,
         CalculateInstancesUpTime::class,
-        CleanUpUnused::class,
         RefreshDatabase::class,
         AwsSyncAmis::class,
         SyncS3Bots::class,
