@@ -8,6 +8,7 @@ use Response;
 
 use Illuminate\Support\Arr;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -55,11 +56,13 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception)
     {
+        Log::debug("11");
         return parent::render($request, $exception);
     }
 
     protected function unauthenticated($request, AuthenticationException $exception)
     {
+        Log::debug("22");
         // return $request->expectsJson()
         //             ? response()->json(['message' => $exception->getMessage()], 401)
         //             : redirect()->guest(route('login'));
