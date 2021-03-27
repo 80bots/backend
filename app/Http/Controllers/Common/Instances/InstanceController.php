@@ -277,9 +277,7 @@ class InstanceController extends AppController
                 }
 
                 Log::debug($body);
-
                 GitHub::createIssue('Issue Report', $body);
-
                 return $this->success([]);
             }
 
@@ -319,7 +317,7 @@ class InstanceController extends AppController
             $aws_instance_id = htmlspecialchars($request->input('aws_instance_id') ?? '');
             $notification = htmlspecialchars($request->input('notification') ?? '');
             $notification = date('Y-m-d H:i:s') . '(/break/)' . $notification;
-            BotInstane::where('aws_instance_id', $aws_instance_id)->update(['last_notification' => $notification]);
+            BotInstance::where('aws_instance_id', $aws_instance_id)->update(['last_notification' => $notification]);
         } catch (Throwable $throwable) {
             Log::error($throwable->getMessage());
             return $this->error(__('keywords.server_error'), $throwable->getMessage());

@@ -80,10 +80,10 @@ Route::group([
     });
 
     Route::resources([
-        'user'      => 'UserController',
-        'schedule'  => 'ScheduleController',
-        'session'   => 'InstanceSessionController',
-        'bots'      => 'BotController',
-        'botinstances'      => 'BotInstanceController',
+        'user' => 'UserController',
+        'schedule' => 'ScheduleController',
+        'session' => 'InstanceSessionController',
+        'bots' => 'BotController',
+        'botinstances' => 'BotInstanceController',
     ]);
 });
