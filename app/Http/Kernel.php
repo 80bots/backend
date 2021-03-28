@@ -57,7 +57,6 @@ class Kernel extends HttpKernel
      */
     protected $routeMiddleware = [
         'api.instance' => \App\Http\Middleware\ApiInstanceSecurityGroup::class,
-        'api.sentry' => \App\Http\Middleware\SentryContext::class,
         'auth' => \App\Http\Middleware\Authenticate::class,
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
         'bindings' => \Illuminate\Routing\Middleware\SubstituteBindings::class,

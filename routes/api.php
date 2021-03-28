@@ -15,7 +15,7 @@ Route::group(['prefix' => 'auth', 'as' => 'auth.', 'namespace' => 'Auth'], funct
 });
 
 Route::group([
-    'middleware' => ['auth:api', 'api.sentry', 'api.instance']
+    'middleware' => ['auth:api', 'api.instance']
 ], function () {
 
     Route::get('/auth/login', 'CheckController@apiCheckLogin')->name('check');
