@@ -28,7 +28,6 @@
         "nubs/random-name-generator": "^2.1",
         "php-http/guzzle6-adapter": "1.1.1",
         "predis/predis": "^1.1",
-        "sentry/sentry-laravel": "^1.7",
         "ext-zip": "*",
         "phpseclib/phpseclib": "^2.0",
         "lcobucci/jwt": "3.3.3"
