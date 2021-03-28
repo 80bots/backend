@@ -5,7 +5,7 @@ namespace App\Console;
 use App\Console\Commands\AddUser;
 use App\Console\Commands\AwsSyncAmis;
 use App\Console\Commands\CacheRefresh;
-use App\Console\Commands\CalculateInstancesUpTime;
+use App\Console\Commands\CalculateInstancesUptime;
 use App\Console\Commands\EchoServerInit;
 use App\Console\Commands\InstanceScheduling;
 use App\Console\Commands\InstanceSyncScheduling;
@@ -26,7 +26,7 @@ class Kernel extends ConsoleKernel
         CacheRefresh::class,
         InstanceScheduling::class,
         InstanceSyncScheduling::class,
-        CalculateInstancesUpTime::class,
+        CalculateInstancesUptime::class,
         RefreshDatabase::class,
         AwsSyncAmis::class,
         SyncS3Bots::class,
