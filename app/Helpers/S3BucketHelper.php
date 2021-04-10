@@ -23,12 +23,12 @@ class S3BucketHelper
     public static function updateOrCreateFilesS3(object $bot, object $disk, $custom_script, $custom_package_json)
     {
         try {
-            if($bot->s3_path !== null) {
+            if ($bot->s3_path !== null) {
                 Log::debug("delete if exists");
                 if ($disk->exists($bot->s3_path . '.zip')) {
                     Log::debug("zip exists on s3 delete it");
                     $isDelete = $disk->delete($bot->s3_path . '.zip');
-                    if($isDelete) Log::info('Update or Create files s3: Zip file delete from s3!');
+                    if ($isDelete) Log::info('Update or Create files s3: Zip file delete from s3!');
                 }
 
                 Storage::put($bot->s3_path . '/src/' . $bot->path, $custom_script);
@@ -46,13 +46,12 @@ class S3BucketHelper
                     $disk->put($bot->s3_path . '.zip', $file_content);
                     Log::debug("zip file updated on s3");
                 }
-                Storage::deleteDirectory('scripts');
+                //Storage::deleteDirectory('scripts');
             }
         } catch (Throwable $throwable) {
             Log::error("Throwable: {$throwable->getMessage()}");
         }
     }
-
 
 
     /**
@@ -67,10 +66,10 @@ class S3BucketHelper
     public static function updateOrCreateFilesS3BotInstance(object $botInstance, object $disk, $custom_script, $custom_package_json)
     {
         try {
-            if($botInstance->s3_path !== null) {
+            if ($botInstance->s3_path !== null) {
                 if ($disk->exists($botInstance->s3_path . '.zip')) {
                     $isDelete = $disk->delete($botInstance->s3_path . '.zip');
-                    if($isDelete) Log::info('Update or Create files s3: Zip file delete from s3!');
+                    if ($isDelete) Log::info('Update or Create files s3: Zip file delete from s3!');
                 }
 
                 Storage::put($botInstance->s3_path . '/src/' . $botInstance->path, $custom_script);
@@ -85,14 +84,12 @@ class S3BucketHelper
                     // Create new zip file for storage s3
                     $disk->put($botInstance->s3_path . '.zip', $file_content);
                 }
-                Storage::deleteDirectory('scripts');
+                //Storage::deleteDirectory('scripts');
             }
         } catch (Throwable $throwable) {
             Log::error("Throwable: {$throwable->getMessage()}");
         }
     }
-
-
 
 
     /**
@@ -104,7 +101,7 @@ class S3BucketHelper
     public static function deleteFilesS3(string $folder_name)
     {
         try {
-            if($folder_name !== null) {
+            if ($folder_name !== null) {
                 $disk = Storage::disk('s3');
                 $disk->delete($folder_name . '.zip');
             }
@@ -123,17 +120,17 @@ class S3BucketHelper
     {
         try {
             $unZip = ZipHelper::unZip($folder_name);
-            if($unZip) {
+            if ($unZip) {
                 $array = [];
                 $files = Storage::files($folder_name . '/src');
                 foreach ($files as $file) {
-                    if (Str::contains($file,'/package.json')) {
+                    if (Str::contains($file, '/package.json')) {
                         $array = Arr::add($array, 'custom_package_json', Storage::get($file));
-                    } elseif (Str::contains($file,'.custom.js')) {
+                    } elseif (Str::contains($file, '.custom.js')) {
                         $array = Arr::add($array, 'custom_script', Storage::get($file));
                     }
                 }
-                Storage::deleteDirectory('scripts');
+                //Storage::deleteDirectory('scripts');
                 Log::info(print_r($array, true));
                 return $array;
             }
@@ -151,7 +148,7 @@ class S3BucketHelper
         try {
             $result = BotParser::getBotInfo($script);
             $i = 0;
-            foreach($result['params'] as $key => $val) {
+            foreach ($result['params'] as $key => $val) {
                 $val->order = $i;
                 $result['params']->$key = $val;
                 $i++;

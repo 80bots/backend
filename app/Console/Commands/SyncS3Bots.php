@@ -74,7 +74,7 @@ class SyncS3Bots extends Command
                             }
                         }
                         Log::info(print_r($localFiles, true));
-                        Storage::deleteDirectory('scripts');
+                        //Storage::deleteDirectory('scripts');
                     }
                 }
             }
