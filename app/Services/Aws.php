@@ -648,7 +648,7 @@ class Aws
         }else{
             Log::debug("SSH login success!");
         }
-        
+
         $ssh->setTimeout(1800);
         $ssh->exec('rm -rf /home/ubuntu/download.sh', function ($str) {
             Log::debug($str);
@@ -670,11 +670,11 @@ class Aws
         }
         $sftp->put('/home/ubuntu/download.sh', $downloadScript);
         Log::debug("download file uploaded successfully");
-        
+
         $ssh->exec('sudo mv /home/ubuntu/download.sh /home/kabas/download.sh', function ($str) {
             Log::debug($str);
         });
-    
+
         $ssh->exec('sudo sh /home/kabas/download.sh ', function ($str) {
             Log::debug($str);
         });
@@ -702,7 +702,7 @@ class Aws
         $scriptCommand                  = "yarn";
         // A piece of script for the correct work of a custom script.
         $paramsScript                   = "const notify=require('./utils/notify.js');let params={};try{params=require('./params/params.json');}catch(e){params={};console.log('Params is not defined');console.log(e);};";
-        $notifyScript                   = "const {parentPort}=require('worker_threads');function notify(status){try{if(typeof(status)===typeof(String())){parentPort.postMessage(status);}else{throw new Error('status type must be string');}}catch(err){console.log(err);}}module.exports=notify;";
+        $notifyScript                   = "const {parentPort}=require('worker_threads');function notify(status){try{if(typeof(status)===typeof(String())){console.log(status);parentPort.postMessage(status);}else{throw new Error('Status type must be string');}}catch(err){console.log(err);}}module.exports=notify;";
         // Zip file name.
         $zipName                        = str_ireplace('scripts/', '', $s3_path);
         // Global instance settings.
@@ -750,7 +750,7 @@ class Aws
         EOF'
         # - Auto generate utils/notify.js file. -
         su - {$user} -c "cat > /home/{$user}/src/utils/notify.js << 'EOF'
-        {$notifyScript} 
+        {$notifyScript}
         EOF"
         # - Changing permissions for the custom script folder. -
         su - {$user} -c 'chown -R {$user}:{$user} /home/{$user}/src'
