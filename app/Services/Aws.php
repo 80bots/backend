@@ -1171,6 +1171,7 @@ echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo s
 su - {$user} -c 'cd {$streamerDir} && cp .env.example .env'
 {$globalSettingsScript}
 {$localAdjustment}
+systemctl disable --now screenshot # disable screenshots todo: replace data-streamer with something like S3FS
 su - {$user} -c 'rm -rf ~/.screenshots/*'
 #  - Generate app startup script file in the home directory. -
 cat > {$homeDir}/startup.sh << 'EOF'
